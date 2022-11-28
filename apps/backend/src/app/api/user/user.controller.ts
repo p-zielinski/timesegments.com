@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CreateNewUserDto } from './dto/createNewUser.dto';
 import { UserService } from './user.service';
+import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -13,5 +14,11 @@ export class UserController {
       { email, plainPassword: password },
       { generateToken: true }
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async test() {
+    console.log('11');
   }
 }

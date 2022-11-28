@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { hashString } from '../../common/hashString';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     private prisma: PrismaService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private jwtService: JwtService
   ) {}
 
   async createNewUser(
@@ -33,7 +35,10 @@ export class UserService {
           expiresAt: new Date(Date.now() + 3600 * 1000 * 24 * 60),
         },
       });
-      return { success: true, token: token.id };
+      return {
+        success: true,
+        token: this.jwtService.sign({ userId: newUser.id, tokenId: token.id }),
+      };
     } catch (error) {
       if (error?.meta?.target?.includes('email')) {
         return { success: false, error: 'This email is already taken' };
