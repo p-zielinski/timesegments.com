@@ -13,6 +13,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './common/auth/jwt.strategy';
 import { TokenService } from './api/token/token.service';
 import { LoggerService } from './common/logger/loger.service';
+import { CategoryController } from './api/category/category.controller';
+import { SubcategoryController } from './api/subcategory/subcategory.controller';
+import { SubcategoryService } from './api/subcategory/subcategory.service';
+import { CategoryService } from './api/category/category.service';
+import { TimeLogService } from './api/time-log/time-log.service';
 
 //nx g @nrwl/nest:service --project backend --directory app/api
 
@@ -29,7 +34,12 @@ import { LoggerService } from './common/logger/loger.service';
       signOptions: { noTimestamp: true },
     }),
   ],
-  controllers: [AppController, UserController],
+  controllers: [
+    AppController,
+    UserController,
+    CategoryController,
+    SubcategoryController,
+  ],
   providers: [
     LoggerService,
     JwtStrategy,
@@ -38,6 +48,9 @@ import { LoggerService } from './common/logger/loger.service';
     UserService,
     PrismaClient,
     TokenService,
+    SubcategoryService,
+    CategoryService,
+    TimeLogService,
   ],
 })
 export class AppModule {}

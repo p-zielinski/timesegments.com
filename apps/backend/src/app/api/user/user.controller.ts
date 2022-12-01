@@ -3,7 +3,7 @@ import { LoginOrRegisterDto } from './dto/loginOrRegister.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
-import { User } from '.prisma/client/index';
+import { User } from '@prisma/client';
 
 @Controller('user')
 export class UserController {
@@ -31,7 +31,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMe(@UserDecorator() user: User) {
+  async handleRequestGetMe(@UserDecorator() user: User) {
     return user;
   }
 }

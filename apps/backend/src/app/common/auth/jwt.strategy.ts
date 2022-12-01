@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { User, Token } from '.prisma/client/index';
+import { User, Token } from '@prisma/client';
 import { TokenService } from '../../api/token/token.service';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       return false;
     }
     if (token.expiresAt && token.expiresAt?.getTime() < new Date().getTime()) {
-      //todo delete token from db
+      this.tokenService.deleteOne(token.id); //don't wait
       return false;
     }
     const tokenWithoutUserRelation = {};

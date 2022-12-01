@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Token } from '.prisma/client/index';
+import { Token } from '@prisma/client';
 
 export const CurrentTokenDecorator = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): Token => {

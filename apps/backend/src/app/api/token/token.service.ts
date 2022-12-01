@@ -44,4 +44,10 @@ export class TokenService {
       include,
     });
   }
+
+  async deleteOne(tokenId: string) {
+    return await this.prisma.token.delete({
+      where: { id: tokenId },
+    });
+  }
 }
