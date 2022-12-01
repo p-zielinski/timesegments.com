@@ -55,6 +55,7 @@ model TimeLog {
   id            String      @id @default(cuid())
   user          User        @relation(fields: [userId], references: [id])
   userId        String
+  comment       Comment?
   category      Category    @relation(fields: [categoryId], references: [id])
   categoryId    String
   subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
@@ -62,4 +63,13 @@ model TimeLog {
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
   endedAt       DateTime?   @updatedAt @db.Timestamptz(3)
+}
+
+model Comment {
+  id            String      @id @default(cuid())
+  comment       String
+  timeLog       TimeLog     @relation(fields: [timeLogId], references: [id])
+  timeLogId     String      @unique
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }

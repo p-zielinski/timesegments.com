@@ -1,13 +1,14 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { User, Token } from '.prisma/client/index';
+import { TokenService } from '../../api/token/token.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private prisma: PrismaService) {
+  constructor(private tokenService: TokenService) {
     super({
-      jwtFromRequest: ExtractJwt.fromHeader('token'),
+      jwtFromRequest: ExtractJwt.fromHeader('jwt_token'),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
     });
@@ -16,20 +17,31 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: {
     userId?: string;
     tokenId?: string;
-    iat?: number;
-    exp?: number;
-  }) {
+    expiresAt?: string;
+  }): Promise<{ user: User; currentToken: Token } | false> {
     if (!payload?.tokenId || !payload?.userId) {
       return false;
     }
-    const token = await this.prisma.token.findFirst({
-      where: { id: payload.tokenId + 1 },
-      include: { user: true },
+    const token = await this.tokenService.findOne(payload.tokenId, {
+      user: true,
     });
     if (!token?.id || !token?.user?.id) {
       return false;
     }
-    console.log(token);
-    if (payload) return { userId: payload.sub, username: payload.username };
+    if (token.expiresAt && token.expiresAt?.getTime() < new Date().getTime()) {
+      //todo delete token from db
+      return false;
+    }
+    const tokenWithoutUserRelation = {};
+    Object.keys(token).forEach((key) => {
+      if (key !== 'user') {
+        tokenWithoutUserRelation[key] = token[key];
+      }
+    });
+
+    return {
+      user: token.user,
+      currentToken: tokenWithoutUserRelation as Token,
+    };
   }
 }

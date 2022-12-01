@@ -11,6 +11,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ValidationSchema } from '../configs/validationSchema';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './common/auth/jwt.strategy';
+import { TokenService } from './api/token/token.service';
+import { LoggerService } from './common/logger/loger.service';
 
 //nx g @nrwl/nest:service --project backend --directory app/api
 
@@ -24,18 +26,18 @@ import { JwtStrategy } from './common/auth/jwt.strategy';
     }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: {
-        expiresIn: undefined,
-      },
+      signOptions: { noTimestamp: true },
     }),
   ],
   controllers: [AppController, UserController],
   providers: [
+    LoggerService,
     JwtStrategy,
     AppService,
     PrismaService,
     UserService,
     PrismaClient,
+    TokenService,
   ],
 })
 export class AppModule {}
