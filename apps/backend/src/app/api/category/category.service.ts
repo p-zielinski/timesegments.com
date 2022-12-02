@@ -35,16 +35,37 @@ export class CategoryService {
     return { success: true, category };
   }
 
-  public async disableCategory(categoryId: string, user: User) {
-    const category = await this.findFirstUseId(categoryId, { user: true });
-    if (!category || category?.user?.id !== user.id) {
+  public async updateVisibilityCategory(
+    categoryId: string,
+    visible: boolean,
+    user: User
+  ) {
+    const categoryWithUser = await this.findFirstUseId(categoryId, {
+      user: true,
+    });
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
         error: `Category not found, bad request`,
       };
     }
-    console.log(await this.updateDisabled(categoryId, true));
-    console.log(category);
+    if (categoryWithUser.visible === visible) {
+      const category = {};
+      Object.keys(categoryWithUser).forEach((key) => {
+        if (key !== 'user') {
+          category[key] = categoryWithUser[key];
+        }
+      });
+      return { success: true, category: category };
+    }
+    const updatedCategory = await this.updateVisibility(categoryId, visible);
+    if (updatedCategory.visible !== visible) {
+      return {
+        success: false,
+        error: `Could not update visibility`,
+      };
+    }
+    return { success: true, category: updatedCategory };
   }
 
   private async countUserCategories(userId: string) {
@@ -61,10 +82,10 @@ export class CategoryService {
     });
   }
 
-  private async updateDisabled(categoryId: string, state: boolean) {
+  private async updateVisibility(categoryId: string, visible: boolean) {
     return await this.prisma.category.update({
       where: { id: categoryId },
-      data: { disabled: state },
+      data: { visible },
     });
   }
 }

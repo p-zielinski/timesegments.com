@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
 import { RenameCategoryDto } from './dto/renameCategory.dto';
-import { DisableCategoryDto } from './dto/disableCategory.dto';
+import { ChangeVisibilityCategoryDto } from './dto/changeVisibilityCategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
@@ -21,14 +21,17 @@ export class CategoryController {
     return await this.categoryService.createCategory(name, user);
   }
 
-  @Post('disable')
+  @Post('change-visibility')
   async handleRequestDisableCategory(
     @UserDecorator() user: User,
-    @Body() disableCategoryDto: DisableCategoryDto
+    @Body() changeVisibilityCategoryDto: ChangeVisibilityCategoryDto
   ) {
-    const { categoryId } = disableCategoryDto;
-    await this.categoryService.disableCategory(categoryId, user);
-    return undefined;
+    const { categoryId, visible } = changeVisibilityCategoryDto;
+    return await this.categoryService.updateVisibilityCategory(
+      categoryId,
+      visible,
+      user
+    );
   }
 
   @Post('rename')
