@@ -25,7 +25,7 @@ export class UserService {
           email: data.email,
           password: await hashString(
             data.plainPassword,
-            this.configService.get<number>('SALT_ROUNDS') ?? 10
+            this.configService.get<number>('SALT_ROUNDS')
           ),
         },
       });

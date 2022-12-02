@@ -18,14 +18,16 @@ export class CategoryController {
     @Body() createCategoryDto: CreateCategoryDto
   ) {
     const { name } = createCategoryDto;
-    return undefined;
+    return await this.categoryService.createCategory(name, user);
   }
 
   @Post('disable')
   async handleRequestDisableCategory(
+    @UserDecorator() user: User,
     @Body() disableCategoryDto: DisableCategoryDto
   ) {
     const { categoryId } = disableCategoryDto;
+    await this.categoryService.disableCategory(categoryId, user);
     return undefined;
   }
 
