@@ -49,6 +49,12 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
+    if (categoryWithUser.state) {
+      return {
+        success: false,
+        error: `You cannot hide active category`,
+      };
+    }
     if (categoryWithUser.visible === visible) {
       const category = {};
       Object.keys(categoryWithUser).forEach((key) => {
@@ -98,7 +104,7 @@ export class CategoryService {
   }
 
   private async countUserCategories(userId: string) {
-    return await this.prisma.category.count({ where: { userId: userId } });
+    return await this.prisma.category.count({ where: { userId } });
   }
 
   private async findFirstUseId(

@@ -1,6 +1,6 @@
 import { IsBoolean, IsString } from 'class-validator';
 
-export class ChangeVisibilityCategoryDto {
+export class ChangeVisibilitySubcategoryDto {
   @IsString()
   subcategoryId: string;
   @IsBoolean()
