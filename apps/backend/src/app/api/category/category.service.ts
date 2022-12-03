@@ -68,6 +68,35 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
+  public async updateNameCategory(categoryId: string, name: string, user: any) {
+    const categoryWithUser = await this.findFirstUseId(categoryId, {
+      user: true,
+    });
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Category not found, bad request`,
+      };
+    }
+    if (categoryWithUser.name === name) {
+      const category = {};
+      Object.keys(categoryWithUser).forEach((key) => {
+        if (key !== 'user') {
+          category[key] = categoryWithUser[key];
+        }
+      });
+      return { success: true, category: category };
+    }
+    const updatedCategory = await this.updateName(categoryId, name);
+    if (updatedCategory.name !== name) {
+      return {
+        success: false,
+        error: `Could not update visibility`,
+      };
+    }
+    return { success: true, category: updatedCategory };
+  }
+
   private async countUserCategories(userId: string) {
     return await this.prisma.category.count({ where: { userId: userId } });
   }
@@ -86,6 +115,13 @@ export class CategoryService {
     return await this.prisma.category.update({
       where: { id: categoryId },
       data: { visible },
+    });
+  }
+
+  private async updateName(categoryId: string, name: string) {
+    return await this.prisma.category.update({
+      where: { id: categoryId },
+      data: { name },
     });
   }
 }

@@ -1,4 +1,10 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
 import { RenameCategoryDto } from './dto/renameCategory.dto';
@@ -18,7 +24,17 @@ export class CategoryController {
     @Body() createCategoryDto: CreateCategoryDto
   ) {
     const { name } = createCategoryDto;
-    return await this.categoryService.createCategory(name, user);
+    const createCategoryStatus = await this.categoryService.createCategory(
+      name,
+      user
+    );
+    if (!createCategoryStatus.success) {
+      throw new BadRequestException({
+        error: createCategoryStatus.error,
+        statusCode: 400,
+      });
+    }
+    return createCategoryStatus.category;
   }
 
   @Post('change-visibility')
@@ -27,18 +43,38 @@ export class CategoryController {
     @Body() changeVisibilityCategoryDto: ChangeVisibilityCategoryDto
   ) {
     const { categoryId, visible } = changeVisibilityCategoryDto;
-    return await this.categoryService.updateVisibilityCategory(
-      categoryId,
-      visible,
-      user
-    );
+    const updateCategoryStatus =
+      await this.categoryService.updateVisibilityCategory(
+        categoryId,
+        visible,
+        user
+      );
+    if (!updateCategoryStatus.success) {
+      throw new BadRequestException({
+        error: updateCategoryStatus.error,
+        statusCode: 400,
+      });
+    }
+    return updateCategoryStatus.category;
   }
 
   @Post('rename')
   async handleRequestRenameCategory(
+    @UserDecorator() user: User,
     @Body() renameCategoryDto: RenameCategoryDto
   ) {
     const { categoryId, name } = renameCategoryDto;
-    return undefined;
+    const updateCategoryStatus = await this.categoryService.updateNameCategory(
+      categoryId,
+      name,
+      user
+    );
+    if (!updateCategoryStatus.success) {
+      throw new BadRequestException({
+        error: updateCategoryStatus.error,
+        statusCode: 400,
+      });
+    }
+    return updateCategoryStatus.category;
   }
 }
