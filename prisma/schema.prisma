@@ -46,6 +46,7 @@ model Subcategory {
   name          String
   category      Category    @relation(fields: [categoryId], references: [id])
   categoryId    String
+//  todo add user relation
   state         Boolean     @default(false)
   visible       Boolean     @default(true)
   timeLogs      TimeLog[]

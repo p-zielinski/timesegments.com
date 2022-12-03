@@ -1,4 +1,10 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CategoryService } from '../category/category.service';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
@@ -8,13 +14,16 @@ import { RenameCategoryDto } from '../category/dto/renameCategory.dto';
 import { SubcategoryService } from './subcategory.service';
 import { RenameSubcategoryDto } from './dto/renameSubcategory.dto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
+import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
+import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('subcategory')
 export class SubcategoryController {
   constructor(private subcategoryService: SubcategoryService) {}
 
   @Post('create')
-  async handleRequestCreateCategory(
+  async handleRequestCreateSubcategory(
     @UserDecorator() user: User,
     @Body() createSubcategoryDto: CreateSubcategoryDto
   ) {
@@ -27,15 +36,15 @@ export class SubcategoryController {
         statusCode: 400,
       });
     }
-    return createCategoryStatus.category;
+    return createCategoryStatus.subcategory;
   }
 
   @Post('change-visibility')
-  async handleRequestDisableCategory(
+  async handleRequestDisableSubcategory(
     @UserDecorator() user: User,
-    @Body() changeVisibilityCategoryDto: ChangeVisibilityCategoryDto
+    @Body() changeVisibilitySubcategoryDto: ChangeVisibilitySubcategoryDto
   ) {
-    const { subcategoryId, visible } = changeVisibilityCategoryDto;
+    const { subcategoryId, visible } = changeVisibilitySubcategoryDto;
     const updateCategoryStatus =
       await this.subcategoryService.updateVisibilitySubcategory(
         subcategoryId,
@@ -52,7 +61,7 @@ export class SubcategoryController {
   }
 
   @Post('rename')
-  async handleRequestRenameCategory(
+  async handleRequestRenameSubcategory(
     @UserDecorator() user: User,
     @Body() renameSubcategoryDto: RenameSubcategoryDto
   ) {

@@ -107,7 +107,7 @@ export class CategoryService {
     return await this.prisma.category.count({ where: { userId } });
   }
 
-  private async findFirstUseId(
+  public async findFirstUseId(
     categoryId: string,
     include: Prisma.CategoryInclude = null
   ) {

@@ -1,40 +1,53 @@
 import { Injectable } from '@nestjs/common';
-import { Category, Prisma, User } from '@prisma/client';
+import { Category, Prisma, Subcategory, User } from '@prisma/client';
 import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class SubcategoryService {
   constructor(
     private prisma: PrismaService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly categoryService: CategoryService
   ) {}
 
   public async createSubcategory(
     name: string,
     categoryId: string,
     user: User
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
-    //first check if category belongs to user
+  ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> {
+    const categoryWithUser = await this.categoryService.findFirstUseId(
+      categoryId,
+      {
+        user: true,
+      }
+    );
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Category not found, bad request`,
+      };
+    }
     if (
       (await this.countCategorySubcategories(categoryId)) >
-      this.configService.get<number>('MAX_NUMBER_OF_CATEGORIES_PER_USER')
+      this.configService.get<number>('MAX_NUMBER_OF_SUBCATEGORIES_PER_CATEGORY')
     ) {
       return {
         success: false,
-        error: `Max number of categories per user was exceeded`,
+        error: `Max number of subcategories per category ${categoryId} was exceeded`,
       };
     }
-    const category = await this.prisma.category.create({
-      data: { name: name, userId: user.id },
+    const subcategory = await this.prisma.subcategory.create({
+      data: { name: name, categoryId },
     });
-    if (!category?.id) {
+    if (!subcategory?.id) {
       return {
         success: false,
-        error: `Could not create category`,
+        error: `Could not create subcategory`,
       };
     }
-    return { success: true, category };
+    return { success: true, subcategory };
   }
 
   public async updateVisibilitySubcategory(
@@ -42,26 +55,27 @@ export class SubcategoryService {
     visible: boolean,
     user: User
   ) {
-    const categoryWithUser = await this.findFirstUseId(categoryId, {
-      user: true,
+    const subcategoryWithUser = await this.findFirstUseId(categoryId, {
+      category: true,
     });
-    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+    console.log(subcategoryWithUser);
+    if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
         error: `Category not found, bad request`,
       };
     }
-    if (categoryWithUser.state) {
+    if (subcategoryWithUser.state) {
       return {
         success: false,
         error: `You cannot hide active category`,
       };
     }
-    if (categoryWithUser.visible === visible) {
+    if (subcategoryWithUser.visible === visible) {
       const category = {};
-      Object.keys(categoryWithUser).forEach((key) => {
+      Object.keys(subcategoryWithUser).forEach((key) => {
         if (key !== 'user') {
-          category[key] = categoryWithUser[key];
+          category[key] = subcategoryWithUser[key];
         }
       });
       return { success: true, category: category };
@@ -114,11 +128,11 @@ export class SubcategoryService {
   }
 
   private async findFirstUseId(
-    categoryId: string,
-    include: Prisma.CategoryInclude = null
+    subcategoryId: string,
+    include: Prisma.SubcategoryInclude = null
   ) {
     return await this.prisma.subcategory.findFirst({
-      where: { id: categoryId },
+      where: { id: subcategoryId },
       include,
     });
   }
