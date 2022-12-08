@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Token, Prisma } from '@prisma/client';
+import { Token, Prisma, User } from '@prisma/client';
 import { LoggerService } from '../../common/logger/loger.service';
 
 const isDate = (date: object) => {
@@ -13,6 +13,41 @@ export class TokenService {
     private prisma: PrismaService,
     private loggerService: LoggerService
   ) {}
+
+  async deleteUsersTokensButOne(tokenId: string, user: User) {
+    const tokens = await this.findUsersTokens(user.id);
+    const tokensToDelete = tokens
+      .map((token) => token.id)
+      .filter((_tokenId) => _tokenId !== tokenId);
+    if (tokensToDelete.length > 0) {
+      await this.deleteMany(tokensToDelete);
+    }
+    return {
+      success: true,
+      message: `Other tokens were successfully deleted`,
+    };
+  }
+
+  async deleteSingleToken(tokenId: string, user: User) {
+    const token = await this.findOne(tokenId, { user: true });
+    if (!token || token?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Token not found, bad request`,
+      };
+    }
+    const deleteResult = await this.deleteOne(tokenId);
+    if (!deleteResult?.id) {
+      return {
+        success: false,
+        error: `Could not delete token`,
+      };
+    }
+    return {
+      success: true,
+      message: `Token "${tokenId}" was deleted`,
+    };
+  }
 
   async generateToken(
     userId: string,
@@ -38,6 +73,17 @@ export class TokenService {
     }
   }
 
+  async findUsersTokens(userId: string) {
+    return (
+      (
+        (await this.prisma.user.findFirst({
+          where: { id: userId },
+          include: { tokens: true },
+        })) || {}
+      )?.tokens || []
+    );
+  }
+
   async findOne(tokenId: string, include: Prisma.TokenInclude = null) {
     return await this.prisma.token.findFirst({
       where: { id: tokenId },
@@ -48,6 +94,12 @@ export class TokenService {
   async deleteOne(tokenId: string) {
     return await this.prisma.token.delete({
       where: { id: tokenId },
+    });
+  }
+
+  async deleteMany(tokenIds: string[]): Promise<{ count?: number }> {
+    return await this.prisma.token.deleteMany({
+      where: { id: { in: tokenIds } },
     });
   }
 }

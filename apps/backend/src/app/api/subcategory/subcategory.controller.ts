@@ -5,12 +5,8 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { CategoryService } from '../category/category.service';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
-import { CreateCategoryDto } from '../category/dto/createCategory.dto';
-import { ChangeVisibilityCategoryDto } from '../category/dto/changeVisibilityCategory.dto';
-import { RenameCategoryDto } from '../category/dto/renameCategory.dto';
 import { SubcategoryService } from './subcategory.service';
 import { RenameSubcategoryDto } from './dto/renameSubcategory.dto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
