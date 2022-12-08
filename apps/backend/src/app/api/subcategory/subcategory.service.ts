@@ -14,11 +14,11 @@ export class SubcategoryService {
 
   public async createSubcategory(
     name: string,
-    categoryId: string,
+    subcategoryId: string,
     user: User
   ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> {
     const categoryWithUser = await this.categoryService.findFirstUseId(
-      categoryId,
+      subcategoryId,
       {
         user: true,
       }
@@ -30,16 +30,16 @@ export class SubcategoryService {
       };
     }
     if (
-      (await this.countCategorySubcategories(categoryId)) >
+      (await this.countCategorySubcategories(subcategoryId)) >
       this.configService.get<number>('MAX_NUMBER_OF_SUBCATEGORIES_PER_CATEGORY')
     ) {
       return {
         success: false,
-        error: `Max number of subcategories per category ${categoryId} was exceeded`,
+        error: `Max number of subcategories per category ${subcategoryId} was exceeded`,
       };
     }
     const subcategory = await this.prisma.subcategory.create({
-      data: { name: name, categoryId },
+      data: { name: name, categoryId: subcategoryId, userId:user.id },
     });
     if (!subcategory?.id) {
       return {
@@ -51,21 +51,20 @@ export class SubcategoryService {
   }
 
   public async updateVisibilitySubcategory(
-    categoryId: string,
+    subcategoryId: string,
     visible: boolean,
     user: User
   ) {
-    const subcategoryWithUser = await this.findFirstUseId(categoryId, {
-      category: true,
+    const subcategoryWithUser = await this.findFirstUseId(subcategoryId, {
+      user: true,
     });
-    console.log(subcategoryWithUser);
     if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
         error: `Category not found, bad request`,
       };
     }
-    if (subcategoryWithUser.state) {
+    if (subcategoryWithUser.active) {
       return {
         success: false,
         error: `You cannot hide active category`,
@@ -80,7 +79,7 @@ export class SubcategoryService {
       });
       return { success: true, category: category };
     }
-    const updatedCategory = await this.updateVisibility(categoryId, visible);
+    const updatedCategory = await this.updateVisibility(subcategoryId, visible);
     if (updatedCategory.visible !== visible) {
       return {
         success: false,
@@ -91,11 +90,11 @@ export class SubcategoryService {
   }
 
   public async updateNameSubcategory(
-    categoryId: string,
+    subcategoryId: string,
     name: string,
     user: any
   ) {
-    const categoryWithUser = await this.findFirstUseId(categoryId, {
+    const categoryWithUser = await this.findFirstUseId(subcategoryId, {
       user: true,
     });
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
@@ -113,7 +112,7 @@ export class SubcategoryService {
       });
       return { success: true, category: category };
     }
-    const updatedCategory = await this.updateName(categoryId, name);
+    const updatedCategory = await this.updateName(subcategoryId, name);
     if (updatedCategory.name !== name) {
       return {
         success: false,

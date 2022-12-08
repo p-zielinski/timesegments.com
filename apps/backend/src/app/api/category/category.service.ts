@@ -49,7 +49,7 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
-    if (categoryWithUser.state) {
+    if (categoryWithUser.active) {
       return {
         success: false,
         error: `You cannot hide active category`,

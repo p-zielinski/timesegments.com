@@ -13,6 +13,7 @@ model User {
   password      String
   tokens        Token[]
   categories    Category[]
+  subcategories Subcategory[]
   timeLogs      TimeLog[]
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
@@ -34,7 +35,7 @@ model Category {
   subcategories Subcategory[]
   user          User        @relation(fields: [userId], references: [id])
   userId        String
-  state         Boolean     @default(false)
+  active        Boolean     @default(false)
   visible       Boolean     @default(true)
   timeLogs      TimeLog[]
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
@@ -44,10 +45,11 @@ model Category {
 model Subcategory {
   id            String      @id @default(cuid())
   name          String
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
   category      Category    @relation(fields: [categoryId], references: [id])
   categoryId    String
-//  todo add user relation
-  state         Boolean     @default(false)
+  active        Boolean     @default(false)
   visible       Boolean     @default(true)
   timeLogs      TimeLog[]
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
