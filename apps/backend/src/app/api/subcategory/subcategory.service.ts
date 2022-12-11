@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Category, Prisma, Subcategory, User } from '@prisma/client';
 import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { CategoryService } from '../category/category.service';
+import { TimeLogService } from '../time-log/time-log.service';
 
 @Injectable()
 export class SubcategoryService {
   constructor(
     private prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly categoryService: CategoryService
+    @Inject(forwardRef(() => CategoryService))
+    private readonly categoryService: CategoryService,
+    private readonly timeLogService: TimeLogService
   ) {}
 
   public async createSubcategory(
@@ -26,7 +29,7 @@ export class SubcategoryService {
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
-        error: `Category not found, bad request`,
+        error: `Subcategory not found, bad request`,
       };
     }
     if (
@@ -39,7 +42,7 @@ export class SubcategoryService {
       };
     }
     const subcategory = await this.prisma.subcategory.create({
-      data: { name: name, categoryId: subcategoryId, userId:user.id },
+      data: { name: name, categoryId: subcategoryId, userId: user.id },
     });
     if (!subcategory?.id) {
       return {
@@ -54,14 +57,14 @@ export class SubcategoryService {
     subcategoryId: string,
     visible: boolean,
     user: User
-  ) {
+  ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> {
     const subcategoryWithUser = await this.findFirstUseId(subcategoryId, {
       user: true,
     });
     if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
-        error: `Category not found, bad request`,
+        error: `Subcategory not found, bad request`,
       };
     }
     if (subcategoryWithUser.active) {
@@ -71,55 +74,124 @@ export class SubcategoryService {
       };
     }
     if (subcategoryWithUser.visible === visible) {
-      const category = {};
-      Object.keys(subcategoryWithUser).forEach((key) => {
-        if (key !== 'user') {
-          category[key] = subcategoryWithUser[key];
-        }
-      });
-      return { success: true, category: category };
+      return {
+        success: true,
+        subcategory: { ...subcategoryWithUser, user: undefined } as Subcategory,
+      };
     }
-    const updatedCategory = await this.updateVisibility(subcategoryId, visible);
-    if (updatedCategory.visible !== visible) {
+    const updatedSubcategory = await this.updateVisibility(
+      subcategoryId,
+      visible
+    );
+    if (updatedSubcategory.visible !== visible) {
       return {
         success: false,
         error: `Could not update visibility`,
       };
     }
-    return { success: true, category: updatedCategory };
+    return { success: true, subcategory: updatedSubcategory };
+  }
+
+  public async setSubcategoryActive(
+    subcategoryId: string,
+    user: User
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    subcategory?: Subcategory;
+    category?: Category;
+  }> {
+    const subcategoryWithUserAndCategory = await this.findFirstUseId(
+      subcategoryId,
+      {
+        user: true,
+        category: true,
+      }
+    );
+    if (
+      !subcategoryWithUserAndCategory ||
+      subcategoryWithUserAndCategory?.user?.id !== user.id
+    ) {
+      return {
+        success: false,
+        error: `Subcategory not found, bad request`,
+      };
+    }
+    if (subcategoryWithUserAndCategory.active) {
+      return {
+        success: true,
+        subcategory: {
+          ...subcategoryWithUserAndCategory,
+          user: undefined,
+          category: undefined,
+        } as Subcategory,
+      };
+    }
+    const activeCategory = await this.categoryService.findActive(user.id);
+    if (activeCategory?.id) {
+      this.categoryService.setCategoryActiveState(activeCategory.id, false); //don't wait
+    }
+    const activeSubcategory = await this.findActive(user.id);
+    if (activeSubcategory?.id) {
+      this.setSubcategoryActiveState(activeSubcategory.id, false); //don't wait
+    }
+    const timeLogNotEndedId = await this.timeLogService.findFirstUsersNotEnded(
+      user.id
+    );
+    if (timeLogNotEndedId) {
+      await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
+    }
+    await this.timeLogService.createNew(
+      user.id,
+      subcategoryWithUserAndCategory.category.id,
+      subcategoryWithUserAndCategory.id
+    );
+    this.categoryService.setCategoryActiveState(
+      subcategoryWithUserAndCategory.category.id,
+      true
+    ); //don't wait
+    this.setSubcategoryActiveState(subcategoryWithUserAndCategory.id, true); //don't wait
+
+    return {
+      success: true,
+      subcategory: {
+        ...subcategoryWithUserAndCategory,
+        user: undefined,
+        category: undefined,
+        active: true,
+      } as Subcategory,
+      category: { ...subcategoryWithUserAndCategory.category, active: true },
+    };
   }
 
   public async updateNameSubcategory(
     subcategoryId: string,
     name: string,
-    user: any
+    user: User
   ) {
-    const categoryWithUser = await this.findFirstUseId(subcategoryId, {
+    const subcategoryWithUser = await this.findFirstUseId(subcategoryId, {
       user: true,
     });
-    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+    if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
-        error: `Category not found, bad request`,
+        error: `Subcategory not found, bad request`,
       };
     }
-    if (categoryWithUser.name === name) {
-      const category = {};
-      Object.keys(categoryWithUser).forEach((key) => {
-        if (key !== 'user') {
-          category[key] = categoryWithUser[key];
-        }
-      });
-      return { success: true, category: category };
+    if (subcategoryWithUser.name === name) {
+      return {
+        success: true,
+        subcategory: { ...subcategoryWithUser, user: undefined },
+      };
     }
-    const updatedCategory = await this.updateName(subcategoryId, name);
-    if (updatedCategory.name !== name) {
+    const updatedSubcategory = await this.updateName(subcategoryId, name);
+    if (updatedSubcategory.name !== name) {
       return {
         success: false,
-        error: `Could not update visibility`,
+        error: `Could not update name`,
       };
     }
-    return { success: true, category: updatedCategory };
+    return { success: true, subcategory: updatedSubcategory };
   }
 
   private async countCategorySubcategories(categoryId: string) {
@@ -147,6 +219,22 @@ export class SubcategoryService {
     return await this.prisma.subcategory.update({
       where: { id: subcategoryId },
       data: { name },
+    });
+  }
+
+  public async findActive(userId: string) {
+    return await this.prisma.subcategory.findFirst({
+      where: { userId, active: true },
+    });
+  }
+
+  public async setSubcategoryActiveState(
+    subcategoryId: string,
+    active: boolean
+  ) {
+    return await this.prisma.subcategory.update({
+      where: { id: subcategoryId },
+      data: { active },
     });
   }
 }

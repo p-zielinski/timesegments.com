@@ -12,6 +12,8 @@ import { RenameSubcategoryDto } from './dto/renameSubcategory.dto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
+import { SetCategoryActiveDto } from '../category/dto/setCategoryActive.dto';
+import { SetSubcategoryActiveDto } from './setSubcategoryActive.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('subcategory')
@@ -53,7 +55,24 @@ export class SubcategoryController {
         statusCode: 400,
       });
     }
-    return updateCategoryStatus.category;
+    return updateCategoryStatus.subcategory;
+  }
+
+  @Post('set-active')
+  async handleRequestSetCategoryActive(
+    @UserDecorator() user: User,
+    @Body() setSubcategoryActiveDto: SetSubcategoryActiveDto
+  ) {
+    const { subcategoryId } = setSubcategoryActiveDto;
+    const updateSubcategoryStatus =
+      await this.subcategoryService.setSubcategoryActive(subcategoryId, user);
+    if (!updateSubcategoryStatus.success) {
+      throw new BadRequestException({
+        error: updateSubcategoryStatus.error,
+        statusCode: 400,
+      });
+    }
+    return updateSubcategoryStatus.subcategory;
   }
 
   @Post('rename')
@@ -74,6 +93,6 @@ export class SubcategoryController {
         statusCode: 400,
       });
     }
-    return updateCategoryStatus.category;
+    return updateCategoryStatus.subcategory;
   }
 }

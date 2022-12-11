@@ -15,6 +15,7 @@ export class UserService {
     private readonly tokenService: TokenService
   ) {}
 
+
   public async createNewUser(
     data: { email: string; plainPassword: string },
     options?: { generateToken: boolean }
