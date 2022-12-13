@@ -5,6 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { checkHashedString } from '../../common/checkHashedString';
 import { TokenService } from '../token/token.service';
+import { CategoryService } from '../category/category.service';
+import { SubcategoryService } from '../subcategory/subcategory.service';
+import { TimeLogService } from '../time-log/time-log.service';
 
 @Injectable()
 export class UserService {
@@ -12,9 +15,49 @@ export class UserService {
     private prisma: PrismaService,
     private readonly configService: ConfigService,
     private jwtService: JwtService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly categoryService: CategoryService,
+    private readonly subcategoryService: SubcategoryService,
+    private readonly timeLogService: TimeLogService
   ) {}
 
+  public async cancelAllActive(userId: string) {
+    const { categories, subcategories } = (await this.prisma.user.findFirst({
+      where: { id: userId },
+      include: { categories: true, subcategories: true },
+    })) || { categories: [], subcategories: [] };
+    const activeCategories = categories.filter((category) => category.active);
+    const activeSubcategories = subcategories.filter(
+      (subcategory) => subcategory.active
+    );
+    const activeTimeLogId =
+      await this.timeLogService.findFirstTimeLogIdWhereNotEnded(userId);
+    if (
+      !(
+        activeTimeLogId ||
+        activeCategories.length ||
+        activeSubcategories.length
+      )
+    ) {
+      return {
+        status: true,
+        message: 'All activities were cancelled successfully.',
+      };
+    }
+    activeCategories.forEach((category) =>
+      this.categoryService.setCategoryActiveState(category.id, false)
+    );
+    activeSubcategories.forEach((subcategory) =>
+      this.subcategoryService.setSubcategoryActiveState(subcategory.id, false)
+    );
+    if (activeTimeLogId) {
+      this.timeLogService.setTimeLogAsEnded(activeTimeLogId); //don't wait
+    }
+    return {
+      status: true,
+      message: 'All activities were cancelled successfully.',
+    };
+  }
 
   public async createNewUser(
     data: { email: string; plainPassword: string },

@@ -102,7 +102,7 @@ export class CategoryService {
         false
       ); //don't wait
       const timeLogNotEndedId =
-        await this.timeLogService.findFirstUsersNotEnded(user.id);
+        await this.timeLogService.findFirstTimeLogIdWhereNotEnded(user.id);
       if (timeLogNotEndedId) {
         await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
       }
@@ -122,7 +122,7 @@ export class CategoryService {
     if (activeCategory) {
       this.setCategoryActiveState(activeCategory.id, false);
       const timeLogNotEndedId =
-        await this.timeLogService.findFirstUsersNotEnded(user.id);
+        await this.timeLogService.findFirstTimeLogIdWhereNotEnded(user.id);
       if (timeLogNotEndedId) {
         await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
       }

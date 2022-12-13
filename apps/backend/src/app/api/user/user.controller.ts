@@ -34,4 +34,10 @@ export class UserController {
   async handleRequestGetMe(@UserDecorator() user: User) {
     return user;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('cancel-all-active')
+  async handleRequestCancelAllActive(@UserDecorator() user: User) {
+    return this.userService.cancelAllActive(user.id);
+  }
 }

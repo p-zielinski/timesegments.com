@@ -135,9 +135,8 @@ export class SubcategoryService {
     if (activeSubcategory?.id) {
       this.setSubcategoryActiveState(activeSubcategory.id, false); //don't wait
     }
-    const timeLogNotEndedId = await this.timeLogService.findFirstUsersNotEnded(
-      user.id
-    );
+    const timeLogNotEndedId =
+      await this.timeLogService.findFirstTimeLogIdWhereNotEnded(user.id);
     if (timeLogNotEndedId) {
       await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
     }
