@@ -53,6 +53,53 @@ export default function Index() {
   const mdUp = useResponsive('up', 'md');
   const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
 
+  const renderLink = () => {
+    switch (currentPageState) {
+      case AuthPageState.LOGIN: {
+        return (
+          <>
+            Don’t have an account? {''}
+            <Link
+              variant="subtitle2"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setCurrentPageState(AuthPageState.REGISTER)}
+            >
+              Get started
+            </Link>
+          </>
+        );
+      }
+      case AuthPageState.REGISTER: {
+        return (
+          <>
+            Already have an account? {''}
+            <Link
+              variant="subtitle2"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setCurrentPageState(AuthPageState.LOGIN)}
+            >
+              Log in
+            </Link>
+          </>
+        );
+      }
+      case AuthPageState.RECOVER_ACCOUNT: {
+        return (
+          <>
+            Want sign in? {''}
+            <Link
+              variant="subtitle2"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setCurrentPageState(AuthPageState.LOGIN)}
+            >
+              Log in
+            </Link>
+          </>
+        );
+      }
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -91,31 +138,7 @@ export default function Index() {
             </Typography>
 
             <Typography variant="body2" sx={{ mb: 3 }}>
-              {currentPageState === AuthPageState.LOGIN ? (
-                <>
-                  Don’t have an account? {''}
-                  <Link
-                    variant="subtitle2"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setCurrentPageState(AuthPageState.REGISTER)}
-                  >
-                    Get started
-                  </Link>
-                </>
-              ) : (
-                currentPageState === AuthPageState.REGISTER && (
-                  <>
-                    Already have an account? {''}
-                    <Link
-                      variant="subtitle2"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setCurrentPageState(AuthPageState.LOGIN)}
-                    >
-                      Log in
-                    </Link>
-                  </>
-                )
-              )}
+              {renderLink()}
             </Typography>
 
             <AuthForm

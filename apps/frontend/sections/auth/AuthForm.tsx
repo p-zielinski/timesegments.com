@@ -107,6 +107,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         useEffect(() => {
           setErrors({});
         }, [authPageState]);
+
         return (
           <>
             <Stack spacing={3}>
@@ -129,10 +130,11 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                         edge="end"
                       >
                         <Iconify
+                          // @ts-ignore
                           icon={
                             showPassword
-                              ? 'eva:eye-fill'
-                              : ('eva:eye-off-fill' as string)
+                              ? ('eva:eye-fill') as any
+                              : ('eva:eye-off-fill' as any)
                           }
                         />
                       </IconButton>
@@ -145,15 +147,16 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
               )}
             </Stack>
 
+
             <Stack
               direction="row"
               alignItems="center"
               justifyContent="end"
               sx={{ my: 2,mt:1 }}
             >
-              <Link variant="subtitle2" underline="hover" onClick={()=>null}>
+              {authPageState!==AuthPageState.RECOVER_ACCOUNT &&<Link variant="subtitle2" underline="hover" sx={{cursor:'pointer'}} onClick={()=>setAuthPageState(AuthPageState.RECOVER_ACCOUNT)}>
                 Forgot password?
-              </Link>
+              </Link>}
             </Stack>
 
             <LoadingButton
@@ -163,7 +166,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
               variant="contained"
               onClick={handleClick}
             >
-              Login
+              {authPageState}
             </LoadingButton>
           </>
         );
