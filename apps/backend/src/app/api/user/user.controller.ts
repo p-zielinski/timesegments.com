@@ -36,6 +36,12 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('me-extended')
+  async handleRequestMeExtended(@UserDecorator() user: User) {
+    return { user: await this.userService.getMeExtended(user.id) };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('cancel-all-active')
   async handleRequestCancelAllActive(@UserDecorator() user: User) {
     return this.userService.cancelAllActive(user.id);

@@ -8,6 +8,7 @@ import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
+import {User} from "@prisma/client";
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,13 @@ export class UserService {
     private readonly subcategoryService: SubcategoryService,
     private readonly timeLogService: TimeLogService
   ) {}
+
+  public async getMeExtended(id:string): Promise<User> {
+    return await this.prisma.user.findFirst({
+      where: { id },
+      include: { categories: {include: {subcategories:true}} },
+    });
+  }
 
   public async cancelAllActive(userId: string) {
     const { categories, subcategories } = (await this.prisma.user.findFirst({
