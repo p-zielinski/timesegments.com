@@ -18,7 +18,7 @@ import {
 // components
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
-import { ColorMultiPicker } from '../../../components/color-utils';
+import ColorMultiPicker from "../../../components/color-utils/ColorMultiPicker";
 
 // ----------------------------------------------------------------------
 

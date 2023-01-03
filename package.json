@@ -41,6 +41,7 @@
     "js-sha256": "^0.9.0",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
+    "nanoid": "^4.0.0",
     "nestjs-prisma": "^0.19.0",
     "next": "^13.0.7",
     "numeral": "^2.0.6",

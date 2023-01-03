@@ -42,7 +42,6 @@ export default function Products() {
           flexWrap="wrap-reverse"
           alignItems="center"
           justifyContent="flex-end"
-          sx={{ mb: 5 }}
         >
           <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
             <ProductFilterSidebar
