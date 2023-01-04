@@ -4,6 +4,7 @@ import { Box, Card, Link, Typography, Stack } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 // utils
 import IsActive from '../../../components/is-active/IsActive';
+import {ACTIVE,INACTIVE} from "../../../consts/colors";
 
 // ----------------------------------------------------------------------
 
@@ -18,16 +19,19 @@ export default function SubcategoryCard({ subcategory }) {
     <Card
       key={id}
       sx={{
-        bgcolor: subcategory.active
-          ? 'rgba(0,133,9,0.15)'
-          : 'rgba(255,0,0,0.13)',
+        border: subcategory.active
+          ? `solid 2px ${ACTIVE}`
+          : `solid 2px ${INACTIVE}`,
         borderTopLeftRadius: 12,
         borderBottomLeftRadius: 12,
         cursor: 'pointer',
         '&:hover': {
           background: subcategory.active
-            ? 'rgba(255,0,0,0.2)'
-            : 'rgba(0,133,9,0.25)',
+            ? INACTIVE
+            : ACTIVE,
+          border: !subcategory.active
+            ? `solid 2px ${ACTIVE}`
+            : `solid 2px ${INACTIVE}`
         },
       }}
     >

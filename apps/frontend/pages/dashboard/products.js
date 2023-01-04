@@ -43,7 +43,7 @@ export default function Products() {
           alignItems="center"
           justifyContent="flex-end"
         >
-          <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
+          <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb:3 }}>
             <ProductFilterSidebar
               openFilter={openFilter}
               onOpenFilter={handleOpenFilter}
