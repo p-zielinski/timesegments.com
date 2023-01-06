@@ -7,9 +7,15 @@ import { fCurrency } from '../../../utils/formatNumber';
 import IsActive from '../../../components/is-active/IsActive';
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';
-import { useState } from 'react';
-import {ACTIVE, ACTIVE_DARK, INACTIVE, INACTIVE_DARK, LIGHT_SILVER} from '../../../consts/colors';
-import hexRgb from 'hex-rgb';
+import {
+  ACTIVE,
+  ACTIVE_DARK,
+  INACTIVE,
+  INACTIVE_DARK,
+  LIGHT_SILVER,
+} from '../../../consts/colors';
+import { getRGBA } from '../../../utils/getRGBA';
+import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 
 // ----------------------------------------------------------------------
 
@@ -44,21 +50,18 @@ export default function CategoryCard({ category, categories, setCategories }) {
     return categories.find((_category) => _category.id === category.id) || {};
   };
 
-  const getRGBA = (hexRgbValue = `ffffff`, alpha = 1) => {
-    const hexRgbObject = hexRgb(hexRgbValue);
-    return `rgba(${hexRgbObject.red},${hexRgbObject.green},${hexRgbObject.blue},${alpha})`;
-  };
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Card>
         <Box sx={{ display: 'flex' }}>
           <Box
             sx={{
-              background: getRGBA(
-                getCategory(category, categories)?.hexColor,
-                0.3
-              ),
+              background: getCategory(category, categories)?.active
+                ? getRGBA(getCategory(category, categories)?.hexColor, 0.3)
+                : getRepeatingLinearGradient(
+                    getCategory(category, categories)?.hexColor,
+                    0.3
+                  ),
               flex: 1,
               border: getCategory(category, categories)?.active
                 ? `solid 2px ${ACTIVE}`
@@ -94,7 +97,9 @@ export default function CategoryCard({ category, categories, setCategories }) {
             sx={{
               width: `60px`,
               p: 2,
-              color:!getCategory(category, categories)?.expandSubcategories?ACTIVE_DARK:INACTIVE_DARK,
+              color: !getCategory(category, categories)?.expandSubcategories
+                ? ACTIVE_DARK
+                : INACTIVE_DARK,
               background: `white`,
               border: `solid 2px ${LIGHT_SILVER}`,
               borderLeft: `0px`,
@@ -147,11 +152,18 @@ export default function CategoryCard({ category, categories, setCategories }) {
                           <SubcategoryCard
                             key={subcategory.id}
                             subcategory={subcategory}
+                            categories={categories}
+                            setCategories={setCategories}
                           />
                         )
                       )
                     ) : (
-                      <Card sx={{ backgroundColor: 'rgba(0,0,0,0.11)' }}>
+                      <Card
+                        sx={{
+                          backgroundColor: 'rgba(0,0,0,0.11)',
+                          border: `solid 2px rgba(0,0,0,0.02)`,
+                        }}
+                      >
                         <Stack spacing={2} sx={{ p: 2 }}>
                           <Typography variant="subtitle3" noWrap>
                             No subcategories to display

@@ -7,7 +7,7 @@ import Blog from '../pages/dashboard/blog';
 import Users from '../pages/dashboard/users';
 import Index from '../pages';
 import Page404 from '../pages/404';
-import Products from '../pages/dashboard/products';
+import Categories from '../pages/dashboard/categories';
 import Index from '../pages/dashboard';
 
 // ----------------------------------------------------------------------
@@ -21,7 +21,7 @@ export default function Router() {
         { element: <Navigate to="/dashboard/app" />, index: true },
         { path: 'app', element: <Index /> },
         { path: 'user', element: <Users /> },
-        { path: 'products', element: <Products /> },
+        { path: 'products', element: <Categories /> },
         { path: 'blog', element: <Blog /> },
       ],
     },

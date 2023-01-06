@@ -5,36 +5,28 @@ import { Container, Stack, Typography } from '@mui/material';
 // components
 import {
   ProductSort,
-  ProductList,
+  CategoryList,
   ProductCartWidget,
   ProductFilterSidebar,
 } from '../../sections/@dashboard/products';
-// mock
-import PRODUCTS from '../../_mock/products';
+
 import DashboardLayout from '../../layouts/dashboard';
 
 // ----------------------------------------------------------------------
 
-export default function Products() {
-  const [openFilter, setOpenFilter] = useState(false);
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
-  };
+export default function Categories() {
+  const [categories, setCategories] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <DashboardLayout>
       <Helmet>
-        <title> Dashboard: Products | Minimal UI </title>
+        <title> Categories </title>
       </Helmet>
 
       <Container>
-        <Typography variant="h4" sx={{ mb: 5 }}>
-          Products
+        <Typography variant="h4" sx={{ mb: 1 }}>
+          Categories & subcategories
         </Typography>
 
         <Stack
@@ -43,17 +35,12 @@ export default function Products() {
           alignItems="center"
           justifyContent="flex-end"
         >
-          <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb:3 }}>
-            <ProductFilterSidebar
-              openFilter={openFilter}
-              onOpenFilter={handleOpenFilter}
-              onCloseFilter={handleCloseFilter}
-            />
+          <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb: 3 }}>
             <ProductSort />
           </Stack>
         </Stack>
 
-        <ProductList products={PRODUCTS} />
+        <CategoryList categories={categories} setCategories={setCategories} isEditing={isEditing} setIsEditing={setIsEditing}/>
         <ProductCartWidget />
       </Container>
     </DashboardLayout>

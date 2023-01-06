@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import { nanoid } from 'nanoid';
-import {ACTIVE, INACTIVE} from "../../consts/colors";
+import {ACTIVE_DARK, INACTIVE_DARK} from "../../consts/colors";
 
 // ----------------------------------------------------------------------
 
@@ -22,8 +22,8 @@ export default function IsActive({ isActive, sx = {} }) {
         height: 16,
         borderRadius: '50%',
         boxShadow: (theme) =>
-          `inset -1px 1px 2px ${alpha(theme.palette.common.black, 0.24)}`,
-        bgcolor: isActive ? ACTIVE : INACTIVE,
+          `inset -1px 1px 2px ${alpha(theme.palette.common.black, 0.32)}`,
+        bgcolor: isActive ? ACTIVE_DARK : INACTIVE_DARK,
         ...sx,
       }}
     />
