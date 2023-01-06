@@ -96,6 +96,7 @@ export default function CategoryList({
         ? getCategories(categories).map((category) => (
             <Grid key={category.id} item xs={1} sm={1} md={1}>
               <CategoryCard
+                isEditing={isEditing}
                 category={category}
                 categories={categories}
                 setCategories={setCategories}

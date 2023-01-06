@@ -11,7 +11,7 @@ import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGra
 
 SubcategoryCard.propTypes = {
   subcategory: PropTypes.object,
-  categories: PropTypes.object,
+  categories: PropTypes.array,
   setCategories: PropTypes.func,
 };
 

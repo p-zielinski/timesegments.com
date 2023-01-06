@@ -23,7 +23,12 @@ CategoryCard.propTypes = {
   category: PropTypes.object,
 };
 
-export default function CategoryCard({ category, categories, setCategories }) {
+export default function CategoryCard({
+  category,
+  categories,
+  setCategories,
+  isEditing,
+}) {
   const reverseExpandSubcategories = () => {
     setCategories(
       [...categories].map((_category) => {
@@ -142,11 +147,12 @@ export default function CategoryCard({ category, categories, setCategories }) {
           >
             {getCategory(category, categories)?.expandSubcategories ? (
               <>
-                {getVisibleSubcategories(category, categories) ? (
+                {getVisibleSubcategories(category, categories) || isEditing ? (
                   <Box
                     sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                   >
-                    {getVisibleSubcategories(category, categories).length ? (
+                    {getVisibleSubcategories(category, categories).length ||
+                    isEditing ? (
                       getVisibleSubcategories(category, categories).map(
                         (subcategory) => (
                           <SubcategoryCard
@@ -171,10 +177,38 @@ export default function CategoryCard({ category, categories, setCategories }) {
                         </Stack>
                       </Card>
                     )}
+                    <Card
+                      sx={{
+                        backgroundColor: 'rgba(0,0,0,0.11)',
+                        cursor: 'pointer',
+                        border: `solid 2px ${ACTIVE}`,
+                        background: ACTIVE,
+                        '&:hover': {
+                          border: `solid 2px ${ACTIVE_DARK}`,
+                        },
+                      }}
+                    >
+                      <Iconify
+                        icon={'material-symbols:add'}
+                        width={40}
+                        sx={{
+                          m: -2,
+                          position: 'absolute',
+                          bottom: 24,
+                          left: 30,
+                        }}
+                      />
+                      <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
+                        <Typography variant="subtitle2" noWrap>
+                          ADD NEW SUBCATEGORY
+                        </Typography>
+                      </Stack>
+                    </Card>
                   </Box>
                 ) : undefined}
               </>
-            ) : getVisibleSubcategories(category, categories).filter(
+            ) : isEditing ||
+              getVisibleSubcategories(category, categories).filter(
                 (subcategory) => subcategory.active
               ).length ? (
               getVisibleSubcategories(category, categories)
