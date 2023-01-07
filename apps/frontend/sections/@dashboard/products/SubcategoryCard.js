@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Card, Typography, Stack } from '@mui/material';
 // utils
 import IsActive from '../../../components/is-active/IsActive';
-import { ACTIVE, INACTIVE } from '../../../consts/colors';
+import { LIGHT_GREEN, LIGHT_RED } from '../../../consts/colors';
 import { getRGBA } from '../../../utils/getRGBA';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 
@@ -37,13 +37,17 @@ export default function SubcategoryCard({
               subcategory?.hexColor || category?.hexColor,
               0.3
             ),
-        border: isActive ? `solid 2px ${ACTIVE}` : `solid 2px ${INACTIVE}`,
+        border: isActive
+          ? `solid 2px ${LIGHT_GREEN}`
+          : `solid 2px ${LIGHT_RED}`,
         borderTopLeftRadius: 12,
         borderBottomLeftRadius: 12,
         cursor: 'pointer',
         '&:hover': {
-          background: isActive ? INACTIVE : ACTIVE,
-          border: !isActive ? `solid 2px ${ACTIVE}` : `solid 2px ${INACTIVE}`,
+          background: isActive ? LIGHT_RED : LIGHT_GREEN,
+          border: !isActive
+            ? `solid 2px ${LIGHT_GREEN}`
+            : `solid 2px ${LIGHT_RED}`,
         },
       }}
     >

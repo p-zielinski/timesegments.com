@@ -4,10 +4,10 @@ import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import CategoryCard from './CategoryCard';
 import Iconify from '../../../components/iconify';
 import {
-  ACTIVE,
-  ACTIVE_DARK,
-  INACTIVE,
-  INACTIVE_DARK,
+  LIGHT_GREEN,
+  GREEN,
+  LIGHT_RED,
+  RED,
   LIGHT_SILVER,
 } from '../../../consts/colors';
 
@@ -36,22 +36,16 @@ export default function CategoryList({
   return (
     <Grid container spacing={2} {...other} columns={1}>
       {isEditing && (
-        <Grid
-          key={'edit_categories'}
-          item
-          xs={1}
-          sm={1}
-          md={1}
-        >
+        <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Card
               sx={{
                 backgroundColor: 'rgba(0,0,0,0.11)',
                 cursor: 'pointer',
-                border: `solid 2px ${INACTIVE}`,
-                background: INACTIVE,
+                border: `solid 2px ${LIGHT_RED}`,
+                background: LIGHT_RED,
                 '&:hover': {
-                  border: `solid 2px ${INACTIVE_DARK}`,
+                  border: `solid 2px ${RED}`,
                 },
               }}
               onClick={() => setIsEditing(false)}
@@ -71,10 +65,10 @@ export default function CategoryList({
               sx={{
                 backgroundColor: 'rgba(0,0,0,0.11)',
                 cursor: 'pointer',
-                border: `solid 2px ${ACTIVE}`,
-                background: ACTIVE,
+                border: `solid 2px ${LIGHT_GREEN}`,
+                background: LIGHT_GREEN,
                 '&:hover': {
-                  border: `solid 2px ${ACTIVE_DARK}`,
+                  border: `solid 2px ${GREEN}`,
                 },
               }}
             >
@@ -147,10 +141,10 @@ export default function CategoryList({
             sx={{
               backgroundColor: 'rgba(0,0,0,0.11)',
               cursor: 'pointer',
-              border: `solid 2px ${ACTIVE}`,
-              background: ACTIVE,
+              border: `solid 2px ${LIGHT_GREEN}`,
+              background: LIGHT_GREEN,
               '&:hover': {
-                border: `solid 2px ${ACTIVE_DARK}`,
+                border: `solid 2px ${GREEN}`,
               },
             }}
           >

@@ -8,11 +8,13 @@ import IsActive from '../../../components/is-active/IsActive';
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';
 import {
-  ACTIVE,
-  ACTIVE_DARK,
-  INACTIVE,
-  INACTIVE_DARK,
+  LIGHT_GREEN,
+  GREEN,
+  LIGHT_RED,
+  RED,
   LIGHT_SILVER,
+  LIGHT_BLUE,
+  BLUE,
 } from '../../../consts/colors';
 import { getRGBA } from '../../../utils/getRGBA';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
@@ -69,19 +71,19 @@ export default function CategoryCard({
                   ),
               flex: 1,
               border: getCategory(category, categories)?.active
-                ? `solid 2px ${ACTIVE}`
-                : `solid 2px ${INACTIVE}`,
+                ? `solid 2px ${LIGHT_GREEN}`
+                : `solid 2px ${LIGHT_RED}`,
               borderRight: `0px`,
               borderTopLeftRadius: 12,
               borderBottomLeftRadius: 12,
               cursor: 'pointer',
               '&:hover': {
                 background: getCategory(category, categories)?.active
-                  ? INACTIVE
-                  : ACTIVE,
+                  ? LIGHT_RED
+                  : LIGHT_GREEN,
                 border: !getCategory(category, categories)?.active
-                  ? `solid 2px ${ACTIVE}`
-                  : `solid 2px ${INACTIVE}`,
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
               },
             }}
           >
@@ -103,8 +105,8 @@ export default function CategoryCard({
               width: `60px`,
               p: 2,
               color: !getCategory(category, categories)?.expandSubcategories
-                ? ACTIVE_DARK
-                : INACTIVE_DARK,
+                ? GREEN
+                : RED,
               background: `white`,
               border: `solid 2px ${LIGHT_SILVER}`,
               borderLeft: `0px`,
@@ -177,33 +179,35 @@ export default function CategoryCard({
                         </Stack>
                       </Card>
                     )}
-                    <Card
-                      sx={{
-                        backgroundColor: 'rgba(0,0,0,0.11)',
-                        cursor: 'pointer',
-                        border: `solid 2px ${ACTIVE}`,
-                        background: ACTIVE,
-                        '&:hover': {
-                          border: `solid 2px ${ACTIVE_DARK}`,
-                        },
-                      }}
-                    >
-                      <Iconify
-                        icon={'material-symbols:add'}
-                        width={40}
+                    {isEditing && (
+                      <Card
                         sx={{
-                          m: -2,
-                          position: 'absolute',
-                          bottom: 24,
-                          left: 30,
+                          backgroundColor: 'rgba(0,0,0,0.11)',
+                          cursor: 'pointer',
+                          border: `solid 2px ${LIGHT_BLUE}`,
+                          background: LIGHT_BLUE,
+                          '&:hover': {
+                            border: `solid 2px ${BLUE}`,
+                          },
                         }}
-                      />
-                      <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
-                        <Typography variant="subtitle2" noWrap>
-                          ADD NEW SUBCATEGORY
-                        </Typography>
-                      </Stack>
-                    </Card>
+                      >
+                        <Iconify
+                          icon={'material-symbols:add'}
+                          width={40}
+                          sx={{
+                            m: -2,
+                            position: 'absolute',
+                            bottom: 24,
+                            left: 30,
+                          }}
+                        />
+                        <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
+                          <Typography variant="subtitle2" noWrap>
+                            ADD NEW SUBCATEGORY
+                          </Typography>
+                        </Stack>
+                      </Card>
+                    )}
                   </Box>
                 ) : undefined}
               </>
