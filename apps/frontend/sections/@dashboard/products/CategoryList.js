@@ -25,6 +25,7 @@ export default function CategoryList({
   setCategories,
   isEditing,
   setIsEditing,
+  windowWidth,
   ...other
 }) {
   const getCategories = (categories) => {
@@ -52,8 +53,8 @@ export default function CategoryList({
             >
               <Iconify
                 icon={'mdi:cancel-bold'}
-                width={30}
-                sx={{ m: -2, position: 'absolute', bottom: 28, left: 35 }}
+                width={42}
+                sx={{ m: -2, position: 'absolute', bottom: 22, left: 22 }}
               />
               <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
                 <Typography variant="subtitle2" noWrap>
@@ -74,8 +75,13 @@ export default function CategoryList({
             >
               <Iconify
                 icon={'material-symbols:add'}
-                width={40}
-                sx={{ m: -2, position: 'absolute', bottom: 24, left: 30 }}
+                width={50}
+                sx={{
+                  m: -2,
+                  position: 'absolute',
+                  bottom: 18,
+                  left: 20,
+                }}
               />
               <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
                 <Typography variant="subtitle2" noWrap>
@@ -94,6 +100,7 @@ export default function CategoryList({
                 category={category}
                 categories={categories}
                 setCategories={setCategories}
+                windowWidth={windowWidth}
               />
             </Grid>
           ))
@@ -150,8 +157,8 @@ export default function CategoryList({
           >
             <Iconify
               icon={'material-symbols:edit'}
-              width={30}
-              sx={{ m: -2, position: 'absolute', bottom: 28, left: 35 }}
+              width={40}
+              sx={{ m: -2, position: 'absolute', bottom: 25, left: 25 }}
             />
             <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
               <Typography variant="subtitle2" noWrap>

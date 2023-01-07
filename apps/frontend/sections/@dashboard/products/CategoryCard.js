@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Card, Link, Typography, Stack } from '@mui/material';
+import { Box, Card, Link, Typography, Stack, Grid } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 // utils
 import { fCurrency } from '../../../utils/formatNumber';
@@ -30,6 +30,7 @@ export default function CategoryCard({
   categories,
   setCategories,
   isEditing,
+  windowWidth,
 }) {
   const reverseExpandSubcategories = () => {
     setCategories(
@@ -49,7 +50,9 @@ export default function CategoryCard({
     return (
       categories
         .find((_category) => _category.id === category.id)
-        ?.subcategories?.filter((subcategory) => subcategory.visible) || []
+        ?.subcategories?.filter((subcategory) =>
+          isEditing ? true : subcategory.visible
+        ) || []
     );
   };
 
@@ -136,106 +139,109 @@ export default function CategoryCard({
       getVisibleSubcategories(category, categories).filter(
         (subcategory) => subcategory.active
       ).length ? (
-        <Box sx={{ display: 'flex' }}>
-          <Box
-            sx={{
-              width: `100px`,
-            }}
-          ></Box>
-          <Box
-            sx={{
-              flex: 1,
-            }}
-          >
-            {getCategory(category, categories)?.expandSubcategories ? (
-              <>
-                {getVisibleSubcategories(category, categories) || isEditing ? (
-                  <Box
-                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-                  >
-                    {getVisibleSubcategories(category, categories).length ||
-                    isEditing ? (
-                      getVisibleSubcategories(category, categories).map(
-                        (subcategory) => (
-                          <SubcategoryCard
-                            key={subcategory.id}
-                            subcategory={subcategory}
-                            categories={categories}
-                            setCategories={setCategories}
-                          />
+        <Grid container spacing={2} columns={12}>
+          <Grid key={'edit_categories'} item xs={1} sm={1} md={1}></Grid>
+          <Grid item xs={11} sm={11} md={11}>
+            <Box
+              sx={{
+                flex: 1,
+              }}
+            >
+              {getCategory(category, categories)?.expandSubcategories ? (
+                <>
+                  {getVisibleSubcategories(category, categories) ||
+                  isEditing ? (
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                    >
+                      {getVisibleSubcategories(category, categories).length ||
+                      isEditing ? (
+                        getVisibleSubcategories(category, categories).map(
+                          (subcategory) => (
+                            <SubcategoryCard
+                              key={subcategory.id}
+                              subcategory={subcategory}
+                              categories={categories}
+                              setCategories={setCategories}
+                              isEditing={isEditing}
+                              windowWidth={windowWidth}
+                            />
+                          )
                         )
-                      )
-                    ) : (
-                      <Card
-                        sx={{
-                          backgroundColor: 'rgba(0,0,0,0.11)',
-                          border: `solid 2px rgba(0,0,0,0.02)`,
-                        }}
-                      >
-                        <Stack spacing={2} sx={{ p: 2 }}>
-                          <Typography variant="subtitle3" noWrap>
-                            No subcategories to display
-                          </Typography>
-                        </Stack>
-                      </Card>
-                    )}
-                    {isEditing && (
-                      <Card
-                        sx={{
-                          backgroundColor: 'rgba(0,0,0,0.11)',
-                          cursor: 'pointer',
-                          border: `solid 2px ${LIGHT_BLUE}`,
-                          background: LIGHT_BLUE,
-                          '&:hover': {
-                            border: `solid 2px ${BLUE}`,
-                          },
-                        }}
-                      >
-                        <Iconify
-                          icon={'material-symbols:add'}
-                          width={40}
+                      ) : (
+                        <Card
                           sx={{
-                            m: -2,
-                            position: 'absolute',
-                            bottom: 24,
-                            left: 30,
+                            backgroundColor: 'rgba(0,0,0,0.11)',
+                            border: `solid 2px rgba(0,0,0,0.02)`,
                           }}
-                        />
-                        <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
-                          <Typography variant="subtitle2" noWrap>
-                            ADD NEW SUBCATEGORY
-                          </Typography>
-                        </Stack>
-                      </Card>
-                    )}
-                  </Box>
-                ) : undefined}
-              </>
-            ) : isEditing ||
-              getVisibleSubcategories(category, categories).filter(
-                (subcategory) => subcategory.active
-              ).length ? (
-              getVisibleSubcategories(category, categories)
-                .filter((subcategory) => subcategory.active)
-                .map((subcategory) => (
-                  <SubcategoryCard
-                    key={subcategory.id}
-                    subcategory={subcategory}
-                    categories={categories}
-                    setCategories={setCategories}
-                  />
-                ))
-            ) : (
-              <Card sx={{ backgroundColor: 'rgba(0,0,0,0.11)' }}>
-                <Stack spacing={2} sx={{ p: 2 }}>
-                  <Typography variant="subtitle3" noWrap>
-                    No subcategories to display
-                  </Typography>
-                </Stack>
-              </Card>
-            )}
-          </Box>
-        </Box>
+                        >
+                          <Stack spacing={2} sx={{ p: 2 }}>
+                            <Typography variant="subtitle3" noWrap>
+                              No subcategories to display
+                            </Typography>
+                          </Stack>
+                        </Card>
+                      )}
+                      {isEditing && (
+                        <Card
+                          sx={{
+                            backgroundColor: 'rgba(0,0,0,0.11)',
+                            cursor: 'pointer',
+                            border: `solid 2px ${LIGHT_BLUE}`,
+                            background: LIGHT_BLUE,
+                            '&:hover': {
+                              border: `solid 2px ${BLUE}`,
+                            },
+                          }}
+                        >
+                          <Iconify
+                            icon={'material-symbols:add'}
+                            width={50}
+                            sx={{
+                              m: -2,
+                              position: 'absolute',
+                              bottom: 18,
+                              left: 20,
+                            }}
+                          />
+                          <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
+                            <Typography variant="subtitle2" noWrap>
+                              ADD NEW SUBCATEGORY
+                            </Typography>
+                          </Stack>
+                        </Card>
+                      )}
+                    </Box>
+                  ) : undefined}
+                </>
+              ) : isEditing ||
+                getVisibleSubcategories(category, categories).filter(
+                  (subcategory) => subcategory.active
+                ).length ? (
+                getVisibleSubcategories(category, categories)
+                  .filter((subcategory) => subcategory.active)
+                  .map((subcategory) => (
+                    <SubcategoryCard
+                      key={subcategory.id}
+                      subcategory={subcategory}
+                      categories={categories}
+                      setCategories={setCategories}
+                      isEditing={isEditing}
+                      windowWidth={windowWidth}
+                    />
+                  ))
+              ) : (
+                <Card sx={{ backgroundColor: 'rgba(0,0,0,0.11)' }}>
+                  <Stack spacing={2} sx={{ p: 2 }}>
+                    <Typography variant="subtitle3" noWrap>
+                      No subcategories to display
+                    </Typography>
+                  </Stack>
+                </Card>
+              )}
+            </Box>
+          </Grid>
+        </Grid>
       ) : undefined}
     </Box>
   );
