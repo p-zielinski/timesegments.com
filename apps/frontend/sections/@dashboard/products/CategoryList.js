@@ -8,7 +8,6 @@ import {
   GREEN,
   LIGHT_RED,
   RED,
-  LIGHT_SILVER,
 } from '../../../consts/colors';
 
 // ----------------------------------------------------------------------
@@ -25,7 +24,6 @@ export default function CategoryList({
   setCategories,
   isEditing,
   setIsEditing,
-  windowWidth,
   ...other
 }) {
   const getCategories = (categories) => {
@@ -100,7 +98,6 @@ export default function CategoryList({
                 category={category}
                 categories={categories}
                 setCategories={setCategories}
-                windowWidth={windowWidth}
               />
             </Grid>
           ))

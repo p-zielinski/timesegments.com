@@ -12,7 +12,6 @@ import {
 import DashboardLayout from '../../layouts/dashboard';
 
 import { User } from '@prisma/client';
-import { sleep } from '../../utils/sleep';
 
 // ----------------------------------------------------------------------
 
@@ -21,39 +20,10 @@ type Props = {
 };
 
 export default function Categories({ user }: Props) {
-  const getWindowDimensions = async () => {
-    const { innerWidth: width, innerHeight: height } = window;
-    return {
-      width,
-      height,
-    };
-  };
   // @ts-ignore
   const [categories, setCategories] = useState(user?.categories || []);
   const [isEditing, setIsEditing] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(null);
-
-  useEffect(() => {
-    const handleResize = async () => {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        try {
-          const widthAndHeight = await getWindowDimensions();
-          if (widthAndHeight.width) {
-            setWindowWidth(widthAndHeight.width);
-            break;
-          }
-        } catch (e) {}
-        await sleep(100);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  const [order,setOrder] = useState('a')
 
   return (
     <DashboardLayout>
@@ -73,7 +43,7 @@ export default function Categories({ user }: Props) {
           justifyContent="flex-end"
         >
           <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb: 3 }}>
-            <ProductSort />
+            <ProductSort order={order} setOrder={setOrder}/>
           </Stack>
         </Stack>
 
@@ -82,7 +52,6 @@ export default function Categories({ user }: Props) {
           setCategories={setCategories}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
-          windowWidth={windowWidth}
         />
         <ProductCartWidget />
       </Container>

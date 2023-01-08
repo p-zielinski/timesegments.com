@@ -8,20 +8,24 @@ import Iconify from '../../../components/iconify';
 
 const SORT_BY_OPTIONS = [
   { value: 'DESC_createdAt', label: 'Newest' },
-  { value: 'ASC_createdAt', label: 'Oldest' },
-  { value: 'a', label: 'Alphabetical' },
-  { value: 'priceAsc', label: 'Reverse alphabetical' },
+  { value: 'ASC.createdAt', label: 'Oldest' },
+  { value: 'DESC.name', label: 'Alphabetical' },
+  { value: 'ASC.name', label: 'Reverse alphabetical' },
 ];
 
-export default function ShopProductSort() {
+export default function ShopProductSort({ order, setOrder }) {
   const [open, setOpen] = useState(null);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (option) => {
     setOpen(null);
+    if (!option) {
+      return;
+    }
+    console.log(option);
   };
 
   return (
@@ -49,7 +53,7 @@ export default function ShopProductSort() {
         keepMounted
         anchorEl={open}
         open={Boolean(open)}
-        onClose={handleClose}
+        onClose={() => handleClose()}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
@@ -57,7 +61,7 @@ export default function ShopProductSort() {
           <MenuItem
             key={option.value}
             selected={option.value === 'newest'}
-            onClick={handleClose}
+            onClick={() => handleClose(option)}
             sx={{ typography: 'body2' }}
           >
             {option.label}

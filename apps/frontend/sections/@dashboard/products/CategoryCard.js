@@ -30,7 +30,6 @@ export default function CategoryCard({
   categories,
   setCategories,
   isEditing,
-  windowWidth,
 }) {
   const reverseExpandSubcategories = () => {
     setCategories(
@@ -164,7 +163,6 @@ export default function CategoryCard({
                               categories={categories}
                               setCategories={setCategories}
                               isEditing={isEditing}
-                              windowWidth={windowWidth}
                             />
                           )
                         )
@@ -227,7 +225,6 @@ export default function CategoryCard({
                       categories={categories}
                       setCategories={setCategories}
                       isEditing={isEditing}
-                      windowWidth={windowWidth}
                     />
                   ))
               ) : (
