@@ -11,19 +11,26 @@ import {
 
 import DashboardLayout from '../../layouts/dashboard';
 
-import { User } from '@prisma/client';
+import { ColumnSortOptions } from '../../enums/sortOption';
+import { sortCategories } from '../../utils/sortCategories';
+import { UserWithCategoriesAndSubcategories } from '../../type/user';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  user?: User;
+  user?: UserWithCategoriesAndSubcategories;
 };
 
 export default function Categories({ user }: Props) {
-  // @ts-ignore
-  const [categories, setCategories] = useState(user?.categories || []);
+  const [order, setOrder] = useState(ColumnSortOptions.NEWEST);
+  const [categories, setCategories] = useState(
+    sortCategories(user?.categories || [], order)
+  );
   const [isEditing, setIsEditing] = useState(false);
-  const [order,setOrder] = useState('a')
+
+  useEffect(() => {
+    setCategories(sortCategories(categories, order));
+  }, [order]);
 
   return (
     <DashboardLayout>
@@ -43,7 +50,7 @@ export default function Categories({ user }: Props) {
           justifyContent="flex-end"
         >
           <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb: 3 }}>
-            <ProductSort order={order} setOrder={setOrder}/>
+            <ProductSort order={order} setOrder={setOrder} />
           </Stack>
         </Stack>
 

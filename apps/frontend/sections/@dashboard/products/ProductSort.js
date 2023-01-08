@@ -3,14 +3,28 @@ import { useState } from 'react';
 import { Menu, Button, MenuItem, Typography } from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
+import { ColumnSortOptions } from '../../../enums/sortOption';
+import capitalize from 'capitalize';
 
 // ----------------------------------------------------------------------
 
 const SORT_BY_OPTIONS = [
-  { value: 'DESC_createdAt', label: 'Newest' },
-  { value: 'ASC.createdAt', label: 'Oldest' },
-  { value: 'DESC.name', label: 'Alphabetical' },
-  { value: 'ASC.name', label: 'Reverse alphabetical' },
+  {
+    value: ColumnSortOptions.ALPHABETICAL,
+    label: capitalize(ColumnSortOptions.ALPHABETICAL),
+  },
+  {
+    value: ColumnSortOptions.REVERSE_ALPHABETICAL,
+    label: capitalize(ColumnSortOptions.REVERSE_ALPHABETICAL),
+  },
+  {
+    value: ColumnSortOptions.NEWEST,
+    label: capitalize(ColumnSortOptions.NEWEST),
+  },
+  {
+    value: ColumnSortOptions.OLDEST,
+    label: capitalize(ColumnSortOptions.OLDEST),
+  },
 ];
 
 export default function ShopProductSort({ order, setOrder }) {
@@ -25,7 +39,7 @@ export default function ShopProductSort({ order, setOrder }) {
     if (!option) {
       return;
     }
-    console.log(option);
+    setOrder(option.value);
   };
 
   return (
@@ -46,7 +60,7 @@ export default function ShopProductSort({ order, setOrder }) {
           variant="subtitle2"
           sx={{ color: 'text.secondary' }}
         >
-          Newest
+          {SORT_BY_OPTIONS.find((option) => option.value === order).label}
         </Typography>
       </Button>
       <Menu
@@ -60,7 +74,7 @@ export default function ShopProductSort({ order, setOrder }) {
         {SORT_BY_OPTIONS.map((option) => (
           <MenuItem
             key={option.value}
-            selected={option.value === 'newest'}
+            selected={option.value === order}
             onClick={() => handleClose(option)}
             sx={{ typography: 'body2' }}
           >
