@@ -14,7 +14,6 @@ import DashboardLayout from '../../layouts/dashboard';
 import { ColumnSortOptions } from '../../enums/sortOption';
 import { sortCategories } from '../../utils/sortCategories';
 import { UserWithCategoriesAndSubcategories } from '../../type/user';
-import {shared} from "../../../../libs/shared/src";
 
 // ----------------------------------------------------------------------
 

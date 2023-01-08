@@ -14,9 +14,6 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": "./time-counter",
-    "paths": {
-      "@time-counter/*": ["libs/*"]
-    }
   },
   "exclude": ["time-counter/node_modules", "tmp"]
 }
