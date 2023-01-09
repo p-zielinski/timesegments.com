@@ -13,7 +13,10 @@
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": "./time-counter",
+    "baseUrl": ".",
+    "paths": {
+      "@test1/shared": ["libs/shared/src/index.ts"]
+    }
   },
-  "exclude": ["time-counter/node_modules", "tmp"]
+  "exclude": ["node_modules", "tmp"]
 }

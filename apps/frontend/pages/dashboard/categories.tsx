@@ -14,6 +14,7 @@ import DashboardLayout from '../../layouts/dashboard';
 import { ColumnSortOptions } from '../../enums/sortOption';
 import { sortCategories } from '../../utils/sortCategories';
 import { UserWithCategoriesAndSubcategories } from '../../type/user';
+import { shared } from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -31,6 +32,8 @@ export default function Categories({ user }: Props) {
   useEffect(() => {
     setCategories(sortCategories(categories, order));
   }, [order]);
+
+  console.log(shared());
 
   return (
     <DashboardLayout>
@@ -76,7 +79,7 @@ export const getServerSideProps = async (context: any) => {
       headers: {
         'Content-type': 'application/json',
         Authorization: `Bearer ${access_token}`,
-        jwt_token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbGJmaXNobmwwMDAwcXR6ZGllZjlhOG1iIiwidG9rZW5JZCI6ImNsY2FuNGEyajAwMDFxdDF3bXMzZjFiNWQiLCJleHBpcmVzQXQiOiIyMDIzLTAyLTI4VDE0OjU4OjQ2LjY1MFoifQ.U7n8UtL08ZTHc9zjnb6FWyayOfWRSxkghA8n_vn89fI`,
+        jwt_token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbGJmaXNobmwwMDAwcXR6ZGllZjlhOG1iIiwidG9rZW5JZCI6ImNsY3A2azNlaTAwMDFxdDNieW41NzYzN3AiLCJleHBpcmVzQXQiOiIyMDIzLTAzLTEwVDE5OjExOjQzLjY3MloifQ.z0JEZKoWlM8rIHkbani6afrHspK__E4Mrc33bXjiS-8`,
       },
     }
   );

@@ -1,5 +1,5 @@
 {
-  "name": "time-counter",
+  "name": "test1",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "private": true,
   "dependencies": {
+    "@nrwl/next": "15.4.5",
     "@emotion/react": "11.10.5",
     "@emotion/styled": "11.10.5",
     "@faker-js/faker": "^7.6.0",
@@ -66,6 +67,7 @@
     "yup-password": "^0.2.2"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.14.5",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
     "@nrwl/cli": "15.4.5",
@@ -111,4 +113,3 @@
     "typescript": "~4.8.2"
   }
 }
-

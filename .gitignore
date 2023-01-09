@@ -6,7 +6,7 @@ tmp
 /out-tsc
 
 # dependencies
-time-counter/node_modules
+node_modules
 
 # IDEs and editors
 /.idea
@@ -37,9 +37,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-/node_modules/
 
 # Next.js
 .next
-*.env
-*.env.local
