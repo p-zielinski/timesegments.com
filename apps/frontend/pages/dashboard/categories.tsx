@@ -7,7 +7,7 @@ import {
   ProductSort,
   CategoryList,
   ProductCartWidget,
-} from '../../sections/@dashboard/products';
+} from '../../sections/@dashboard/categories';
 
 import DashboardLayout from '../../layouts/dashboard';
 
@@ -70,7 +70,7 @@ export default function Categories({ user }: Props) {
 }
 
 export const getServerSideProps = async (context: any) => {
-  const { access_token } = context.req.cookies;
+  const { jwt_token } = context.req.cookies;
 
   const responseUser = await fetch(
     process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
@@ -78,8 +78,7 @@ export const getServerSideProps = async (context: any) => {
       method: 'GET',
       headers: {
         'Content-type': 'application/json',
-        Authorization: `Bearer ${access_token}`,
-        jwt_token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbGJmaXNobmwwMDAwcXR6ZGllZjlhOG1iIiwidG9rZW5JZCI6ImNsY3A2azNlaTAwMDFxdDNieW41NzYzN3AiLCJleHBpcmVzQXQiOiIyMDIzLTAzLTEwVDE5OjExOjQzLjY3MloifQ.z0JEZKoWlM8rIHkbani6afrHspK__E4Mrc33bXjiS-8`,
+        jwt_token,
       },
     }
   );

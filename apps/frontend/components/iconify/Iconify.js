@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { forwardRef } from 'react';
 // icons
 import { Icon } from '@iconify/react';
 // @mui
@@ -8,9 +7,11 @@ import { Box } from '@mui/material';
 // ----------------------------------------------------------------------
 
 // eslint-disable-next-line react/display-name
-const Iconify = forwardRef(({ icon, width = 25, sx, ...other }, ref) => (
-  <Box ref={ref} component={Icon} icon={icon} sx={{ width, height: width, ...sx }} {...other} />
-));
+export const Iconify = ({ icon, width = 25, sx, ...other }, ref) => (
+  <Box sx={{ width, height: width, ...sx }}>
+    <Icon icon={icon} width={'100%'} height={'100%'} />
+  </Box>
+);
 
 Iconify.propTypes = {
   sx: PropTypes.object,

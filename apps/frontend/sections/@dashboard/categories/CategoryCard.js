@@ -1,9 +1,7 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Card, Link, Typography, Stack, Grid } from '@mui/material';
-import { alpha, styled } from '@mui/material/styles';
+import { Box, Card, Typography, Stack, Grid } from '@mui/material';
 // utils
-import { fCurrency } from '../../../utils/formatNumber';
 import IsActive from '../../../components/is-active/IsActive';
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';

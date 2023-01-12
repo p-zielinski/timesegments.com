@@ -1,16 +1,17 @@
 import { getRGBA } from './getRGBA';
 
 export const getRepeatingLinearGradient = (
-  hexRgbValue = `ffffff`,
-  alpha = 1
+  hexValueOfRgb = `ffffff`,
+  alpha = 1,
+  numberOfDegrees = 45
 ) => {
-  return hexRgbValue === 'ffffff'
+  return hexValueOfRgb === 'ffffff'
     ? 'white'
     : `repeating-linear-gradient(
-          45deg,
-        ${getRGBA(hexRgbValue, alpha)},
-        ${getRGBA(hexRgbValue, alpha)} 10px,
-        ${getRGBA(hexRgbValue, alpha / 5)} 10px,
-        ${getRGBA(hexRgbValue, alpha / 5)} 28px
+          ${numberOfDegrees}deg,
+        ${getRGBA(hexValueOfRgb, alpha)},
+        ${getRGBA(hexValueOfRgb, alpha)} 10px,
+        ${getRGBA(hexValueOfRgb, alpha / 5)} 10px,
+        ${getRGBA(hexValueOfRgb, alpha / 5)} 28px
         )`;
 };
