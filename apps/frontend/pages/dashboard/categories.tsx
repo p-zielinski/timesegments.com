@@ -33,8 +33,6 @@ export default function Categories({ user }: Props) {
     setCategories(sortCategories(categories, order));
   }, [order]);
 
-  console.log(shared());
-
   return (
     <DashboardLayout>
       <Helmet>

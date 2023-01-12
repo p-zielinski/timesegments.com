@@ -12,7 +12,7 @@ import {
   ORANGE,
   RED,
 } from '../../../consts/colors';
-import { getRGBA } from '../../../utils/getRGBA';
+import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
 
@@ -98,7 +98,10 @@ export default function SubcategoryCard({
         <Box
           sx={{
             background: isActive
-              ? getRGBA(subcategory?.hexColor || category?.hexColor, 0.3)
+              ? getRgbaStringFromHexString(
+                  subcategory?.hexColor || category?.hexColor,
+                  0.3
+                )
               : getRepeatingLinearGradient(
                   subcategory?.hexColor || category?.hexColor,
                   0.3

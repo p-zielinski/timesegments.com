@@ -1,17 +1,10 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Card, Grid, Modal, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import CategoryCard from './CategoryCard';
 import Iconify from '../../../components/iconify';
 import { LIGHT_GREEN, GREEN, LIGHT_RED, RED } from '../../../consts/colors';
-import { useState } from 'react';
-import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
-import { getRGBA } from '../../../utils/getRGBA';
-import { getRandomRgbObjectForSliderPicker } from '../../../utils/getRandomRgbObjectForSliderPicker';
 import React from 'react';
-import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
-import TextField from '@mui/material/TextField';
-import { SliderPicker } from 'react-color';
 import AddNewCategory from './AddNewCategory';
 
 // ----------------------------------------------------------------------

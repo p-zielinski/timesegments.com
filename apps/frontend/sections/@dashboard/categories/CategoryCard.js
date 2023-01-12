@@ -14,7 +14,7 @@ import {
   LIGHT_BLUE,
   BLUE,
 } from '../../../consts/colors';
-import { getRGBA } from '../../../utils/getRGBA';
+import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 
 // ----------------------------------------------------------------------
@@ -64,7 +64,10 @@ export default function CategoryCard({
           <Box
             sx={{
               background: getCategory(category, categories)?.active
-                ? getRGBA(getCategory(category, categories)?.hexColor, 0.3)
+                ? getRgbaStringFromHexString(
+                    getCategory(category, categories)?.hexColor,
+                    0.3
+                  )
                 : getRepeatingLinearGradient(
                     getCategory(category, categories)?.hexColor,
                     0.3
