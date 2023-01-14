@@ -1,4 +1,3 @@
-import { getRgbaStringFromHexString } from './getRgbaStringFromHexString';
 import { getHexFromRGBAObject } from './getHexFromRGBAObject';
 import { getRgbaObjectFromHexString } from './getRgbaObjectFromHexString';
 
@@ -19,7 +18,7 @@ export const getRepeatingLinearGradient = (
         )} 10px,
         ${getHexFromRGBAObject(
           getRgbaObjectFromHexString(hexValueOfRgb, alpha / 5)
-        )} 10px,
+        )} 150px,
         ${getHexFromRGBAObject(
           getRgbaObjectFromHexString(hexValueOfRgb, alpha / 5)
         )} 28px

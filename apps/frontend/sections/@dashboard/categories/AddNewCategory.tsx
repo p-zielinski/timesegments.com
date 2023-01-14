@@ -1,6 +1,6 @@
 import { Box, Card, Stack, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
-import { GREEN, LIGHT_GREEN } from '../../../consts/colors';
+import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import TextField from '@mui/material/TextField';
@@ -16,11 +16,10 @@ export default function AddNewCategory({
   categories,
   setCategories,
   isEditing,
-  setIsEditing,
   ...other
 }) {
   const [openCreateNewCategoryMenu, setOpenCreateNewCategoryMenu] =
-    useState(true);
+    useState(false);
   const [color, setColor] = useState(getRandomRgbObjectForSliderPicker());
 
   function Picker() {
@@ -137,7 +136,6 @@ export default function AddNewCategory({
                   minHeight: 58,
                   borderBottomLeftRadius: 12,
                   borderBottomRightRadius: 12,
-
                   border: !isFormValid
                     ? `solid 2px ${getHexFromRGBAObject({
                         r: 0,
@@ -155,6 +153,29 @@ export default function AddNewCategory({
                   sx={{
                     flex: 1,
                     p: 2,
+                    margin: `0 0 -2px -2px`,
+                    border: !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 0,
+                          g: 0,
+                          b: 0,
+                          a: 0.05,
+                        })}`
+                      : `solid 2px ${LIGHT_GREEN}`,
+                    borderBottomLeftRadius: 12,
+                    borderTop: 0,
+                    '&:hover': {
+                      border: !isFormValid
+                        ? `solid 2px ${getHexFromRGBAObject({
+                            r: 0,
+                            g: 0,
+                            b: 0,
+                            a: 0.05,
+                          })}`
+                        : `solid 2px ${GREEN}`,
+                      borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
+                      pt: !isFormValid ? 2 : 1.8,
+                    },
                   }}
                   onClick={() => {
                     handleSubmit();
@@ -167,7 +188,7 @@ export default function AddNewCategory({
                       m: -2,
                       position: 'absolute',
                       bottom: 21,
-                      left: 20,
+                      left: 22,
                     }}
                   />
                   <Stack spacing={2} sx={{ ml: 5 }}>
@@ -178,26 +199,33 @@ export default function AddNewCategory({
                 </Box>
                 <Box
                   sx={{
-                    width: '56px',
-                    color: 'rgb(255, 118, 118)',
-                    borderBottomLeftRadius: '25px',
-                    borderBottomRightRadius: '12px',
-                    borderTopLeftRadius: '25px',
-                    background: 'rgba(255,255,255,1)',
-                    boxShadow: `-2px 1px 5px 1px rgba(255, 255, 255, 1)`,
+                    margin: `0 -2px -2px 0`,
                     cursor: 'pointer',
+                    color: 'black',
+                    border: !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    width: '60px',
+                    borderBottomRightRadius: 12,
+                    background: !isFormValid
+                      ? `rgba(255, 0, 0, 0.2)`
+                      : LIGHT_RED,
+                    '&:hover': {
+                      background: LIGHT_RED,
+                      border: `solid 2px ${RED}`,
+                    },
                   }}
                   onClick={() => setOpenCreateNewCategoryMenu(false)}
                 >
                   <Iconify
-                    icon={'material-symbols:cancel'}
-                    width={50}
-                    sx={{
-                      m: -2,
-                      position: 'absolute',
-                      bottom: 21,
-                      right: 20,
-                    }}
+                    icon={'mdi:cancel-bold'}
+                    width={42}
+                    sx={{ m: -2, position: 'absolute', bottom: 26, right: 24 }}
                   />
                 </Box>
               </Box>
