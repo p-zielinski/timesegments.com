@@ -12,7 +12,7 @@ import { ChangeVisibilityCategoryDto } from './dto/changeVisibilityCategory.dto'
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
-import {SetCategoryActiveDto} from "./dto/setCategoryActive.dto";
+import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('category')
@@ -65,11 +65,10 @@ export class CategoryController {
     @Body() setCategoryActiveDto: SetCategoryActiveDto
   ) {
     const { categoryId } = setCategoryActiveDto;
-    const updateCategoryStatus =
-      await this.categoryService.setCategoryActive(
-        categoryId,
-        user
-      );
+    const updateCategoryStatus = await this.categoryService.setCategoryActive(
+      categoryId,
+      user
+    );
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,

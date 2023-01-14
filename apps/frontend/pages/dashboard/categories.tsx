@@ -11,10 +11,10 @@ import {
 
 import DashboardLayout from '../../layouts/dashboard';
 
-import { ColumnSortOptions } from '../../enums/sortOption';
+import { ColumnSortOptions, CategoriesPageMode } from '@test1/shared';
 import { sortCategories } from '../../utils/sortCategories';
 import { UserWithCategoriesAndSubcategories } from '../../type/user';
-import { shared } from '@test1/shared';
+import { Category } from '@prisma/client';
 
 // ----------------------------------------------------------------------
 
@@ -23,11 +23,20 @@ type Props = {
 };
 
 export default function Categories({ user }: Props) {
-  const [order, setOrder] = useState(ColumnSortOptions.NEWEST);
-  const [categories, setCategories] = useState(
+  const [order, setOrder] = useState<ColumnSortOptions>(
+    ColumnSortOptions.NEWEST
+  );
+  const [categories, setCategories] = useState<Category[]>(
     sortCategories(user?.categories || [], order)
   );
-  const [isEditing, setIsEditing] = useState(false);
+  const [mode, setMode] = useState<CategoriesPageMode>(CategoriesPageMode.VIEW);
+  const [isEditing, setIsEditing] = useState<{
+    categoriesIds: string[];
+    subcategoriesIds: string[];
+  }>({
+    categoriesIds: [],
+    subcategoriesIds: [],
+  });
 
   useEffect(() => {
     setCategories(sortCategories(categories, order));
@@ -58,6 +67,8 @@ export default function Categories({ user }: Props) {
         <CategoryList
           categories={categories}
           setCategories={setCategories}
+          mode={mode}
+          setMode={setMode}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
         />

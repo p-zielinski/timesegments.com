@@ -163,6 +163,7 @@ export default function AddNewCategory({
                         })}`
                       : `solid 2px ${LIGHT_GREEN}`,
                     borderBottomLeftRadius: 12,
+                    borderRight: 0,
                     borderTop: 0,
                     '&:hover': {
                       border: !isFormValid

@@ -6,6 +6,7 @@ import Iconify from '../../../components/iconify';
 import { LIGHT_GREEN, GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import React from 'react';
 import AddNewCategory from './AddNewCategory';
+import { CategoriesPageMode } from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -19,6 +20,8 @@ CategoryList.propTypes = {
 export default function CategoryList({
   categories,
   setCategories,
+  mode,
+  setMode,
   isEditing,
   setIsEditing,
   ...other
@@ -32,7 +35,7 @@ export default function CategoryList({
   return (
     <>
       <Grid container spacing={2} {...other} columns={1}>
-        {isEditing && (
+        {mode === CategoriesPageMode.EDIT && (
           <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Card
@@ -45,7 +48,7 @@ export default function CategoryList({
                     border: `solid 2px ${RED}`,
                   },
                 }}
-                onClick={() => setIsEditing(false)}
+                onClick={() => setMode(CategoriesPageMode.VIEW)}
               >
                 <Iconify
                   icon={'mdi:cancel-bold'}
@@ -104,14 +107,14 @@ export default function CategoryList({
                 </Box>
               </Grid>
             )}
-        {!isEditing && (
+        {mode === CategoriesPageMode.VIEW && (
           <Grid
             key={'edit_categories'}
             item
             xs={1}
             sm={1}
             md={1}
-            onClick={() => setIsEditing(true)}
+            onClick={() => setMode(CategoriesPageMode.EDIT)}
           >
             <Card
               sx={{

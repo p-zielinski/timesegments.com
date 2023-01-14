@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 // @mui
 import {
   Link,
@@ -11,16 +11,16 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Formik } from 'formik';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
-import loginRegisterSchema from "../../yupSchemas/loginRegister";
+import loginRegisterSchema from '../../yupSchemas/loginRegister';
 // components
 import Iconify from '../../components/iconify';
 import { useRouter } from 'next/router';
-import { AuthPageState } from '../../enums/authPageState';
-import recoverSchema from "../../yupSchemas/recover";
-import { InputText } from "../../components/form/Text";
-import Image from 'next/image'
-import mail from "../../graphics/mail.svg";
-import locker from "../../graphics/locker.svg";
+import { AuthPageState } from '../../../../libs/shared/src/lib/enums/authPageState';
+import recoverSchema from '../../yupSchemas/recover';
+import { InputText } from '../../components/form/Text';
+import Image from 'next/image';
+import mail from '../../graphics/mail.svg';
+import locker from '../../graphics/locker.svg';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({ authPageState, setAuthPageState }) {
@@ -111,11 +111,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         return (
           <>
             <Stack spacing={3}>
-              <InputText
-                type="text"
-                name="email"
-                label="Email address"
-              />
+              <InputText type="text" name="email" label="Email address" />
               {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
                 authPageState
               ) && (
@@ -125,7 +121,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                       <IconButton
                         onClick={() => {
                           setShowPassword(!showPassword);
-                          console.log('123')
+                          console.log('123');
                         }}
                         edge="end"
                       >
@@ -133,30 +129,38 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                           // @ts-ignore
                           icon={
                             showPassword
-                              ? ('eva:eye-fill') as any
+                              ? ('eva:eye-fill' as any)
                               : ('eva:eye-off-fill' as any)
                           }
                         />
                       </IconButton>
                     </InputAdornment>
                   }
-                  type={showPassword?'text':'password'}
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   label="Password"
                 />
               )}
             </Stack>
 
-
             <Stack
               direction="row"
               alignItems="center"
               justifyContent="end"
-              sx={{ my: 2,mt:1 }}
+              sx={{ my: 2, mt: 1 }}
             >
-              {authPageState!==AuthPageState.RECOVER_ACCOUNT &&<Link variant="subtitle2" underline="hover" sx={{cursor:'pointer'}} onClick={()=>setAuthPageState(AuthPageState.RECOVER_ACCOUNT)}>
-                Forgot password?
-              </Link>}
+              {authPageState !== AuthPageState.RECOVER_ACCOUNT && (
+                <Link
+                  variant="subtitle2"
+                  underline="hover"
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() =>
+                    setAuthPageState(AuthPageState.RECOVER_ACCOUNT)
+                  }
+                >
+                  Forgot password?
+                </Link>
+              )}
             </Stack>
 
             <LoadingButton

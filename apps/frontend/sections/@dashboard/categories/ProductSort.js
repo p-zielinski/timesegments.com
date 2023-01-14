@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Menu, Button, MenuItem, Typography } from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import { ColumnSortOptions } from '../../../enums/sortOption';
+import { ColumnSortOptions } from '../../../../../libs/shared/src/lib/enums/sortOption';
 import capitalize from 'capitalize';
 
 // ----------------------------------------------------------------------

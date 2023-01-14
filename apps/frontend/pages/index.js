@@ -17,7 +17,7 @@ import Iconify from '../components/iconify';
 // sections
 import { AuthForm } from '../sections/auth';
 import { useState } from 'react';
-import { AuthPageState } from '../enums/authPageState';
+import { AuthPageState } from '../../../libs/shared/src/lib/enums/authPageState';
 
 // ----------------------------------------------------------------------
 
