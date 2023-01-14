@@ -15,6 +15,8 @@ import {
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
+import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
+import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 
 // ----------------------------------------------------------------------
 
@@ -99,15 +101,22 @@ export default function SubcategoryCard({
           sx={{
             background: isActive
               ? getRgbaStringFromHexString(
-                  subcategory?.hexColor || category?.hexColor,
+                  subcategory?.color || category?.color,
                   0.3
                 )
               : getRepeatingLinearGradient(
-                  subcategory?.hexColor || category?.hexColor,
+                  subcategory?.color || category?.color,
                   0.3
                 ),
             flex: 1,
-            border: isActive
+            border: isEditing
+              ? `solid 2px ${getHexFromRGBAObject({
+                  ...getRgbaObjectFromHexString(
+                    subcategory?.color || category?.color
+                  ),
+                  a: 0.3,
+                })}`
+              : isActive
               ? `solid 2px ${LIGHT_GREEN}`
               : `solid 2px ${LIGHT_RED}`,
             borderLeft: isEditing
@@ -119,13 +128,31 @@ export default function SubcategoryCard({
             borderBottomRightRadius: 12,
             borderTopLeftRadius: isEditing ? 0 : 12,
             borderBottomLeftRadius: isEditing ? 0 : 12,
-            cursor: 'pointer',
+            cursor: isEditing ? 'auto' : 'pointer',
             '&:hover': {
-              background: isActive ? LIGHT_RED : LIGHT_GREEN,
-              border: !isActive
+              background: isEditing
+                ? getRepeatingLinearGradient(
+                    subcategory?.color || category?.color,
+                    0.3
+                  )
+                : isActive
+                ? LIGHT_RED
+                : LIGHT_GREEN,
+              border: isEditing
+                ? `solid 2px ${getHexFromRGBAObject({
+                    ...getRgbaObjectFromHexString(
+                      subcategory?.color || category?.color
+                    ),
+                    a: 0.3,
+                  })}`
+                : !isActive
                 ? `solid 2px ${LIGHT_GREEN}`
                 : `solid 2px ${LIGHT_RED}`,
-              borderLeft: `0px`,
+              borderLeft: isEditing
+                ? 0
+                : !isActive
+                ? `solid 2px ${LIGHT_GREEN}`
+                : `solid 2px ${LIGHT_RED}`,
             },
           }}
         >

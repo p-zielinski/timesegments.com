@@ -21,9 +21,7 @@ export default function AddNewCategory({
 }) {
   const [openCreateNewCategoryMenu, setOpenCreateNewCategoryMenu] =
     useState(true);
-  const [backgroundHue, setBackgroundHue] = useState(
-    getRandomRgbObjectForSliderPicker()
-  );
+  const [color, setColor] = useState(getRandomRgbObjectForSliderPicker());
 
   function Picker() {
     return (
@@ -67,7 +65,7 @@ export default function AddNewCategory({
         />
         <Stack spacing={2} sx={{ ml: 5 }}>
           <Typography variant="subtitle2" noWrap>
-            ADD NEW CATEGORY
+            CREATE NEW CATEGORY
           </Typography>
         </Stack>
       </Card>
@@ -99,12 +97,9 @@ export default function AddNewCategory({
                   backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: getRepeatingLinearGradient(
-                    backgroundHue?.hex,
-                    0.3
-                  ),
+                  background: getRepeatingLinearGradient(color?.hex, 0.3),
                   border: `solid 2px ${getHexFromRGBAObject({
-                    ...(backgroundHue.rgb as Rgba),
+                    ...(color.rgb as Rgba),
                     a: 0.3,
                   })}`,
                   borderBottom: '0px',
@@ -119,9 +114,9 @@ export default function AddNewCategory({
                   <Stack spacing={2}>
                     <SliderPicker
                       height={`8px`}
-                      onChangeComplete={setBackgroundHue}
-                      onChange={setBackgroundHue}
-                      color={backgroundHue}
+                      onChangeComplete={setColor}
+                      onChange={setColor}
+                      color={color}
                       pointer={Picker}
                     />
                     <InputText
@@ -177,7 +172,7 @@ export default function AddNewCategory({
                   />
                   <Stack spacing={2} sx={{ ml: 5 }}>
                     <Typography variant="subtitle2" noWrap>
-                      ADD NEW CATEGORY
+                      CREATE NEW CATEGORY
                     </Typography>
                   </Stack>
                 </Box>

@@ -16,6 +16,9 @@ import {
 } from '../../../consts/colors';
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
+import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
+import { Rgba } from '../../../type/user';
+import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 
 // ----------------------------------------------------------------------
 
@@ -29,6 +32,8 @@ export default function CategoryCard({
   setCategories,
   isEditing,
 }) {
+  const { active: isActive } = category;
+
   const reverseExpandSubcategories = () => {
     setCategories(
       [...categories].map((_category) => {
@@ -61,32 +66,102 @@ export default function CategoryCard({
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Card>
         <Box sx={{ display: 'flex' }}>
+          {isEditing && (
+            <>
+              <Box
+                sx={{
+                  width: `60px`,
+                  minWidth: '60px',
+                  p: 2,
+                  color: category.visible ? GREEN : RED,
+                  background: `white`,
+                  border: `solid 2px ${LIGHT_SILVER}`,
+                  borderRight: `0px`,
+                  borderTopLeftRadius: 12,
+                  borderBottomLeftRadius: 12,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    color: !category.visible ? GREEN : RED,
+                    background: LIGHT_SILVER,
+                  },
+                }}
+              >
+                <Iconify
+                  icon={
+                    category.visible
+                      ? 'gridicons:visible'
+                      : 'gridicons:not-visible'
+                  }
+                  width={40}
+                  sx={{ m: -2, position: 'absolute', bottom: 34, left: 27 }}
+                />
+              </Box>
+              <Box
+                sx={{
+                  width: `60px`,
+                  minWidth: '60px',
+                  p: 2,
+                  color: GREEN,
+                  background: `white`,
+                  borderTop: `solid 2px ${LIGHT_SILVER}`,
+                  borderBottom: `solid 2px ${LIGHT_SILVER}`,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    background: LIGHT_SILVER,
+                  },
+                }}
+              >
+                <Iconify
+                  icon={'material-symbols:edit'}
+                  width={40}
+                  sx={{ m: -2, position: 'absolute', bottom: 34, left: 88 }}
+                />
+              </Box>
+            </>
+          )}
           <Box
             sx={{
-              background: getCategory(category, categories)?.active
-                ? getRgbaStringFromHexString(
-                    getCategory(category, categories)?.hexColor,
-                    0.3
-                  )
-                : getRepeatingLinearGradient(
-                    getCategory(category, categories)?.hexColor,
-                    0.3
-                  ),
+              background: isActive
+                ? getRgbaStringFromHexString(category?.color, 0.3)
+                : getRepeatingLinearGradient(category?.color, 0.3),
               flex: 1,
-              border: getCategory(category, categories)?.active
+              border: isEditing
+                ? `solid 2px ${getHexFromRGBAObject({
+                    ...getRgbaObjectFromHexString(category?.color),
+                    a: 0.3,
+                  })}`
+                : isActive
                 ? `solid 2px ${LIGHT_GREEN}`
                 : `solid 2px ${LIGHT_RED}`,
-              borderRight: `0px`,
-              borderTopLeftRadius: 12,
-              borderBottomLeftRadius: 12,
-              cursor: 'pointer',
+              borderLeft: isEditing
+                ? `0px`
+                : isActive
+                ? `solid 2px ${LIGHT_GREEN}`
+                : `solid 2px ${LIGHT_RED}`,
+              borderRight: 0,
+              borderTopLeftRadius: isEditing ? 0 : 12,
+              borderBottomLeftRadius: isEditing ? 0 : 12,
+              cursor: isEditing ? 'auto' : 'pointer',
               '&:hover': {
-                background: getCategory(category, categories)?.active
+                background: isEditing
+                  ? getRepeatingLinearGradient(category?.color, 0.3)
+                  : isActive
                   ? LIGHT_RED
                   : LIGHT_GREEN,
-                border: !getCategory(category, categories)?.active
+                border: isEditing
+                  ? `solid 2px ${getHexFromRGBAObject({
+                      ...getRgbaObjectFromHexString(category?.color),
+                      a: 0.3,
+                    })}`
+                  : !isActive
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,
+                borderLeft: isEditing
+                  ? 0
+                  : !isActive
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
+                borderRight: 0,
               },
             }}
           >
@@ -205,7 +280,7 @@ export default function CategoryCard({
                           />
                           <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
                             <Typography variant="subtitle2" noWrap>
-                              ADD NEW SUBCATEGORY
+                              CREATE NEW SUBCATEGORY
                             </Typography>
                           </Stack>
                         </Card>

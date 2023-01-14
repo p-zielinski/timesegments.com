@@ -11,7 +11,7 @@ services:
       - 9999:5432
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4
     depends_on:
       - postgres
     environment:
@@ -19,6 +19,5 @@ services:
       PGADMIN_DEFAULT_PASSWORD: piotr
     ports:
       - "7999:80"
-    restart: always
     links:
       - "postgres"

@@ -29,7 +29,7 @@ export class CategoryService {
       };
     }
     const category = await this.prisma.category.create({
-      data: { name: name, userId: user.id },
+      data: { name: name, userId: user.id, color: '#ffffff' },
     });
     if (!category?.id) {
       return {
@@ -161,10 +161,6 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
-  private async countUserCategories(userId: string) {
-    return await this.prisma.category.count({ where: { userId } });
-  }
-
   public async findFirstUseId(
     categoryId: string,
     include: Prisma.CategoryInclude = null
@@ -172,20 +168,6 @@ export class CategoryService {
     return await this.prisma.category.findFirst({
       where: { id: categoryId },
       include,
-    });
-  }
-
-  private async updateVisibility(categoryId: string, visible: boolean) {
-    return await this.prisma.category.update({
-      where: { id: categoryId },
-      data: { visible },
-    });
-  }
-
-  private async updateName(categoryId: string, name: string) {
-    return await this.prisma.category.update({
-      where: { id: categoryId },
-      data: { name },
     });
   }
 
@@ -199,6 +181,24 @@ export class CategoryService {
     return await this.prisma.category.update({
       where: { id: categoryId },
       data: { active },
+    });
+  }
+
+  private async countUserCategories(userId: string) {
+    return await this.prisma.category.count({ where: { userId } });
+  }
+
+  private async updateVisibility(categoryId: string, visible: boolean) {
+    return await this.prisma.category.update({
+      where: { id: categoryId },
+      data: { visible },
+    });
+  }
+
+  private async updateName(categoryId: string, name: string) {
+    return await this.prisma.category.update({
+      where: { id: categoryId },
+      data: { name },
     });
   }
 }
