@@ -13,7 +13,7 @@ import { CategoriesPageMode } from '@test1/shared';
 CategoryList.propTypes = {
   categories: PropTypes.array.isRequired,
   setCategories: PropTypes.func.isRequired,
-  isEditing: PropTypes.bool.isRequired,
+  isEditing: PropTypes.object.isRequired,
   setIsEditing: PropTypes.func.isRequired,
 };
 
@@ -69,7 +69,9 @@ export default function CategoryList({
           ? getCategories(categories).map((category) => (
               <Grid key={category.id} item xs={1} sm={1} md={1}>
                 <CategoryCard
+                  mode={mode}
                   isEditing={isEditing}
+                  setIsEditing={setIsEditing}
                   category={category}
                   categories={categories}
                   setCategories={setCategories}

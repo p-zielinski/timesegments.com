@@ -19,6 +19,8 @@ import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGra
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { Rgba } from '../../../type/user';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { CategoriesPageMode } from '@test1/shared';
+import EditCategory from './EditCategory';
 
 // ----------------------------------------------------------------------
 
@@ -30,7 +32,9 @@ export default function CategoryCard({
   category,
   categories,
   setCategories,
+  mode,
   isEditing,
+  setIsEditing,
 }) {
   const { active: isActive } = category;
 
@@ -53,7 +57,7 @@ export default function CategoryCard({
       categories
         .find((_category) => _category.id === category.id)
         ?.subcategories?.filter((subcategory) =>
-          isEditing ? true : subcategory.visible
+          mode === CategoriesPageMode.EDIT ? true : subcategory.visible
         ) || []
     );
   };
@@ -64,152 +68,176 @@ export default function CategoryCard({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Card>
-        <Box sx={{ display: 'flex' }}>
-          {isEditing && (
-            <>
-              <Box
-                sx={{
-                  width: `60px`,
-                  minWidth: '60px',
-                  p: 2,
-                  color: category.visible ? GREEN : RED,
-                  background: `white`,
-                  border: `solid 2px ${LIGHT_SILVER}`,
-                  borderRight: `0px`,
-                  borderTopLeftRadius: 12,
-                  borderBottomLeftRadius: 12,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    color: !category.visible ? GREEN : RED,
-                    background: LIGHT_SILVER,
-                  },
-                }}
-              >
-                <Iconify
-                  icon={
-                    category.visible
-                      ? 'gridicons:visible'
-                      : 'gridicons:not-visible'
+      {isEditing.categoriesIds?.includes(category.id) &&
+      mode === CategoriesPageMode.EDIT ? (
+        <EditCategory
+          category={category}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+        />
+      ) : (
+        <Card>
+          <Box sx={{ display: 'flex' }}>
+            {mode === CategoriesPageMode.EDIT && (
+              <>
+                <Box
+                  sx={{
+                    width: `60px`,
+                    minWidth: '60px',
+                    p: 2,
+                    color: category.visible ? GREEN : RED,
+                    background: `white`,
+                    border: `solid 2px ${LIGHT_SILVER}`,
+                    borderRight: `0px`,
+                    borderTopLeftRadius: 12,
+                    borderBottomLeftRadius: 12,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      color: !category.visible ? GREEN : RED,
+                      background: LIGHT_SILVER,
+                    },
+                  }}
+                >
+                  <Iconify
+                    icon={
+                      category.visible
+                        ? 'gridicons:visible'
+                        : 'gridicons:not-visible'
+                    }
+                    width={40}
+                    sx={{ m: -2, position: 'absolute', bottom: 34, left: 27 }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    width: `60px`,
+                    minWidth: '60px',
+                    p: 2,
+                    color: GREEN,
+                    background: `white`,
+                    borderTop: `solid 2px ${LIGHT_SILVER}`,
+                    borderBottom: `solid 2px ${LIGHT_SILVER}`,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: LIGHT_SILVER,
+                    },
+                  }}
+                  onClick={() =>
+                    setIsEditing({
+                      ...isEditing,
+                      categoriesIds: [...isEditing.categoriesIds, category.id],
+                    })
                   }
-                  width={40}
-                  sx={{ m: -2, position: 'absolute', bottom: 34, left: 27 }}
-                />
-              </Box>
-              <Box
-                sx={{
-                  width: `60px`,
-                  minWidth: '60px',
-                  p: 2,
-                  color: GREEN,
-                  background: `white`,
-                  borderTop: `solid 2px ${LIGHT_SILVER}`,
-                  borderBottom: `solid 2px ${LIGHT_SILVER}`,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    background: LIGHT_SILVER,
-                  },
-                }}
-              >
-                <Iconify
-                  icon={'material-symbols:edit'}
-                  width={40}
-                  sx={{ m: -2, position: 'absolute', bottom: 34, left: 88 }}
-                />
-              </Box>
-            </>
-          )}
-          <Box
-            sx={{
-              background: isActive
-                ? getRgbaStringFromHexString(category?.color, 0.3)
-                : getRepeatingLinearGradient(category?.color, 0.3),
-              flex: 1,
-              border: isEditing
-                ? `solid 2px ${getHexFromRGBAObject({
-                    ...getRgbaObjectFromHexString(category?.color),
-                    a: 0.3,
-                  })}`
-                : isActive
-                ? `solid 2px ${LIGHT_GREEN}`
-                : `solid 2px ${LIGHT_RED}`,
-              borderLeft: isEditing
-                ? `0px`
-                : isActive
-                ? `solid 2px ${LIGHT_GREEN}`
-                : `solid 2px ${LIGHT_RED}`,
-              borderRight: 0,
-              borderTopLeftRadius: isEditing ? 0 : 12,
-              borderBottomLeftRadius: isEditing ? 0 : 12,
-              cursor: isEditing ? 'auto' : 'pointer',
-              '&:hover': {
-                background: isEditing
-                  ? getRepeatingLinearGradient(category?.color, 0.3)
-                  : isActive
-                  ? LIGHT_RED
-                  : LIGHT_GREEN,
-                border: isEditing
-                  ? `solid 2px ${getHexFromRGBAObject({
-                      ...getRgbaObjectFromHexString(category?.color),
-                      a: 0.3,
-                    })}`
-                  : !isActive
-                  ? `solid 2px ${LIGHT_GREEN}`
-                  : `solid 2px ${LIGHT_RED}`,
-                borderLeft: isEditing
-                  ? 0
-                  : !isActive
-                  ? `solid 2px ${LIGHT_GREEN}`
-                  : `solid 2px ${LIGHT_RED}`,
+                >
+                  <Iconify
+                    icon={'material-symbols:edit'}
+                    width={40}
+                    sx={{ m: -2, position: 'absolute', bottom: 34, left: 88 }}
+                  />
+                </Box>
+              </>
+            )}
+            <Box
+              sx={{
+                background: isActive
+                  ? getRgbaStringFromHexString(category?.color, 0.3)
+                  : getRepeatingLinearGradient(category?.color, 0.3),
+                flex: 1,
+                border:
+                  mode === CategoriesPageMode.EDIT
+                    ? `solid 2px ${getHexFromRGBAObject({
+                        ...getRgbaObjectFromHexString(category?.color),
+                        a: 0.3,
+                      })}`
+                    : isActive
+                    ? `solid 2px ${LIGHT_GREEN}`
+                    : `solid 2px ${LIGHT_RED}`,
+                borderLeft:
+                  mode === CategoriesPageMode.EDIT
+                    ? `0px`
+                    : isActive
+                    ? `solid 2px ${LIGHT_GREEN}`
+                    : `solid 2px ${LIGHT_RED}`,
                 borderRight: 0,
-              },
-            }}
-          >
-            <Stack
-              spacing={1}
-              sx={{ p: 3 }}
-              direction="row"
-              alignItems="center"
-              justifyContent="left"
+                borderTopLeftRadius: mode === CategoriesPageMode.EDIT ? 0 : 12,
+                borderBottomLeftRadius:
+                  mode === CategoriesPageMode.EDIT ? 0 : 12,
+                cursor: mode === CategoriesPageMode.EDIT ? 'auto' : 'pointer',
+                '&:hover': {
+                  background:
+                    mode === CategoriesPageMode.EDIT
+                      ? getRepeatingLinearGradient(category?.color, 0.3)
+                      : isActive
+                      ? LIGHT_RED
+                      : LIGHT_GREEN,
+                  border:
+                    mode === CategoriesPageMode.EDIT
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          ...getRgbaObjectFromHexString(category?.color),
+                          a: 0.3,
+                        })}`
+                      : !isActive
+                      ? `solid 2px ${LIGHT_GREEN}`
+                      : `solid 2px ${LIGHT_RED}`,
+                  borderLeft:
+                    mode === CategoriesPageMode.EDIT
+                      ? 0
+                      : !isActive
+                      ? `solid 2px ${LIGHT_GREEN}`
+                      : `solid 2px ${LIGHT_RED}`,
+                  borderRight: 0,
+                },
+              }}
             >
-              <IsActive isActive={getCategory(category, categories)?.active} />
-              <Typography variant="subtitle2" noWrap>
-                {getCategory(category, categories)?.name}
-              </Typography>
-            </Stack>
-          </Box>
-          <Box
-            sx={{
-              width: `60px`,
-              p: 2,
-              color: !getCategory(category, categories)?.expandSubcategories
-                ? GREEN
-                : RED,
-              background: `white`,
-              border: `solid 2px ${LIGHT_SILVER}`,
-              borderLeft: `0px`,
-              borderTopRightRadius: 12,
-              borderBottomRightRadius: 12,
-              cursor: 'pointer',
-              '&:hover': {
+              <Stack
+                spacing={1}
+                sx={{ p: 3 }}
+                direction="row"
+                alignItems="center"
+                justifyContent="left"
+              >
+                <IsActive
+                  isActive={getCategory(category, categories)?.active}
+                />
+                <Typography variant="subtitle2" noWrap>
+                  {getCategory(category, categories)?.name}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box
+              sx={{
+                width: `60px`,
+                p: 2,
+                color: !getCategory(category, categories)?.expandSubcategories
+                  ? GREEN
+                  : RED,
+                background: `white`,
+                border: `solid 2px ${LIGHT_SILVER}`,
                 borderLeft: `0px`,
-                background: LIGHT_SILVER,
-              },
-            }}
-            onClick={() => reverseExpandSubcategories(category, categories)}
-          >
-            <Iconify
-              icon={
-                getCategory(category, categories)?.expandSubcategories
-                  ? 'eva:chevron-up-fill'
-                  : 'eva:chevron-down-fill'
-              }
-              width={50}
-              sx={{ m: -2, position: 'absolute', bottom: 27, right: 20 }}
-            />
+                borderTopRightRadius: 12,
+                borderBottomRightRadius: 12,
+                cursor: 'pointer',
+                '&:hover': {
+                  borderLeft: `0px`,
+                  background: LIGHT_SILVER,
+                },
+              }}
+              onClick={() => reverseExpandSubcategories(category, categories)}
+            >
+              <Iconify
+                icon={
+                  getCategory(category, categories)?.expandSubcategories
+                    ? 'eva:chevron-up-fill'
+                    : 'eva:chevron-down-fill'
+                }
+                width={50}
+                sx={{ m: -2, position: 'absolute', bottom: 27, right: 20 }}
+              />
+            </Box>
           </Box>
-        </Box>
-      </Card>
+        </Card>
+      )}
+
       {getCategory(category, categories)?.expandSubcategories ||
       getVisibleSubcategories(category, categories).filter(
         (subcategory) => subcategory.active
@@ -225,12 +253,12 @@ export default function CategoryCard({
               {getCategory(category, categories)?.expandSubcategories ? (
                 <>
                   {getVisibleSubcategories(category, categories) ||
-                  isEditing ? (
+                  mode === CategoriesPageMode.EDIT ? (
                     <Box
                       sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
                       {getVisibleSubcategories(category, categories).length ||
-                      isEditing ? (
+                      mode === CategoriesPageMode.EDIT ? (
                         getVisibleSubcategories(category, categories).map(
                           (subcategory) => (
                             <SubcategoryCard
@@ -239,6 +267,8 @@ export default function CategoryCard({
                               categories={categories}
                               setCategories={setCategories}
                               isEditing={isEditing}
+                              setIsEditing={setIsEditing}
+                              mode={mode}
                             />
                           )
                         )
@@ -256,7 +286,7 @@ export default function CategoryCard({
                           </Stack>
                         </Card>
                       )}
-                      {isEditing && (
+                      {mode === CategoriesPageMode.EDIT && (
                         <Card
                           sx={{
                             backgroundColor: 'rgba(0,0,0,0.11)',
@@ -288,20 +318,24 @@ export default function CategoryCard({
                     </Box>
                   ) : undefined}
                 </>
-              ) : isEditing ||
+              ) : mode === CategoriesPageMode.EDIT ||
                 getVisibleSubcategories(category, categories).filter(
                   (subcategory) => subcategory.active
                 ).length ? (
                 getVisibleSubcategories(category, categories)
                   .filter((subcategory) => subcategory.active)
                   .map((subcategory) => (
-                    <SubcategoryCard
-                      key={subcategory.id}
-                      subcategory={subcategory}
-                      categories={categories}
-                      setCategories={setCategories}
-                      isEditing={isEditing}
-                    />
+                    <>
+                      <SubcategoryCard
+                        key={subcategory.id}
+                        subcategory={subcategory}
+                        categories={categories}
+                        setCategories={setCategories}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        mode={mode}
+                      />
+                    </>
                   ))
               ) : (
                 <Card sx={{ backgroundColor: 'rgba(0,0,0,0.11)' }}>

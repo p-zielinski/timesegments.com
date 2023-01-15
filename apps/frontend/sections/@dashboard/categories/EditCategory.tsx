@@ -5,16 +5,22 @@ import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React, { useState } from 'react';
-import { getRandomRgbObjectForSliderPicker } from '../../../utils/getRandomRgbObjectForSliderPicker';
 import { Rgba } from '../../../type/user';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
+import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 
-export default function AddNewCategory({ ...other }) {
-  const [openCreateNewCategoryMenu, setOpenCreateNewCategoryMenu] =
-    useState(false);
-  const [color, setColor] = useState(getRandomRgbObjectForSliderPicker());
+export default function EditCategory({
+  category,
+  isEditing,
+  setIsEditing,
+  ...other
+}) {
+  const [color, setColor] = useState({
+    hex: category.color,
+    rgb: getRgbaObjectFromHexString(category.color),
+  });
 
   function Picker() {
     return (
@@ -31,47 +37,13 @@ export default function AddNewCategory({ ...other }) {
     );
   }
 
-  if (!openCreateNewCategoryMenu) {
-    return (
-      <Card
-        sx={{
-          p: 2,
-          cursor: 'pointer',
-          minHeight: 54,
-          background: LIGHT_GREEN,
-          border: `solid 2px  ${LIGHT_GREEN}`,
-          '&:hover': {
-            border: `solid 2px  ${GREEN}`,
-          },
-        }}
-        onClick={() => setOpenCreateNewCategoryMenu(true)}
-      >
-        <Iconify
-          icon={'material-symbols:add'}
-          width={50}
-          sx={{
-            m: -2,
-            position: 'absolute',
-            bottom: 18,
-            left: 20,
-          }}
-        />
-        <Stack spacing={2} sx={{ ml: 5 }}>
-          <Typography variant="subtitle2" noWrap>
-            CREATE NEW CATEGORY
-          </Typography>
-        </Stack>
-      </Card>
-    );
-  }
-
   const validationSchema = yup.object().shape({
     categoryName: yup.string().required('Category name is required'),
   });
 
   return (
     <Formik
-      initialValues={{ categoryName: '' }}
+      initialValues={{ categoryName: category.name }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
@@ -96,11 +68,6 @@ export default function AddNewCategory({ ...other }) {
                     a: 0.3,
                   })}`,
                   borderBottom: '0px',
-                }}
-                onClick={() => {
-                  if (!openCreateNewCategoryMenu) {
-                    setOpenCreateNewCategoryMenu(true);
-                  }
                 }}
               >
                 <Box sx={{ p: 2 }}>
@@ -177,18 +144,18 @@ export default function AddNewCategory({ ...other }) {
                   }}
                 >
                   <Iconify
-                    icon={'material-symbols:add'}
-                    width={50}
+                    icon={'material-symbols:save-outline'}
+                    width={42}
                     sx={{
                       m: -2,
                       position: 'absolute',
-                      bottom: 21,
-                      left: 22,
+                      bottom: 25,
+                      left: 25,
                     }}
                   />
                   <Stack spacing={2} sx={{ ml: 5 }}>
                     <Typography variant="subtitle2" noWrap>
-                      CREATE NEW CATEGORY
+                      SAVE CATEGORY
                     </Typography>
                   </Stack>
                 </Box>
@@ -215,7 +182,14 @@ export default function AddNewCategory({ ...other }) {
                       border: `solid 2px ${RED}`,
                     },
                   }}
-                  onClick={() => setOpenCreateNewCategoryMenu(false)}
+                  onClick={() =>
+                    setIsEditing({
+                      ...isEditing,
+                      categoriesIds: isEditing.categoriesIds.filter(
+                        (categoryId) => categoryId !== category.id
+                      ),
+                    })
+                  }
                 >
                   <Iconify
                     icon={'mdi:cancel-bold'}

@@ -17,6 +17,7 @@ import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGra
 import Iconify from '../../../components/iconify';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { CategoriesPageMode } from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -32,7 +33,8 @@ export default function SubcategoryCard({
   categories,
   setCategories,
   isEditing,
-  windowWidth,
+  setIsEditing,
+  mode,
 }) {
   const { name, active: isActive, id } = subcategory;
   const category = categories.find((category) =>
@@ -44,7 +46,7 @@ export default function SubcategoryCard({
   return (
     <Card>
       <Box sx={{ display: 'flex' }}>
-        {isEditing && (
+        {mode === CategoriesPageMode.EDIT && (
           <>
             <Box
               sx={{
@@ -109,56 +111,61 @@ export default function SubcategoryCard({
                   0.3
                 ),
             flex: 1,
-            border: isEditing
-              ? `solid 2px ${getHexFromRGBAObject({
-                  ...getRgbaObjectFromHexString(
-                    subcategory?.color || category?.color
-                  ),
-                  a: 0.3,
-                })}`
-              : isActive
-              ? `solid 2px ${LIGHT_GREEN}`
-              : `solid 2px ${LIGHT_RED}`,
-            borderLeft: isEditing
-              ? `0px`
-              : isActive
-              ? `solid 2px ${LIGHT_GREEN}`
-              : `solid 2px ${LIGHT_RED}`,
-            borderTopRightRadius: 12,
-            borderBottomRightRadius: 12,
-            borderTopLeftRadius: isEditing ? 0 : 12,
-            borderBottomLeftRadius: isEditing ? 0 : 12,
-            cursor: isEditing ? 'auto' : 'pointer',
-            '&:hover': {
-              background: isEditing
-                ? getRepeatingLinearGradient(
-                    subcategory?.color || category?.color,
-                    0.3
-                  )
-                : isActive
-                ? LIGHT_RED
-                : LIGHT_GREEN,
-              border: isEditing
+            border:
+              mode === CategoriesPageMode.EDIT
                 ? `solid 2px ${getHexFromRGBAObject({
                     ...getRgbaObjectFromHexString(
                       subcategory?.color || category?.color
                     ),
                     a: 0.3,
                   })}`
-                : !isActive
+                : isActive
                 ? `solid 2px ${LIGHT_GREEN}`
                 : `solid 2px ${LIGHT_RED}`,
-              borderLeft: isEditing
-                ? 0
-                : !isActive
+            borderLeft:
+              mode === CategoriesPageMode.EDIT
+                ? `0px`
+                : isActive
                 ? `solid 2px ${LIGHT_GREEN}`
                 : `solid 2px ${LIGHT_RED}`,
+            borderTopRightRadius: 12,
+            borderBottomRightRadius: 12,
+            borderTopLeftRadius: mode === CategoriesPageMode.EDIT ? 0 : 12,
+            borderBottomLeftRadius: mode === CategoriesPageMode.EDIT ? 0 : 12,
+            cursor: mode === CategoriesPageMode.EDIT ? 'auto' : 'pointer',
+            '&:hover': {
+              background:
+                mode === CategoriesPageMode.EDIT
+                  ? getRepeatingLinearGradient(
+                      subcategory?.color || category?.color,
+                      0.3
+                    )
+                  : isActive
+                  ? LIGHT_RED
+                  : LIGHT_GREEN,
+              border:
+                mode === CategoriesPageMode.EDIT
+                  ? `solid 2px ${getHexFromRGBAObject({
+                      ...getRgbaObjectFromHexString(
+                        subcategory?.color || category?.color
+                      ),
+                      a: 0.3,
+                    })}`
+                  : !isActive
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
+              borderLeft:
+                mode === CategoriesPageMode.EDIT
+                  ? 0
+                  : !isActive
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
             },
           }}
         >
           <Stack
             spacing={1}
-            sx={{ p: 3, pl: isEditing ? 2 : 3 }}
+            sx={{ p: 3, pl: mode === CategoriesPageMode.EDIT ? 2 : 3 }}
             direction="row"
             alignItems="center"
             justifyContent="left"
