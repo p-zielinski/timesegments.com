@@ -1,6 +1,13 @@
 import { Box, Card, Stack, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
-import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
+import {
+  BLUE,
+  GREEN,
+  LIGHT_BLUE,
+  LIGHT_GREEN,
+  LIGHT_RED,
+  RED,
+} from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
@@ -10,8 +17,10 @@ import { Rgba } from '../../../type/user';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
+import { CreateNewType } from '../../../enum/createNewType';
+import capitalize from 'capitalize';
 
-export default function AddNewCategory({ ...other }) {
+export default function AddNew({ type, data = {}, ...other }) {
   const [openCreateNewCategoryMenu, setOpenCreateNewCategoryMenu] =
     useState(false);
   const [color, setColor] = useState(getRandomRgbObjectForSliderPicker());
@@ -38,10 +47,15 @@ export default function AddNewCategory({ ...other }) {
           p: 2,
           cursor: 'pointer',
           minHeight: 54,
-          background: LIGHT_GREEN,
-          border: `solid 2px  ${LIGHT_GREEN}`,
+          background:
+            type === CreateNewType.CATEGORY ? LIGHT_GREEN : LIGHT_BLUE,
+          border: `solid 2px  ${
+            type === CreateNewType.CATEGORY ? LIGHT_GREEN : LIGHT_BLUE
+          }`,
           '&:hover': {
-            border: `solid 2px  ${GREEN}`,
+            border: `solid 2px  ${
+              type === CreateNewType.CATEGORY ? GREEN : BLUE
+            }`,
           },
         }}
         onClick={() => setOpenCreateNewCategoryMenu(true)}
@@ -58,7 +72,7 @@ export default function AddNewCategory({ ...other }) {
         />
         <Stack spacing={2} sx={{ ml: 5 }}>
           <Typography variant="subtitle2" noWrap>
-            CREATE NEW CATEGORY
+            CREATE NEW {type?.toUpperCase()}
           </Typography>
         </Stack>
       </Card>
@@ -71,7 +85,7 @@ export default function AddNewCategory({ ...other }) {
 
   return (
     <Formik
-      initialValues={{ categoryName: '' }}
+      initialValues={{ ...data, [type + 'Name']: '' }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
@@ -114,8 +128,8 @@ export default function AddNewCategory({ ...other }) {
                     />
                     <InputText
                       type="text"
-                      name="categoryName"
-                      label="Category name"
+                      name={`${type}Name`}
+                      label={`${capitalize(type)} name`}
                     />
                   </Stack>
                 </Box>
@@ -188,7 +202,7 @@ export default function AddNewCategory({ ...other }) {
                   />
                   <Stack spacing={2} sx={{ ml: 5 }}>
                     <Typography variant="subtitle2" noWrap>
-                      CREATE NEW CATEGORY
+                      CREATE NEW {type?.toUpperCase()}
                     </Typography>
                   </Stack>
                 </Box>

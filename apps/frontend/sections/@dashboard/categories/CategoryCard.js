@@ -11,16 +11,15 @@ import {
   LIGHT_RED,
   RED,
   LIGHT_SILVER,
-  LIGHT_BLUE,
-  BLUE,
 } from '../../../consts/colors';
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
-import { Rgba } from '../../../type/user';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
-import { CategoriesPageMode } from '@test1/shared';
 import EditCategory from './EditCategory';
+import AddNew from './AddNew';
+import { CreateNewType } from '../../../enum/createNewType';
+import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
 
 // ----------------------------------------------------------------------
 
@@ -71,6 +70,8 @@ export default function CategoryCard({
       {isEditing.categoriesIds?.includes(category.id) &&
       mode === CategoriesPageMode.EDIT ? (
         <EditCategory
+          categories={categories}
+          setCategories={setCategories}
           category={category}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
@@ -287,33 +288,10 @@ export default function CategoryCard({
                         </Card>
                       )}
                       {mode === CategoriesPageMode.EDIT && (
-                        <Card
-                          sx={{
-                            backgroundColor: 'rgba(0,0,0,0.11)',
-                            cursor: 'pointer',
-                            border: `solid 2px ${LIGHT_BLUE}`,
-                            background: LIGHT_BLUE,
-                            '&:hover': {
-                              border: `solid 2px ${BLUE}`,
-                            },
-                          }}
-                        >
-                          <Iconify
-                            icon={'material-symbols:add'}
-                            width={50}
-                            sx={{
-                              m: -2,
-                              position: 'absolute',
-                              bottom: 18,
-                              left: 20,
-                            }}
-                          />
-                          <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
-                            <Typography variant="subtitle2" noWrap>
-                              CREATE NEW SUBCATEGORY
-                            </Typography>
-                          </Stack>
-                        </Card>
+                        <AddNew
+                          type={CreateNewType.SUBCATEGORY}
+                          data={{ categoryId: category.id }}
+                        />
                       )}
                     </Box>
                   ) : undefined}

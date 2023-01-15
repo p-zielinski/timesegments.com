@@ -4,12 +4,10 @@ import { Card, Typography, Stack, Box } from '@mui/material';
 // utils
 import IsActive from '../../../components/is-active/IsActive';
 import {
-  BLUE,
   GREEN,
   LIGHT_GREEN,
   LIGHT_RED,
   LIGHT_SILVER,
-  ORANGE,
   RED,
 } from '../../../consts/colors';
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
@@ -17,7 +15,8 @@ import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGra
 import Iconify from '../../../components/iconify';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
-import { CategoriesPageMode } from '@test1/shared';
+import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
+import EditSubcategory from './EditSubcategory';
 
 // ----------------------------------------------------------------------
 
@@ -48,55 +47,74 @@ export default function SubcategoryCard({
       <Box sx={{ display: 'flex' }}>
         {mode === CategoriesPageMode.EDIT && (
           <>
-            <Box
-              sx={{
-                width: `60px`,
-                minWidth: '60px',
-                p: 2,
-                color: subcategory.visible ? GREEN : RED,
-                background: `white`,
-                border: `solid 2px ${LIGHT_SILVER}`,
-                borderRight: `0px`,
-                borderTopLeftRadius: 12,
-                borderBottomLeftRadius: 12,
-                cursor: 'pointer',
-                '&:hover': {
-                  color: !subcategory.visible ? GREEN : RED,
-                  background: LIGHT_SILVER,
-                },
-              }}
-            >
-              <Iconify
-                icon={
-                  subcategory.visible
-                    ? 'gridicons:visible'
-                    : 'gridicons:not-visible'
-                }
-                width={40}
-                sx={{ m: -2, position: 'absolute', bottom: 34, left: 27 }}
+            {isEditing.subcategoriesIds.includes(subcategory.id) ? (
+              <EditSubcategory
+                subcategory={subcategory}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
               />
-            </Box>
-            <Box
-              sx={{
-                width: `60px`,
-                minWidth: '60px',
-                p: 2,
-                color: GREEN,
-                background: `white`,
-                borderTop: `solid 2px ${LIGHT_SILVER}`,
-                borderBottom: `solid 2px ${LIGHT_SILVER}`,
-                cursor: 'pointer',
-                '&:hover': {
-                  background: LIGHT_SILVER,
-                },
-              }}
-            >
-              <Iconify
-                icon={'material-symbols:edit'}
-                width={40}
-                sx={{ m: -2, position: 'absolute', bottom: 34, left: 88 }}
-              />
-            </Box>
+            ) : (
+              <>
+                <Box
+                  sx={{
+                    width: `60px`,
+                    minWidth: '60px',
+                    p: 2,
+                    color: subcategory.visible ? GREEN : RED,
+                    background: `white`,
+                    border: `solid 2px ${LIGHT_SILVER}`,
+                    borderRight: `0px`,
+                    borderTopLeftRadius: 12,
+                    borderBottomLeftRadius: 12,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      color: !subcategory.visible ? GREEN : RED,
+                      background: LIGHT_SILVER,
+                    },
+                  }}
+                >
+                  <Iconify
+                    icon={
+                      subcategory.visible
+                        ? 'gridicons:visible'
+                        : 'gridicons:not-visible'
+                    }
+                    width={40}
+                    sx={{ m: -2, position: 'absolute', bottom: 34, left: 27 }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    width: `60px`,
+                    minWidth: '60px',
+                    p: 2,
+                    color: GREEN,
+                    background: `white`,
+                    borderTop: `solid 2px ${LIGHT_SILVER}`,
+                    borderBottom: `solid 2px ${LIGHT_SILVER}`,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: LIGHT_SILVER,
+                    },
+                  }}
+                  onClick={() => {
+                    setIsEditing({
+                      ...isEditing,
+                      subcategoriesIds: [
+                        ...isEditing.subcategoriesIds,
+                        subcategory.id,
+                      ],
+                    });
+                  }}
+                >
+                  <Iconify
+                    icon={'material-symbols:edit'}
+                    width={40}
+                    sx={{ m: -2, position: 'absolute', bottom: 34, left: 88 }}
+                  />
+                </Box>
+              </>
+            )}
           </>
         )}
         <Box

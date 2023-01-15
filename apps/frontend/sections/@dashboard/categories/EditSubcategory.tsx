@@ -4,37 +4,27 @@ import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Rgba } from '../../../type/user';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { Checkbox } from '../Form/Checkbox';
+import { getRandomRgbObjectForSliderPicker } from '../../../utils/getRandomRgbObjectForSliderPicker';
 
-export default function EditCategory({
-  categories,
-  setCategories,
-  category,
+export default function EditSubcategory({
+  subcategory,
   isEditing,
   setIsEditing,
   ...other
 }) {
-  const [oldColor] = useState(category.color);
-  const [color, setColor] = useState({
-    hex: category.color,
-    rgb: getRgbaObjectFromHexString(category.color),
-  });
+  const x = [subcategory.color || getRandomRgbObjectForSliderPicker().hex];
 
-  useEffect(() => {
-    setCategories(
-      categories.map((_category) => {
-        if (_category.id !== category.id) {
-          return _category;
-        }
-        return { ..._category, color: color.hex };
-      })
-    );
-  }, [color.hex]);
+  const [color, setColor] = useState({
+    hex: subcategory.color,
+    rgb: getRgbaObjectFromHexString(subcategory.color),
+  });
 
   function Picker() {
     return (
@@ -52,12 +42,12 @@ export default function EditCategory({
   }
 
   const validationSchema = yup.object().shape({
-    categoryName: yup.string().required('Category name is required'),
+    subcategoryName: yup.string().required('Subcategory name is required'),
   });
 
   return (
     <Formik
-      initialValues={{ categoryName: category.name }}
+      initialValues={{ categoryName: subcategory.name }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
@@ -93,10 +83,14 @@ export default function EditCategory({
                       color={color}
                       pointer={Picker}
                     />
+                    <Checkbox
+                      label={'Inherit from subcategory'}
+                      name={'inheritColor'}
+                    />
                     <InputText
                       type="text"
-                      name="categoryName"
-                      label="Category name"
+                      name="subcategoryName"
+                      label="subcategory name"
                     />
                   </Stack>
                 </Box>
@@ -169,7 +163,7 @@ export default function EditCategory({
                   />
                   <Stack spacing={2} sx={{ ml: 5 }}>
                     <Typography variant="subtitle2" noWrap>
-                      SAVE CATEGORY
+                      SAVE SUBCATEGORY
                     </Typography>
                   </Stack>
                 </Box>
@@ -200,7 +194,7 @@ export default function EditCategory({
                     setIsEditing({
                       ...isEditing,
                       categoriesIds: isEditing.categoriesIds.filter(
-                        (categoryId) => categoryId !== category.id
+                        (subcategoryId) => subcategoryId !== subcategory.id
                       ),
                     })
                   }

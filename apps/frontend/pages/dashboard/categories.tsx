@@ -11,10 +11,11 @@ import {
 
 import DashboardLayout from '../../layouts/dashboard';
 
-import { ColumnSortOptions, CategoriesPageMode } from '@test1/shared';
+import { ColumnSortOptions } from '@test1/shared';
 import { sortCategories } from '../../utils/sortCategories';
 import { UserWithCategoriesAndSubcategories } from '../../type/user';
 import { Category } from '@prisma/client';
+import { CategoriesPageMode } from '../../enum/categoriesPageMode';
 
 // ----------------------------------------------------------------------
 

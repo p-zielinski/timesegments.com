@@ -5,8 +5,9 @@ import CategoryCard from './CategoryCard';
 import Iconify from '../../../components/iconify';
 import { LIGHT_GREEN, GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import React from 'react';
-import AddNewCategory from './AddNewCategory';
-import { CategoriesPageMode } from '@test1/shared';
+import AddNew from './AddNew';
+import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
+import { CreateNewType } from '../../../enum/createNewType';
 
 // ----------------------------------------------------------------------
 
@@ -61,7 +62,7 @@ export default function CategoryList({
                   </Typography>
                 </Stack>
               </Card>
-              <AddNewCategory />
+              <AddNew type={CreateNewType.CATEGORY} />
             </Box>
           </Grid>
         )}
