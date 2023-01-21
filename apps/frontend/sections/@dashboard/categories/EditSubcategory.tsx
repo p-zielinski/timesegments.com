@@ -4,15 +4,16 @@ import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useState } from 'react';
+import React from 'react';
 import { Rgba } from '../../../type/user';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { Checkbox } from '../Form/Checkbox';
-import { getRandomRgbObjectForSliderPicker } from '../../../utils/getRandomRgbObjectForSliderPicker';
 import { styled } from '@mui/material/styles';
+import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 
 export default function EditSubcategory({
   category,
@@ -40,47 +41,40 @@ export default function EditSubcategory({
     subcategoryName: yup.string().required('Subcategory name is required'),
   });
 
-  let ColoredTextField = styled(TextField)({
-    '& label.Mui-focused': {
-      color: subcategory.color || category.color,
-    },
-    '& .MuiInput-underline:after': {
-      borderBottomColor: subcategory.color || category.color,
-    },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: subcategory.color || category.color,
+  let StyledTextField, darkHexColor;
+  const setStyledTextField = (hexColor) => {
+    darkHexColor = getHexFromRGBObject(
+      getDarkColorBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(hexColor)
+      )
+    );
+    StyledTextField = styled(TextField)({
+      '& input': {
+        color: darkHexColor,
       },
-      '&:hover fieldset': {
-        borderColor: subcategory.color || category.color,
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: subcategory.color || category.color,
-      },
-    },
-  });
-
-  const changeValidationTextField = (color) => {
-    ColoredTextField = styled(TextField)({
       '& label.Mui-focused': {
-        color: 'red',
+        color: darkHexColor,
+      },
+      '& label': {
+        color: darkHexColor,
       },
       '& .MuiInput-underline:after': {
-        borderBottomColor: color,
+        borderBottomColor: hexColor,
       },
       '& .MuiOutlinedInput-root': {
         '& fieldset': {
-          borderColor: color,
+          borderColor: hexColor,
         },
         '&:hover fieldset': {
-          borderColor: color,
+          borderColor: hexColor,
         },
         '&.Mui-focused fieldset': {
-          borderColor: color,
+          borderColor: hexColor,
         },
       },
     });
   };
+  setStyledTextField(subcategory.color || category.color);
 
   return (
     <Formik
@@ -127,7 +121,7 @@ export default function EditSubcategory({
                       height={`8px`}
                       onChange={(value) => {
                         setFieldValue('color', value);
-                        changeValidationTextField(value.hex);
+                        setStyledTextField(value.hex);
                       }}
                       color={values.color}
                       pointer={Picker}
@@ -136,14 +130,14 @@ export default function EditSubcategory({
                       label={'Inherit from category'}
                       name={'inheritColor'}
                       hideHelpText={true}
-                      color={values.color?.hex}
+                      color={darkHexColor}
                     />
                     <InputText
-                      key={JSON.stringify(values.color)}
                       type="text"
                       name="subcategoryName"
                       label="subcategory name"
-                      CustomTextField={ColoredTextField}
+                      TextField={StyledTextField}
+                      helperTextColor={darkHexColor}
                     />
                   </Stack>
                 </Box>
@@ -246,7 +240,7 @@ export default function EditSubcategory({
                   onClick={() =>
                     setIsEditing({
                       ...isEditing,
-                      categoriesIds: isEditing.categoriesIds.filter(
+                      subcategoriesIds: isEditing.subcategoriesIds.filter(
                         (subcategoryId) => subcategoryId !== subcategory.id
                       ),
                     })

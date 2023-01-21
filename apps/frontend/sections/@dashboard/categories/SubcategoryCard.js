@@ -24,7 +24,7 @@ SubcategoryCard.propTypes = {
   subcategory: PropTypes.object,
   categories: PropTypes.array,
   setCategories: PropTypes.func,
-  isEditing: PropTypes.bool,
+  isEditing: PropTypes.object,
 };
 
 export default function SubcategoryCard({

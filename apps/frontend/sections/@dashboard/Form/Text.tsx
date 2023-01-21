@@ -1,7 +1,7 @@
 import React from 'react';
 import { Field } from 'formik';
 import helperTextHandler from './helperTextHandler';
-import { TextField } from '@mui/material';
+import { TextField as DefaultTextField } from '@mui/material';
 import { StyledComponent } from 'styled-components';
 
 type InputTextProps = {
@@ -12,7 +12,8 @@ type InputTextProps = {
   endAdornment?: React.ReactNode;
   helperText?: string;
   isDisabled?: boolean;
-  CustomTextField?: StyledComponent<any>;
+  TextField?: StyledComponent<any>;
+  helperTextColor?: string;
 };
 
 export const InputText: React.FC<InputTextProps> = ({
@@ -24,14 +25,15 @@ export const InputText: React.FC<InputTextProps> = ({
   endAdornment,
   helperText,
   isDisabled,
-  CustomTextField = TextField,
+  TextField = DefaultTextField,
+  helperTextColor = '#888888',
 }) => {
   return (
     <Field autoComplete="nope" name={name}>
       {({ field, meta }: { field: any; meta: any }) => {
         return (
           <>
-            <CustomTextField
+            <TextField
               key={'dsds'}
               disabled={isDisabled}
               {...field}
@@ -44,7 +46,6 @@ export const InputText: React.FC<InputTextProps> = ({
               }
               label={label}
               type={type}
-              borderColor="green"
               variant="outlined"
               size="small"
               autoComplete="nope"
@@ -66,6 +67,7 @@ export const InputText: React.FC<InputTextProps> = ({
                       : '-3px',
                   ml: '4px',
                   mb: helperText?.match(/optional/i) ? -0.3 : -1,
+                  color: helperTextColor,
                 },
               }}
               fullWidth

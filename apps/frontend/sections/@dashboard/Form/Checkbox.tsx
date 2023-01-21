@@ -21,6 +21,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
 }) => {
   const colorSx = color
     ? {
+        fontColor: color,
         color,
         '&.Mui-checked': {
           color,
@@ -52,7 +53,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
                 }}
               />
             }
-            label={label}
+            label={<span style={{ color: color }}>{label}</span>}
           />
           {!hideHelpText && <FormHelperText>{meta.error}</FormHelperText>}
         </>

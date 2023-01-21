@@ -1,4 +1,4 @@
-import { ColumnSortOptions } from '../../../libs/shared/src/lib/enums/sortOption';
+import { ColumnSortOptions } from '@test1/shared';
 import { Category } from '@prisma/client';
 
 export const sortCategories = (
