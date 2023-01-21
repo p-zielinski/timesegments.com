@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography } from '@mui/material';
+import { Box, Card, Stack, Typography, TextField } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
@@ -12,20 +12,15 @@ import { InputText } from '../Form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { Checkbox } from '../Form/Checkbox';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/getRandomRgbObjectForSliderPicker';
+import { styled } from '@mui/material/styles';
 
 export default function EditSubcategory({
+  category,
   subcategory,
   isEditing,
   setIsEditing,
   ...other
 }) {
-  const x = [subcategory.color || getRandomRgbObjectForSliderPicker().hex];
-
-  const [color, setColor] = useState({
-    hex: subcategory.color,
-    rgb: getRgbaObjectFromHexString(subcategory.color),
-  });
-
   function Picker() {
     return (
       <div
@@ -45,15 +40,64 @@ export default function EditSubcategory({
     subcategoryName: yup.string().required('Subcategory name is required'),
   });
 
+  let ColoredTextField = styled(TextField)({
+    '& label.Mui-focused': {
+      color: subcategory.color || category.color,
+    },
+    '& .MuiInput-underline:after': {
+      borderBottomColor: subcategory.color || category.color,
+    },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: subcategory.color || category.color,
+      },
+      '&:hover fieldset': {
+        borderColor: subcategory.color || category.color,
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: subcategory.color || category.color,
+      },
+    },
+  });
+
+  const changeValidationTextField = (color) => {
+    ColoredTextField = styled(TextField)({
+      '& label.Mui-focused': {
+        color: 'red',
+      },
+      '& .MuiInput-underline:after': {
+        borderBottomColor: color,
+      },
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderColor: color,
+        },
+        '&:hover fieldset': {
+          borderColor: color,
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: color,
+        },
+      },
+    });
+  };
+
   return (
     <Formik
-      initialValues={{ categoryName: subcategory.name }}
+      initialValues={{
+        subcategoryName: subcategory.name,
+        color: {
+          hex: subcategory.color || category.color,
+          rgb: getRgbaObjectFromHexString(subcategory.color || category.color),
+        },
+        inheritColor: !subcategory.name,
+      }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
     >
-      {({ handleSubmit, values }) => {
+      {({ handleSubmit, values, setFieldValue }) => {
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
@@ -66,9 +110,12 @@ export default function EditSubcategory({
                   backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: getRepeatingLinearGradient(color?.hex, 0.3),
+                  background: getRepeatingLinearGradient(
+                    values.color?.hex,
+                    0.3
+                  ),
                   border: `solid 2px ${getHexFromRGBAObject({
-                    ...(color.rgb as Rgba),
+                    ...(values.color.rgb as Rgba),
                     a: 0.3,
                   })}`,
                   borderBottom: '0px',
@@ -78,19 +125,25 @@ export default function EditSubcategory({
                   <Stack spacing={2}>
                     <SliderPicker
                       height={`8px`}
-                      onChangeComplete={setColor}
-                      onChange={setColor}
-                      color={color}
+                      onChange={(value) => {
+                        setFieldValue('color', value);
+                        changeValidationTextField(value.hex);
+                      }}
+                      color={values.color}
                       pointer={Picker}
                     />
                     <Checkbox
-                      label={'Inherit from subcategory'}
+                      label={'Inherit from category'}
                       name={'inheritColor'}
+                      hideHelpText={true}
+                      color={values.color?.hex}
                     />
                     <InputText
+                      key={JSON.stringify(values.color)}
                       type="text"
                       name="subcategoryName"
                       label="subcategory name"
+                      CustomTextField={ColoredTextField}
                     />
                   </Stack>
                 </Box>

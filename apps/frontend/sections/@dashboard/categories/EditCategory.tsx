@@ -63,7 +63,7 @@ export default function EditCategory({
       }}
       validationSchema={validationSchema}
     >
-      {({ handleSubmit, values }) => {
+      {({ handleSubmit, values, setFieldValue }) => {
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
@@ -85,7 +85,7 @@ export default function EditCategory({
                 }}
               >
                 <Box sx={{ p: 2 }}>
-                  <Stack spacing={2}>
+                  <Stack spacing={3}>
                     <SliderPicker
                       height={`8px`}
                       onChangeComplete={setColor}

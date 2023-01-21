@@ -9,6 +9,7 @@ type CheckboxProps = {
   name: string;
   saveAsString?: boolean;
   hideHelpText?: boolean;
+  color?: string;
 };
 
 export const Checkbox: React.FC<CheckboxProps> = ({
@@ -16,7 +17,17 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   name,
   saveAsString,
   hideHelpText,
+  color,
 }) => {
+  const colorSx = color
+    ? {
+        color,
+        '&.Mui-checked': {
+          color,
+        },
+      }
+    : {};
+
   return (
     <Field autoComplete="nope" name={name}>
       {({ field, meta, form }) => (
@@ -24,7 +35,11 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           <FormControlLabel
             control={
               <CheckboxMui
-                checked={field.value?.match(/true/i) ? true : false}
+                sx={{
+                  m: -1,
+                  ...colorSx,
+                }}
+                checked={field.value}
                 {...field}
                 value={field.value}
                 onChange={(e) => {

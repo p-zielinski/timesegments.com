@@ -80,7 +80,9 @@ export default function Categories({ user }: Props) {
 }
 
 export const getServerSideProps = async (context: any) => {
-  const { jwt_token } = context.req.cookies;
+  let { jwt_token } = context.req.cookies;
+
+  jwt_token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbGN0OXpjZnQwMDAwcXc1NXJ1MnQ5NjlvIiwidG9rZW5JZCI6ImNsZDVvd3czMDAwMDBxd3lubTJzb2t2c2UiLCJleHBpcmVzQXQiOiIyMDIzLTAzLTIyVDA4OjI5OjUyLjYxOVoifQ.j4Tyz6zORhroQ7sxVm-Tvnpxy1bVGVpTHj-fuDWNsSY`;
 
   const responseUser = await fetch(
     process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
