@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography } from '@mui/material';
+import { Box, Card, Stack, TextField, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
@@ -10,6 +10,9 @@ import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
+import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { styled } from '@mui/material/styles';
 
 export default function EditCategory({
   categories,
@@ -19,7 +22,6 @@ export default function EditCategory({
   setIsEditing,
   ...other
 }) {
-  const [oldColor] = useState(category.color);
   const [color, setColor] = useState({
     hex: category.color,
     rgb: getRgbaObjectFromHexString(category.color),
@@ -54,6 +56,41 @@ export default function EditCategory({
   const validationSchema = yup.object().shape({
     categoryName: yup.string().required('Category name is required'),
   });
+
+  let StyledTextField, darkHexColor;
+  const setStyledTextField = (hexColor) => {
+    darkHexColor = getHexFromRGBObject(
+      getDarkColorBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(hexColor)
+      )
+    );
+    StyledTextField = styled(TextField)({
+      '& input': {
+        color: darkHexColor,
+      },
+      '& label.Mui-focused': {
+        color: darkHexColor,
+      },
+      '& label': {
+        color: darkHexColor,
+      },
+      '& .MuiInput-underline:after': {
+        borderBottomColor: hexColor,
+      },
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderColor: hexColor,
+        },
+        '&:hover fieldset': {
+          borderColor: hexColor,
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: hexColor,
+        },
+      },
+    });
+  };
+  setStyledTextField(category.color);
 
   return (
     <Formik
@@ -97,6 +134,8 @@ export default function EditCategory({
                       type="text"
                       name="categoryName"
                       label="Category name"
+                      TextField={StyledTextField}
+                      helperTextColor={darkHexColor}
                     />
                   </Stack>
                 </Box>

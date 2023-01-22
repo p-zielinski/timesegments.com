@@ -84,7 +84,7 @@ export default function EditSubcategory({
           hex: subcategory.color || category.color,
           rgb: getRgbaObjectFromHexString(subcategory.color || category.color),
         },
-        inheritColor: !subcategory.name,
+        inheritColor: !subcategory.color,
       }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
@@ -122,6 +122,10 @@ export default function EditSubcategory({
                       onChange={(value) => {
                         setFieldValue('color', value);
                         setStyledTextField(value.hex);
+                        setFieldValue(
+                          'inheritColor',
+                          value.hex === category.color
+                        );
                       }}
                       color={values.color}
                       pointer={Picker}
@@ -131,6 +135,16 @@ export default function EditSubcategory({
                       name={'inheritColor'}
                       hideHelpText={true}
                       color={darkHexColor}
+                      onChange={(e) => {
+                        setFieldValue('inheritColor', e.target.checked);
+                        if (e.target.checked) {
+                          setFieldValue('color', {
+                            hex: category.color,
+                            rgb: getRgbaObjectFromHexString(category.color),
+                          });
+                          setStyledTextField(category.color);
+                        }
+                      }}
                     />
                     <InputText
                       type="text"

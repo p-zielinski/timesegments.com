@@ -105,11 +105,8 @@ export default function SubcategoryCard({
               }}
               onClick={() => {
                 setIsEditing({
-                  ...isEditing,
-                  subcategoriesIds: [
-                    ...isEditing.subcategoriesIds,
-                    subcategory.id,
-                  ],
+                  categoriesIds: [],
+                  subcategoriesIds: [subcategory.id],
                 });
               }}
             >

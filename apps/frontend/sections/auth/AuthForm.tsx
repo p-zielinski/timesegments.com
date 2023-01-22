@@ -126,7 +126,6 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                         edge="end"
                       >
                         <Iconify
-                          // @ts-ignore
                           icon={
                             showPassword
                               ? ('eva:eye-fill' as any)

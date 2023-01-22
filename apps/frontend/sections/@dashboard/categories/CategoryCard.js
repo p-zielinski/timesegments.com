@@ -125,8 +125,8 @@ export default function CategoryCard({
                   }}
                   onClick={() =>
                     setIsEditing({
-                      ...isEditing,
-                      categoriesIds: [...isEditing.categoriesIds, category.id],
+                      subcategoriesIds: [],
+                      categoriesIds: [category.id],
                     })
                   }
                 >

@@ -10,14 +10,15 @@ type CheckboxProps = {
   saveAsString?: boolean;
   hideHelpText?: boolean;
   color?: string;
+  onChange?: (any) => unknown;
 };
 
 export const Checkbox: React.FC<CheckboxProps> = ({
   label,
   name,
-  saveAsString,
   hideHelpText,
   color,
+  onChange,
 }) => {
   const colorSx = color
     ? {
@@ -43,14 +44,10 @@ export const Checkbox: React.FC<CheckboxProps> = ({
                 checked={field.value}
                 {...field}
                 value={field.value}
-                onChange={(e) => {
-                  form.setFieldValue(
-                    name,
-                    saveAsString
-                      ? e.target.checked.toString()
-                      : e.target.checked
-                  );
-                }}
+                onChange={
+                  onChange ||
+                  ((e) => form.setFieldValue(name, e.target.checked))
+                }
               />
             }
             label={<span style={{ color: color }}>{label}</span>}
