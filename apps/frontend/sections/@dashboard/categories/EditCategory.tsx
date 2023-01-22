@@ -22,22 +22,6 @@ export default function EditCategory({
   setIsEditing,
   ...other
 }) {
-  const [color, setColor] = useState({
-    hex: category.color,
-    rgb: getRgbaObjectFromHexString(category.color),
-  });
-
-  useEffect(() => {
-    setCategories(
-      categories.map((_category) => {
-        if (_category.id !== category.id) {
-          return _category;
-        }
-        return { ..._category, color: color.hex };
-      })
-    );
-  }, [color.hex]);
-
   function Picker() {
     return (
       <div
@@ -94,7 +78,13 @@ export default function EditCategory({
 
   return (
     <Formik
-      initialValues={{ categoryName: category.name }}
+      initialValues={{
+        categoryName: category.name,
+        color: {
+          hex: category.color,
+          rgb: getRgbaObjectFromHexString(category.color),
+        },
+      }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
@@ -113,9 +103,12 @@ export default function EditCategory({
                   backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: getRepeatingLinearGradient(color?.hex, 0.3),
+                  background: getRepeatingLinearGradient(
+                    values.color?.hex,
+                    0.3
+                  ),
                   border: `solid 2px ${getHexFromRGBAObject({
-                    ...(color.rgb as Rgba),
+                    ...(values.color.rgb as Rgba),
                     a: 0.3,
                   })}`,
                   borderBottom: '0px',
@@ -125,9 +118,20 @@ export default function EditCategory({
                   <Stack spacing={3}>
                     <SliderPicker
                       height={`8px`}
-                      onChangeComplete={setColor}
-                      onChange={setColor}
-                      color={color}
+                      onChange={(value) => {
+                        setFieldValue('color', value);
+                        setFieldValue('color', value);
+                        setStyledTextField(value.hex);
+                        setCategories(
+                          categories.map((_category) => {
+                            if (_category.id !== category.id) {
+                              return _category;
+                            }
+                            return { ..._category, color: value.hex };
+                          })
+                        );
+                      }}
+                      color={values.color}
                       pointer={Picker}
                     />
                     <InputText

@@ -186,10 +186,12 @@ export default function AddNew({
                       onChange={(value) => {
                         setFieldValue('color', value);
                         setStyledTextField(value.hex);
-                        setFieldValue(
-                          'inheritColor',
-                          value.hex === category.color
-                        );
+                        if (category) {
+                          setFieldValue(
+                            'inheritColor',
+                            value.hex === category.color
+                          );
+                        }
                       }}
                       color={values.color}
                       pointer={Picker}
