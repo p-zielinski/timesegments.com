@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
+import { MeExtendedDto } from './dto/meExtendedDto';
 
 @Controller('user')
 export class UserController {
@@ -36,9 +37,13 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('me-extended')
-  async handleRequestMeExtended(@UserDecorator() user: User) {
-    return { user: await this.userService.getMeExtended(user.id) };
+  @Post('me-extended')
+  async handleRequestMeExtended(
+    @UserDecorator() user: User,
+    @Body() meExtendedDto: MeExtendedDto
+  ) {
+    const { extend } = meExtendedDto;
+    return await this.userService.getMeExtended(user.id, extend);
   }
 
   @UseGuards(JwtAuthGuard)

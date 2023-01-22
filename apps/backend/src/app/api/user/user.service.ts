@@ -8,7 +8,8 @@ import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
-import {User} from "@prisma/client";
+import { User, Prisma } from '@prisma/client';
+import { Limits, MeExtendedOption } from '@test1/shared';
 
 @Injectable()
 export class UserService {
@@ -22,11 +23,39 @@ export class UserService {
     private readonly timeLogService: TimeLogService
   ) {}
 
-  public async getMeExtended(id:string): Promise<User> {
-    return await this.prisma.user.findFirst({
+  public async getMeExtended(
+    id: string,
+    extend: MeExtendedOption[]
+  ): Promise<{
+    user: User;
+    limits: Limits;
+  }> {
+    const include: Prisma.UserInclude = {};
+    if (
+      extend.includes(MeExtendedOption.CATEGORIES) &&
+      extend.includes(MeExtendedOption.SUBCATEGORIES)
+    ) {
+      include.categories = { include: { subcategories: true } };
+    } else if (extend.includes(MeExtendedOption.CATEGORIES)) {
+      include.categories = true;
+    }
+    const user = await this.prisma.user.findFirst({
       where: { id },
-      include: { categories: {include: {subcategories:true}} },
+      include,
     });
+
+    const limits: { categoriesLimits?: number; subcategoriesLimits?: number } =
+      {};
+    if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
+      limits.categoriesLimits = 3;
+    }
+    if (extend.includes(MeExtendedOption.SUBCATEGORIES_LIMIT)) {
+      limits.subcategoriesLimits = 2;
+    }
+    return {
+      user,
+      limits: Object.keys(limits).length ? limits : undefined,
+    };
   }
 
   public async cancelAllActive(userId: string) {
@@ -59,7 +88,7 @@ export class UserService {
       this.subcategoryService.setSubcategoryActiveState(subcategory.id, false)
     );
     if (activeTimeLogId) {
-      this.timeLogService.setTimeLogAsEnded(activeTimeLogId); //don't wait
+      await this.timeLogService.setTimeLogAsEnded(activeTimeLogId); //don't wait
     }
     return {
       status: true,

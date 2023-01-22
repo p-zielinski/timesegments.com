@@ -8,6 +8,10 @@ import React from 'react';
 import AddNew from './AddNew';
 import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
 import { CreateNewType } from '../../../enum/createNewType';
+import ShowNoShow from './ShowNoShow';
+import { ShowNoShowType } from '../../../enum/showNoShowType';
+import ShowLimitReached from './ShowLimitReached';
+import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
 
 // ----------------------------------------------------------------------
 
@@ -25,6 +29,7 @@ export default function CategoryList({
   setMode,
   isEditing,
   setIsEditing,
+  limits,
   ...other
 }) {
   const getCategories = (categories) => {
@@ -62,11 +67,15 @@ export default function CategoryList({
                   </Typography>
                 </Stack>
               </Card>
-              <AddNew
-                type={CreateNewType.CATEGORY}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-              />
+              {categories.length < limits.categoriesLimits ? (
+                <AddNew
+                  type={CreateNewType.CATEGORY}
+                  isEditing={isEditing}
+                  setIsEditing={setIsEditing}
+                />
+              ) : (
+                <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />
+              )}
             </Box>
           </Grid>
         )}
@@ -80,40 +89,11 @@ export default function CategoryList({
                   category={category}
                   categories={categories}
                   setCategories={setCategories}
+                  limits={limits}
                 />
               </Grid>
             ))
-          : !isEditing && (
-              <Grid key={'no_category_to_show'} item xs={1} sm={1} md={1}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box sx={{ display: 'flex' }}>
-                    <Box
-                      sx={{
-                        width: `100px`,
-                      }}
-                    ></Box>
-                    <Box
-                      sx={{
-                        flex: 1,
-                      }}
-                    >
-                      <Card
-                        sx={{
-                          backgroundColor: 'rgba(0,0,0,0.11)',
-                          border: `solid 2px rgba(0,0,0,0.02)`,
-                        }}
-                      >
-                        <Stack spacing={2} sx={{ p: 2 }}>
-                          <Typography variant="subtitle3" noWrap>
-                            No categories to display
-                          </Typography>
-                        </Stack>
-                      </Card>
-                    </Box>
-                  </Box>
-                </Box>
-              </Grid>
-            )}
+          : !isEditing && <ShowNoShow type={ShowNoShowType.CATEGORIES} />}
         {mode === CategoriesPageMode.VIEW && (
           <Grid
             key={'edit_categories'}

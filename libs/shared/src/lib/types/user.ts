@@ -9,5 +9,3 @@ const userWithCategoriesAndSubcategories = Prisma.validator<Prisma.UserArgs>()({
 export type UserWithCategoriesAndSubcategories = Prisma.UserGetPayload<
   typeof userWithCategoriesAndSubcategories
 >;
-
-export type Rgba = { r: number; g: number; b: number; a: number };

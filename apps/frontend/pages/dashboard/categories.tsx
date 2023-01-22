@@ -11,9 +11,13 @@ import {
 
 import DashboardLayout from '../../layouts/dashboard';
 
-import { ColumnSortOptions } from '@test1/shared';
+import {
+  ColumnSortOption,
+  Limits,
+  MeExtendedOption,
+  UserWithCategoriesAndSubcategories,
+} from '@test1/shared';
 import { sortCategories } from '../../utils/sortCategories';
-import { UserWithCategoriesAndSubcategories } from '../../type/user';
 import { Category } from '@prisma/client';
 import { CategoriesPageMode } from '../../enum/categoriesPageMode';
 
@@ -21,12 +25,11 @@ import { CategoriesPageMode } from '../../enum/categoriesPageMode';
 
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
+  limits: Limits;
 };
 
-export default function Categories({ user }: Props) {
-  const [order, setOrder] = useState<ColumnSortOptions>(
-    ColumnSortOptions.NEWEST
-  );
+export default function Categories({ user, limits }: Props) {
+  const [order, setOrder] = useState<ColumnSortOption>(ColumnSortOption.NEWEST);
   const [categories, setCategories] = useState<Category[]>(
     sortCategories(user?.categories || [], order)
   );
@@ -74,6 +77,7 @@ export default function Categories({ user }: Props) {
           setMode={setMode}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
+          limits={limits}
         />
         <ProductCartWidget />
       </Container>
@@ -89,19 +93,31 @@ export const getServerSideProps = async (context: any) => {
   const responseUser = await fetch(
     process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
     {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-type': 'application/json',
         jwt_token,
       },
+      body: JSON.stringify({
+        extend: [
+          MeExtendedOption.CATEGORIES,
+          MeExtendedOption.SUBCATEGORIES,
+          MeExtendedOption.CATEGORIES_LIMIT,
+          MeExtendedOption.SUBCATEGORIES_LIMIT,
+        ],
+      }),
     }
   );
-  let user;
+  let user: UserWithCategoriesAndSubcategories, limits: Limits;
   try {
-    user = (await responseUser.json())?.user;
-  } catch (e) {}
+    const response = await responseUser.json();
+    user = response.user;
+    limits = response.limits;
+  } catch (e) {
+    console.log(e);
+  }
 
   return {
-    props: { user: user?.id ? user : null },
+    props: { user, limits },
   };
 };

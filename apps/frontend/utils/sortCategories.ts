@@ -1,12 +1,12 @@
-import { ColumnSortOptions } from '@test1/shared';
+import { ColumnSortOption } from '@test1/shared';
 import { Category } from '@prisma/client';
 
 export const sortCategories = (
   categories: Category[],
-  sortOption: ColumnSortOptions
+  sortOption: ColumnSortOption
 ) => {
   switch (sortOption) {
-    case ColumnSortOptions.ALPHABETICAL:
+    case ColumnSortOption.ALPHABETICAL:
       return categories
         .map((category) => {
           return {
@@ -23,7 +23,7 @@ export const sortCategories = (
         .sort((category1, category2) =>
           (category1?.name ?? '').localeCompare(category2?.name ?? '')
         );
-    case ColumnSortOptions.REVERSE_ALPHABETICAL:
+    case ColumnSortOption.REVERSE_ALPHABETICAL:
       return categories
         .map((category) => {
           return {
@@ -41,7 +41,7 @@ export const sortCategories = (
           (category1?.name ?? '').localeCompare(category2?.name ?? '')
         );
 
-    case ColumnSortOptions.OLDEST:
+    case ColumnSortOption.OLDEST:
       return categories
         .map((category) => {
           return {
@@ -59,7 +59,7 @@ export const sortCategories = (
             new Date(category1?.createdAt).getTime() -
             new Date(category2?.createdAt).getTime()
         );
-    case ColumnSortOptions.NEWEST:
+    case ColumnSortOption.NEWEST:
       return categories
         .map((category) => {
           return {

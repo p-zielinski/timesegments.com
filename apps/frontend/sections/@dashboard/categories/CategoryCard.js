@@ -20,6 +20,11 @@ import EditCategory from './EditCategory';
 import AddNew from './AddNew';
 import { CreateNewType } from '../../../enum/createNewType';
 import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
+import ShowNoShow from './ShowNoShow';
+import { ShowNoShowType } from '../../../enum/showNoShowType';
+import React from 'react';
+import ShowLimitReached from './ShowLimitReached';
+import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +39,7 @@ export default function CategoryCard({
   mode,
   isEditing,
   setIsEditing,
+  limits,
 }) {
   const { active: isActive } = category;
 
@@ -289,13 +295,22 @@ export default function CategoryCard({
                         </Card>
                       )}
                       {mode === CategoriesPageMode.EDIT && (
-                        <AddNew
-                          type={CreateNewType.SUBCATEGORY}
-                          data={{ categoryId: category.id }}
-                          isEditing={isEditing}
-                          setIsEditing={setIsEditing}
-                          category={category}
-                        />
+                        <>
+                          {category.subcategories.length <
+                          limits.subcategoriesLimits ? (
+                            <AddNew
+                              type={CreateNewType.SUBCATEGORY}
+                              data={{ categoryId: category.id }}
+                              isEditing={isEditing}
+                              setIsEditing={setIsEditing}
+                              category={category}
+                            />
+                          ) : (
+                            <ShowLimitReached
+                              type={ShowLimitReachedType.SUBCATEGORIES}
+                            />
+                          )}
+                        </>
                       )}
                     </Box>
                   ) : undefined}
@@ -320,13 +335,7 @@ export default function CategoryCard({
                     </>
                   ))
               ) : (
-                <Card sx={{ backgroundColor: 'rgba(0,0,0,0.11)' }}>
-                  <Stack spacing={2} sx={{ p: 2 }}>
-                    <Typography variant="subtitle3" noWrap>
-                      No subcategories to display
-                    </Typography>
-                  </Stack>
-                </Card>
+                <ShowNoShow type={ShowNoShowType.SUBCATEGORIES} />
               )}
             </Box>
           </Grid>

@@ -4,8 +4,7 @@ import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useEffect, useState } from 'react';
-import { Rgba } from '../../../type/user';
+import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
@@ -108,7 +107,7 @@ export default function EditCategory({
                     0.3
                   ),
                   border: `solid 2px ${getHexFromRGBAObject({
-                    ...(values.color.rgb as Rgba),
+                    ...values.color.rgb,
                     a: 0.3,
                   })}`,
                   borderBottom: '0px',

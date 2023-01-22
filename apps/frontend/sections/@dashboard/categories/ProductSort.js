@@ -3,27 +3,27 @@ import { useState } from 'react';
 import { Menu, Button, MenuItem, Typography } from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import { ColumnSortOptions } from '@test1/shared';
+import { ColumnSortOption } from '@test1/shared';
 import capitalize from 'capitalize';
 
 // ----------------------------------------------------------------------
 
 const SORT_BY_OPTIONS = [
   {
-    value: ColumnSortOptions.ALPHABETICAL,
-    label: capitalize(ColumnSortOptions.ALPHABETICAL),
+    value: ColumnSortOption.ALPHABETICAL,
+    label: capitalize(ColumnSortOption.ALPHABETICAL),
   },
   {
-    value: ColumnSortOptions.REVERSE_ALPHABETICAL,
-    label: capitalize(ColumnSortOptions.REVERSE_ALPHABETICAL),
+    value: ColumnSortOption.REVERSE_ALPHABETICAL,
+    label: capitalize(ColumnSortOption.REVERSE_ALPHABETICAL),
   },
   {
-    value: ColumnSortOptions.NEWEST,
-    label: capitalize(ColumnSortOptions.NEWEST),
+    value: ColumnSortOption.NEWEST,
+    label: capitalize(ColumnSortOption.NEWEST),
   },
   {
-    value: ColumnSortOptions.OLDEST,
-    label: capitalize(ColumnSortOptions.OLDEST),
+    value: ColumnSortOption.OLDEST,
+    label: capitalize(ColumnSortOption.OLDEST),
   },
 ];
 

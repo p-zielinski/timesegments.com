@@ -5,7 +5,7 @@ import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React from 'react';
-import { Rgba } from '../../../type/user';
+import { Rgba } from '../../../types/user';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
