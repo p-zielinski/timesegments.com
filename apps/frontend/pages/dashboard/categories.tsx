@@ -32,11 +32,13 @@ export default function Categories({ user }: Props) {
   );
   const [mode, setMode] = useState<CategoriesPageMode>(CategoriesPageMode.VIEW);
   const [isEditing, setIsEditing] = useState<{
-    categoriesIds: string[];
-    subcategoriesIds: string[];
+    categoryId: string;
+    subcategoryId: string;
+    createNew: string;
   }>({
-    categoriesIds: [],
-    subcategoriesIds: [],
+    categoryId: undefined,
+    subcategoryId: undefined,
+    createNew: undefined,
   });
 
   useEffect(() => {

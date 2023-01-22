@@ -62,7 +62,11 @@ export default function CategoryList({
                   </Typography>
                 </Stack>
               </Card>
-              <AddNew type={CreateNewType.CATEGORY} />
+              <AddNew
+                type={CreateNewType.CATEGORY}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+              />
             </Box>
           </Grid>
         )}

@@ -74,7 +74,6 @@ export default function EditSubcategory({
       },
     });
   };
-  setStyledTextField(subcategory.color || category.color);
 
   return (
     <Formik
@@ -92,6 +91,7 @@ export default function EditSubcategory({
       validationSchema={validationSchema}
     >
       {({ handleSubmit, values, setFieldValue }) => {
+        setStyledTextField(values.color.hex);
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
@@ -253,10 +253,9 @@ export default function EditSubcategory({
                   }}
                   onClick={() =>
                     setIsEditing({
-                      ...isEditing,
-                      subcategoriesIds: isEditing.subcategoriesIds.filter(
-                        (subcategoryId) => subcategoryId !== subcategory.id
-                      ),
+                      categoryId: undefined,
+                      subcategoryId: undefined,
+                      createNew: undefined,
                     })
                   }
                 >

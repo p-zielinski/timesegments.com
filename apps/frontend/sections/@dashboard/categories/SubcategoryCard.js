@@ -35,7 +35,7 @@ export default function SubcategoryCard({
   setIsEditing,
   mode,
 }) {
-  const { name, active: isActive, id } = subcategory;
+  const { name, active: isActive } = subcategory;
   const category = categories.find((category) =>
     category.subcategories.find(
       (_subcategory) => _subcategory.id === subcategory.id
@@ -44,7 +44,7 @@ export default function SubcategoryCard({
 
   if (
     mode === CategoriesPageMode.EDIT &&
-    isEditing.subcategoriesIds.includes(subcategory.id)
+    isEditing.subcategoryId === subcategory.id
   ) {
     return (
       <EditSubcategory
@@ -105,8 +105,9 @@ export default function SubcategoryCard({
               }}
               onClick={() => {
                 setIsEditing({
-                  categoriesIds: [],
-                  subcategoriesIds: [subcategory.id],
+                  categoryId: undefined,
+                  subcategoryId: subcategory.id,
+                  createNew: undefined,
                 });
               }}
             >

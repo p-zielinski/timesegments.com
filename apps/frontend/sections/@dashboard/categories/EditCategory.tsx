@@ -237,10 +237,9 @@ export default function EditCategory({
                   }}
                   onClick={() =>
                     setIsEditing({
-                      ...isEditing,
-                      categoriesIds: isEditing.categoriesIds.filter(
-                        (categoryId) => categoryId !== category.id
-                      ),
+                      subcategoryId: undefined,
+                      categoryId: undefined,
+                      createNew: undefined,
                     })
                   }
                 >

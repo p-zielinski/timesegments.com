@@ -67,7 +67,7 @@ export default function CategoryCard({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {isEditing.categoriesIds?.includes(category.id) &&
+      {isEditing.categoryId === category.id &&
       mode === CategoriesPageMode.EDIT ? (
         <EditCategory
           categories={categories}
@@ -125,8 +125,9 @@ export default function CategoryCard({
                   }}
                   onClick={() =>
                     setIsEditing({
-                      subcategoriesIds: [],
-                      categoriesIds: [category.id],
+                      subcategoryId: undefined,
+                      categoryId: category.id,
+                      createNew: undefined,
                     })
                   }
                 >
@@ -291,6 +292,9 @@ export default function CategoryCard({
                         <AddNew
                           type={CreateNewType.SUBCATEGORY}
                           data={{ categoryId: category.id }}
+                          isEditing={isEditing}
+                          setIsEditing={setIsEditing}
+                          category={category}
                         />
                       )}
                     </Box>

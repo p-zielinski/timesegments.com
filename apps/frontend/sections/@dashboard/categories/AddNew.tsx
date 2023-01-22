@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography } from '@mui/material';
+import { Box, Card, Stack, TextField, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import {
   BLUE,
@@ -19,12 +19,20 @@ import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
 import { CreateNewType } from '../../../enum/createNewType';
 import capitalize from 'capitalize';
+import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
+import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { styled } from '@mui/material/styles';
+import { Checkbox } from '../Form/Checkbox';
 
-export default function AddNew({ type, data = {}, ...other }) {
-  const [openCreateNewCategoryMenu, setOpenCreateNewCategoryMenu] =
-    useState(false);
-  const [color, setColor] = useState(getRandomRgbObjectForSliderPicker());
-
+export default function AddNew({
+  type,
+  data = {},
+  isEditing,
+  setIsEditing,
+  category,
+  ...other
+}) {
   function Picker() {
     return (
       <div
@@ -40,7 +48,44 @@ export default function AddNew({ type, data = {}, ...other }) {
     );
   }
 
-  if (!openCreateNewCategoryMenu) {
+  let StyledTextField, darkHexColor;
+  const setStyledTextField = (hexColor) => {
+    darkHexColor = getHexFromRGBObject(
+      getDarkColorBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(hexColor)
+      )
+    );
+    StyledTextField = styled(TextField)({
+      '& input': {
+        color: darkHexColor,
+      },
+      '& label.Mui-focused': {
+        color: darkHexColor,
+      },
+      '& label': {
+        color: darkHexColor,
+      },
+      '& .MuiInput-underline:after': {
+        borderBottomColor: hexColor,
+      },
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderColor: hexColor,
+        },
+        '&:hover fieldset': {
+          borderColor: hexColor,
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: hexColor,
+        },
+      },
+    });
+  };
+
+  if (
+    isEditing?.createNew !==
+    `${type}${category?.id ? `4categoryId:${category.id}` : ''}`
+  ) {
     return (
       <Card
         sx={{
@@ -58,7 +103,15 @@ export default function AddNew({ type, data = {}, ...other }) {
             }`,
           },
         }}
-        onClick={() => setOpenCreateNewCategoryMenu(true)}
+        onClick={() =>
+          setIsEditing({
+            categoryId: undefined,
+            subcategoryId: undefined,
+            createNew: `${type}${
+              category?.id ? `4categoryId:${category.id}` : ''
+            }`,
+          })
+        }
       >
         <Iconify
           icon={'material-symbols:add'}
@@ -85,13 +138,24 @@ export default function AddNew({ type, data = {}, ...other }) {
 
   return (
     <Formik
-      initialValues={{ ...data, [type + 'Name']: '' }}
+      initialValues={{
+        ...data,
+        [type + 'Name']: '',
+        inheritColor: category?.id ? true : undefined,
+        color: category
+          ? {
+              hex: category.color,
+              rgb: getRgbaObjectFromHexString(category.color),
+            }
+          : getRandomRgbObjectForSliderPicker(),
+      }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
     >
-      {({ handleSubmit, values }) => {
+      {({ handleSubmit, values, setFieldValue }) => {
+        setStyledTextField(values.color.hex);
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
@@ -104,28 +168,50 @@ export default function AddNew({ type, data = {}, ...other }) {
                   backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: getRepeatingLinearGradient(color?.hex, 0.3),
+                  background: getRepeatingLinearGradient(
+                    values.color?.hex,
+                    0.3
+                  ),
                   border: `solid 2px ${getHexFromRGBAObject({
-                    ...(color.rgb as Rgba),
+                    ...(values.color.rgb as Rgba),
                     a: 0.3,
                   })}`,
                   borderBottom: '0px',
-                }}
-                onClick={() => {
-                  if (!openCreateNewCategoryMenu) {
-                    setOpenCreateNewCategoryMenu(true);
-                  }
                 }}
               >
                 <Box sx={{ p: 2 }}>
                   <Stack spacing={2}>
                     <SliderPicker
                       height={`8px`}
-                      onChangeComplete={setColor}
-                      onChange={setColor}
-                      color={color}
+                      onChange={(value) => {
+                        setFieldValue('color', value);
+                        setStyledTextField(value.hex);
+                        setFieldValue(
+                          'inheritColor',
+                          value.hex === category.color
+                        );
+                      }}
+                      color={values.color}
                       pointer={Picker}
                     />
+                    {category && (
+                      <Checkbox
+                        label={'Inherit from category'}
+                        name={'inheritColor'}
+                        hideHelpText={true}
+                        color={darkHexColor}
+                        onChange={(e) => {
+                          setFieldValue('inheritColor', e.target.checked);
+                          if (e.target.checked) {
+                            setFieldValue('color', {
+                              hex: category.color,
+                              rgb: getRgbaObjectFromHexString(category.color),
+                            });
+                            setStyledTextField(category.color);
+                          }
+                        }}
+                      />
+                    )}
                     <InputText
                       type="text"
                       name={`${type}Name`}
@@ -229,7 +315,13 @@ export default function AddNew({ type, data = {}, ...other }) {
                       border: `solid 2px ${RED}`,
                     },
                   }}
-                  onClick={() => setOpenCreateNewCategoryMenu(false)}
+                  onClick={() =>
+                    setIsEditing({
+                      categoryId: undefined,
+                      subcategoryId: undefined,
+                      createNew: undefined,
+                    })
+                  }
                 >
                   <Iconify
                     icon={'mdi:cancel-bold'}
