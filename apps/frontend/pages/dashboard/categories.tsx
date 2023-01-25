@@ -117,8 +117,6 @@ export const getServerSideProps = async (context: any) => {
     console.log(e);
   }
 
-  console.log(limits);
-
   return {
     props: { user, limits },
   };
