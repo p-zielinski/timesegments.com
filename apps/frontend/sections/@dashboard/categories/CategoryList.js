@@ -67,7 +67,7 @@ export default function CategoryList({
                   </Typography>
                 </Stack>
               </Card>
-              {categories.length < limits.categoriesLimits ? (
+              {categories.length < limits.categoriesLimit ? (
                 <AddNew
                   type={CreateNewType.CATEGORY}
                   isEditing={isEditing}

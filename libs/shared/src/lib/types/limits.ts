@@ -1,4 +1,4 @@
 export type Limits = {
-  categoriesLimits?: number;
-  subcategoriesLimits?: number;
+  categoriesLimit?: number;
+  subcategoriesLimit?: number;
 };

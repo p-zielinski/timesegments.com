@@ -44,15 +44,15 @@ export class UserService {
       include,
     });
 
-    const limits: { categoriesLimits?: number; subcategoriesLimits?: number } =
+    const limits: { categoriesLimit?: number; subcategoriesLimit?: number } =
       {};
     if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
-      limits.categoriesLimits = this.configService.get<number>(
+      limits.categoriesLimit = this.configService.get<number>(
         'MAX_NUMBER_OF_CATEGORIES_PER_USER'
       );
     }
     if (extend.includes(MeExtendedOption.SUBCATEGORIES_LIMIT)) {
-      limits.subcategoriesLimits = this.configService.get<number>(
+      limits.subcategoriesLimit = this.configService.get<number>(
         'MAX_NUMBER_OF_SUBCATEGORIES_PER_CATEGORY'
       );
     }

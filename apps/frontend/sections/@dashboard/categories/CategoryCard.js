@@ -297,7 +297,7 @@ export default function CategoryCard({
                       {mode === CategoriesPageMode.EDIT && (
                         <>
                           {category.subcategories.length <
-                          limits.subcategoriesLimits ? (
+                          limits.subcategoriesLimit ? (
                             <AddNew
                               type={CreateNewType.SUBCATEGORY}
                               data={{ categoryId: category.id }}
