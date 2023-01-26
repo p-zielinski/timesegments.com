@@ -11,6 +11,7 @@ import {
   LIGHT_RED,
   RED,
   LIGHT_SILVER,
+  IS_SAVING_HEX,
 } from '../../../consts/colors';
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
@@ -36,9 +37,11 @@ export default function CategoryCard({
   category,
   categories,
   setCategories,
-  mode,
+  viewMode,
   isEditing,
   setIsEditing,
+  isSaving,
+  setIsSaving,
   limits,
 }) {
   const { active: isActive } = category;
@@ -62,7 +65,7 @@ export default function CategoryCard({
       categories
         .find((_category) => _category.id === category.id)
         ?.subcategories?.filter((subcategory) =>
-          mode === CategoriesPageMode.EDIT ? true : subcategory.visible
+          viewMode === CategoriesPageMode.EDIT ? true : subcategory.visible
         ) || []
     );
   };
@@ -71,10 +74,18 @@ export default function CategoryCard({
     return categories.find((_category) => _category.id === category.id) || {};
   };
 
+  const changeCategoryVisibility = () => {
+    return;
+  };
+
+  const setCategoryAsActive = () => {
+    return;
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {isEditing.categoryId === category.id &&
-      mode === CategoriesPageMode.EDIT ? (
+      viewMode === CategoriesPageMode.EDIT ? (
         <EditCategory
           categories={categories}
           setCategories={setCategories}
@@ -85,25 +96,30 @@ export default function CategoryCard({
       ) : (
         <Card>
           <Box sx={{ display: 'flex' }}>
-            {mode === CategoriesPageMode.EDIT && (
+            {viewMode === CategoriesPageMode.EDIT && (
               <>
                 <Box
                   sx={{
                     width: `60px`,
                     minWidth: '60px',
                     p: 2,
-                    color: category.visible ? GREEN : RED,
+                    color: isSaving
+                      ? IS_SAVING_HEX
+                      : category.visible
+                      ? GREEN
+                      : RED,
                     background: `white`,
                     border: `solid 2px ${LIGHT_SILVER}`,
                     borderRight: `0px`,
                     borderTopLeftRadius: 12,
                     borderBottomLeftRadius: 12,
-                    cursor: 'pointer',
-                    '&:hover': {
+                    cursor: !isSaving && 'pointer',
+                    '&:hover': !isSaving && {
                       color: !category.visible ? GREEN : RED,
                       background: LIGHT_SILVER,
                     },
                   }}
+                  onClick={() => !isSaving && changeCategoryVisibility()}
                 >
                   <Iconify
                     icon={
@@ -120,16 +136,17 @@ export default function CategoryCard({
                     width: `60px`,
                     minWidth: '60px',
                     p: 2,
-                    color: GREEN,
+                    color: isSaving ? IS_SAVING_HEX : GREEN,
                     background: `white`,
                     borderTop: `solid 2px ${LIGHT_SILVER}`,
                     borderBottom: `solid 2px ${LIGHT_SILVER}`,
-                    cursor: 'pointer',
-                    '&:hover': {
+                    cursor: !isSaving && 'pointer',
+                    '&:hover': !isSaving && {
                       background: LIGHT_SILVER,
                     },
                   }}
                   onClick={() =>
+                    !isSaving &&
                     setIsEditing({
                       subcategoryId: undefined,
                       categoryId: category.id,
@@ -147,39 +164,56 @@ export default function CategoryCard({
             )}
             <Box
               sx={{
+                color: isSaving && IS_SAVING_HEX,
                 background: isActive
-                  ? getRgbaStringFromHexString(category?.color, 0.3)
-                  : getRepeatingLinearGradient(category?.color, 0.3),
+                  ? getRgbaStringFromHexString(
+                      isSaving ? IS_SAVING_HEX : category?.color,
+                      0.3
+                    )
+                  : getRepeatingLinearGradient(
+                      isSaving ? IS_SAVING_HEX : category?.color,
+                      0.3
+                    ),
                 flex: 1,
                 border:
-                  mode === CategoriesPageMode.EDIT
+                  viewMode === CategoriesPageMode.EDIT
                     ? `solid 2px ${getHexFromRGBAObject({
-                        ...getRgbaObjectFromHexString(category?.color),
+                        ...getRgbaObjectFromHexString(
+                          isSaving ? IS_SAVING_HEX : category?.color
+                        ),
                         a: 0.3,
                       })}`
+                    : isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
                     : isActive
                     ? `solid 2px ${LIGHT_GREEN}`
                     : `solid 2px ${LIGHT_RED}`,
                 borderLeft:
-                  mode === CategoriesPageMode.EDIT
+                  viewMode === CategoriesPageMode.EDIT
                     ? `0px`
+                    : isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
                     : isActive
                     ? `solid 2px ${LIGHT_GREEN}`
                     : `solid 2px ${LIGHT_RED}`,
                 borderRight: 0,
-                borderTopLeftRadius: mode === CategoriesPageMode.EDIT ? 0 : 12,
+                borderTopLeftRadius:
+                  viewMode === CategoriesPageMode.EDIT ? 0 : 12,
                 borderBottomLeftRadius:
-                  mode === CategoriesPageMode.EDIT ? 0 : 12,
-                cursor: mode === CategoriesPageMode.EDIT ? 'auto' : 'pointer',
-                '&:hover': {
+                  viewMode === CategoriesPageMode.EDIT ? 0 : 12,
+                cursor:
+                  !isSaving &&
+                  viewMode === CategoriesPageMode.EDIT &&
+                  'pointer',
+                '&:hover': !isSaving && {
                   background:
-                    mode === CategoriesPageMode.EDIT
+                    viewMode === CategoriesPageMode.EDIT
                       ? getRepeatingLinearGradient(category?.color, 0.3)
                       : isActive
                       ? LIGHT_RED
                       : LIGHT_GREEN,
                   border:
-                    mode === CategoriesPageMode.EDIT
+                    viewMode === CategoriesPageMode.EDIT
                       ? `solid 2px ${getHexFromRGBAObject({
                           ...getRgbaObjectFromHexString(category?.color),
                           a: 0.3,
@@ -188,7 +222,7 @@ export default function CategoryCard({
                       ? `solid 2px ${LIGHT_GREEN}`
                       : `solid 2px ${LIGHT_RED}`,
                   borderLeft:
-                    mode === CategoriesPageMode.EDIT
+                    viewMode === CategoriesPageMode.EDIT
                       ? 0
                       : !isActive
                       ? `solid 2px ${LIGHT_GREEN}`
@@ -196,6 +230,7 @@ export default function CategoryCard({
                   borderRight: 0,
                 },
               }}
+              onClick={() => !isSaving && setCategoryAsActive}
             >
               <Stack
                 spacing={1}
@@ -206,6 +241,7 @@ export default function CategoryCard({
               >
                 <IsActive
                   isActive={getCategory(category, categories)?.active}
+                  isSaving={isSaving}
                 />
                 <Typography variant="subtitle2" noWrap>
                   {getCategory(category, categories)?.name}
@@ -216,7 +252,9 @@ export default function CategoryCard({
               sx={{
                 width: `60px`,
                 p: 2,
-                color: !getCategory(category, categories)?.expandSubcategories
+                color: isSaving
+                  ? IS_SAVING_HEX
+                  : !getCategory(category, categories)?.expandSubcategories
                   ? GREEN
                   : RED,
                 background: `white`,
@@ -224,13 +262,15 @@ export default function CategoryCard({
                 borderLeft: `0px`,
                 borderTopRightRadius: 12,
                 borderBottomRightRadius: 12,
-                cursor: 'pointer',
-                '&:hover': {
+                cursor: !isSaving && 'pointer',
+                '&:hover': !isSaving && {
                   borderLeft: `0px`,
                   background: LIGHT_SILVER,
                 },
               }}
-              onClick={() => reverseExpandSubcategories(category, categories)}
+              onClick={() =>
+                !isSaving && reverseExpandSubcategories(category, categories)
+              }
             >
               <Iconify
                 icon={
@@ -261,12 +301,12 @@ export default function CategoryCard({
               {getCategory(category, categories)?.expandSubcategories ? (
                 <>
                   {getVisibleSubcategories(category, categories) ||
-                  mode === CategoriesPageMode.EDIT ? (
+                  viewMode === CategoriesPageMode.EDIT ? (
                     <Box
                       sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
                       {getVisibleSubcategories(category, categories).length ||
-                      mode === CategoriesPageMode.EDIT ? (
+                      viewMode === CategoriesPageMode.EDIT ? (
                         getVisibleSubcategories(category, categories).map(
                           (subcategory) => (
                             <SubcategoryCard
@@ -276,7 +316,9 @@ export default function CategoryCard({
                               setCategories={setCategories}
                               isEditing={isEditing}
                               setIsEditing={setIsEditing}
-                              mode={mode}
+                              viewMode={viewMode}
+                              isSaving={isSaving}
+                              setIsSaving={setIsSaving}
                             />
                           )
                         )
@@ -294,7 +336,7 @@ export default function CategoryCard({
                           </Stack>
                         </Card>
                       )}
-                      {mode === CategoriesPageMode.EDIT && (
+                      {viewMode === CategoriesPageMode.EDIT && (
                         <>
                           {category.subcategories.length <
                           limits.subcategoriesLimit ? (
@@ -315,7 +357,7 @@ export default function CategoryCard({
                     </Box>
                   ) : undefined}
                 </>
-              ) : mode === CategoriesPageMode.EDIT ||
+              ) : viewMode === CategoriesPageMode.EDIT ||
                 getVisibleSubcategories(category, categories).filter(
                   (subcategory) => subcategory.active
                 ).length ? (
@@ -330,7 +372,9 @@ export default function CategoryCard({
                         setCategories={setCategories}
                         isEditing={isEditing}
                         setIsEditing={setIsEditing}
-                        mode={mode}
+                        viewMode={viewMode}
+                        isSaving={isSaving}
+                        setIsSaving={setIsSaving}
                       />
                     </>
                   ))

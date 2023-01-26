@@ -10,5 +10,7 @@ export const ORANGE = `rgb(255, 159, 118)`;
 
 export const LIGHT_SILVER = `rgb(232, 232, 232)`;
 
+export const IS_SAVING_HEX = `#B9B9B9FF`;
+
 //export const LIGHT_RED = `rgb(254, 198, 198)`;
 // export const RED = `rgb(255, 118, 118)`;

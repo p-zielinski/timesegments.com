@@ -25,12 +25,13 @@ CategoryList.propTypes = {
 export default function CategoryList({
   categories,
   setCategories,
-  mode,
-  setMode,
+  viewMode,
+  setViewMode,
   isEditing,
   setIsEditing,
+  isSaving,
+  setIsSaving,
   limits,
-  ...other
 }) {
   const getCategories = (categories) => {
     return categories.filter((category) =>
@@ -40,8 +41,8 @@ export default function CategoryList({
 
   return (
     <>
-      <Grid container spacing={2} {...other} columns={1}>
-        {mode === CategoriesPageMode.EDIT && (
+      <Grid container spacing={2} columns={1}>
+        {viewMode === CategoriesPageMode.EDIT && (
           <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Card
@@ -54,7 +55,7 @@ export default function CategoryList({
                     border: `solid 2px ${RED}`,
                   },
                 }}
-                onClick={() => setMode(CategoriesPageMode.VIEW)}
+                onClick={() => setViewMode(CategoriesPageMode.VIEW)}
               >
                 <Iconify
                   icon={'mdi:cancel-bold'}
@@ -83,25 +84,27 @@ export default function CategoryList({
           ? getCategories(categories).map((category) => (
               <Grid key={category.id} item xs={1} sm={1} md={1}>
                 <CategoryCard
-                  mode={mode}
+                  viewMode={viewMode}
                   isEditing={isEditing}
                   setIsEditing={setIsEditing}
                   category={category}
                   categories={categories}
                   setCategories={setCategories}
+                  isSaving={isSaving}
+                  setIsSaving={setIsSaving}
                   limits={limits}
                 />
               </Grid>
             ))
           : !isEditing && <ShowNoShow type={ShowNoShowType.CATEGORIES} />}
-        {mode === CategoriesPageMode.VIEW && (
+        {viewMode === CategoriesPageMode.VIEW && (
           <Grid
             key={'edit_categories'}
             item
             xs={1}
             sm={1}
             md={1}
-            onClick={() => setMode(CategoriesPageMode.EDIT)}
+            onClick={() => setViewMode(CategoriesPageMode.EDIT)}
           >
             <Card
               sx={{

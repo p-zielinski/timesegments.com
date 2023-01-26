@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import { nanoid } from 'nanoid';
-import { GREEN, RED } from '../../consts/colors';
+import { GREEN, IS_SAVING_HEX, RED } from '../../consts/colors';
 
 // ----------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ IsActive.propTypes = {
   isActive: PropTypes.bool,
 };
 
-export default function IsActive({ isActive, sx = {} }) {
+export default function IsActive({ isActive, isSaving, sx = {} }) {
   return (
     <Box
       key={nanoid()}
@@ -23,7 +23,7 @@ export default function IsActive({ isActive, sx = {} }) {
         borderRadius: '50%',
         boxShadow: (theme) =>
           `inset -1px 1px 2px ${alpha(theme.palette.common.black, 0.32)}`,
-        bgcolor: isActive ? GREEN : RED,
+        bgcolor: isSaving ? IS_SAVING_HEX : isActive ? GREEN : RED,
         ...sx,
       }}
     />

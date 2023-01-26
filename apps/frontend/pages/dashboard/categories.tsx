@@ -12,12 +12,10 @@ import {
 import DashboardLayout from '../../layouts/dashboard';
 
 import {
-  ColumnSortOption,
   Limits,
   MeExtendedOption,
   UserWithCategoriesAndSubcategories,
 } from '@test1/shared';
-import { sortCategories } from '../../utils/sortCategories';
 import { Category } from '@prisma/client';
 import { CategoriesPageMode } from '../../enum/categoriesPageMode';
 
@@ -29,11 +27,12 @@ type Props = {
 };
 
 export default function Categories({ user, limits }: Props) {
-  const [order, setOrder] = useState<ColumnSortOption>(ColumnSortOption.NEWEST);
   const [categories, setCategories] = useState<Category[]>(
-    sortCategories(user?.categories || [], order)
+    user?.categories || []
   );
-  const [mode, setMode] = useState<CategoriesPageMode>(CategoriesPageMode.VIEW);
+  const [viewMode, setViewMode] = useState<CategoriesPageMode>(
+    CategoriesPageMode.EDIT
+  );
   const [isEditing, setIsEditing] = useState<{
     categoryId: string;
     subcategoryId: string;
@@ -43,10 +42,7 @@ export default function Categories({ user, limits }: Props) {
     subcategoryId: undefined,
     createNew: undefined,
   });
-
-  useEffect(() => {
-    setCategories(sortCategories(categories, order));
-  }, [order]);
+  const [isSaving, setIsSaving] = useState<boolean>(true);
 
   return (
     <DashboardLayout>
@@ -66,15 +62,20 @@ export default function Categories({ user, limits }: Props) {
           justifyContent="flex-end"
         >
           <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb: 3 }}>
-            <ProductSort order={order} setOrder={setOrder} />
+            <ProductSort
+              categories={categories}
+              setCategories={setCategories}
+            />
           </Stack>
         </Stack>
 
         <CategoryList
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
           categories={categories}
           setCategories={setCategories}
-          mode={mode}
-          setMode={setMode}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           limits={limits}

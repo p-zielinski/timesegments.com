@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import { Menu, Button, MenuItem, Typography } from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
 import { ColumnSortOption } from '@test1/shared';
 import capitalize from 'capitalize';
+import { sortCategories } from '../../../utils/sortCategories';
 
 // ----------------------------------------------------------------------
 
@@ -27,8 +28,13 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function ShopProductSort({ order, setOrder }) {
+export default function ShopProductSort({ categories, setCategories }) {
+  const [sortOrder, setSortOrder] = useState(ColumnSortOption.NEWEST);
   const [open, setOpen] = useState(null);
+
+  useEffect(() => {
+    setCategories(sortCategories(categories, sortOrder));
+  }, [sortOrder]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -39,7 +45,7 @@ export default function ShopProductSort({ order, setOrder }) {
     if (!option) {
       return;
     }
-    setOrder(option.value);
+    setSortOrder(option.value);
   };
 
   return (
@@ -60,7 +66,7 @@ export default function ShopProductSort({ order, setOrder }) {
           variant="subtitle2"
           sx={{ color: 'text.secondary' }}
         >
-          {SORT_BY_OPTIONS.find((option) => option.value === order).label}
+          {SORT_BY_OPTIONS.find((option) => option.value === sortOrder).label}
         </Typography>
       </Button>
       <Menu
@@ -74,7 +80,7 @@ export default function ShopProductSort({ order, setOrder }) {
         {SORT_BY_OPTIONS.map((option) => (
           <MenuItem
             key={option.value}
-            selected={option.value === order}
+            selected={option.value === setSortOrder}
             onClick={() => handleClose(option)}
             sx={{ typography: 'body2' }}
           >

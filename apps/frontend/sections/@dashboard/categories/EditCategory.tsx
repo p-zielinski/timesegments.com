@@ -4,7 +4,7 @@ import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
@@ -21,6 +21,8 @@ export default function EditCategory({
   setIsEditing,
   ...other
 }) {
+  const [staticCategory] = useState(category);
+
   function Picker() {
     return (
       <div
@@ -238,13 +240,21 @@ export default function EditCategory({
                       border: `solid 2px ${RED}`,
                     },
                   }}
-                  onClick={() =>
+                  onClick={() => {
+                    setCategories(
+                      categories.map((_category) => {
+                        if (_category.id !== category.id) {
+                          return _category;
+                        }
+                        return staticCategory;
+                      })
+                    );
                     setIsEditing({
                       subcategoryId: undefined,
                       categoryId: undefined,
                       createNew: undefined,
-                    })
-                  }
+                    });
+                  }}
                 >
                   <Iconify
                     icon={'mdi:cancel-bold'}

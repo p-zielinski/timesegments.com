@@ -1,10 +1,16 @@
 import { Box, Card, Stack, Typography, TextField } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
-import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
+import {
+  GREEN,
+  IS_SAVING_HEX,
+  LIGHT_GREEN,
+  LIGHT_RED,
+  RED,
+} from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useEffect } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
@@ -17,9 +23,9 @@ import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 export default function EditSubcategory({
   category,
   subcategory,
-  isEditing,
   setIsEditing,
-  ...other
+  isSaving,
+  setIsSaving,
 }) {
   function Picker() {
     return (
@@ -29,7 +35,7 @@ export default function EditSubcategory({
           height: '18px',
           borderRadius: '50%',
           transform: 'translate(-8px, -3px)',
-          backgroundColor: 'rgb(248, 248, 248)',
+          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
           boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
         }}
       />
@@ -73,7 +79,9 @@ export default function EditSubcategory({
       },
     });
   };
-  setStyledTextField(subcategory.color || category.color);
+  setStyledTextField(
+    isSaving ? IS_SAVING_HEX : subcategory.color || category.color
+  );
 
   return (
     <Formik
@@ -94,47 +102,63 @@ export default function EditSubcategory({
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
-          <Card>
+          <Card key={isSaving.toString()}>
             <Box>
               <Box
                 sx={{
                   borderTopLeftRadius: '12px',
                   borderTopRightRadius: '12px',
-                  backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
                   background: getRepeatingLinearGradient(
-                    values.color?.hex,
+                    isSaving ? IS_SAVING_HEX : values.color?.hex,
                     0.3
                   ),
-                  border: `solid 2px ${getHexFromRGBAObject({
-                    ...values.color.rgb,
-                    a: 0.3,
-                  })}`,
+                  border: `solid 2px ${
+                    isSaving
+                      ? IS_SAVING_HEX
+                      : getHexFromRGBAObject({
+                          ...values.color.rgb,
+                          a: 0.3,
+                        })
+                  }`,
                   borderBottom: '0px',
                 }}
               >
                 <Box sx={{ p: 2 }}>
                   <Stack spacing={2}>
-                    <SliderPicker
-                      height={`8px`}
-                      onChange={(value) => {
-                        setFieldValue('color', value);
-                        setStyledTextField(value.hex);
-                        setFieldValue(
-                          'inheritColor',
-                          value.hex === category.color
-                        );
+                    <Box
+                      sx={{
+                        filter: isSaving ? 'grayscale(100%)' : 'none',
                       }}
-                      color={values.color}
-                      pointer={Picker}
-                    />
+                    >
+                      <SliderPicker
+                        height={`8px`}
+                        onChange={(value) => {
+                          if (isSaving) {
+                            return;
+                          }
+                          setFieldValue('color', value);
+                          setStyledTextField(value.hex);
+                          setFieldValue(
+                            'inheritColor',
+                            value.hex === category.color
+                          );
+                        }}
+                        color={values.color}
+                        pointer={Picker}
+                      />
+                    </Box>
                     <Checkbox
                       label={'Inherit from category'}
                       name={'inheritColor'}
                       hideHelpText={true}
-                      color={darkHexColor}
+                      color={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
                       onChange={(e) => {
+                        if (isSaving) {
+                          return;
+                        }
                         setFieldValue('inheritColor', e.target.checked);
                         if (e.target.checked) {
                           setFieldValue('color', {
@@ -150,7 +174,8 @@ export default function EditSubcategory({
                       name="subcategoryName"
                       label="subcategory name"
                       TextField={StyledTextField}
-                      helperTextColor={darkHexColor}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
                     />
                   </Stack>
                 </Box>

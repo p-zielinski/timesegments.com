@@ -11,7 +11,7 @@ type InputTextProps = {
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
   helperText?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
   TextField?: StyledComponent<any>;
   helperTextColor?: string;
 };
@@ -19,12 +19,11 @@ type InputTextProps = {
 export const InputText: React.FC<InputTextProps> = ({
   label,
   name,
-
   type = 'text',
   startAdornment,
   endAdornment,
   helperText,
-  isDisabled,
+  disabled = false,
   TextField = DefaultTextField,
   helperTextColor = '#888888',
 }) => {
@@ -34,8 +33,7 @@ export const InputText: React.FC<InputTextProps> = ({
         return (
           <>
             <TextField
-              key={'dsds'}
-              disabled={isDisabled}
+              disabled={disabled}
               {...field}
               focused={
                 !!(

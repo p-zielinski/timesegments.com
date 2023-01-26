@@ -11,6 +11,7 @@ type CheckboxProps = {
   hideHelpText?: boolean;
   color?: string;
   onChange?: (any) => unknown;
+  disabled?: boolean;
 };
 
 export const Checkbox: React.FC<CheckboxProps> = ({
@@ -19,6 +20,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   hideHelpText,
   color,
   onChange,
+  disabled = false,
 }) => {
   const colorSx = color
     ? {
@@ -37,6 +39,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           <FormControlLabel
             control={
               <CheckboxMui
+                disabled={disabled}
                 sx={{
                   m: -1,
                   ...colorSx,
