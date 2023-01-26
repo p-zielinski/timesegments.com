@@ -27,21 +27,6 @@ export default function EditSubcategory({
   isSaving,
   setIsSaving,
 }) {
-  function Picker() {
-    return (
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          borderRadius: '50%',
-          transform: 'translate(-8px, -3px)',
-          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
-          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
-        }}
-      />
-    );
-  }
-
   const validationSchema = yup.object().shape({
     subcategoryName: yup.string().required('Subcategory name is required'),
   });
@@ -82,6 +67,21 @@ export default function EditSubcategory({
   setStyledTextField(
     isSaving ? IS_SAVING_HEX : subcategory.color || category.color
   );
+
+  function Picker() {
+    return (
+      <div
+        style={{
+          width: '18px',
+          height: '18px',
+          borderRadius: '50%',
+          transform: 'translate(-8px, -3px)',
+          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
+          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
+        }}
+      />
+    );
+  }
 
   return (
     <Formik
@@ -130,8 +130,21 @@ export default function EditSubcategory({
                     <Box
                       sx={{
                         filter: isSaving ? 'grayscale(100%)' : 'none',
+                        cursor: isSaving ? 'default' : 'pointer',
                       }}
                     >
+                      {isSaving && (
+                        <Box
+                          sx={{
+                            width: 'calc(100% + 20px)',
+                            height: 'calc(100% + 20px)',
+                            background: 'transparent',
+                            position: 'absolute',
+                            zIndex: 1,
+                            transform: 'translate(-10px, -10px)',
+                          }}
+                        />
+                      )}
                       <SliderPicker
                         height={`8px`}
                         onChange={(value) => {
@@ -184,13 +197,20 @@ export default function EditSubcategory({
                 sx={{
                   display: 'flex',
                   width: '100%',
-                  background: !isFormValid
-                    ? getRepeatingLinearGradient('000000', 0.05, 135)
-                    : LIGHT_GREEN,
+                  background:
+                    !isFormValid || isSaving
+                      ? getRepeatingLinearGradient(
+                          isSaving ? IS_SAVING_HEX : '000000',
+                          isSaving ? 0.2 : 0.05,
+                          135
+                        )
+                      : LIGHT_GREEN,
                   minHeight: 58,
                   borderBottomLeftRadius: 12,
                   borderBottomRightRadius: 12,
-                  border: !isFormValid
+                  border: isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
+                    : !isFormValid
                     ? `solid 2px ${getHexFromRGBAObject({
                         r: 0,
                         g: 0,
@@ -199,8 +219,12 @@ export default function EditSubcategory({
                       })}`
                     : `solid 2px ${LIGHT_GREEN}`,
                   borderTop: 0,
-                  color: !isFormValid ? 'rgba(0,0,0,.2)' : 'black',
-                  cursor: !isFormValid ? 'auto' : 'pointer',
+                  color: isSaving
+                    ? IS_SAVING_HEX
+                    : !isFormValid
+                    ? 'rgba(0,0,0,.2)'
+                    : 'black',
+                  cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                 }}
               >
                 <Box
@@ -208,7 +232,9 @@ export default function EditSubcategory({
                     flex: 1,
                     p: 2,
                     margin: `0 0 -2px -2px`,
-                    border: !isFormValid
+                    border: isSaving
+                      ? `solid 2px ${IS_SAVING_HEX}`
+                      : !isFormValid
                       ? `solid 2px ${getHexFromRGBAObject({
                           r: 0,
                           g: 0,
@@ -219,7 +245,7 @@ export default function EditSubcategory({
                     borderBottomLeftRadius: 12,
                     borderRight: 0,
                     borderTop: 0,
-                    '&:hover': {
+                    '&:hover': !isSaving && {
                       border: !isFormValid
                         ? `solid 2px ${getHexFromRGBAObject({
                             r: 0,
@@ -255,9 +281,31 @@ export default function EditSubcategory({
                 <Box
                   sx={{
                     margin: `0 -2px -2px 0`,
-                    cursor: 'pointer',
-                    color: 'black',
-                    border: !isFormValid
+                    cursor: !isSaving && 'pointer',
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    border: isSaving
+                      ? `solid 2px ${IS_SAVING_HEX}`
+                      : !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    borderLeft: isSaving
+                      ? `solid 2px transparent`
+                      : !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    borderTop: isSaving
+                      ? `solid 2px transparent`
+                      : !isFormValid
                       ? `solid 2px ${getHexFromRGBAObject({
                           r: 255,
                           g: 0,
@@ -267,15 +315,18 @@ export default function EditSubcategory({
                       : `solid 2px ${LIGHT_RED}`,
                     width: '60px',
                     borderBottomRightRadius: 12,
-                    background: !isFormValid
+                    background: isSaving
+                      ? 'transparent'
+                      : !isFormValid
                       ? `rgba(255, 0, 0, 0.2)`
                       : LIGHT_RED,
-                    '&:hover': {
+                    '&:hover': !isSaving && {
                       background: LIGHT_RED,
                       border: `solid 2px ${RED}`,
                     },
                   }}
                   onClick={() =>
+                    !isSaving &&
                     setIsEditing({
                       categoryId: undefined,
                       subcategoryId: undefined,
