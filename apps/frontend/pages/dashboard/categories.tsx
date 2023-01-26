@@ -38,9 +38,9 @@ export default function Categories({ user, limits }: Props) {
     subcategoryId: string;
     createNew: string;
   }>({
-    categoryId: undefined,
-    subcategoryId: undefined,
-    createNew: undefined,
+    categoryId: 'clcta0wgu0008qw55laz9uhwu',
+    subcategoryId: 'clcta18jv000bqw557jwc50lq',
+    createNew: 'category',
   });
   const [isSaving, setIsSaving] = useState<boolean>(true);
 
