@@ -2,7 +2,15 @@ import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
-import { Box, Link, Button, Drawer, Typography, Avatar, Stack } from '@mui/material';
+import {
+  Box,
+  Link,
+  Button,
+  Drawer,
+  Typography,
+  Avatar,
+  Stack,
+} from '@mui/material';
 // mock
 import account from '../../../_mock/account';
 // hooks
@@ -13,7 +21,7 @@ import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
 //
 import navConfig from './config';
-import {useRouter} from "next/router";
+import { useRouter } from 'next/router';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +43,7 @@ Nav.propTypes = {
 };
 
 export default function Nav({ openNav, onCloseNav }) {
-  const router = useRouter()
+  const router = useRouter();
 
   const isDesktop = useResponsive('up', 'lg');
 
@@ -50,7 +58,11 @@ export default function Nav({ openNav, onCloseNav }) {
     <Scrollbar
       sx={{
         height: 1,
-        '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' },
+        '& .simplebar-content': {
+          height: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        },
       }}
     >
       <Box sx={{ px: 2.5, py: 3, display: 'inline-flex' }}>
@@ -80,7 +92,11 @@ export default function Nav({ openNav, onCloseNav }) {
       <Box sx={{ flexGrow: 1 }} />
 
       <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-        <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
+        <Stack
+          alignItems="center"
+          spacing={3}
+          sx={{ pt: 5, borderRadius: 2, position: 'relative' }}
+        >
           <Box
             component="img"
             src="/assets/illustrations/illustration_avatar.png"
@@ -97,9 +113,7 @@ export default function Nav({ openNav, onCloseNav }) {
             </Typography>
           </Box>
 
-          <Button href="https://material-ui.com/store/items/minimal-dashboard/" target="_blank" variant="contained">
-            Upgrade to Pro
-          </Button>
+          <Button variant="contained">Upgrade to Pro</Button>
         </Stack>
       </Box>
     </Scrollbar>
