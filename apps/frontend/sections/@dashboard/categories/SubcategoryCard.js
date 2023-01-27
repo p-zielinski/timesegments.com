@@ -85,7 +85,7 @@ export default function SubcategoryCard({
                   ? GREEN
                   : RED,
                 background: `white`,
-                border: `solid 2px ${LIGHT_SILVER}`,
+                border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_SILVER}`,
                 borderRight: `0px`,
                 borderTopLeftRadius: 12,
                 borderBottomLeftRadius: 12,
@@ -114,8 +114,12 @@ export default function SubcategoryCard({
                 p: 2,
                 color: isSaving ? IS_SAVING_HEX : GREEN,
                 background: `white`,
-                borderTop: `solid 2px ${LIGHT_SILVER}`,
-                borderBottom: `solid 2px ${LIGHT_SILVER}`,
+                borderTop: `solid 2px ${
+                  isSaving ? IS_SAVING_HEX : LIGHT_SILVER
+                }`,
+                borderBottom: `solid 2px ${
+                  isSaving ? IS_SAVING_HEX : LIGHT_SILVER
+                }`,
                 cursor: !isSaving && 'pointer',
                 '&:hover': !isSaving && {
                   background: LIGHT_SILVER,
@@ -155,22 +159,27 @@ export default function SubcategoryCard({
                   0.3
                 ),
             flex: 1,
-            border:
-              viewMode === CategoriesPageMode.EDIT
-                ? `solid 2px ${getHexFromRGBAObject({
-                    ...getRgbaObjectFromHexString(
-                      isSaving
-                        ? IS_SAVING_HEX
-                        : subcategory?.color || category?.color
-                    ),
-                    a: 0.3,
-                  })}`
-                : isActive
-                ? `solid 2px ${LIGHT_GREEN}`
-                : `solid 2px ${LIGHT_RED}`,
+            border: isSaving
+              ? IS_SAVING_HEX
+              : viewMode === CategoriesPageMode.EDIT
+              ? `solid 2px ${
+                  isSaving
+                    ? IS_SAVING_HEX
+                    : getHexFromRGBAObject({
+                        ...getRgbaObjectFromHexString(
+                          subcategory?.color || category?.color
+                        ),
+                        a: 0.3,
+                      })
+                }`
+              : isActive
+              ? `solid 2px ${LIGHT_GREEN}`
+              : `solid 2px ${LIGHT_RED}`,
             borderLeft:
               viewMode === CategoriesPageMode.EDIT
                 ? `0px`
+                : isSaving
+                ? `solid 2px ${IS_SAVING_HEX}`
                 : isActive
                 ? `solid 2px ${LIGHT_GREEN}`
                 : `solid 2px ${LIGHT_RED}`,

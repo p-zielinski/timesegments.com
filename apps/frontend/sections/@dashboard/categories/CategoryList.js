@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import CategoryCard from './CategoryCard';
 import Iconify from '../../../components/iconify';
-import { LIGHT_GREEN, GREEN, LIGHT_RED, RED } from '../../../consts/colors';
+import {
+  LIGHT_GREEN,
+  GREEN,
+  LIGHT_RED,
+  RED,
+  IS_SAVING_HEX,
+  SUPER_LIGHT_SILVER,
+} from '../../../consts/colors';
 import React from 'react';
 import AddNew from './AddNew';
 import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
@@ -47,15 +54,20 @@ export default function CategoryList({
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Card
                 sx={{
-                  backgroundColor: 'rgba(0,0,0,0.11)',
-                  cursor: 'pointer',
-                  border: `solid 2px ${LIGHT_RED}`,
-                  background: LIGHT_RED,
-                  '&:hover': {
+                  backgroundColor: isSaving
+                    ? IS_SAVING_HEX
+                    : 'rgba(0,0,0,0.11)',
+                  cursor: !isSaving && 'pointer',
+                  color: isSaving && IS_SAVING_HEX,
+                  border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_RED}`,
+                  background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                  '&:hover': !isSaving && {
                     border: `solid 2px ${RED}`,
                   },
                 }}
-                onClick={() => setViewMode(CategoriesPageMode.VIEW)}
+                onClick={() =>
+                  !isSaving && setViewMode(CategoriesPageMode.VIEW)
+                }
               >
                 <Iconify
                   icon={'mdi:cancel-bold'}
@@ -73,6 +85,8 @@ export default function CategoryList({
                   type={CreateNewType.CATEGORY}
                   isEditing={isEditing}
                   setIsEditing={setIsEditing}
+                  isSaving={isSaving}
+                  setIsSaving={setIsSaving}
                 />
               ) : (
                 <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />

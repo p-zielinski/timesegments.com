@@ -3,10 +3,13 @@ import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGra
 import {
   BLUE,
   GREEN,
+  IS_SAVING_HEX,
   LIGHT_BLUE,
   LIGHT_GREEN,
   LIGHT_RED,
+  LIGHT_SILVER,
   RED,
+  SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
@@ -30,23 +33,9 @@ export default function AddNew({
   isEditing,
   setIsEditing,
   category,
-  ...other
+  isSaving,
+  setIsSaving,
 }) {
-  function Picker() {
-    return (
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          borderRadius: '50%',
-          transform: 'translate(-8px, -3px)',
-          backgroundColor: 'rgb(248, 248, 248)',
-          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
-        }}
-      />
-    );
-  }
-
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -81,6 +70,21 @@ export default function AddNew({
     });
   };
 
+  function Picker() {
+    return (
+      <div
+        style={{
+          width: '18px',
+          height: '18px',
+          borderRadius: '50%',
+          transform: 'translate(-8px, -3px)',
+          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
+          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
+        }}
+      />
+    );
+  }
+
   if (
     isEditing?.createNew !==
     `${type}${category?.id ? `4categoryId:${category.id}` : ''}`
@@ -89,20 +93,29 @@ export default function AddNew({
       <Card
         sx={{
           p: 2,
-          cursor: 'pointer',
+          cursor: !isSaving && 'pointer',
           minHeight: 54,
-          background:
-            type === CreateNewType.CATEGORY ? LIGHT_GREEN : LIGHT_BLUE,
+          color: isSaving && IS_SAVING_HEX,
+          background: isSaving
+            ? SUPER_LIGHT_SILVER
+            : type === CreateNewType.CATEGORY
+            ? LIGHT_GREEN
+            : LIGHT_BLUE,
           border: `solid 2px  ${
-            type === CreateNewType.CATEGORY ? LIGHT_GREEN : LIGHT_BLUE
+            isSaving
+              ? IS_SAVING_HEX
+              : type === CreateNewType.CATEGORY
+              ? LIGHT_GREEN
+              : LIGHT_BLUE
           }`,
-          '&:hover': {
+          '&:hover': !isSaving && {
             border: `solid 2px  ${
               type === CreateNewType.CATEGORY ? GREEN : BLUE
             }`,
           },
         }}
         onClick={() =>
+          !isSaving &&
           setIsEditing({
             categoryId: undefined,
             subcategoryId: undefined,
@@ -154,7 +167,7 @@ export default function AddNew({
       validationSchema={validationSchema}
     >
       {({ handleSubmit, values, setFieldValue }) => {
-        setStyledTextField(values.color.hex);
+        setStyledTextField(isSaving ? IS_SAVING_HEX : values.color.hex);
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
@@ -164,41 +177,63 @@ export default function AddNew({
                 sx={{
                   borderTopLeftRadius: '12px',
                   borderTopRightRadius: '12px',
-                  backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
                   background: getRepeatingLinearGradient(
-                    values.color?.hex,
+                    isSaving ? IS_SAVING_HEX : values.color?.hex,
                     0.3
                   ),
-                  border: `solid 2px ${getHexFromRGBAObject({
-                    ...(values.color.rgb as {
-                      r: number;
-                      g: number;
-                      b: number;
-                    }),
-                    a: 0.3,
-                  })}`,
+                  border: `solid 2px ${
+                    isSaving
+                      ? IS_SAVING_HEX
+                      : getHexFromRGBAObject({
+                          ...(values.color.rgb as {
+                            r: number;
+                            g: number;
+                            b: number;
+                          }),
+                          a: 0.3,
+                        })
+                  }`,
                   borderBottom: '0px',
                 }}
               >
                 <Box sx={{ p: 2 }}>
                   <Stack spacing={2}>
-                    <SliderPicker
-                      height={`8px`}
-                      onChange={(value) => {
-                        setFieldValue('color', value);
-                        setStyledTextField(value.hex);
-                        if (category) {
-                          setFieldValue(
-                            'inheritColor',
-                            value.hex === category.color
-                          );
-                        }
+                    <Box
+                      sx={{
+                        filter: isSaving ? 'grayscale(100%)' : 'none',
+                        cursor: isSaving ? 'default' : 'pointer',
                       }}
-                      color={values.color}
-                      pointer={Picker}
-                    />
+                    >
+                      {isSaving && (
+                        <Box
+                          sx={{
+                            width: 'calc(100% + 20px)',
+                            height: 'calc(100% + 20px)',
+                            background: 'transparent',
+                            position: 'absolute',
+                            zIndex: 1,
+                            transform: 'translate(-10px, -10px)',
+                          }}
+                        />
+                      )}
+                      <SliderPicker
+                        height={`8px`}
+                        onChange={(value) => {
+                          setFieldValue('color', value);
+                          setStyledTextField(value.hex);
+                          if (category) {
+                            setFieldValue(
+                              'inheritColor',
+                              value.hex === category.color
+                            );
+                          }
+                        }}
+                        color={values.color}
+                        pointer={Picker}
+                      />
+                    </Box>
                     {category && (
                       <Checkbox
                         label={'Inherit from category'}
@@ -221,6 +256,8 @@ export default function AddNew({
                       type="text"
                       name={`${type}Name`}
                       label={`${capitalize(type)} name`}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
                     />
                   </Stack>
                 </Box>
@@ -229,13 +266,20 @@ export default function AddNew({
                 sx={{
                   display: 'flex',
                   width: '100%',
-                  background: !isFormValid
-                    ? getRepeatingLinearGradient('000000', 0.05, 135)
-                    : LIGHT_GREEN,
+                  background:
+                    !isFormValid || isSaving
+                      ? getRepeatingLinearGradient(
+                          isSaving ? IS_SAVING_HEX : '000000',
+                          isSaving ? 0.2 : 0.05,
+                          135
+                        )
+                      : LIGHT_GREEN,
                   minHeight: 58,
                   borderBottomLeftRadius: 12,
                   borderBottomRightRadius: 12,
-                  border: !isFormValid
+                  border: isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
+                    : !isFormValid
                     ? `solid 2px ${getHexFromRGBAObject({
                         r: 0,
                         g: 0,
@@ -244,8 +288,12 @@ export default function AddNew({
                       })}`
                     : `solid 2px ${LIGHT_GREEN}`,
                   borderTop: 0,
-                  color: !isFormValid ? 'rgba(0,0,0,.2)' : 'black',
-                  cursor: !isFormValid ? 'auto' : 'pointer',
+                  color: isSaving
+                    ? IS_SAVING_HEX
+                    : !isFormValid
+                    ? 'rgba(0,0,0,.2)'
+                    : 'black',
+                  cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                 }}
               >
                 <Box
@@ -253,7 +301,9 @@ export default function AddNew({
                     flex: 1,
                     p: 2,
                     margin: `0 0 -2px -2px`,
-                    border: !isFormValid
+                    border: isSaving
+                      ? `solid 2px ${IS_SAVING_HEX}`
+                      : !isFormValid
                       ? `solid 2px ${getHexFromRGBAObject({
                           r: 0,
                           g: 0,
@@ -264,7 +314,7 @@ export default function AddNew({
                     borderBottomLeftRadius: 12,
                     borderRight: 0,
                     borderTop: 0,
-                    '&:hover': {
+                    '&:hover': !isSaving && {
                       border: !isFormValid
                         ? `solid 2px ${getHexFromRGBAObject({
                             r: 0,
@@ -278,7 +328,7 @@ export default function AddNew({
                     },
                   }}
                   onClick={() => {
-                    handleSubmit();
+                    !isSaving && handleSubmit();
                   }}
                 >
                   <Iconify
@@ -300,9 +350,31 @@ export default function AddNew({
                 <Box
                   sx={{
                     margin: `0 -2px -2px 0`,
-                    cursor: 'pointer',
-                    color: 'black',
-                    border: !isFormValid
+                    cursor: !isSaving && 'pointer',
+                    color: !isSaving && 'black',
+                    border: isSaving
+                      ? `solid 2px ${IS_SAVING_HEX}`
+                      : !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    borderLeft: isSaving
+                      ? `solid 2px transparent`
+                      : !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    borderTop: isSaving
+                      ? `solid 2px transparent`
+                      : !isFormValid
                       ? `solid 2px ${getHexFromRGBAObject({
                           r: 255,
                           g: 0,
@@ -312,15 +384,18 @@ export default function AddNew({
                       : `solid 2px ${LIGHT_RED}`,
                     width: '60px',
                     borderBottomRightRadius: 12,
-                    background: !isFormValid
+                    background: isSaving
+                      ? 'transparent'
+                      : !isFormValid
                       ? `rgba(255, 0, 0, 0.2)`
                       : LIGHT_RED,
-                    '&:hover': {
+                    '&:hover': !isSaving && {
                       background: LIGHT_RED,
                       border: `solid 2px ${RED}`,
                     },
                   }}
                   onClick={() =>
+                    !isSaving &&
                     setIsEditing({
                       categoryId: undefined,
                       subcategoryId: undefined,

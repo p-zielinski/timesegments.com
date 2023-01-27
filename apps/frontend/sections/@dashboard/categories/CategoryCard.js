@@ -92,6 +92,8 @@ export default function CategoryCard({
           category={category}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
         />
       ) : (
         <Card>
@@ -175,19 +177,16 @@ export default function CategoryCard({
                       0.3
                     ),
                 flex: 1,
-                border:
-                  viewMode === CategoriesPageMode.EDIT
-                    ? `solid 2px ${getHexFromRGBAObject({
-                        ...getRgbaObjectFromHexString(
-                          isSaving ? IS_SAVING_HEX : category?.color
-                        ),
-                        a: 0.3,
-                      })}`
-                    : isSaving
-                    ? `solid 2px ${IS_SAVING_HEX}`
-                    : isActive
-                    ? `solid 2px ${LIGHT_GREEN}`
-                    : `solid 2px ${LIGHT_RED}`,
+                border: isSaving
+                  ? `solid 2px ${IS_SAVING_HEX}`
+                  : viewMode === CategoriesPageMode.EDIT
+                  ? `solid 2px ${getHexFromRGBAObject({
+                      ...getRgbaObjectFromHexString(category?.color),
+                      a: 0.3,
+                    })}`
+                  : isActive
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
                 borderLeft:
                   viewMode === CategoriesPageMode.EDIT
                     ? `0px`
@@ -346,6 +345,8 @@ export default function CategoryCard({
                               isEditing={isEditing}
                               setIsEditing={setIsEditing}
                               category={category}
+                              isSaving={isSaving}
+                              setIsSaving={setIsSaving}
                             />
                           ) : (
                             <ShowLimitReached

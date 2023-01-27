@@ -1,6 +1,12 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
-import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../../consts/colors';
+import {
+  GREEN,
+  IS_SAVING_HEX,
+  LIGHT_GREEN,
+  LIGHT_RED,
+  RED,
+} from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
@@ -19,24 +25,10 @@ export default function EditCategory({
   category,
   isEditing,
   setIsEditing,
-  ...other
+  isSaving,
+  setIsSaving,
 }) {
   const [staticCategory] = useState(category);
-
-  function Picker() {
-    return (
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          borderRadius: '50%',
-          transform: 'translate(-8px, -3px)',
-          backgroundColor: 'rgb(248, 248, 248)',
-          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
-        }}
-      />
-    );
-  }
 
   const validationSchema = yup.object().shape({
     categoryName: yup.string().required('Category name is required'),
@@ -75,7 +67,22 @@ export default function EditCategory({
       },
     });
   };
-  setStyledTextField(category.color);
+  setStyledTextField(isSaving ? IS_SAVING_HEX : category.color);
+
+  function Picker() {
+    return (
+      <div
+        style={{
+          width: '18px',
+          height: '18px',
+          borderRadius: '50%',
+          transform: 'translate(-8px, -3px)',
+          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
+          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
+        }}
+      />
+    );
+  }
 
   return (
     <Formik

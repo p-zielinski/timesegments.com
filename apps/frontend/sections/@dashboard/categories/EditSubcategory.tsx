@@ -259,7 +259,7 @@ export default function EditSubcategory({
                     },
                   }}
                   onClick={() => {
-                    handleSubmit();
+                    !isSaving && handleSubmit();
                   }}
                 >
                   <Iconify
