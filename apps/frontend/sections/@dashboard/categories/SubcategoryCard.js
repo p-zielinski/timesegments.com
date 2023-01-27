@@ -85,7 +85,7 @@ export default function SubcategoryCard({
                   ? GREEN
                   : RED,
                 background: `white`,
-                border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_SILVER}`,
+                border: `solid 2px ${LIGHT_SILVER}`,
                 borderRight: `0px`,
                 borderTopLeftRadius: 12,
                 borderBottomLeftRadius: 12,
@@ -114,12 +114,8 @@ export default function SubcategoryCard({
                 p: 2,
                 color: isSaving ? IS_SAVING_HEX : GREEN,
                 background: `white`,
-                borderTop: `solid 2px ${
-                  isSaving ? IS_SAVING_HEX : LIGHT_SILVER
-                }`,
-                borderBottom: `solid 2px ${
-                  isSaving ? IS_SAVING_HEX : LIGHT_SILVER
-                }`,
+                borderTop: `solid 2px ${LIGHT_SILVER}`,
+                borderBottom: `solid 2px ${LIGHT_SILVER}`,
                 cursor: !isSaving && 'pointer',
                 '&:hover': !isSaving && {
                   background: LIGHT_SILVER,
@@ -160,7 +156,7 @@ export default function SubcategoryCard({
                 ),
             flex: 1,
             border: isSaving
-              ? IS_SAVING_HEX
+              ? `solid 2px ${IS_SAVING_HEX}`
               : viewMode === CategoriesPageMode.EDIT
               ? `solid 2px ${
                   isSaving
@@ -188,7 +184,7 @@ export default function SubcategoryCard({
             borderTopLeftRadius: viewMode === CategoriesPageMode.EDIT ? 0 : 12,
             borderBottomLeftRadius:
               viewMode === CategoriesPageMode.EDIT ? 0 : 12,
-            cursor: viewMode === CategoriesPageMode.EDIT ? 'auto' : 'pointer',
+            cursor: !isSaving && 'pointer',
             '&:hover': !isSaving && {
               background:
                 viewMode === CategoriesPageMode.EDIT

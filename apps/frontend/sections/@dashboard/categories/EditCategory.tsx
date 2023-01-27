@@ -108,46 +108,69 @@ export default function EditCategory({
                 sx={{
                   borderTopLeftRadius: '12px',
                   borderTopRightRadius: '12px',
-                  backgroundColor: 'rgba(0,0,0,0.11)',
                   cursor: 'auto',
                   minHeight: 54,
                   background: getRepeatingLinearGradient(
-                    values.color?.hex,
+                    isSaving ? IS_SAVING_HEX : values.color?.hex,
                     0.3
                   ),
-                  border: `solid 2px ${getHexFromRGBAObject({
-                    ...values.color.rgb,
-                    a: 0.3,
-                  })}`,
+                  border: `solid 2px ${
+                    isSaving
+                      ? IS_SAVING_HEX
+                      : getHexFromRGBAObject({
+                          ...values.color.rgb,
+                          a: 0.3,
+                        })
+                  }`,
                   borderBottom: '0px',
                 }}
               >
                 <Box sx={{ p: 2 }}>
                   <Stack spacing={3}>
-                    <SliderPicker
-                      height={`8px`}
-                      onChange={(value) => {
-                        setFieldValue('color', value);
-                        setFieldValue('color', value);
-                        setStyledTextField(value.hex);
-                        setCategories(
-                          categories.map((_category) => {
-                            if (_category.id !== category.id) {
-                              return _category;
-                            }
-                            return { ..._category, color: value.hex };
-                          })
-                        );
+                    <Box
+                      sx={{
+                        filter: isSaving ? 'grayscale(100%)' : 'none',
+                        cursor: isSaving ? 'default' : 'pointer',
                       }}
-                      color={values.color}
-                      pointer={Picker}
-                    />
+                    >
+                      {isSaving && (
+                        <Box
+                          sx={{
+                            width: 'calc(100% + 20px)',
+                            height: 'calc(100% + 20px)',
+                            background: 'transparent',
+                            position: 'absolute',
+                            zIndex: 1,
+                            transform: 'translate(-10px, -10px)',
+                          }}
+                        />
+                      )}
+                      <SliderPicker
+                        height={`8px`}
+                        onChange={(value) => {
+                          setFieldValue('color', value);
+                          setFieldValue('color', value);
+                          setStyledTextField(value.hex);
+                          setCategories(
+                            categories.map((_category) => {
+                              if (_category.id !== category.id) {
+                                return _category;
+                              }
+                              return { ..._category, color: value.hex };
+                            })
+                          );
+                        }}
+                        color={values.color}
+                        pointer={Picker}
+                      />
+                    </Box>
                     <InputText
                       type="text"
                       name="categoryName"
                       label="Category name"
                       TextField={StyledTextField}
-                      helperTextColor={darkHexColor}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
                     />
                   </Stack>
                 </Box>
@@ -156,13 +179,20 @@ export default function EditCategory({
                 sx={{
                   display: 'flex',
                   width: '100%',
-                  background: !isFormValid
-                    ? getRepeatingLinearGradient('000000', 0.05, 135)
-                    : LIGHT_GREEN,
+                  background:
+                    !isFormValid || isSaving
+                      ? getRepeatingLinearGradient(
+                          isSaving ? IS_SAVING_HEX : '000000',
+                          isSaving ? 0.2 : 0.05,
+                          135
+                        )
+                      : LIGHT_GREEN,
                   minHeight: 58,
                   borderBottomLeftRadius: 12,
                   borderBottomRightRadius: 12,
-                  border: !isFormValid
+                  border: isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
+                    : !isFormValid
                     ? `solid 2px ${getHexFromRGBAObject({
                         r: 0,
                         g: 0,
@@ -171,8 +201,12 @@ export default function EditCategory({
                       })}`
                     : `solid 2px ${LIGHT_GREEN}`,
                   borderTop: 0,
-                  color: !isFormValid ? 'rgba(0,0,0,.2)' : 'black',
-                  cursor: !isFormValid ? 'auto' : 'pointer',
+                  color: isSaving
+                    ? IS_SAVING_HEX
+                    : !isFormValid
+                    ? 'rgba(0,0,0,.2)'
+                    : 'black',
+                  cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                 }}
               >
                 <Box
@@ -180,7 +214,9 @@ export default function EditCategory({
                     flex: 1,
                     p: 2,
                     margin: `0 0 -2px -2px`,
-                    border: !isFormValid
+                    border: isSaving
+                      ? `solid 2px ${IS_SAVING_HEX}`
+                      : !isFormValid
                       ? `solid 2px ${getHexFromRGBAObject({
                           r: 0,
                           g: 0,
@@ -191,7 +227,7 @@ export default function EditCategory({
                     borderBottomLeftRadius: 12,
                     borderRight: 0,
                     borderTop: 0,
-                    '&:hover': {
+                    '&:hover': !isSaving && {
                       border: !isFormValid
                         ? `solid 2px ${getHexFromRGBAObject({
                             r: 0,
@@ -205,7 +241,7 @@ export default function EditCategory({
                     },
                   }}
                   onClick={() => {
-                    handleSubmit();
+                    !isSaving && handleSubmit();
                   }}
                 >
                   <Iconify
@@ -227,9 +263,31 @@ export default function EditCategory({
                 <Box
                   sx={{
                     margin: `0 -2px -2px 0`,
-                    cursor: 'pointer',
-                    color: 'black',
-                    border: !isFormValid
+                    cursor: !isSaving && 'pointer',
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    border: isSaving
+                      ? `solid 2px ${IS_SAVING_HEX}`
+                      : !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    borderLeft: isSaving
+                      ? `solid 2px transparent`
+                      : !isFormValid
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          r: 255,
+                          g: 0,
+                          b: 0,
+                          a: 0.2,
+                        })}`
+                      : `solid 2px ${LIGHT_RED}`,
+                    borderTop: isSaving
+                      ? `solid 2px transparent`
+                      : !isFormValid
                       ? `solid 2px ${getHexFromRGBAObject({
                           r: 255,
                           g: 0,
@@ -239,15 +297,20 @@ export default function EditCategory({
                       : `solid 2px ${LIGHT_RED}`,
                     width: '60px',
                     borderBottomRightRadius: 12,
-                    background: !isFormValid
+                    background: isSaving
+                      ? 'transparent'
+                      : !isFormValid
                       ? `rgba(255, 0, 0, 0.2)`
                       : LIGHT_RED,
-                    '&:hover': {
+                    '&:hover': !isSaving && {
                       background: LIGHT_RED,
                       border: `solid 2px ${RED}`,
                     },
                   }}
                   onClick={() => {
+                    if (isSaving) {
+                      return;
+                    }
                     setCategories(
                       categories.map((_category) => {
                         if (_category.id !== category.id) {

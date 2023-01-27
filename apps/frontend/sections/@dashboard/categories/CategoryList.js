@@ -122,11 +122,11 @@ export default function CategoryList({
           >
             <Card
               sx={{
-                backgroundColor: 'rgba(0,0,0,0.11)',
-                cursor: 'pointer',
-                border: `solid 2px ${LIGHT_GREEN}`,
-                background: LIGHT_GREEN,
-                '&:hover': {
+                cursor: !isSaving && 'pointer',
+                color: isSaving && IS_SAVING_HEX,
+                border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_GREEN}`,
+                background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_GREEN,
+                '&:hover': !isSaving && {
                   border: `solid 2px ${GREEN}`,
                 },
               }}
@@ -134,7 +134,7 @@ export default function CategoryList({
               <Iconify
                 icon={'material-symbols:edit'}
                 width={40}
-                sx={{ m: -2, position: 'absolute', bottom: 25, left: 25 }}
+                sx={{ m: -2, position: 'absolute', bottom: 22, left: 25 }}
               />
               <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
                 <Typography variant="subtitle2" noWrap>

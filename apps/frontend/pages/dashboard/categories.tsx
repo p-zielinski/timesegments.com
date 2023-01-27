@@ -31,18 +31,18 @@ export default function Categories({ user, limits }: Props) {
     user?.categories || []
   );
   const [viewMode, setViewMode] = useState<CategoriesPageMode>(
-    CategoriesPageMode.EDIT
+    CategoriesPageMode.VIEW
   );
   const [isEditing, setIsEditing] = useState<{
     categoryId: string;
     subcategoryId: string;
     createNew: string;
   }>({
-    categoryId: 'clcta0wgu0008qw55laz9uhwu',
-    subcategoryId: 'clcta18jv000bqw557jwc50lq',
-    createNew: 'category',
+    categoryId: undefined,
+    subcategoryId: undefined,
+    createNew: undefined,
   });
-  const [isSaving, setIsSaving] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   return (
     <DashboardLayout>
@@ -51,7 +51,11 @@ export default function Categories({ user, limits }: Props) {
       </Helmet>
 
       <Container>
-        <Typography variant="h4" sx={{ mb: 1 }}>
+        <Typography
+          variant="h4"
+          sx={{ mb: 1 }}
+          onClick={() => setIsSaving(!isSaving)}
+        >
           Categories & subcategories
         </Typography>
 

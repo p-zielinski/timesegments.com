@@ -200,10 +200,7 @@ export default function CategoryCard({
                   viewMode === CategoriesPageMode.EDIT ? 0 : 12,
                 borderBottomLeftRadius:
                   viewMode === CategoriesPageMode.EDIT ? 0 : 12,
-                cursor:
-                  !isSaving &&
-                  viewMode === CategoriesPageMode.EDIT &&
-                  'pointer',
+                cursor: !isSaving && 'pointer',
                 '&:hover': !isSaving && {
                   background:
                     viewMode === CategoriesPageMode.EDIT
@@ -322,18 +319,10 @@ export default function CategoryCard({
                           )
                         )
                       ) : (
-                        <Card
-                          sx={{
-                            backgroundColor: 'rgba(0,0,0,0.11)',
-                            border: `solid 2px rgba(0,0,0,0.02)`,
-                          }}
-                        >
-                          <Stack spacing={2} sx={{ p: 2 }}>
-                            <Typography variant="subtitle3" noWrap>
-                              No subcategories to display
-                            </Typography>
-                          </Stack>
-                        </Card>
+                        <ShowNoShow
+                          isSaving={isSaving}
+                          type={ShowNoShowType.SUBCATEGORIES}
+                        />
                       )}
                       {viewMode === CategoriesPageMode.EDIT && (
                         <>
@@ -380,7 +369,10 @@ export default function CategoryCard({
                     </>
                   ))
               ) : (
-                <ShowNoShow type={ShowNoShowType.SUBCATEGORIES} />
+                <ShowNoShow
+                  isSaving={isSaving}
+                  type={ShowNoShowType.SUBCATEGORIES}
+                />
               )}
             </Box>
           </Grid>

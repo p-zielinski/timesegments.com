@@ -1,16 +1,31 @@
 import { Box, Card as CardBlock, Grid, Stack, Typography } from '@mui/material';
 import { ShowNoShowType } from '../../../enum/showNoShowType';
+import {
+  IS_SAVING_HEX,
+  LIGHT_SILVER,
+  SUPER_LIGHT_SILVER,
+} from '../../../consts/colors';
 
-export default function ShowNoShow({ type }: { type: ShowNoShowType }) {
+export default function ShowNoShow({
+  type,
+  isSaving,
+}: {
+  type: ShowNoShowType;
+  isSaving: boolean;
+}) {
   const Card = (
     <CardBlock
       sx={{
-        backgroundColor: 'rgba(0,0,0,0.11)',
-        border: `solid 2px rgba(0,0,0,0.02)`,
+        backgroundColor: SUPER_LIGHT_SILVER,
+        border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_SILVER}`,
+        color: isSaving ? IS_SAVING_HEX : 'black',
+        minHeight: 58,
       }}
     >
       <Stack spacing={2} sx={{ p: 2 }}>
-        <Typography noWrap>No {type} to display</Typography>
+        <Typography variant="body2" noWrap>
+          No {type} to display
+        </Typography>
       </Stack>
     </CardBlock>
   );
