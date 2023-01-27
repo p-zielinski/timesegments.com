@@ -18,6 +18,8 @@ import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
 import EditSubcategory from './EditSubcategory';
+import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
+import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
 
 // ----------------------------------------------------------------------
 
@@ -197,12 +199,14 @@ export default function SubcategoryCard({
                   : LIGHT_GREEN,
               border:
                 viewMode === CategoriesPageMode.EDIT
-                  ? `solid 2px ${getHexFromRGBAObject({
-                      ...getRgbaObjectFromHexString(
-                        subcategory?.color || category?.color
-                      ),
-                      a: 0.3,
-                    })}`
+                  ? `solid 2px ${getHexFromRGBObject(
+                      getDarkColorBasedOnSliderPickerSchema(
+                        getRgbaObjectFromHexString(
+                          subcategory?.color || category.color
+                        ),
+                        'very bright'
+                      )
+                    )}`
                   : !isActive
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,

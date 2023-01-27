@@ -26,6 +26,8 @@ import { ShowNoShowType } from '../../../enum/showNoShowType';
 import React from 'react';
 import ShowLimitReached from './ShowLimitReached';
 import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
+import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
+import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
 
 // ----------------------------------------------------------------------
 
@@ -210,10 +212,12 @@ export default function CategoryCard({
                       : LIGHT_GREEN,
                   border:
                     viewMode === CategoriesPageMode.EDIT
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          ...getRgbaObjectFromHexString(category?.color),
-                          a: 0.3,
-                        })}`
+                      ? `solid 2px ${getHexFromRGBObject(
+                          getDarkColorBasedOnSliderPickerSchema(
+                            getRgbaObjectFromHexString(category.color),
+                            'very bright'
+                          )
+                        )}`
                       : !isActive
                       ? `solid 2px ${LIGHT_GREEN}`
                       : `solid 2px ${LIGHT_RED}`,

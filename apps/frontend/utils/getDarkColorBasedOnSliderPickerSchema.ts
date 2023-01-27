@@ -1,6 +1,6 @@
 export const getDarkColorBasedOnSliderPickerSchema = (
   rgbaObject,
-  darknessLevel: 'dark' | 'normal' = 'normal'
+  darknessLevel: 'dark' | 'normal' | 'bright' | 'very bright' = 'normal'
 ) => {
   const rgbObject = {
     r: rgbaObject.r,
@@ -52,6 +52,10 @@ export const getDarkColorBasedOnSliderPickerSchema = (
   for (const key of Object.keys(baseColor)) {
     if (darknessLevel === 'normal') {
       newRgbObject[key] = Math.floor(baseColor[key] / 2.8481) + 45;
+    } else if (darknessLevel === 'very bright') {
+      newRgbObject[key] = Math.floor(baseColor[key] / 2.8539) + 121;
+    } else if (darknessLevel === 'bright') {
+      newRgbObject[key] = Math.floor(baseColor[key] / 2) + 64;
     } else {
       newRgbObject[key] = Math.floor(baseColor[key] / 4.8846) + 25;
     }

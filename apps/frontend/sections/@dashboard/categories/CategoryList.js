@@ -110,7 +110,12 @@ export default function CategoryList({
                 />
               </Grid>
             ))
-          : !isEditing && <ShowNoShow type={ShowNoShowType.CATEGORIES} />}
+          : !isEditing && (
+              <ShowNoShow
+                type={ShowNoShowType.CATEGORIES}
+                isSaving={isSaving}
+              />
+            )}
         {viewMode === CategoriesPageMode.VIEW && (
           <Grid
             key={'edit_categories'}
