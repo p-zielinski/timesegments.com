@@ -22,7 +22,7 @@ import { InputText } from '../Form/Text';
 import { CreateNewType } from '../../../enum/createNewType';
 import capitalize from 'capitalize';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
-import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { Checkbox } from '../Form/Checkbox';
@@ -39,7 +39,7 @@ export default function AddNew({
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
-      getDarkColorBasedOnSliderPickerSchema(
+      getColorShadeBasedOnSliderPickerSchema(
         getRgbaObjectFromHexString(hexColor)
       )
     );

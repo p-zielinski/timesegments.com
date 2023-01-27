@@ -17,7 +17,7 @@ import { InputText } from '../Form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { Checkbox } from '../Form/Checkbox';
 import { styled } from '@mui/material/styles';
-import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 
 export default function EditSubcategory({
@@ -34,7 +34,7 @@ export default function EditSubcategory({
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
-      getDarkColorBasedOnSliderPickerSchema(
+      getColorShadeBasedOnSliderPickerSchema(
         getRgbaObjectFromHexString(hexColor)
       )
     );

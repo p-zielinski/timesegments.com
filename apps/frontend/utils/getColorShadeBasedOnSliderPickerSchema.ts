@@ -1,4 +1,4 @@
-export const getDarkColorBasedOnSliderPickerSchema = (
+export const getColorShadeBasedOnSliderPickerSchema = (
   rgbaObject,
   darknessLevel: 'dark' | 'normal' | 'bright' | 'very bright' = 'normal'
 ) => {

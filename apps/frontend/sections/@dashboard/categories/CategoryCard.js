@@ -27,7 +27,7 @@ import React from 'react';
 import ShowLimitReached from './ShowLimitReached';
 import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
-import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 
 // ----------------------------------------------------------------------
 
@@ -213,7 +213,7 @@ export default function CategoryCard({
                   border:
                     viewMode === CategoriesPageMode.EDIT
                       ? `solid 2px ${getHexFromRGBObject(
-                          getDarkColorBasedOnSliderPickerSchema(
+                          getColorShadeBasedOnSliderPickerSchema(
                             getRgbaObjectFromHexString(category.color),
                             'very bright'
                           )

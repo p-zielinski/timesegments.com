@@ -16,7 +16,7 @@ import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
-import { getDarkColorBasedOnSliderPickerSchema } from '../../../utils/getDarkColorBasedOnSliderPickerSchema';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { styled } from '@mui/material/styles';
 
 export default function EditCategory({
@@ -37,7 +37,7 @@ export default function EditCategory({
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
-      getDarkColorBasedOnSliderPickerSchema(
+      getColorShadeBasedOnSliderPickerSchema(
         getRgbaObjectFromHexString(hexColor)
       )
     );
