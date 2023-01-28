@@ -67,7 +67,7 @@ export class CategoryController {
       categoryId,
       user
     );
-    if (!updateCategoryStatus.success) {
+    if (updateCategoryStatus.success === false) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,
       });

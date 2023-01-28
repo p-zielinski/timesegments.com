@@ -63,7 +63,7 @@ export class SubcategoryController {
     const { subcategoryId } = setSubcategoryActiveDto;
     const updateSubcategoryStatus =
       await this.subcategoryService.setSubcategoryActive(subcategoryId, user);
-    if (!updateSubcategoryStatus.success) {
+    if (updateSubcategoryStatus.success === false) {
       throw new BadRequestException({
         error: updateSubcategoryStatus.error,
       });

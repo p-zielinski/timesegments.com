@@ -79,7 +79,9 @@ export class CategoryService {
   public async setCategoryActive(
     categoryId: string,
     user: User
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+  ): Promise<
+    { success: true; category?: Category } | { success: false; error: string }
+  > {
     const categoryWithUser = await this.findFirstUseId(categoryId, {
       user: true,
     });
