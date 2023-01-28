@@ -71,14 +71,10 @@ export class UserService {
     const activeSubcategories = subcategories.filter(
       (subcategory) => subcategory.active
     );
-    const activeTimeLogId =
+    const activeTimeLog =
       await this.timeLogService.findFirstTimeLogWhereNotEnded(userId);
     if (
-      !(
-        activeTimeLogId ||
-        activeCategories.length ||
-        activeSubcategories.length
-      )
+      !(activeTimeLog || activeCategories.length || activeSubcategories.length)
     ) {
       return {
         status: true,
@@ -91,8 +87,8 @@ export class UserService {
     activeSubcategories.forEach((subcategory) =>
       this.subcategoryService.setSubcategoryActiveState(subcategory.id, false)
     );
-    if (activeTimeLogId) {
-      await this.timeLogService.setTimeLogAsEnded(activeTimeLogId); //don't wait
+    if (activeTimeLog) {
+      await this.timeLogService.setTimeLogAsEnded(activeTimeLog.id); //don't wait
     }
     return {
       status: true,

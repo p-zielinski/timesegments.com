@@ -90,20 +90,19 @@ export default function CategoryCard({
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.category) {
-      const newCategories = categories.map((category) => {
-        const subcategories = category.subcategories.map((subcategory) => {
-          subcategory.active = false;
-          return subcategory;
-        });
-        if (category.id === response.category?.id) {
-          return { ...response.category, subcategories };
-        }
-        return { ...category, active: false, subcategories };
-      });
-      console.log(newCategories);
-      setCategories(newCategories);
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories.map((subcategory) => {
+            subcategory.active = false;
+            return subcategory;
+          });
+          if (category.id === response.category?.id) {
+            return { ...response.category, subcategories };
+          }
+          return { ...category, active: false, subcategories };
+        })
+      );
     }
-    console.log(response);
     setIsSaving(false);
     return;
   };
