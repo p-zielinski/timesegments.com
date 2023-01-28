@@ -5,13 +5,10 @@ import { PrismaService } from '../../prisma.service';
 export class TimeLogService {
   constructor(private prisma: PrismaService) {}
 
-  public async findFirstTimeLogIdWhereNotEnded(userId: string) {
-    return (
-      await this.prisma.timeLog.findFirst({
-        where: { userId, endedAt: null },
-        select: { id: true },
-      })
-    )?.id;
+  public async findFirstTimeLogWhereNotEnded(userId: string) {
+    return await this.prisma.timeLog.findFirst({
+      where: { userId, endedAt: null },
+    });
   }
 
   public async setTimeLogAsEnded(id: string) {

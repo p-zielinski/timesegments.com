@@ -33,7 +33,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async handleRequestGetMe(@UserDecorator() user: User) {
-    return user;
+    return { user };
   }
 
   @UseGuards(JwtAuthGuard)

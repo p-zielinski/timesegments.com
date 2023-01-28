@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 // @mui
 import { Container, Stack, Typography } from '@mui/material';
 // components

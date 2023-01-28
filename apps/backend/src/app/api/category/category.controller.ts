@@ -32,7 +32,6 @@ export class CategoryController {
     if (!createCategoryStatus.success) {
       throw new BadRequestException({
         error: createCategoryStatus.error,
-        statusCode: 400,
       });
     }
     return createCategoryStatus.category;
@@ -53,10 +52,9 @@ export class CategoryController {
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return updateCategoryStatus.category;
+    return updateCategoryStatus;
   }
 
   @Post('set-active')
@@ -72,10 +70,9 @@ export class CategoryController {
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return updateCategoryStatus.category;
+    return updateCategoryStatus;
   }
 
   @Post('rename')
@@ -92,9 +89,8 @@ export class CategoryController {
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return updateCategoryStatus.category;
+    return updateCategoryStatus;
   }
 }

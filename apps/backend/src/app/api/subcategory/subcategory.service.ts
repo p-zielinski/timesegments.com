@@ -136,7 +136,7 @@ export class SubcategoryService {
       this.setSubcategoryActiveState(activeSubcategory.id, false); //don't wait
     }
     const timeLogNotEndedId =
-      await this.timeLogService.findFirstTimeLogIdWhereNotEnded(user.id);
+      await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
     if (timeLogNotEndedId) {
       await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
     }
@@ -193,6 +193,22 @@ export class SubcategoryService {
     return { success: true, subcategory: updatedSubcategory };
   }
 
+  public async findActive(userId: string) {
+    return await this.prisma.subcategory.findFirst({
+      where: { userId, active: true },
+    });
+  }
+
+  public async setSubcategoryActiveState(
+    subcategoryId: string,
+    active: boolean
+  ) {
+    return await this.prisma.subcategory.update({
+      where: { id: subcategoryId },
+      data: { active },
+    });
+  }
+
   private async countCategorySubcategories(categoryId: string) {
     return await this.prisma.subcategory.count({ where: { categoryId } });
   }
@@ -218,22 +234,6 @@ export class SubcategoryService {
     return await this.prisma.subcategory.update({
       where: { id: subcategoryId },
       data: { name },
-    });
-  }
-
-  public async findActive(userId: string) {
-    return await this.prisma.subcategory.findFirst({
-      where: { userId, active: true },
-    });
-  }
-
-  public async setSubcategoryActiveState(
-    subcategoryId: string,
-    active: boolean
-  ) {
-    return await this.prisma.subcategory.update({
-      where: { id: subcategoryId },
-      data: { active },
     });
   }
 }

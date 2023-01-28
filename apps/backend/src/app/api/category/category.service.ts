@@ -89,49 +89,46 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
-    const activeSubcategory = await this.subcategoryService.findActive(user.id);
-    if (categoryWithUser.active && !activeSubcategory) {
-      return {
-        success: true,
-        category: { ...categoryWithUser, user: undefined } as Category,
-      };
-    }
-    if (categoryWithUser.active && activeSubcategory?.id) {
-      this.subcategoryService.setSubcategoryActiveState(
-        activeSubcategory.id,
-        false
-      ); //don't wait
-      const timeLogNotEndedId =
-        await this.timeLogService.findFirstTimeLogIdWhereNotEnded(user.id);
-      if (timeLogNotEndedId) {
-        await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
-      }
+    const timeLogNotEnded =
+      await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
+    if (!timeLogNotEnded) {
       await this.timeLogService.createNew(user.id, categoryWithUser.id);
       return {
         success: true,
+        category: await this.setCategoryActiveState(categoryWithUser.id, true),
+      };
+    }
+    if (
+      timeLogNotEnded.categoryId === categoryWithUser.id &&
+      timeLogNotEnded.subcategoryId
+    ) {
+      await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+      await this.timeLogService.createNew(user.id, categoryWithUser.id);
+      this.subcategoryService.setSubcategoryActiveState(
+        timeLogNotEnded.subcategoryId,
+        false
+      ); //don't wait
+      return {
+        success: true,
         category: { ...categoryWithUser, user: undefined } as Category,
       };
     }
-    const activeCategory = await this.findActive(user.id);
-    if (activeSubcategory) {
+    if (timeLogNotEnded.categoryId) {
+      this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
+    }
+    if (timeLogNotEnded.subcategoryId) {
       this.subcategoryService.setSubcategoryActiveState(
-        activeSubcategory.id,
+        timeLogNotEnded.subcategoryId,
         false
       ); //don't wait
     }
-    if (activeCategory) {
-      this.setCategoryActiveState(activeCategory.id, false);
-      const timeLogNotEndedId =
-        await this.timeLogService.findFirstTimeLogIdWhereNotEnded(user.id);
-      if (timeLogNotEndedId) {
-        await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
-      }
-    }
-    this.setCategoryActiveState(categoryId, true); //don't wait
-    await this.timeLogService.createNew(user.id, categoryId);
+    await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
     return {
       success: true,
-      category: { ...categoryWithUser, user: undefined } as Category,
+      category: await this.setCategoryActiveState(
+        categoryWithUser.id,
+        timeLogNotEnded.categoryId !== categoryWithUser.id
+      ),
     };
   }
 

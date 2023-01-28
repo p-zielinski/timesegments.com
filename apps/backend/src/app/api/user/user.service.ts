@@ -72,7 +72,7 @@ export class UserService {
       (subcategory) => subcategory.active
     );
     const activeTimeLogId =
-      await this.timeLogService.findFirstTimeLogIdWhereNotEnded(userId);
+      await this.timeLogService.findFirstTimeLogWhereNotEnded(userId);
     if (
       !(
         activeTimeLogId ||

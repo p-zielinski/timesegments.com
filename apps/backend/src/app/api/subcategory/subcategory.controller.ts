@@ -12,7 +12,6 @@ import { RenameSubcategoryDto } from './dto/renameSubcategory.dto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
-import { SetCategoryActiveDto } from '../category/dto/setCategoryActive.dto';
 import { SetSubcategoryActiveDto } from './setSubcategoryActive.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -31,10 +30,9 @@ export class SubcategoryController {
     if (!createCategoryStatus.success) {
       throw new BadRequestException({
         error: createCategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return createCategoryStatus.subcategory;
+    return createCategoryStatus;
   }
 
   @Post('change-visibility')
@@ -52,10 +50,9 @@ export class SubcategoryController {
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return updateCategoryStatus.subcategory;
+    return updateCategoryStatus;
   }
 
   @Post('set-active')
@@ -69,10 +66,9 @@ export class SubcategoryController {
     if (!updateSubcategoryStatus.success) {
       throw new BadRequestException({
         error: updateSubcategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return updateSubcategoryStatus.subcategory;
+    return updateSubcategoryStatus;
   }
 
   @Post('rename')
@@ -90,9 +86,8 @@ export class SubcategoryController {
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({
         error: updateCategoryStatus.error,
-        statusCode: 400,
       });
     }
-    return updateCategoryStatus.subcategory;
+    return updateCategoryStatus;
   }
 }

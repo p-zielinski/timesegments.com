@@ -30,7 +30,6 @@ export class TokenController {
     if (!revokeSingleTokenStatus.success) {
       throw new BadRequestException({
         error: revokeSingleTokenStatus.error,
-        statusCode: 400,
       });
     }
     return { message: revokeSingleTokenStatus.message };

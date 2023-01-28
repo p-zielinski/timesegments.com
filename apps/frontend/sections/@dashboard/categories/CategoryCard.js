@@ -28,6 +28,7 @@ import ShowLimitReached from './ShowLimitReached';
 import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
+import { handleFetch } from '../../../utils/handleFetch';
 
 // ----------------------------------------------------------------------
 
@@ -77,10 +78,33 @@ export default function CategoryCard({
   };
 
   const changeCategoryVisibility = () => {
+    console.log('22');
     return;
   };
 
-  const setCategoryAsActive = () => {
+  const changeCategoryActiveState = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'category/set-active',
+      body: { categoryId: category.id },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.category) {
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories.map((subcategory) => {
+            subcategory.active = false;
+            return subcategory;
+          });
+          if (category.id === response.category?.id) {
+            return { ...response.category, subcategories };
+          }
+          return { ...category, subcategories };
+        })
+      );
+    }
+    console.log(response);
+    setIsSaving(false);
     return;
   };
 
@@ -230,7 +254,7 @@ export default function CategoryCard({
                   borderRight: 0,
                 },
               }}
-              onClick={() => !isSaving && setCategoryAsActive}
+              onClick={() => !isSaving && changeCategoryActiveState()}
             >
               <Stack
                 spacing={1}
