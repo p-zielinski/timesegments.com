@@ -121,9 +121,7 @@ export class CategoryService {
         } as Category,
       };
     }
-    if (timeLogNotEnded.categoryId) {
-      await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
-    }
+    await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
     if (timeLogNotEnded.subcategoryId) {
       await this.subcategoryService.setSubcategoryActiveState(
         timeLogNotEnded.subcategoryId,

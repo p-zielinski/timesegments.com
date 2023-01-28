@@ -95,12 +95,14 @@ export class SubcategoryService {
   public async setSubcategoryActive(
     subcategoryId: string,
     user: User
-  ): Promise<{
-    success: boolean;
-    error?: string;
-    subcategory?: Subcategory;
-    category?: Category;
-  }> {
+  ): Promise<
+    | {
+        success: true;
+        subcategory: Subcategory;
+        category: Category;
+      }
+    | { success: false; error: string }
+  > {
     const subcategoryWithUserAndCategory = await this.findFirstUseId(
       subcategoryId,
       {
@@ -117,49 +119,91 @@ export class SubcategoryService {
         error: `Subcategory not found, bad request`,
       };
     }
-    if (subcategoryWithUserAndCategory.active) {
-      return {
-        success: true,
-        subcategory: {
-          ...subcategoryWithUserAndCategory,
-          user: undefined,
-          category: undefined,
-        } as Subcategory,
-      };
-    }
-    const activeCategory = await this.categoryService.findActive(user.id);
-    if (activeCategory?.id) {
-      this.categoryService.setCategoryActiveState(activeCategory.id, false); //don't wait
-    }
-    const activeSubcategory = await this.findActive(user.id);
-    if (activeSubcategory?.id) {
-      this.setSubcategoryActiveState(activeSubcategory.id, false); //don't wait
-    }
     const timeLogNotEnded =
       await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
-    if (timeLogNotEnded) {
+    if (!timeLogNotEnded) {
+      await this.timeLogService.createNew(
+        user.id,
+        subcategoryWithUserAndCategory.category.id,
+        subcategoryWithUserAndCategory.id
+      );
+      const category = await this.categoryService.setCategoryActiveState(
+        subcategoryWithUserAndCategory.category.id,
+        true
+      );
+      return {
+        success: true,
+        category,
+        subcategory: await this.setSubcategoryActiveState(
+          subcategoryWithUserAndCategory.id,
+          true
+        ),
+      };
+    }
+    if (
+      timeLogNotEnded.categoryId === subcategoryWithUserAndCategory.category.id
+    ) {
       await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+      if (timeLogNotEnded.subcategoryId === subcategoryWithUserAndCategory.id) {
+        const category = await this.categoryService.setCategoryActiveState(
+          subcategoryWithUserAndCategory.category.id,
+          false
+        );
+        return {
+          success: true,
+          category,
+          subcategory: await this.setSubcategoryActiveState(
+            subcategoryWithUserAndCategory.id,
+            false
+          ),
+        };
+      }
+      if (timeLogNotEnded.subcategoryId) {
+        await this.setSubcategoryActiveState(
+          timeLogNotEnded.subcategoryId,
+          false
+        );
+      }
+      await this.timeLogService.createNew(
+        user.id,
+        subcategoryWithUserAndCategory.category.id,
+        subcategoryWithUserAndCategory.id
+      );
+      return {
+        success: true,
+        category: subcategoryWithUserAndCategory.category,
+        subcategory: await this.setSubcategoryActiveState(
+          subcategoryWithUserAndCategory.id,
+          true
+        ),
+      };
+    }
+    await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+    await this.categoryService.setCategoryActiveState(
+      timeLogNotEnded.categoryId,
+      false
+    );
+    if (timeLogNotEnded.subcategoryId) {
+      await this.setSubcategoryActiveState(
+        timeLogNotEnded.subcategoryId,
+        false
+      );
     }
     await this.timeLogService.createNew(
       user.id,
       subcategoryWithUserAndCategory.category.id,
       subcategoryWithUserAndCategory.id
     );
-    this.categoryService.setCategoryActiveState(
-      subcategoryWithUserAndCategory.category.id,
-      true
-    ); //don't wait
-    this.setSubcategoryActiveState(subcategoryWithUserAndCategory.id, true); //don't wait
-
     return {
       success: true,
-      subcategory: {
-        ...subcategoryWithUserAndCategory,
-        user: undefined,
-        category: undefined,
-        active: true,
-      } as Subcategory,
-      category: { ...subcategoryWithUserAndCategory.category, active: true },
+      category: await this.categoryService.setCategoryActiveState(
+        subcategoryWithUserAndCategory.category.id,
+        true
+      ),
+      subcategory: await this.setSubcategoryActiveState(
+        subcategoryWithUserAndCategory.id,
+        true
+      ),
     };
   }
 

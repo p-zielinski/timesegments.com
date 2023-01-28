@@ -20,6 +20,7 @@ import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
 import EditSubcategory from './EditSubcategory';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
+import { handleFetch } from '../../../utils/handleFetch';
 
 // ----------------------------------------------------------------------
 
@@ -51,7 +52,37 @@ export default function SubcategoryCard({
     return;
   };
 
-  const setSubcategoryAsActive = () => {
+  const setSubcategoryAsActive = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'subcategory/set-active',
+      body: { subcategoryId: subcategory.id },
+      method: 'POST',
+    });
+
+    console.log(response);
+    if (
+      response.statusCode === 201 &&
+      response?.subcategory &&
+      response?.category
+    ) {
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories.map((subcategory) => {
+            if (subcategory.id === response.subcategory.id) {
+              return response.subcategory;
+            }
+            subcategory.active = false;
+            return subcategory;
+          });
+          if (category.id === response.category?.id) {
+            return { ...response.category, subcategories };
+          }
+          return { ...category, active: false, subcategories };
+        })
+      );
+    }
+    setIsSaving(false);
     return;
   };
 
@@ -143,19 +174,10 @@ export default function SubcategoryCard({
         <Box
           sx={{
             color: isSaving && IS_SAVING_HEX,
-            background: isActive
-              ? getRgbaStringFromHexString(
-                  isSaving
-                    ? IS_SAVING_HEX
-                    : subcategory?.color || category?.color,
-                  0.3
-                )
-              : getRepeatingLinearGradient(
-                  isSaving
-                    ? IS_SAVING_HEX
-                    : subcategory?.color || category?.color,
-                  0.3
-                ),
+            background: getRepeatingLinearGradient(
+              isSaving ? IS_SAVING_HEX : subcategory?.color || category?.color,
+              0.3
+            ),
             flex: 1,
             border: isSaving
               ? `solid 2px ${IS_SAVING_HEX}`
@@ -186,7 +208,8 @@ export default function SubcategoryCard({
             borderTopLeftRadius: viewMode === CategoriesPageMode.EDIT ? 0 : 12,
             borderBottomLeftRadius:
               viewMode === CategoriesPageMode.EDIT ? 0 : 12,
-            cursor: !isSaving && 'pointer',
+            cursor:
+              !isSaving && viewMode === CategoriesPageMode.VIEW && 'pointer',
             '&:hover': !isSaving && {
               background:
                 viewMode === CategoriesPageMode.EDIT
@@ -199,14 +222,16 @@ export default function SubcategoryCard({
                   : LIGHT_GREEN,
               border:
                 viewMode === CategoriesPageMode.EDIT
-                  ? `solid 2px ${getHexFromRGBObject(
-                      getColorShadeBasedOnSliderPickerSchema(
-                        getRgbaObjectFromHexString(
-                          subcategory?.color || category.color
-                        ),
-                        'very bright'
-                      )
-                    )}`
+                  ? `solid 2px ${
+                      isSaving
+                        ? IS_SAVING_HEX
+                        : getHexFromRGBAObject({
+                            ...getRgbaObjectFromHexString(
+                              subcategory?.color || category?.color
+                            ),
+                            a: 0.3,
+                          })
+                    }`
                   : !isActive
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,
@@ -218,7 +243,11 @@ export default function SubcategoryCard({
                   : `solid 2px ${LIGHT_RED}`,
             },
           }}
-          onClick={() => !isSaving && setSubcategoryAsActive}
+          onClick={() =>
+            !isSaving &&
+            viewMode !== CategoriesPageMode.EDIT &&
+            setSubcategoryAsActive()
+          }
         >
           <Stack
             spacing={1}

@@ -48,6 +48,8 @@ export default function CategoryCard({
   limits,
 }) {
   const { active: isActive } = category;
+  const doesAnySubcategoryWithinCurrentCategoryActive =
+    !!category.subcategories.find((subcategory) => subcategory.active);
 
   const reverseExpandSubcategories = () => {
     setCategories(
@@ -192,15 +194,10 @@ export default function CategoryCard({
             <Box
               sx={{
                 color: isSaving && IS_SAVING_HEX,
-                background: isActive
-                  ? getRgbaStringFromHexString(
-                      isSaving ? IS_SAVING_HEX : category?.color,
-                      0.3
-                    )
-                  : getRepeatingLinearGradient(
-                      isSaving ? IS_SAVING_HEX : category?.color,
-                      0.3
-                    ),
+                background: getRepeatingLinearGradient(
+                  isSaving ? IS_SAVING_HEX : category?.color,
+                  0.3
+                ),
                 flex: 1,
                 border: isSaving
                   ? `solid 2px ${IS_SAVING_HEX}`
@@ -225,35 +222,43 @@ export default function CategoryCard({
                   viewMode === CategoriesPageMode.EDIT ? 0 : 12,
                 borderBottomLeftRadius:
                   viewMode === CategoriesPageMode.EDIT ? 0 : 12,
-                cursor: !isSaving && 'pointer',
+                cursor:
+                  !isSaving &&
+                  viewMode === CategoriesPageMode.VIEW &&
+                  'pointer',
                 '&:hover': !isSaving && {
                   background:
                     viewMode === CategoriesPageMode.EDIT
                       ? getRepeatingLinearGradient(category?.color, 0.3)
-                      : isActive
+                      : isActive &&
+                        !doesAnySubcategoryWithinCurrentCategoryActive
                       ? LIGHT_RED
                       : LIGHT_GREEN,
                   border:
                     viewMode === CategoriesPageMode.EDIT
-                      ? `solid 2px ${getHexFromRGBObject(
-                          getColorShadeBasedOnSliderPickerSchema(
-                            getRgbaObjectFromHexString(category.color),
-                            'very bright'
-                          )
-                        )}`
-                      : !isActive
-                      ? `solid 2px ${LIGHT_GREEN}`
-                      : `solid 2px ${LIGHT_RED}`,
+                      ? `solid 2px ${getHexFromRGBAObject({
+                          ...getRgbaObjectFromHexString(category?.color),
+                          a: 0.3,
+                        })}`
+                      : isActive &&
+                        !doesAnySubcategoryWithinCurrentCategoryActive
+                      ? `solid 2px ${LIGHT_RED}`
+                      : `solid 2px ${LIGHT_GREEN}`,
                   borderLeft:
                     viewMode === CategoriesPageMode.EDIT
                       ? 0
-                      : !isActive
-                      ? `solid 2px ${LIGHT_GREEN}`
-                      : `solid 2px ${LIGHT_RED}`,
+                      : isActive &&
+                        !doesAnySubcategoryWithinCurrentCategoryActive
+                      ? `solid 2px ${LIGHT_RED}`
+                      : `solid 2px ${LIGHT_GREEN}`,
                   borderRight: 0,
                 },
               }}
-              onClick={() => !isSaving && changeCategoryActiveState()}
+              onClick={() =>
+                !isSaving &&
+                viewMode !== CategoriesPageMode.EDIT &&
+                changeCategoryActiveState()
+              }
             >
               <Stack
                 spacing={1}
