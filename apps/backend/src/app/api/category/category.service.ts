@@ -104,25 +104,26 @@ export class CategoryService {
     ) {
       await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
       await this.timeLogService.createNew(user.id, categoryWithUser.id);
-      this.subcategoryService.setSubcategoryActiveState(
+      await this.subcategoryService.setSubcategoryActiveState(
         timeLogNotEnded.subcategoryId,
         false
-      ); //don't wait
+      );
       return {
         success: true,
         category: { ...categoryWithUser, user: undefined } as Category,
       };
     }
     if (timeLogNotEnded.categoryId) {
-      this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
+      await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
     }
     if (timeLogNotEnded.subcategoryId) {
-      this.subcategoryService.setSubcategoryActiveState(
+      await this.subcategoryService.setSubcategoryActiveState(
         timeLogNotEnded.subcategoryId,
         false
-      ); //don't wait
+      );
     }
     await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+    await this.timeLogService.createNew(user.id, categoryWithUser.id);
     return {
       success: true,
       category: await this.setCategoryActiveState(

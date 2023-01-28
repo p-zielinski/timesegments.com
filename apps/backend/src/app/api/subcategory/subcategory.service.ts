@@ -135,10 +135,10 @@ export class SubcategoryService {
     if (activeSubcategory?.id) {
       this.setSubcategoryActiveState(activeSubcategory.id, false); //don't wait
     }
-    const timeLogNotEndedId =
+    const timeLogNotEnded =
       await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
-    if (timeLogNotEndedId) {
-      await this.timeLogService.setTimeLogAsEnded(timeLogNotEndedId);
+    if (timeLogNotEnded) {
+      await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
     }
     await this.timeLogService.createNew(
       user.id,
