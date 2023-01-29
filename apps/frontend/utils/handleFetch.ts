@@ -14,7 +14,7 @@ export const handleFetch = async ({
   additionalHeaders?: object;
   sentToken?: boolean;
 }) => {
-  await new Promise((r) => setTimeout(r, 400));
+  await new Promise((r) => setTimeout(r, 200));
   let statusCode;
   const jwt_token = sentToken ? cookie.get('jwt_token') : undefined;
   const url = !pathOrUrl
