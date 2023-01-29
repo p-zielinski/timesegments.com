@@ -70,7 +70,7 @@ export class SubcategoryService {
     if (subcategoryWithUser.active) {
       return {
         success: false,
-        error: `You cannot hide active category`,
+        error: `You cannot hide active subcategory`,
       };
     }
     if (subcategoryWithUser.visible === visible) {

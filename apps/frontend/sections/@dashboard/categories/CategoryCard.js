@@ -12,6 +12,7 @@ import {
   RED,
   LIGHT_SILVER,
   IS_SAVING_HEX,
+  SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
@@ -79,8 +80,25 @@ export default function CategoryCard({
     return categories.find((_category) => _category.id === category.id) || {};
   };
 
-  const changeCategoryVisibility = () => {
-    console.log('22');
+  const changeCategoryVisibility = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'category/change-visibility',
+      body: { categoryId: category.id, visible: !category.visible },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.category) {
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories;
+          if (category.id === response.category?.id) {
+            return { ...response.category, subcategories };
+          }
+          return { ...category, subcategories };
+        })
+      );
+    }
+    setIsSaving(false);
     return;
   };
 
@@ -132,23 +150,31 @@ export default function CategoryCard({
                     width: `60px`,
                     minWidth: '60px',
                     p: 2,
-                    color: isSaving
-                      ? IS_SAVING_HEX
-                      : category.visible
-                      ? GREEN
-                      : RED,
-                    background: `white`,
+                    color:
+                      isSaving || category.active
+                        ? IS_SAVING_HEX
+                        : category.visible
+                        ? GREEN
+                        : RED,
+                    background: isSaving
+                      ? `white`
+                      : category.active
+                      ? SUPER_LIGHT_SILVER
+                      : 'white',
                     border: `solid 2px ${LIGHT_SILVER}`,
                     borderRight: `0px`,
                     borderTopLeftRadius: 12,
                     borderBottomLeftRadius: 12,
-                    cursor: !isSaving && 'pointer',
-                    '&:hover': !isSaving && {
-                      color: !category.visible ? GREEN : RED,
-                      background: LIGHT_SILVER,
-                    },
+                    cursor: !isSaving && !category.active && 'pointer',
+                    '&:hover': !isSaving &&
+                      !category.active && {
+                        color: !category.visible ? GREEN : RED,
+                        background: LIGHT_SILVER,
+                      },
                   }}
-                  onClick={() => !isSaving && changeCategoryVisibility()}
+                  onClick={() =>
+                    !isSaving && !category.active && changeCategoryVisibility()
+                  }
                 >
                   <Iconify
                     icon={

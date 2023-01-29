@@ -42,7 +42,7 @@ export default function CategoryList({
 }) {
   const getCategories = (categories) => {
     return categories.filter((category) =>
-      isEditing ? category.visible : true
+      viewMode === CategoriesPageMode.VIEW ? category.visible : true
     );
   };
 

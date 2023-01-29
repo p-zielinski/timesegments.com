@@ -10,6 +10,7 @@ import {
   LIGHT_RED,
   LIGHT_SILVER,
   RED,
+  SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
@@ -48,7 +49,27 @@ export default function SubcategoryCard({
     )
   );
 
-  const changeSubcategoryVisibility = () => {
+  const changeSubcategoryVisibility = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'subcategory/change-visibility',
+      body: { subcategoryId: subcategory.id, visible: !subcategory.visible },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.subcategory) {
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories.map((subcategory) => {
+            if (subcategory.id === response.subcategory.id) {
+              return response.subcategory;
+            }
+            return subcategory;
+          });
+          return { ...category, subcategories };
+        })
+      );
+    }
+    setIsSaving(false);
     return;
   };
 
@@ -59,8 +80,6 @@ export default function SubcategoryCard({
       body: { subcategoryId: subcategory.id },
       method: 'POST',
     });
-
-    console.log(response);
     if (
       response.statusCode === 201 &&
       response?.subcategory &&
@@ -112,23 +131,33 @@ export default function SubcategoryCard({
                 width: `60px`,
                 minWidth: '60px',
                 p: 2,
-                color: isSaving
-                  ? IS_SAVING_HEX
-                  : subcategory.visible
-                  ? GREEN
-                  : RED,
-                background: `white`,
+                color:
+                  isSaving || subcategory.active
+                    ? IS_SAVING_HEX
+                    : subcategory.visible
+                    ? GREEN
+                    : RED,
+                background: isSaving
+                  ? `white`
+                  : subcategory.active
+                  ? SUPER_LIGHT_SILVER
+                  : 'white',
                 border: `solid 2px ${LIGHT_SILVER}`,
                 borderRight: `0px`,
                 borderTopLeftRadius: 12,
                 borderBottomLeftRadius: 12,
-                cursor: !isSaving && 'pointer',
-                '&:hover': !isSaving && {
-                  color: !subcategory.visible ? GREEN : RED,
-                  background: LIGHT_SILVER,
-                },
+                cursor: !isSaving && !subcategory.active && 'pointer',
+                '&:hover': !isSaving &&
+                  !subcategory.active && {
+                    color: !subcategory.visible ? GREEN : RED,
+                    background: LIGHT_SILVER,
+                  },
               }}
-              onClick={() => !isSaving && changeSubcategoryVisibility()}
+              onClick={() =>
+                !isSaving &&
+                !subcategory.active &&
+                changeSubcategoryVisibility()
+              }
             >
               <Iconify
                 icon={
