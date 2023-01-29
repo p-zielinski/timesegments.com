@@ -75,15 +75,15 @@ export class CategoryController {
     return updateCategoryStatus;
   }
 
-  @Post('rename')
+  @Post('update')
   async handleRequestRenameCategory(
     @UserDecorator() user: User,
     @Body() renameCategoryDto: RenameCategoryDto
   ) {
-    const { categoryId, name } = renameCategoryDto;
-    const updateCategoryStatus = await this.categoryService.updateNameCategory(
+    const { categoryId, name, color } = renameCategoryDto;
+    const updateCategoryStatus = await this.categoryService.updateCategory(
       categoryId,
-      name,
+      name,color
       user
     );
     if (!updateCategoryStatus.success) {

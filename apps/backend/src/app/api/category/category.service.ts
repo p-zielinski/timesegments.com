@@ -141,7 +141,7 @@ export class CategoryService {
     };
   }
 
-  public async updateNameCategory(categoryId: string, name: string, user: any) {
+  public async updateCategory(categoryId: string, name: string, user: any) {
     const categoryWithUser = await this.findFirstUseId(categoryId, {
       user: true,
     });
