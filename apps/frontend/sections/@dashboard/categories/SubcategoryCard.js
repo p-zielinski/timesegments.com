@@ -22,6 +22,7 @@ import EditSubcategory from './EditSubcategory';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { handleFetch } from '../../../utils/handleFetch';
+import React from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -202,6 +203,29 @@ export default function SubcategoryCard({
             </Box>
           </>
         )}
+        {viewMode === CategoriesPageMode.VIEW && (
+          <Box
+            sx={{
+              width: `60px`,
+              minWidth: '60px',
+              p: 2,
+              background: isActive ? LIGHT_GREEN : LIGHT_RED,
+              border: isSaving
+                ? `solid 2px ${IS_SAVING_HEX}`
+                : isActive
+                ? `solid 2px ${LIGHT_GREEN}`
+                : `solid 2px ${LIGHT_RED}`,
+              borderLeft: isSaving
+                ? `solid 2px ${IS_SAVING_HEX}`
+                : isActive
+                ? `solid 2px ${LIGHT_GREEN}`
+                : `solid 2px ${LIGHT_RED}`,
+              borderRight: 0,
+              borderTopLeftRadius: 12,
+              borderBottomLeftRadius: 12,
+            }}
+          />
+        )}
         <Box
           sx={{
             color: isSaving && IS_SAVING_HEX,
@@ -226,19 +250,11 @@ export default function SubcategoryCard({
               : isActive
               ? `solid 2px ${LIGHT_GREEN}`
               : `solid 2px ${LIGHT_RED}`,
-            borderLeft:
-              viewMode === CategoriesPageMode.EDIT
-                ? `0px`
-                : isSaving
-                ? `solid 2px ${IS_SAVING_HEX}`
-                : isActive
-                ? `solid 2px ${LIGHT_GREEN}`
-                : `solid 2px ${LIGHT_RED}`,
+            borderLeft: 0,
             borderTopRightRadius: 12,
             borderBottomRightRadius: 12,
-            borderTopLeftRadius: viewMode === CategoriesPageMode.EDIT ? 0 : 12,
-            borderBottomLeftRadius:
-              viewMode === CategoriesPageMode.EDIT ? 0 : 12,
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
             cursor:
               !isSaving && viewMode === CategoriesPageMode.VIEW && 'pointer',
             '&:hover': !isSaving && {
@@ -266,12 +282,7 @@ export default function SubcategoryCard({
                   : !isActive
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,
-              borderLeft:
-                viewMode === CategoriesPageMode.EDIT
-                  ? 0
-                  : !isActive
-                  ? `solid 2px ${LIGHT_GREEN}`
-                  : `solid 2px ${LIGHT_RED}`,
+              borderLeft: 0,
             },
           }}
           onClick={() =>
@@ -287,7 +298,6 @@ export default function SubcategoryCard({
             alignItems="center"
             justifyContent="left"
           >
-            <IsActive isActive={isActive} isSaving={isSaving} />
             <Typography variant="subtitle2" noWrap>
               {name}
             </Typography>

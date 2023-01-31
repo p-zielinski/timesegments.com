@@ -238,14 +238,6 @@ export default function CategoryCard({
                   borderTopLeftRadius: 12,
                   borderBottomLeftRadius: 12,
                 }}
-                onClick={() =>
-                  !isSaving &&
-                  setIsEditing({
-                    subcategoryId: undefined,
-                    categoryId: category.id,
-                    createNew: undefined,
-                  })
-                }
               />
             )}
             <Box
@@ -266,14 +258,7 @@ export default function CategoryCard({
                   : isActive
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,
-                borderLeft:
-                  viewMode === CategoriesPageMode.EDIT
-                    ? `0px`
-                    : isSaving
-                    ? `solid 2px ${IS_SAVING_HEX}`
-                    : isActive
-                    ? `solid 2px ${LIGHT_GREEN}`
-                    : `solid 2px ${LIGHT_RED}`,
+                borderLeft: 0,
                 borderRight: 0,
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,
@@ -299,13 +284,7 @@ export default function CategoryCard({
                         !doesAnySubcategoryWithinCurrentCategoryActive
                       ? `solid 2px ${LIGHT_RED}`
                       : `solid 2px ${LIGHT_GREEN}`,
-                  borderLeft:
-                    viewMode === CategoriesPageMode.EDIT
-                      ? 0
-                      : isActive &&
-                        !doesAnySubcategoryWithinCurrentCategoryActive
-                      ? `solid 2px ${LIGHT_RED}`
-                      : `solid 2px ${LIGHT_GREEN}`,
+                  borderLeft: 0,
                   borderRight: 0,
                 },
               }}
