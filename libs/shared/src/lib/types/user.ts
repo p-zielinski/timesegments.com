@@ -1,11 +1,17 @@
 import { Prisma } from '@prisma/client';
 
-// 1: Define a type that includes the relation to `Post`
 const userWithCategoriesAndSubcategories = Prisma.validator<Prisma.UserArgs>()({
   include: { categories: { include: { subcategories: true } } },
 });
 
-// 3: This type will include a user and all their posts
+const categoryWithSubcategories = Prisma.validator<Prisma.CategoryArgs>()({
+  include: { subcategories: true },
+});
+
 export type UserWithCategoriesAndSubcategories = Prisma.UserGetPayload<
   typeof userWithCategoriesAndSubcategories
+>;
+
+export type CategoryWithSubcategories = Prisma.CategoryGetPayload<
+  typeof categoryWithSubcategories
 >;
