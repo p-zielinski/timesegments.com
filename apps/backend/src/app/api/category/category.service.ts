@@ -16,8 +16,9 @@ export class CategoryService {
   ) {}
 
   public async createCategory(
+    user: User,
     name: string,
-    user: User
+    color: string
   ): Promise<{ success: boolean; error?: string; category?: Category }> {
     if (
       (await this.countUserCategories(user.id)) >
@@ -29,7 +30,7 @@ export class CategoryService {
       };
     }
     const category = await this.prisma.category.create({
-      data: { name: name, userId: user.id, color: '#ffffff' },
+      data: { name, userId: user.id, color },
     });
     if (!category?.id) {
       return {
@@ -141,7 +142,12 @@ export class CategoryService {
     };
   }
 
-  public async updateCategory(categoryId: string, name: string, user: any) {
+  public async updateCategory(
+    categoryId: string,
+    name: string,
+    color: string,
+    user: User
+  ) {
     const categoryWithUser = await this.findFirstUseId(categoryId, {
       user: true,
     });
@@ -151,19 +157,17 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
-    if (categoryWithUser.name === name) {
+    if (categoryWithUser.name === name && categoryWithUser.color === color) {
       return {
         success: true,
         category: { ...categoryWithUser, user: undefined } as Category,
       };
     }
-    const updatedCategory = await this.updateName(categoryId, name);
-    if (updatedCategory.name !== name) {
-      return {
-        success: false,
-        error: `Could not update visibility`,
-      };
-    }
+    const updatedCategory = await this.updateNameAndColor(
+      categoryId,
+      name,
+      color
+    );
     return { success: true, category: updatedCategory };
   }
 
@@ -201,10 +205,14 @@ export class CategoryService {
     });
   }
 
-  private async updateName(categoryId: string, name: string) {
+  private async updateNameAndColor(
+    categoryId: string,
+    name: string,
+    color: string
+  ) {
     return await this.prisma.category.update({
       where: { id: categoryId },
-      data: { name },
+      data: { name, color },
     });
   }
 }

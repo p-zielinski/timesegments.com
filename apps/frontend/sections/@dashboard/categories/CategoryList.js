@@ -87,6 +87,8 @@ export default function CategoryList({
                   setIsEditing={setIsEditing}
                   isSaving={isSaving}
                   setIsSaving={setIsSaving}
+                  categories={categories}
+                  setCategories={setCategories}
                 />
               ) : (
                 <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />

@@ -16,12 +16,13 @@ export class SubcategoryService {
   ) {}
 
   public async createSubcategory(
+    user: User,
+    categoryId: string,
     name: string,
-    subcategoryId: string,
-    user: User
+    color: string
   ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> {
     const categoryWithUser = await this.categoryService.findFirstUseId(
-      subcategoryId,
+      categoryId,
       {
         user: true,
       }
@@ -33,16 +34,21 @@ export class SubcategoryService {
       };
     }
     if (
-      (await this.countCategorySubcategories(subcategoryId)) >
+      (await this.countCategorySubcategories(categoryId)) >
       this.configService.get<number>('MAX_NUMBER_OF_SUBCATEGORIES_PER_CATEGORY')
     ) {
       return {
         success: false,
-        error: `Max number of subcategories per category ${subcategoryId} was exceeded`,
+        error: `Max number of subcategories per category ${categoryId} was exceeded`,
       };
     }
     const subcategory = await this.prisma.subcategory.create({
-      data: { name: name, categoryId: subcategoryId, userId: user.id },
+      data: {
+        name: name,
+        categoryId: categoryId,
+        userId: user.id,
+        color: color ? color : null,
+      },
     });
     if (!subcategory?.id) {
       return {
@@ -207,10 +213,11 @@ export class SubcategoryService {
     };
   }
 
-  public async updateNameSubcategory(
+  public async updateSubcategory(
+    user: User,
     subcategoryId: string,
     name: string,
-    user: User
+    color?: string
   ) {
     const subcategoryWithUser = await this.findFirstUseId(subcategoryId, {
       user: true,
@@ -221,19 +228,20 @@ export class SubcategoryService {
         error: `Subcategory not found, bad request`,
       };
     }
-    if (subcategoryWithUser.name === name) {
+    if (
+      subcategoryWithUser.name === name &&
+      subcategoryWithUser.color === color
+    ) {
       return {
         success: true,
         subcategory: { ...subcategoryWithUser, user: undefined },
       };
     }
-    const updatedSubcategory = await this.updateName(subcategoryId, name);
-    if (updatedSubcategory.name !== name) {
-      return {
-        success: false,
-        error: `Could not update name`,
-      };
-    }
+    const updatedSubcategory = await this.updateNameAndColor(
+      subcategoryId,
+      name,
+      color
+    );
     return { success: true, subcategory: updatedSubcategory };
   }
 
@@ -274,10 +282,14 @@ export class SubcategoryService {
     });
   }
 
-  private async updateName(subcategoryId: string, name: string) {
+  private async updateNameAndColor(
+    subcategoryId: string,
+    name: string,
+    color?: string
+  ) {
     return await this.prisma.subcategory.update({
       where: { id: subcategoryId },
-      data: { name },
+      data: { name, color: color ?? null },
     });
   }
 }

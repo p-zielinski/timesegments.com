@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class RenameCategoryDto {
+export class UpdateCategoryDto {
   @IsString()
   categoryId: string;
   @IsString()

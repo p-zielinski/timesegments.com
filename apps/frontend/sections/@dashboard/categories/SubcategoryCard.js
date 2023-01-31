@@ -112,6 +112,8 @@ export default function SubcategoryCard({
     return (
       <EditSubcategory
         category={category}
+        categories={categories}
+        setCategories={setCategories}
         subcategory={subcategory}
         isEditing={isEditing}
         setIsEditing={setIsEditing}

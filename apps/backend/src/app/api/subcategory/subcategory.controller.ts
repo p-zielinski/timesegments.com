@@ -8,7 +8,7 @@ import {
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
 import { SubcategoryService } from './subcategory.service';
-import { RenameSubcategoryDto } from './dto/renameSubcategory.dto';
+import { UpdateSubcategoryDto } from './dto/updateSubcategoryDto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
@@ -24,9 +24,15 @@ export class SubcategoryController {
     @UserDecorator() user: User,
     @Body() createSubcategoryDto: CreateSubcategoryDto
   ) {
-    const { name, categoryId } = createSubcategoryDto;
+    const { categoryId, name, color } = createSubcategoryDto;
     const createCategoryStatus =
-      await this.subcategoryService.createSubcategory(name, categoryId, user);
+      await this.subcategoryService.createSubcategory(
+        user,
+        categoryId,
+
+        name,
+        color
+      );
     if (!createCategoryStatus.success) {
       throw new BadRequestException({
         error: createCategoryStatus.error,
@@ -71,17 +77,18 @@ export class SubcategoryController {
     return updateSubcategoryStatus;
   }
 
-  @Post('rename')
+  @Post('update')
   async handleRequestRenameSubcategory(
     @UserDecorator() user: User,
-    @Body() renameSubcategoryDto: RenameSubcategoryDto
+    @Body() updateSubcategoryDto: UpdateSubcategoryDto
   ) {
-    const { subcategoryId, name } = renameSubcategoryDto;
+    const { subcategoryId, name, color } = updateSubcategoryDto;
     const updateCategoryStatus =
-      await this.subcategoryService.updateNameSubcategory(
+      await this.subcategoryService.updateSubcategory(
+        user,
         subcategoryId,
         name,
-        user
+        color
       );
     if (!updateCategoryStatus.success) {
       throw new BadRequestException({

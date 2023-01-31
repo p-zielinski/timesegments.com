@@ -26,6 +26,7 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorS
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { Checkbox } from '../Form/Checkbox';
+import { handleFetch } from '../../../utils/handleFetch';
 
 export default function AddNew({
   type,
@@ -35,6 +36,8 @@ export default function AddNew({
   category,
   isSaving,
   setIsSaving,
+  categories,
+  setCategories,
 }) {
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
@@ -68,6 +71,68 @@ export default function AddNew({
         },
       },
     });
+  };
+
+  const createCategory = async (name: string, color: string) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'category/create',
+      body: { name, color },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.category) {
+      setCategories([
+        { ...response.category, subcategories: [] },
+        ...categories,
+      ]);
+      setIsEditing({
+        subcategoryId: undefined,
+        categoryId: undefined,
+        createNew: undefined,
+      });
+    }
+    setIsSaving(false);
+    return;
+  };
+
+  const createSubcategory = async (
+    name: string,
+    color: string,
+    inheritColor: boolean
+  ) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'subcategory/create',
+      body: {
+        categoryId: category.id,
+        name,
+        color: inheritColor ? undefined : color,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.subcategory) {
+      setCategories(
+        categories.map((_category) => {
+          if (_category.id === category.id) {
+            return {
+              ..._category,
+              subcategories: [
+                ..._category.subcategories,
+                response?.subcategory,
+              ],
+            };
+          }
+          return _category;
+        })
+      );
+      setIsEditing({
+        categoryId: undefined,
+        subcategoryId: undefined,
+        createNew: undefined,
+      });
+    }
+    setIsSaving(false);
+    return;
   };
 
   function Picker() {
@@ -145,7 +210,7 @@ export default function AddNew({
   }
 
   const validationSchema = yup.object().shape({
-    categoryName: yup.string().required('Category name is required'),
+    [type + 'Name']: yup.string().required('Category name is required'),
   });
 
   return (
@@ -162,6 +227,15 @@ export default function AddNew({
           : getRandomRgbObjectForSliderPicker(),
       }}
       onSubmit={async (values, { setSubmitting }) => {
+        if (type === CreateNewType.CATEGORY) {
+          await createCategory(values?.[type + 'Name'], values.color.hex);
+        } else {
+          await createSubcategory(
+            values?.[type + 'Name'],
+            values.color.hex,
+            values.inheritColor
+          );
+        }
         setSubmitting(false);
       }}
       validationSchema={validationSchema}

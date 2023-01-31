@@ -217,6 +217,37 @@ export default function CategoryCard({
                 </Box>
               </>
             )}
+            {viewMode === CategoriesPageMode.VIEW && (
+              <Box
+                sx={{
+                  width: `60px`,
+                  minWidth: '60px',
+                  p: 2,
+                  background: isActive ? LIGHT_GREEN : LIGHT_RED,
+                  border: isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
+                    : isActive
+                    ? `solid 2px ${LIGHT_GREEN}`
+                    : `solid 2px ${LIGHT_RED}`,
+                  borderLeft: isSaving
+                    ? `solid 2px ${IS_SAVING_HEX}`
+                    : isActive
+                    ? `solid 2px ${LIGHT_GREEN}`
+                    : `solid 2px ${LIGHT_RED}`,
+                  borderRight: 0,
+                  borderTopLeftRadius: 12,
+                  borderBottomLeftRadius: 12,
+                }}
+                onClick={() =>
+                  !isSaving &&
+                  setIsEditing({
+                    subcategoryId: undefined,
+                    categoryId: category.id,
+                    createNew: undefined,
+                  })
+                }
+              />
+            )}
             <Box
               sx={{
                 color: isSaving && IS_SAVING_HEX,
@@ -244,10 +275,8 @@ export default function CategoryCard({
                     ? `solid 2px ${LIGHT_GREEN}`
                     : `solid 2px ${LIGHT_RED}`,
                 borderRight: 0,
-                borderTopLeftRadius:
-                  viewMode === CategoriesPageMode.EDIT ? 0 : 12,
-                borderBottomLeftRadius:
-                  viewMode === CategoriesPageMode.EDIT ? 0 : 12,
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
                 cursor:
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW &&
@@ -293,10 +322,6 @@ export default function CategoryCard({
                 alignItems="center"
                 justifyContent="left"
               >
-                <IsActive
-                  isActive={getCategory(category, categories)?.active}
-                  isSaving={isSaving}
-                />
                 <Typography variant="subtitle2" noWrap>
                   {getCategory(category, categories)?.name}
                 </Typography>
@@ -394,6 +419,8 @@ export default function CategoryCard({
                               category={category}
                               isSaving={isSaving}
                               setIsSaving={setIsSaving}
+                              categories={categories}
+                              setCategories={setCategories}
                             />
                           ) : (
                             <ShowLimitReached

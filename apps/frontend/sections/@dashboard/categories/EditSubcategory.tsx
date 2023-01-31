@@ -10,7 +10,7 @@ import {
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useEffect } from 'react';
+import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
@@ -19,9 +19,12 @@ import { Checkbox } from '../Form/Checkbox';
 import { styled } from '@mui/material/styles';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
+import { handleFetch } from '../../../utils/handleFetch';
 
 export default function EditSubcategory({
   category,
+  categories,
+  setCategories,
   subcategory,
   setIsEditing,
   isSaving,
@@ -68,6 +71,43 @@ export default function EditSubcategory({
     isSaving ? IS_SAVING_HEX : subcategory.color || category.color
   );
 
+  const updateSubcategory = async (
+    categoryName: string,
+    color: string,
+    inheritColor: boolean
+  ) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'subcategory/update',
+      body: {
+        subcategoryId: subcategory.id,
+        name: categoryName,
+        color: inheritColor ? undefined : color,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.subcategory) {
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories.map((subcategory) => {
+            if (subcategory.id === response.subcategory.id) {
+              return response.subcategory;
+            }
+            return subcategory;
+          });
+          return { ...category, subcategories };
+        })
+      );
+      setIsEditing({
+        categoryId: undefined,
+        subcategoryId: undefined,
+        createNew: undefined,
+      });
+    }
+    setIsSaving(false);
+    return;
+  };
+
   function Picker() {
     return (
       <div
@@ -94,6 +134,11 @@ export default function EditSubcategory({
         inheritColor: !subcategory.color,
       }}
       onSubmit={async (values, { setSubmitting }) => {
+        await updateSubcategory(
+          values.subcategoryName,
+          values.color.hex,
+          values.inheritColor
+        );
         setSubmitting(false);
       }}
       validationSchema={validationSchema}

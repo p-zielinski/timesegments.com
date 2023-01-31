@@ -1,11 +1,12 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export class CreateSubcategoryDto {
-  @IsString()
-  categoryId: string;
-  @IsString()
-  name: string;
+export class UpdateSubcategoryDto {
   @IsOptional()
   @IsString()
   color: string;
+  @IsString()
+  name: string;
+
+  @IsString()
+  subcategoryId: string;
 }

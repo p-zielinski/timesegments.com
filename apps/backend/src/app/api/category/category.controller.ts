@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
-import { RenameCategoryDto } from './dto/renameCategory.dto';
+import { UpdateCategoryDto } from './dto/updateCategoryDto';
 import { ChangeVisibilityCategoryDto } from './dto/changeVisibilityCategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
@@ -24,17 +24,18 @@ export class CategoryController {
     @UserDecorator() user: User,
     @Body() createCategoryDto: CreateCategoryDto
   ) {
-    const { name } = createCategoryDto;
+    const { name, color } = createCategoryDto;
     const createCategoryStatus = await this.categoryService.createCategory(
+      user,
       name,
-      user
+      color
     );
     if (!createCategoryStatus.success) {
       throw new BadRequestException({
         error: createCategoryStatus.error,
       });
     }
-    return createCategoryStatus.category;
+    return createCategoryStatus;
   }
 
   @Post('change-visibility')
@@ -78,12 +79,13 @@ export class CategoryController {
   @Post('update')
   async handleRequestRenameCategory(
     @UserDecorator() user: User,
-    @Body() renameCategoryDto: RenameCategoryDto
+    @Body() updateCategoryDto: UpdateCategoryDto
   ) {
-    const { categoryId, name, color } = renameCategoryDto;
+    const { categoryId, name, color } = updateCategoryDto;
     const updateCategoryStatus = await this.categoryService.updateCategory(
       categoryId,
-      name,color
+      name,
+      color,
       user
     );
     if (!updateCategoryStatus.success) {

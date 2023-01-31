@@ -18,6 +18,7 @@ import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexS
 import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { styled } from '@mui/material/styles';
+import { handleFetch } from '../../../utils/handleFetch';
 
 export default function EditCategory({
   categories,
@@ -28,7 +29,7 @@ export default function EditCategory({
   isSaving,
   setIsSaving,
 }) {
-  const [staticCategory] = useState(category);
+  const [staticCategory, setStaticCategory] = useState(category);
 
   const validationSchema = yup.object().shape({
     categoryName: yup.string().required('Category name is required'),
@@ -69,6 +70,38 @@ export default function EditCategory({
   };
   setStyledTextField(isSaving ? IS_SAVING_HEX : category.color);
 
+  const updateCategory = async (categoryName: string, color: string) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'category/update',
+      body: { categoryId: category.id, name: categoryName, color },
+      method: 'POST',
+    });
+    if (response.statusCode === 201 && response?.category) {
+      setCategories(
+        categories.map((category) => {
+          const subcategories = category.subcategories.map((subcategory) => {
+            subcategory.active = false;
+            return subcategory;
+          });
+          if (category.id === response.category?.id) {
+            const updatedCategory = { ...response.category, subcategories };
+            setStaticCategory(updatedCategory);
+            return updatedCategory;
+          }
+          return { ...category, active: false, subcategories };
+        })
+      );
+      setIsEditing({
+        subcategoryId: undefined,
+        categoryId: undefined,
+        createNew: undefined,
+      });
+    }
+    setIsSaving(false);
+    return;
+  };
+
   function Picker() {
     return (
       <div
@@ -94,6 +127,7 @@ export default function EditCategory({
         },
       }}
       onSubmit={async (values, { setSubmitting }) => {
+        await updateCategory(values.categoryName, values.color.hex);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
