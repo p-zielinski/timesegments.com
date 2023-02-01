@@ -77,6 +77,39 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
+  public async updateExpandSubcategoriesCategory(
+    categoryId: string,
+    expandSubcategories: boolean,
+    user: User
+  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+    const categoryWithUser = await this.findFirstUseId(categoryId, {
+      user: true,
+    });
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Category not found, bad request`,
+      };
+    }
+    if (categoryWithUser.expandSubcategories === expandSubcategories) {
+      return {
+        success: true,
+        category: { ...categoryWithUser, user: undefined } as Category,
+      };
+    }
+    const updatedCategory = await this.updateExpandSubcategories(
+      categoryId,
+      expandSubcategories
+    );
+    if (updatedCategory.expandSubcategories !== expandSubcategories) {
+      return {
+        success: false,
+        error: `Could not update expandSubcategories`,
+      };
+    }
+    return { success: true, category: updatedCategory };
+  }
+
   public async setCategoryActive(
     categoryId: string,
     user: User
@@ -202,6 +235,16 @@ export class CategoryService {
     return await this.prisma.category.update({
       where: { id: categoryId },
       data: { visible },
+    });
+  }
+
+  private async updateExpandSubcategories(
+    categoryId: string,
+    expandSubcategories: boolean
+  ) {
+    return await this.prisma.category.update({
+      where: { id: categoryId },
+      data: { expandSubcategories },
     });
   }
 

@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
 import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
+import { SetExpandSubcategoriesDto } from './dto/setExpandSubcategories.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('category')
@@ -48,6 +49,26 @@ export class CategoryController {
       await this.categoryService.updateVisibilityCategory(
         categoryId,
         visible,
+        user
+      );
+    if (!updateCategoryStatus.success) {
+      throw new BadRequestException({
+        error: updateCategoryStatus.error,
+      });
+    }
+    return updateCategoryStatus;
+  }
+
+  @Post('set-expand-subcategories')
+  async handleRequestSetExpandSubcategories(
+    @UserDecorator() user: User,
+    @Body() setExpandSubcategoriesDto: SetExpandSubcategoriesDto
+  ) {
+    const { categoryId, expandSubcategories } = setExpandSubcategoriesDto;
+    const updateCategoryStatus =
+      await this.categoryService.updateExpandSubcategoriesCategory(
+        categoryId,
+        expandSubcategories,
         user
       );
     if (!updateCategoryStatus.success) {

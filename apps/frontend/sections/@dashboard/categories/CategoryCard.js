@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 // @mui
 import { Box, Card, Typography, Stack, Grid } from '@mui/material';
 // utils
-import IsActive from '../../../components/is-active/IsActive';
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';
 import {
@@ -14,7 +13,6 @@ import {
   IS_SAVING_HEX,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
-import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
@@ -27,8 +25,6 @@ import { ShowNoShowType } from '../../../enum/showNoShowType';
 import React from 'react';
 import ShowLimitReached from './ShowLimitReached';
 import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
-import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
 import { handleFetch } from '../../../utils/handleFetch';
 
 // ----------------------------------------------------------------------
@@ -53,6 +49,7 @@ export default function CategoryCard({
     !!category.subcategories.find((subcategory) => subcategory.active);
 
   const reverseExpandSubcategories = () => {
+    setCategoryExpandSubcategoriesInDB(!category.expandSubcategories); //don't wait
     setCategories(
       [...categories].map((_category) => {
         if (_category.id === category.id) {
@@ -124,6 +121,15 @@ export default function CategoryCard({
       );
     }
     setIsSaving(false);
+    return;
+  };
+
+  const setCategoryExpandSubcategoriesInDB = async (value) => {
+    await handleFetch({
+      pathOrUrl: 'category/set-expand-subcategories',
+      body: { categoryId: category.id, expandSubcategories: value },
+      method: 'POST',
+    });
     return;
   };
 
