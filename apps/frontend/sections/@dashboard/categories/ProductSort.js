@@ -34,7 +34,20 @@ export default function ShopProductSort({ categories, setCategories }) {
 
   useEffect(() => {
     setCategories(sortCategories(categories, sortOrder));
-  }, [sortOrder]);
+  }, [
+    sortOrder,
+    //this gets current state of categories and subcategories names
+    categories
+      .map((category) => {
+        return [
+          category.name,
+          ...(category.subcategories ?? []).map(
+            (subcategory) => subcategory.name
+          ),
+        ].join(',');
+      })
+      .join(','),
+  ]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);

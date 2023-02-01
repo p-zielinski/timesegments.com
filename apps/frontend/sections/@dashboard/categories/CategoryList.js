@@ -11,7 +11,7 @@ import {
   IS_SAVING_HEX,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AddNew from './AddNew';
 import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
 import { CreateNewType } from '../../../enum/createNewType';
@@ -19,6 +19,8 @@ import ShowNoShow from './ShowNoShow';
 import { ShowNoShowType } from '../../../enum/showNoShowType';
 import ShowLimitReached from './ShowLimitReached';
 import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
+import { CategoryWithSubcategories } from '@test1/shared';
+import EditCategoriesButtonComponent from './EditCategoriesButtonComponent';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +42,19 @@ export default function CategoryList({
   setIsSaving,
   limits,
 }) {
+  const [
+    numberOfCategoriesAndSubcategoriesCombined,
+    setNumberOfCategoriesAndSubcategoriesCombined,
+  ] = useState(0);
+
+  useEffect(() => {
+    const subcategoriesNumber = (categories ?? [])
+      .filter((category) => category.visible)
+      .map((category) => (category.subcategories ?? []).length)
+      .reduce((accumulator, currentValue) => accumulator + currentValue + 1, 0);
+    setNumberOfCategoriesAndSubcategoriesCombined(subcategoriesNumber);
+  }, [categories]);
+
   const getCategories = (categories) => {
     return categories.filter((category) =>
       viewMode === CategoriesPageMode.VIEW ? category.visible : true
@@ -96,6 +111,14 @@ export default function CategoryList({
             </Box>
           </Grid>
         )}
+        {viewMode === CategoriesPageMode.VIEW &&
+          numberOfCategoriesAndSubcategoriesCombined > 10 && (
+            <EditCategoriesButtonComponent
+              isSaving={isSaving}
+              setViewMode={setViewMode}
+            />
+          )}
+
         {getCategories(categories).length
           ? getCategories(categories).map((category) => (
               <Grid key={category.id} item xs={1} sm={1} md={1}>
@@ -119,37 +142,10 @@ export default function CategoryList({
               />
             )}
         {viewMode === CategoriesPageMode.VIEW && (
-          <Grid
-            key={'edit_categories'}
-            item
-            xs={1}
-            sm={1}
-            md={1}
-            onClick={() => setViewMode(CategoriesPageMode.EDIT)}
-          >
-            <Card
-              sx={{
-                cursor: !isSaving && 'pointer',
-                color: isSaving && IS_SAVING_HEX,
-                border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_GREEN}`,
-                background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_GREEN,
-                '&:hover': !isSaving && {
-                  border: `solid 2px ${GREEN}`,
-                },
-              }}
-            >
-              <Iconify
-                icon={'material-symbols:edit'}
-                width={40}
-                sx={{ m: -2, position: 'absolute', bottom: 22, left: 25 }}
-              />
-              <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
-                <Typography variant="subtitle2" noWrap>
-                  EDIT CATEGORIES
-                </Typography>
-              </Stack>
-            </Card>
-          </Grid>
+          <EditCategoriesButtonComponent
+            isSaving={isSaving}
+            setViewMode={setViewMode}
+          />
         )}
       </Grid>
     </>

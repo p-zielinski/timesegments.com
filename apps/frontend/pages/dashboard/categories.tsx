@@ -44,22 +44,6 @@ export default function Categories({ user, limits }: Props) {
     createNew: undefined,
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [
-    numberOfCategoriesAndSubcategoriesCombined,
-    setNumberOfCategoriesAndSubcategoriesCombined,
-  ] = useState(0);
-
-  useEffect(() => {
-    const subcategoriesNumber = (categories ?? [])
-      .filter((category) => category.visible)
-      .map(
-        (category) =>
-          (category as CategoryWithSubcategories).subcategories.filter(
-            (category) => category.visible
-          ).length
-      )
-      .reduce((accumulator, currentValue) => accumulator + currentValue + 1, 0);
-  }, [categories]);
 
   return (
     <DashboardLayout>
