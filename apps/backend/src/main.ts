@@ -8,6 +8,7 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app/app.module';
 import { RemovePasswordKeyFromResponse } from './app/common/interceptor/removePasswordKeyFromResponse.interceptor';
+import { RemoveSuccessKeyFromResponse } from './app/common/interceptor/removeSuccessKeyFromResponse.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -16,6 +17,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3333;
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useGlobalInterceptors(new RemovePasswordKeyFromResponse());
+  app.useGlobalInterceptors(new RemoveSuccessKeyFromResponse());
   await app.listen(port);
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`

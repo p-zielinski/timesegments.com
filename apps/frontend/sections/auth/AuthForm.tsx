@@ -15,12 +15,13 @@ import loginRegisterSchema from '../../yupSchemas/loginRegister';
 // components
 import Iconify from '../../components/iconify';
 import { useRouter } from 'next/router';
-import { AuthPageState } from '../../../../libs/shared/src/lib/enums/authPageState';
+import { AuthPageState } from '@test1/shared';
 import recoverSchema from '../../yupSchemas/recover';
 import { InputText } from '../../components/form/Text';
 import Image from 'next/image';
 import mail from '../../graphics/mail.svg';
 import locker from '../../graphics/locker.svg';
+import { handleFetch } from '../../utils/handleFetch';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({ authPageState, setAuthPageState }) {
@@ -29,10 +30,6 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleClick = () => {
-    router.push('/dashboard');
-  };
-
   const onLoginOrRegister = async (
     emailAndPassword: {
       email: string;
@@ -40,32 +37,21 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
     },
     endpoint: 'login' | 'register'
   ): Promise<boolean> => {
-    const response = await fetch(process.env.NEXT_PUBLIC_API_URL + endpoint, {
+    const response = await handleFetch({
+      pathOrUrl: 'user/' + endpoint,
+      body: emailAndPassword,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(emailAndPassword),
     });
-    let responseJSON;
-    try {
-      responseJSON = await response.json();
-    } catch (e) {
-      setError(new Error('Communication error with the server'));
-      return false;
-    }
-    if (responseJSON.token) {
-      const jwtDecoded: { exp: number } = jwt_decode(responseJSON.token);
-      await Cookies.set('access_token', responseJSON.token, {
+    if (response.statusCode === 201) {
+      const jwtDecoded: { exp: number } = jwt_decode(response.token);
+      await Cookies.set('jwt_token', response.token, {
         expires: new Date(jwtDecoded.exp * 1000),
         path: '/',
       });
       return true;
     }
-    if (responseJSON.error) {
-      setError(new Error(responseJSON.error));
-    }
-    return false;
+    setError(new Error(response.error));
+    return;
   };
 
   return (
@@ -83,8 +69,6 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         if (authPageState === AuthPageState.REGISTER) {
           await onLoginOrRegister(emailAndPassword, 'register');
         }
-        console.log();
-
         setSubmitting(false);
       }}
       validationSchema={
@@ -167,7 +151,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
               size="large"
               type="submit"
               variant="contained"
-              onClick={handleClick}
+              onClick={() => handleSubmit()}
             >
               {authPageState}
             </LoadingButton>

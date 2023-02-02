@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { LoginOrRegisterDto } from './dto/loginOrRegister.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
@@ -15,19 +22,31 @@ export class UserController {
     @Body() loginOrRegisterDto: LoginOrRegisterDto
   ) {
     const { email, password } = loginOrRegisterDto;
-    return await this.userService.createNewUser(
+    const registerStatus = await this.userService.createNewUser(
       { email, plainPassword: password },
       { generateToken: true }
     );
+    if (!registerStatus.success) {
+      throw new BadRequestException({
+        error: registerStatus.error,
+      });
+    }
+    return registerStatus;
   }
 
   @Post('login')
   async handleRequestLogin(@Body() loginOrRegisterDto: LoginOrRegisterDto) {
     const { email, password } = loginOrRegisterDto;
-    return await this.userService.validateUser({
+    const loginStatus = await this.userService.validateUser({
       email,
       password,
     });
+    if (!loginStatus.success) {
+      throw new BadRequestException({
+        error: loginStatus.error,
+      });
+    }
+    return loginStatus;
   }
 
   @UseGuards(JwtAuthGuard)
