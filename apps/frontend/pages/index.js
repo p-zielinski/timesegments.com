@@ -51,7 +51,9 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 export default function Index() {
   const mdUp = useResponsive('up', 'md');
-  const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
+  const [currentPageState, setCurrentPageState] = useState(
+    AuthPageState.REGISTER
+  );
 
   const renderLink = () => {
     switch (currentPageState) {

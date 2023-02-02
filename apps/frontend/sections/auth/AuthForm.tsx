@@ -22,6 +22,7 @@ import Image from 'next/image';
 import mail from '../../graphics/mail.svg';
 import locker from '../../graphics/locker.svg';
 import { handleFetch } from '../../utils/handleFetch';
+import { SelectWithSearch } from '../../components/form/SelectWithSearch';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({ authPageState, setAuthPageState }) {
@@ -105,7 +106,6 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                       <IconButton
                         onClick={() => {
                           setShowPassword(!showPassword);
-                          console.log('123');
                         }}
                         edge="end"
                       >
@@ -122,6 +122,25 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   label="Password"
+                />
+              )}
+              {authPageState === AuthPageState.REGISTER && (
+                <SelectWithSearch
+                  name="countryId"
+                  grouping={(option) => (option.popular ? 'Popular' : 'Other')}
+                  label="Country"
+                  options={[]
+                    .sort((a, b) => {
+                      if (a.popular !== b.popular) {
+                        return a.popular ? -1 : 1;
+                      }
+                      return a.label.localeCompare(b.label);
+                    })
+                    .map((e) => ({
+                      value: `${e.value}`,
+                      label: e.label,
+                      popular: e.popular,
+                    }))}
                 />
               )}
             </Stack>
