@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
-import { Link as RouterLink } from 'next/link'
+import { Link as RouterLink } from 'next/link';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Box, Link } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
+// eslint-disable-next-line react/display-name
+export default function Logo({ disabledLink = false, sx, ...other }) {
   const theme = useTheme();
 
   const PRIMARY_LIGHT = theme.palette.primary.light;
@@ -28,7 +29,6 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
 
   const logo = (
     <Box
-      ref={ref}
       component="div"
       sx={{
         width: 40,
@@ -38,7 +38,12 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
       }}
       {...other}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 512 512">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 512 512"
+      >
         <defs>
           <linearGradient id="BG1" x1="100%" x2="50%" y1="9.946%" y2="50%">
             <stop offset="0%" stopColor={PRIMARY_DARK} />
@@ -83,11 +88,4 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
       {logo}
     </Link>
   );
-});
-
-Logo.propTypes = {
-  sx: PropTypes.object,
-  disabledLink: PropTypes.bool,
-};
-
-export default Logo;
+}

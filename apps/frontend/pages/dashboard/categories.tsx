@@ -12,7 +12,6 @@ import {
 import DashboardLayout from '../../layouts/dashboard';
 
 import {
-  CategoryWithSubcategories,
   Limits,
   MeExtendedOption,
   UserWithCategoriesAndSubcategories,

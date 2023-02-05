@@ -1,7 +1,16 @@
 import { useState } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
-import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
+import {
+  Box,
+  Divider,
+  Typography,
+  Stack,
+  MenuItem,
+  Avatar,
+  IconButton,
+  Popover,
+} from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
 
@@ -56,7 +65,6 @@ export default function AccountPopover() {
       >
         <Avatar src={account.photoURL} alt="photoURL" />
       </IconButton>
-
       <Popover
         open={Boolean(open)}
         anchorEl={open}
