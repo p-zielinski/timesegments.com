@@ -1,7 +1,16 @@
 import { useState } from 'react';
 // @mui
 import { styled } from '@mui/material/styles';
-import { Input, Slide, Button, IconButton, InputAdornment, ClickAwayListener } from '@mui/material';
+import {
+  Input,
+  Slide,
+  Button,
+  IconButton,
+  InputAdornment,
+  ClickAwayListener,
+  Box,
+  Typography,
+} from '@mui/material';
 // utils
 import { bgBlur } from '../../../utils/cssStyles';
 // component
@@ -44,34 +53,8 @@ export default function Searchbar() {
   };
 
   return (
-    <ClickAwayListener onClickAway={handleClose}>
-      <div>
-        {!open && (
-          <IconButton onClick={handleOpen}>
-            <Iconify icon="eva:search-fill" />
-          </IconButton>
-        )}
-
-        <Slide direction="down" in={open} mountOnEnter unmountOnExit>
-          <StyledSearchbar>
-            <Input
-              autoFocus
-              fullWidth
-              disableUnderline
-              placeholder="Search…"
-              startAdornment={
-                <InputAdornment position="start">
-                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
-                </InputAdornment>
-              }
-              sx={{ mr: 1, fontWeight: 'fontWeightBold' }}
-            />
-            <Button variant="contained" onClick={handleClose}>
-              Search
-            </Button>
-          </StyledSearchbar>
-        </Slide>
-      </div>
-    </ClickAwayListener>
+    <Box sx={{ color: 'black' }} variant="h4">
+      <Typography variant="h4">Categories & subcategories</Typography>
+    </Box>
   );
 }

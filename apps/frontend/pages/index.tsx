@@ -83,8 +83,6 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  console.log(serverSideFetchedUser);
-
   if (!serverSideFetchedUser) {
     return (
       <>
@@ -148,21 +146,18 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
       </Helmet>
 
       <Container>
-        <Typography
-          variant="h4"
-          sx={{ mb: 1 }}
-          onClick={() => setIsSaving(!isSaving)}
-        >
-          Categories & subcategories
-        </Typography>
-
         <Stack
           direction="row"
           flexWrap="wrap-reverse"
           alignItems="center"
           justifyContent="flex-end"
         >
-          <Stack direction="row" spacing={1} flexShrink={0} sx={{ mb: 3 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            flexShrink={0}
+            sx={{ mt: -3, mb: 3 }}
+          >
             <ProductSort
               categories={categories}
               setCategories={setCategories}
@@ -189,8 +184,6 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
 
 export const getServerSideProps = async (context: any) => {
   let { jwt_token } = context.req.cookies;
-
-  jwt_token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbGN0OXpjZnQwMDAwcXc1NXJ1MnQ5NjlvIiwidG9rZW5JZCI6ImNsZDVvd3czMDAwMDBxd3lubTJzb2t2c2UiLCJleHBpcmVzQXQiOiIyMDIzLTAzLTIyVDA4OjI5OjUyLjYxOVoifQ.j4Tyz6zORhroQ7sxVm-Tvnpxy1bVGVpTHj-fuDWNsSY`;
 
   const responseUser = await fetch(
     process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
@@ -220,6 +213,6 @@ export const getServerSideProps = async (context: any) => {
   }
 
   return {
-    props: { user, limits },
+    props: { user: user ?? null, limits: limits ?? null },
   };
 };
