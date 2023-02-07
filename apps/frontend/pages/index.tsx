@@ -6,7 +6,7 @@ import { Link, Container, Typography, Stack } from '@mui/material';
 import useResponsive from '../hooks/useResponsive';
 // sections
 import { AuthForm } from '../sections/auth';
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import {
   AuthPageState,
   Limits,
@@ -14,7 +14,7 @@ import {
   UserWithCategoriesAndSubcategories,
 } from '@test1/shared';
 import Logo from '../components/logo';
-import { Category } from '@prisma/client';
+import { Category,User } from '@prisma/client';
 import { CategoriesPageMode } from '../enum/categoriesPageMode';
 import { RenderAuthLink } from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
@@ -51,23 +51,23 @@ const StyledContent = styled('div')(({ theme }) => ({
   padding: theme.spacing(12, 0),
 }));
 
-// ----------------------------------------------------------------------
-
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
   limits: Limits;
 };
 
 export default function Index({ user: serverSideFetchedUser, limits }: Props) {
+  const [user,setUser] = useState<UserWithCategoriesAndSubcategories>(serverSideFetchedUser)
+
   //Auth page states
   const mdUp = useResponsive('up', 'md');
   const [currentPageState, setCurrentPageState] = useState(
-    AuthPageState.REGISTER
+    AuthPageState.LOGIN
   );
 
   //Categories page states
   const [categories, setCategories] = useState<Category[]>(
-    serverSideFetchedUser?.categories || []
+    user?.categories || []
   );
   const [viewMode, setViewMode] = useState<CategoriesPageMode>(
     CategoriesPageMode.VIEW
@@ -83,7 +83,7 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  if (!serverSideFetchedUser) {
+  if (!user) {
     return (
       <>
         <Helmet>
@@ -131,6 +131,8 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
               <AuthForm
                 authPageState={currentPageState}
                 setAuthPageState={setCurrentPageState}
+                setUser={setUser}
+                setCategories={setCategories}
               />
             </StyledContent>
           </Container>
@@ -183,7 +185,7 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
 }
 
 export const getServerSideProps = async (context: any) => {
-  let { jwt_token } = context.req.cookies;
+  const { jwt_token } = context.req.cookies;
 
   const responseUser = await fetch(
     process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',

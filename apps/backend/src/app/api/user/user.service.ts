@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
-import { hashString } from '../../common/hashString';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { checkHashedString } from '../../common/checkHashedString';
-import { TokenService } from '../token/token.service';
-import { CategoryService } from '../category/category.service';
-import { SubcategoryService } from '../subcategory/subcategory.service';
-import { TimeLogService } from '../time-log/time-log.service';
-import { User, Prisma } from '@prisma/client';
-import { Limits, MeExtendedOption } from '@test1/shared';
+import {Injectable} from '@nestjs/common';
+import {PrismaService} from '../../prisma.service';
+import {hashString} from '../../common/hashString';
+import {ConfigService} from '@nestjs/config';
+import {JwtService} from '@nestjs/jwt';
+import {checkHashedString} from '../../common/checkHashedString';
+import {TokenService} from '../token/token.service';
+import {CategoryService} from '../category/category.service';
+import {SubcategoryService} from '../subcategory/subcategory.service';
+import {TimeLogService} from '../time-log/time-log.service';
+import {User, Prisma} from '@prisma/client';
+import {Limits, MeExtendedOption} from '@test1/shared';
 
 @Injectable()
 export class UserService {
@@ -21,7 +21,8 @@ export class UserService {
     private readonly categoryService: CategoryService,
     private readonly subcategoryService: SubcategoryService,
     private readonly timeLogService: TimeLogService
-  ) {}
+  ) {
+  }
 
   public async getMeExtended(
     id: string,
@@ -35,14 +36,10 @@ export class UserService {
       extend.includes(MeExtendedOption.CATEGORIES) &&
       extend.includes(MeExtendedOption.SUBCATEGORIES)
     ) {
-      include.categories = { include: { subcategories: true } };
+      include.categories = {include: {subcategories: true}};
     } else if (extend.includes(MeExtendedOption.CATEGORIES)) {
       include.categories = true;
     }
-    const user = await this.prisma.user.findFirst({
-      where: { id },
-      include,
-    });
 
     const limits: { categoriesLimit?: number; subcategoriesLimit?: number } =
       {};
@@ -57,16 +54,20 @@ export class UserService {
       );
     }
     return {
-      user,
+      user: (extend.includes(MeExtendedOption.CATEGORIES) ||
+        extend.includes(MeExtendedOption.SUBCATEGORIES)) ? await this.prisma.user.findFirst({
+        where: {id},
+        include,
+      }) : undefined,
       limits: Object.keys(limits).length ? limits : undefined,
     };
   }
 
   public async cancelAllActive(userId: string) {
-    const { categories, subcategories } = (await this.prisma.user.findFirst({
-      where: { id: userId },
-      include: { categories: true, subcategories: true },
-    })) || { categories: [], subcategories: [] };
+    const {categories, subcategories} = (await this.prisma.user.findFirst({
+      where: {id: userId},
+      include: {categories: true, subcategories: true},
+    })) || {categories: [], subcategories: []};
     const activeCategories = categories.filter((category) => category.active);
     const activeSubcategories = subcategories.filter(
       (subcategory) => subcategory.active
@@ -99,7 +100,10 @@ export class UserService {
   public async createNewUser(
     data: { email: string; plainPassword: string },
     options?: { generateToken: boolean }
-  ): Promise<{ success: boolean; error?: string; token?: string }> {
+  ): Promise<
+    | { success: false; error: string }
+    | { success: true; user: User; token?: string }
+  > {
     try {
       const newUser = await this.prisma.user.create({
         data: {
@@ -111,7 +115,7 @@ export class UserService {
         },
       });
       if (!options?.generateToken) {
-        return { success: true };
+        return {success: true, user: newUser};
       }
       const token = await this.tokenService.generateToken(
         newUser.id,
@@ -124,10 +128,11 @@ export class UserService {
           tokenId: token.id,
           expiresAt: token.expiresAt,
         }),
+        user: newUser
       };
     } catch (error) {
       if (error?.meta?.target?.includes('email')) {
-        return { success: false, error: 'This email is already taken' };
+        return {success: false, error: 'This email is already taken'};
       }
       return {
         success: false,
@@ -142,14 +147,17 @@ export class UserService {
   public async validateUser(data: {
     password: string;
     email: string;
-  }): Promise<{ success: boolean; error?: string; token?: string }> {
+  }): Promise<
+    | { success: false; error: string }
+    | { success: true; token: string; user: User }
+  > {
     const requestedUser = await this.prisma.user.findFirst({
-      where: { email: data.email },
+      where: {email: data.email},
     });
     const VALIDATION_ERROR = {
       success: false,
       error: 'Email or password does not match',
-    };
+    } as { success: false; error: string };
     if (
       !requestedUser?.password ||
       !(await checkHashedString(data.password, requestedUser.password))
@@ -167,6 +175,7 @@ export class UserService {
         tokenId: token.id,
         expiresAt: token.expiresAt,
       }),
+      user: requestedUser,
     };
   }
 }

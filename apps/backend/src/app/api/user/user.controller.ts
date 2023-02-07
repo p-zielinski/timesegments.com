@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
+import { MeExtendedOption } from '@test1/shared';
 
 @Controller('user')
 export class UserController {
@@ -22,31 +23,48 @@ export class UserController {
     @Body() loginOrRegisterDto: LoginOrRegisterDto
   ) {
     const { email, password } = loginOrRegisterDto;
-    const registerStatus = await this.userService.createNewUser(
+    const registeringResult = await this.userService.createNewUser(
       { email, plainPassword: password },
       { generateToken: true }
     );
-    if (!registerStatus.success) {
+    if (registeringResult.success === false) {
       throw new BadRequestException({
-        error: registerStatus.error,
+        error: registeringResult.error,
       });
     }
-    return registerStatus;
+    const { limits } = await this.userService.getMeExtended(
+      registeringResult.user.id,
+      [MeExtendedOption.CATEGORIES_LIMIT, MeExtendedOption.SUBCATEGORIES_LIMIT]
+    );
+    return {
+      ...registeringResult,
+      user: { ...registeringResult.user, categories: [] },
+      limits,
+    };
   }
 
   @Post('login')
   async handleRequestLogin(@Body() loginOrRegisterDto: LoginOrRegisterDto) {
     const { email, password } = loginOrRegisterDto;
-    const loginStatus = await this.userService.validateUser({
+    const validatingResult = await this.userService.validateUser({
       email,
       password,
     });
-    if (!loginStatus.success) {
+    if (validatingResult.success === false) {
       throw new BadRequestException({
-        error: loginStatus.error,
+        error: validatingResult.error,
       });
     }
-    return loginStatus;
+    const { user, limits } = await this.userService.getMeExtended(
+      validatingResult.user.id,
+      [
+        MeExtendedOption.CATEGORIES,
+        MeExtendedOption.SUBCATEGORIES,
+        MeExtendedOption.CATEGORIES_LIMIT,
+        MeExtendedOption.SUBCATEGORIES_LIMIT,
+      ]
+    );
+    return { ...validatingResult, user, limits };
   }
 
   @UseGuards(JwtAuthGuard)

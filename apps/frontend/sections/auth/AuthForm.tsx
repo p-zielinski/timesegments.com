@@ -18,14 +18,16 @@ import { useRouter } from 'next/router';
 import { AuthPageState } from '@test1/shared';
 import recoverSchema from '../../yupSchemas/recover';
 import { InputText } from '../../components/form/Text';
-import Image from 'next/image';
-import mail from '../../graphics/mail.svg';
-import locker from '../../graphics/locker.svg';
 import { handleFetch } from '../../utils/handleFetch';
 import { SelectWithSearch } from '../../components/form/SelectWithSearch';
 // ----------------------------------------------------------------------
 
-export default function AuthForm({ authPageState, setAuthPageState }) {
+export default function AuthForm({
+  authPageState,
+  setAuthPageState,
+  setUser,
+  setCategories,
+}) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
 
@@ -49,6 +51,8 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         expires: new Date(jwtDecoded.exp * 1000),
         path: '/',
       });
+      setUser(response.user);
+      setCategories(response.user?.categories ?? []);
       return true;
     }
     setError(new Error(response.error));
