@@ -1,25 +1,17 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import {Box, Card, Grid, Stack, Typography} from '@mui/material';
 import CategoryCard from './CategoryCard';
 import Iconify from '../../../components/iconify';
-import {
-  LIGHT_GREEN,
-  GREEN,
-  LIGHT_RED,
-  RED,
-  IS_SAVING_HEX,
-  SUPER_LIGHT_SILVER,
-} from '../../../consts/colors';
-import React, { useEffect, useState } from 'react';
+import {IS_SAVING_HEX, LIGHT_RED, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
+import React, {useEffect, useState} from 'react';
 import AddNew from './AddNew';
-import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
-import { CreateNewType } from '../../../enum/createNewType';
+import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
+import {CreateNewType} from '../../../enum/createNewType';
 import ShowNoShow from './ShowNoShow';
-import { ShowNoShowType } from '../../../enum/showNoShowType';
+import {ShowNoShowType} from '../../../enum/showNoShowType';
 import ShowLimitReached from './ShowLimitReached';
-import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
-import { CategoryWithSubcategories } from '@test1/shared';
+import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import EditCategoriesButtonComponent from './EditCategoriesButtonComponent';
 
 // ----------------------------------------------------------------------
@@ -67,34 +59,36 @@ export default function CategoryList({
         {viewMode === CategoriesPageMode.EDIT && (
           <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Card
-                sx={{
-                  backgroundColor: isSaving
-                    ? IS_SAVING_HEX
-                    : 'rgba(0,0,0,0.11)',
-                  cursor: !isSaving && 'pointer',
-                  color: isSaving && IS_SAVING_HEX,
-                  border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_RED}`,
-                  background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
-                  '&:hover': !isSaving && {
-                    border: `solid 2px ${RED}`,
-                  },
-                }}
-                onClick={() =>
-                  !isSaving && setViewMode(CategoriesPageMode.VIEW)
-                }
-              >
-                <Iconify
-                  icon={'mdi:cancel-bold'}
-                  width={42}
-                  sx={{ m: -2, position: 'absolute', bottom: 22, left: 22 }}
-                />
-                <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
-                  <Typography variant="subtitle2" noWrap>
-                    STOP EDITING CATEGORIES
-                  </Typography>
-                </Stack>
-              </Card>
+              {categories.length !== 0 && (
+                <Card
+                  sx={{
+                    backgroundColor: isSaving
+                      ? IS_SAVING_HEX
+                      : 'rgba(0,0,0,0.11)',
+                    cursor: !isSaving && 'pointer',
+                    color: isSaving && IS_SAVING_HEX,
+                    border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_RED}`,
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                    '&:hover': !isSaving && {
+                      border: `solid 2px ${RED}`,
+                    },
+                  }}
+                  onClick={() =>
+                    !isSaving && setViewMode(CategoriesPageMode.VIEW)
+                  }
+                >
+                  <Iconify
+                    icon={'mdi:cancel-bold'}
+                    width={42}
+                    sx={{ m: -2, position: 'absolute', bottom: 22, left: 22 }}
+                  />
+                  <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
+                    <Typography variant="subtitle2" noWrap>
+                      STOP EDITING CATEGORIES
+                    </Typography>
+                  </Stack>
+                </Card>
+              )}
               {categories.length < limits.categoriesLimit ? (
                 <AddNew
                   type={CreateNewType.CATEGORY}

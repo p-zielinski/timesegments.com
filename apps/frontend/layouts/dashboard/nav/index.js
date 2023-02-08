@@ -1,27 +1,18 @@
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import {useEffect, useState} from 'react';
 // @mui
-import { styled, alpha } from '@mui/material/styles';
-import {
-  Box,
-  Link,
-  Button,
-  Drawer,
-  Typography,
-  Avatar,
-  Stack,
-} from '@mui/material';
+import {alpha, styled} from '@mui/material/styles';
+import {Box, Drawer, Link, Typography} from '@mui/material';
 // mock
-import account from '../../../_mock/account';
 // hooks
 import useResponsive from '../../../hooks/useResponsive';
 // components
-import Logo from '../../../components/logo';
 import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
 //
 import navConfig from './config';
-import { useRouter } from 'next/router';
+import {useRouter} from 'next/router';
+import {getRandomRgbObjectForSliderPicker} from '../../../utils/getRandomRgbObjectForSliderPicker';
 
 // ----------------------------------------------------------------------
 
@@ -42,7 +33,8 @@ Nav.propTypes = {
   onCloseNav: PropTypes.func,
 };
 
-export default function Nav({ openNav, onCloseNav }) {
+export default function Nav({ openNav, onCloseNav, user, setUser }) {
+  const [color, setColor] = useState(getRandomRgbObjectForSliderPicker().hex);
   const router = useRouter();
 
   const isDesktop = useResponsive('up', 'lg');
@@ -64,57 +56,34 @@ export default function Nav({ openNav, onCloseNav }) {
         },
       }}
     >
-      <Box sx={{ px: 2.5, py: 3, display: 'inline-flex' }}>
-        <Logo />
-      </Box>
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color,
+          px: 2.5,
+          py: 3,
+          display: 'inline-flex',
+          fontSize: 20,
+        }}
+      >
+        {process.env.NEXT_PUBLIC_APP_NAME}
+      </Typography>
 
-      <Box sx={{ mb: 5, mx: 2.5 }}>
+      <Box sx={{ mb: 3, mx: 2.5 }}>
         <Link underline="none">
           <StyledAccount>
-            <Avatar src={account.photoURL} alt="photoURL" />
-
-            <Box sx={{ ml: 2 }}>
+            <Box sx={{ ml: 0 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {account.displayName}
-              </Typography>
-
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {account.role}
+                {user.email.split('@')[0]}
               </Typography>
             </Box>
           </StyledAccount>
         </Link>
       </Box>
 
-      <NavSection data={navConfig} />
+      <NavSection data={navConfig} setUser={setUser} />
 
       <Box sx={{ flexGrow: 1 }} />
-
-      <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-        <Stack
-          alignItems="center"
-          spacing={3}
-          sx={{ pt: 5, borderRadius: 2, position: 'relative' }}
-        >
-          <Box
-            component="img"
-            src="/assets/illustrations/illustration_avatar.png"
-            sx={{ width: 100, position: 'absolute', top: -50 }}
-          />
-
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography gutterBottom variant="h6">
-              Get more?
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              From only $69
-            </Typography>
-          </Box>
-
-          <Button variant="contained">Upgrade to Pro</Button>
-        </Stack>
-      </Box>
     </Scrollbar>
   );
 

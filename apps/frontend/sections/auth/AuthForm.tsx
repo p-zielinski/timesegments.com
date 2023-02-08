@@ -1,25 +1,19 @@
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 // @mui
-import {
-  Link,
-  Stack,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from '@mui/material';
+import {IconButton, InputAdornment, Link, Stack} from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Formik } from 'formik';
+import {Formik} from 'formik';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
 import loginRegisterSchema from '../../yupSchemas/loginRegister';
 // components
 import Iconify from '../../components/iconify';
-import { useRouter } from 'next/router';
-import { AuthPageState } from '@test1/shared';
+import {useRouter} from 'next/router';
+import {AuthPageState} from '@test1/shared';
 import recoverSchema from '../../yupSchemas/recover';
-import { InputText } from '../../components/form/Text';
-import { handleFetch } from '../../utils/handleFetch';
-import { SelectWithSearch } from '../../components/form/SelectWithSearch';
+import {InputText} from '../../components/form/Text';
+import {handleFetch} from '../../utils/handleFetch';
+import {SelectWithSearch} from '../../components/form/SelectWithSearch';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({
@@ -27,6 +21,7 @@ export default function AuthForm({
   setAuthPageState,
   setUser,
   setCategories,
+  setLimits,
 }) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
@@ -53,6 +48,7 @@ export default function AuthForm({
       });
       setUser(response.user);
       setCategories(response.user?.categories ?? []);
+      setLimits(response.limits);
       return true;
     }
     setError(new Error(response.error));

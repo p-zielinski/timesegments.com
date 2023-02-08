@@ -1,28 +1,18 @@
-import { Helmet } from 'react-helmet-async';
+import {Helmet} from 'react-helmet-async';
 // @mui
-import { styled } from '@mui/material/styles';
-import { Link, Container, Typography, Stack } from '@mui/material';
+import {styled} from '@mui/material/styles';
+import {Container, Stack, Typography} from '@mui/material';
 // hooks
 import useResponsive from '../hooks/useResponsive';
 // sections
-import { AuthForm } from '../sections/auth';
+import {AuthForm} from '../sections/auth';
 import {useEffect, useState} from 'react';
-import {
-  AuthPageState,
-  Limits,
-  MeExtendedOption,
-  UserWithCategoriesAndSubcategories,
-} from '@test1/shared';
-import Logo from '../components/logo';
-import { Category,User } from '@prisma/client';
-import { CategoriesPageMode } from '../enum/categoriesPageMode';
-import { RenderAuthLink } from '../components/renderAuthLink';
+import {AuthPageState, Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
+import {Category} from '@prisma/client';
+import {CategoriesPageMode} from '../enum/categoriesPageMode';
+import {RenderAuthLink} from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
-import {
-  CategoryList,
-  ProductCartWidget,
-  ProductSort,
-} from '../sections/@dashboard/categories';
+import {CategoryList, ProductSort} from '../sections/@dashboard/categories';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -56,14 +46,19 @@ type Props = {
   limits: Limits;
 };
 
-export default function Index({ user: serverSideFetchedUser, limits }: Props) {
-  const [user,setUser] = useState<UserWithCategoriesAndSubcategories>(serverSideFetchedUser)
+export default function Index({
+  user: serverSideFetchedUser,
+  limits: serverSideFetchedLimits,
+}: Props) {
+  const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
+    serverSideFetchedUser
+  );
+
+  const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits);
 
   //Auth page states
   const mdUp = useResponsive('up', 'md');
-  const [currentPageState, setCurrentPageState] = useState(
-    AuthPageState.LOGIN
-  );
+  const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
 
   //Categories page states
   const [categories, setCategories] = useState<Category[]>(
@@ -72,6 +67,13 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
   const [viewMode, setViewMode] = useState<CategoriesPageMode>(
     CategoriesPageMode.VIEW
   );
+
+  useEffect(() => {
+    if (!categories.length) {
+      setViewMode(CategoriesPageMode.EDIT);
+    }
+  }, [categories.length]);
+
   const [isEditing, setIsEditing] = useState<{
     categoryId: string;
     subcategoryId: string;
@@ -91,14 +93,6 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
         </Helmet>
 
         <StyledRoot>
-          <Logo
-            sx={{
-              position: 'fixed',
-              top: { xs: 16, sm: 24, md: 40 },
-              left: { xs: 16, sm: 24, md: 40 },
-            }}
-          />
-
           {mdUp && (
             <StyledSection>
               <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
@@ -133,6 +127,7 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
                 setAuthPageState={setCurrentPageState}
                 setUser={setUser}
                 setCategories={setCategories}
+                setLimits={setLimits}
               />
             </StyledContent>
           </Container>
@@ -142,7 +137,7 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout user={user} setUser={setUser}>
       <Helmet>
         <title>Categories</title>
       </Helmet>
@@ -178,7 +173,6 @@ export default function Index({ user: serverSideFetchedUser, limits }: Props) {
           setIsEditing={setIsEditing}
           limits={limits}
         />
-        {/*<ProductCartWidget />*/}
       </Container>
     </DashboardLayout>
   );
