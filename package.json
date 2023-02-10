@@ -4,9 +4,9 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
-    "start:frontend": "nx serve frontend --port=$PORT --hostname 0.0.0.0",
+    "start:frontend": "nx serve frontend --prod --port=$PORT --hostname 0.0.0.0",
     "start:backend": "prisma migrate dev; nx serve backend --prod --port=$PORT",
-    "build:frontend": "nx build frontend --verbose",
+    "build:frontend": "nx build frontend",
     "build:backend": "nx build backend --prod",
     "test": "nx test",
     "dev": "nx run-many --target serve --projects=backend,frontend --parallel=2"
