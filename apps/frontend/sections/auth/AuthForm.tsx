@@ -3,7 +3,6 @@ import {useEffect, useState} from 'react';
 import {IconButton, InputAdornment, Link, Stack} from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {Formik} from 'formik';
-import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
 import loginRegisterSchema from '../../yupSchemas/loginRegister';
 // components
@@ -41,9 +40,8 @@ export default function AuthForm({
       method: 'POST',
     });
     if (response.statusCode === 201) {
-      const jwtDecoded: { exp: number } = jwt_decode(response.token);
       await Cookies.set('jwt_token', response.token, {
-        expires: new Date(jwtDecoded.exp * 1000),
+        expires: 34560000,
         path: '/',
       });
       setUser(response.user);
