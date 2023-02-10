@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography, TextField } from '@mui/material';
+import { Box, Card, Stack, TextField, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
 import {
   GREEN,
@@ -29,6 +29,7 @@ export default function EditSubcategory({
   setIsEditing,
   isSaving,
   setIsSaving,
+  disableHover,
 }) {
   const validationSchema = yup.object().shape({
     subcategoryName: yup.string().required('Subcategory name is required'),
@@ -290,18 +291,19 @@ export default function EditSubcategory({
                     borderBottomLeftRadius: 12,
                     borderRight: 0,
                     borderTop: 0,
-                    '&:hover': !isSaving && {
-                      border: !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 0,
-                            g: 0,
-                            b: 0,
-                            a: 0.05,
-                          })}`
-                        : `solid 2px ${GREEN}`,
-                      borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
-                      pt: !isFormValid ? 2 : 1.8,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        border: !isFormValid
+                          ? `solid 2px ${getHexFromRGBAObject({
+                              r: 0,
+                              g: 0,
+                              b: 0,
+                              a: 0.05,
+                            })}`
+                          : `solid 2px ${GREEN}`,
+                        borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
+                        pt: !isFormValid ? 2 : 1.8,
+                      },
                   }}
                   onClick={() => {
                     !isSaving && handleSubmit();
@@ -365,10 +367,11 @@ export default function EditSubcategory({
                       : !isFormValid
                       ? `rgba(255, 0, 0, 0.2)`
                       : LIGHT_RED,
-                    '&:hover': !isSaving && {
-                      background: LIGHT_RED,
-                      border: `solid 2px ${RED}`,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        background: LIGHT_RED,
+                        border: `solid 2px ${RED}`,
+                      },
                   }}
                   onClick={() =>
                     !isSaving &&

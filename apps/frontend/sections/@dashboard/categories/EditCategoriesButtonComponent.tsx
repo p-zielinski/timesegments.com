@@ -10,6 +10,7 @@ import React from 'react';
 import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
 
 export default function EditCategoriesButtonComponent({
+  disableHover,
   isSaving,
   setViewMode,
 }) {
@@ -28,9 +29,10 @@ export default function EditCategoriesButtonComponent({
           color: isSaving && IS_SAVING_HEX,
           border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_GREEN}`,
           background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_GREEN,
-          '&:hover': !isSaving && {
-            border: `solid 2px ${GREEN}`,
-          },
+          '&:hover': !disableHover &&
+            !isSaving && {
+              border: `solid 2px ${GREEN}`,
+            },
         }}
       >
         <Iconify

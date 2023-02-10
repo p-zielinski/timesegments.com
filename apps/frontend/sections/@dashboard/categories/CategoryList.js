@@ -24,6 +24,7 @@ CategoryList.propTypes = {
 };
 
 export default function CategoryList({
+  disableHover,
   categories,
   setCategories,
   viewMode,
@@ -69,9 +70,10 @@ export default function CategoryList({
                     color: isSaving && IS_SAVING_HEX,
                     border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_RED}`,
                     background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
-                    '&:hover': !isSaving && {
-                      border: `solid 2px ${RED}`,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        border: `solid 2px ${RED}`,
+                      },
                   }}
                   onClick={() =>
                     !isSaving && setViewMode(CategoriesPageMode.VIEW)
@@ -91,6 +93,7 @@ export default function CategoryList({
               )}
               {categories.length < limits.categoriesLimit ? (
                 <AddNew
+                  disableHover={disableHover}
                   type={CreateNewType.CATEGORY}
                   isEditing={isEditing}
                   setIsEditing={setIsEditing}
@@ -108,6 +111,7 @@ export default function CategoryList({
         {viewMode === CategoriesPageMode.VIEW &&
           numberOfCategoriesAndSubcategoriesCombined > 10 && (
             <EditCategoriesButtonComponent
+              disableHover={disableHover}
               isSaving={isSaving}
               setViewMode={setViewMode}
             />
@@ -117,6 +121,7 @@ export default function CategoryList({
           ? getCategories(categories).map((category) => (
               <Grid key={category.id} item xs={1} sm={1} md={1}>
                 <CategoryCard
+                  disableHover={disableHover}
                   viewMode={viewMode}
                   isEditing={isEditing}
                   setIsEditing={setIsEditing}

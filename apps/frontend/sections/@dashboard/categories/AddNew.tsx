@@ -7,7 +7,6 @@ import {
   LIGHT_BLUE,
   LIGHT_GREEN,
   LIGHT_RED,
-  LIGHT_SILVER,
   RED,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
@@ -29,6 +28,7 @@ import { Checkbox } from '../Form/Checkbox';
 import { handleFetch } from '../../../utils/handleFetch';
 
 export default function AddNew({
+  disableHover,
   type,
   data = {},
   isEditing,
@@ -173,11 +173,12 @@ export default function AddNew({
               ? LIGHT_GREEN
               : LIGHT_BLUE
           }`,
-          '&:hover': !isSaving && {
-            border: `solid 2px  ${
-              type === CreateNewType.CATEGORY ? GREEN : BLUE
-            }`,
-          },
+          '&:hover': !disableHover &&
+            !isSaving && {
+              border: `solid 2px  ${
+                type === CreateNewType.CATEGORY ? GREEN : BLUE
+              }`,
+            },
         }}
         onClick={() =>
           !isSaving &&
@@ -388,18 +389,19 @@ export default function AddNew({
                     borderBottomLeftRadius: 12,
                     borderRight: 0,
                     borderTop: 0,
-                    '&:hover': !isSaving && {
-                      border: !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 0,
-                            g: 0,
-                            b: 0,
-                            a: 0.05,
-                          })}`
-                        : `solid 2px ${GREEN}`,
-                      borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
-                      pt: !isFormValid ? 2 : 1.8,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        border: !isFormValid
+                          ? `solid 2px ${getHexFromRGBAObject({
+                              r: 0,
+                              g: 0,
+                              b: 0,
+                              a: 0.05,
+                            })}`
+                          : `solid 2px ${GREEN}`,
+                        borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
+                        pt: !isFormValid ? 2 : 1.8,
+                      },
                   }}
                   onClick={() => {
                     !isSaving && handleSubmit();
@@ -463,10 +465,11 @@ export default function AddNew({
                       : !isFormValid
                       ? `rgba(255, 0, 0, 0.2)`
                       : LIGHT_RED,
-                    '&:hover': !isSaving && {
-                      background: LIGHT_RED,
-                      border: `solid 2px ${RED}`,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        background: LIGHT_RED,
+                        border: `solid 2px ${RED}`,
+                      },
                   }}
                   onClick={() =>
                     !isSaving &&

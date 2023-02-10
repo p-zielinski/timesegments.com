@@ -1,27 +1,15 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Card, Typography, Stack, Box } from '@mui/material';
+import {Box, Card, Stack, Typography} from '@mui/material';
 // utils
-import IsActive from '../../../components/is-active/IsActive';
-import {
-  GREEN,
-  IS_SAVING_HEX,
-  LIGHT_GREEN,
-  LIGHT_RED,
-  LIGHT_SILVER,
-  RED,
-  SUPER_LIGHT_SILVER,
-} from '../../../consts/colors';
-import { getRgbaStringFromHexString } from '../../../utils/getRgbaStringFromHexString';
-import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
+import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
+import {getRepeatingLinearGradient} from '../../../utils/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
-import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
-import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
-import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
+import {getHexFromRGBAObject} from '../../../utils/getHexFromRGBAObject';
+import {getRgbaObjectFromHexString} from '../../../utils/getRgbaObjectFromHexString';
+import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import EditSubcategory from './EditSubcategory';
-import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
-import { handleFetch } from '../../../utils/handleFetch';
+import {handleFetch} from '../../../utils/handleFetch';
 import React from 'react';
 
 // ----------------------------------------------------------------------
@@ -34,6 +22,7 @@ SubcategoryCard.propTypes = {
 };
 
 export default function SubcategoryCard({
+  disableHover,
   subcategory,
   categories,
   setCategories,
@@ -112,6 +101,7 @@ export default function SubcategoryCard({
   ) {
     return (
       <EditSubcategory
+        disableHover={disableHover}
         category={category}
         categories={categories}
         setCategories={setCategories}
@@ -150,7 +140,8 @@ export default function SubcategoryCard({
                 borderTopLeftRadius: 12,
                 borderBottomLeftRadius: 12,
                 cursor: !isSaving && !subcategory.active && 'pointer',
-                '&:hover': !isSaving &&
+                '&:hover': !disableHover &&
+                  !isSaving &&
                   !subcategory.active && {
                     color: !subcategory.visible ? GREEN : RED,
                     background: LIGHT_SILVER,
@@ -182,9 +173,10 @@ export default function SubcategoryCard({
                 borderTop: `solid 2px ${LIGHT_SILVER}`,
                 borderBottom: `solid 2px ${LIGHT_SILVER}`,
                 cursor: !isSaving && 'pointer',
-                '&:hover': !isSaving && {
-                  background: LIGHT_SILVER,
-                },
+                '&:hover': !disableHover &&
+                  !isSaving && {
+                    background: LIGHT_SILVER,
+                  },
               }}
               onClick={() => {
                 !isSaving &&
@@ -257,33 +249,34 @@ export default function SubcategoryCard({
             borderBottomLeftRadius: 0,
             cursor:
               !isSaving && viewMode === CategoriesPageMode.VIEW && 'pointer',
-            '&:hover': !isSaving && {
-              background:
-                viewMode === CategoriesPageMode.EDIT
-                  ? getRepeatingLinearGradient(
-                      subcategory?.color || category?.color,
-                      0.3
-                    )
-                  : isActive
-                  ? LIGHT_RED
-                  : LIGHT_GREEN,
-              border:
-                viewMode === CategoriesPageMode.EDIT
-                  ? `solid 2px ${
-                      isSaving
-                        ? IS_SAVING_HEX
-                        : getHexFromRGBAObject({
-                            ...getRgbaObjectFromHexString(
-                              subcategory?.color || category?.color
-                            ),
-                            a: 0.3,
-                          })
-                    }`
-                  : !isActive
-                  ? `solid 2px ${LIGHT_GREEN}`
-                  : `solid 2px ${LIGHT_RED}`,
-              borderLeft: 0,
-            },
+            '&:hover': !disableHover &&
+              !isSaving && {
+                background:
+                  viewMode === CategoriesPageMode.EDIT
+                    ? getRepeatingLinearGradient(
+                        subcategory?.color || category?.color,
+                        0.3
+                      )
+                    : isActive
+                    ? LIGHT_RED
+                    : LIGHT_GREEN,
+                border:
+                  viewMode === CategoriesPageMode.EDIT
+                    ? `solid 2px ${
+                        isSaving
+                          ? IS_SAVING_HEX
+                          : getHexFromRGBAObject({
+                              ...getRgbaObjectFromHexString(
+                                subcategory?.color || category?.color
+                              ),
+                              a: 0.3,
+                            })
+                      }`
+                    : !isActive
+                    ? `solid 2px ${LIGHT_GREEN}`
+                    : `solid 2px ${LIGHT_RED}`,
+                borderLeft: 0,
+              },
           }}
           onClick={() =>
             !isSaving &&

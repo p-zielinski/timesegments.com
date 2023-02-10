@@ -13,6 +13,8 @@ import {CategoriesPageMode} from '../enum/categoriesPageMode';
 import {RenderAuthLink} from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
 import {CategoryList, ProductSort} from '../sections/@dashboard/categories';
+import {isMobile} from 'react-device-detect';
+
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -71,6 +73,8 @@ export default function Index({
   useEffect(() => {
     if (!categories.length) {
       setViewMode(CategoriesPageMode.EDIT);
+    } else {
+      setViewMode(CategoriesPageMode.VIEW);
     }
   }, [categories.length]);
 
@@ -84,6 +88,12 @@ export default function Index({
     createNew: undefined,
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  const [disableHover, setDisableHover] = useState<boolean>(true);
+
+  useEffect(() => {
+    setDisableHover(isMobile);
+  }, [isMobile]);
 
   if (!user) {
     return (
@@ -163,6 +173,7 @@ export default function Index({
         </Stack>
 
         <CategoryList
+          disableHover={disableHover}
           isSaving={isSaving}
           setIsSaving={setIsSaving}
           categories={categories}

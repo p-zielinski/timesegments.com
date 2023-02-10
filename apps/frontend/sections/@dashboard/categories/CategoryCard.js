@@ -1,31 +1,23 @@
 import PropTypes from 'prop-types';
 // @mui
-import { Box, Card, Typography, Stack, Grid } from '@mui/material';
+import {Box, Card, Grid, Stack, Typography} from '@mui/material';
 // utils
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';
-import {
-  LIGHT_GREEN,
-  GREEN,
-  LIGHT_RED,
-  RED,
-  LIGHT_SILVER,
-  IS_SAVING_HEX,
-  SUPER_LIGHT_SILVER,
-} from '../../../consts/colors';
-import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
-import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
-import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
+import {getRepeatingLinearGradient} from '../../../utils/getRepeatingLinearGradient';
+import {getHexFromRGBAObject} from '../../../utils/getHexFromRGBAObject';
+import {getRgbaObjectFromHexString} from '../../../utils/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
 import AddNew from './AddNew';
-import { CreateNewType } from '../../../enum/createNewType';
-import { CategoriesPageMode } from '../../../enum/categoriesPageMode';
+import {CreateNewType} from '../../../enum/createNewType';
+import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import ShowNoShow from './ShowNoShow';
-import { ShowNoShowType } from '../../../enum/showNoShowType';
+import {ShowNoShowType} from '../../../enum/showNoShowType';
 import React from 'react';
 import ShowLimitReached from './ShowLimitReached';
-import { ShowLimitReachedType } from '../../../enum/showLimitReachedType';
-import { handleFetch } from '../../../utils/handleFetch';
+import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
+import {handleFetch} from '../../../utils/handleFetch';
 
 // ----------------------------------------------------------------------
 
@@ -43,6 +35,7 @@ export default function CategoryCard({
   isSaving,
   setIsSaving,
   limits,
+  disableHover,
 }) {
   const { active: isActive } = category;
   const doesAnySubcategoryWithinCurrentCategoryActive =
@@ -172,7 +165,8 @@ export default function CategoryCard({
                     borderTopLeftRadius: 12,
                     borderBottomLeftRadius: 12,
                     cursor: !isSaving && !category.active && 'pointer',
-                    '&:hover': !isSaving &&
+                    '&:hover': !disableHover &&
+                      !isSaving &&
                       !category.active && {
                         color: !category.visible ? GREEN : RED,
                         background: LIGHT_SILVER,
@@ -202,9 +196,10 @@ export default function CategoryCard({
                     borderTop: `solid 2px ${LIGHT_SILVER}`,
                     borderBottom: `solid 2px ${LIGHT_SILVER}`,
                     cursor: !isSaving && 'pointer',
-                    '&:hover': !isSaving && {
-                      background: LIGHT_SILVER,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        background: LIGHT_SILVER,
+                      },
                   }}
                   onClick={() =>
                     !isSaving &&
@@ -272,27 +267,28 @@ export default function CategoryCard({
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW &&
                   'pointer',
-                '&:hover': !isSaving && {
-                  background:
-                    viewMode === CategoriesPageMode.EDIT
-                      ? getRepeatingLinearGradient(category?.color, 0.3)
-                      : isActive &&
-                        !doesAnySubcategoryWithinCurrentCategoryActive
-                      ? LIGHT_RED
-                      : LIGHT_GREEN,
-                  border:
-                    viewMode === CategoriesPageMode.EDIT
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          ...getRgbaObjectFromHexString(category?.color),
-                          a: 0.3,
-                        })}`
-                      : isActive &&
-                        !doesAnySubcategoryWithinCurrentCategoryActive
-                      ? `solid 2px ${LIGHT_RED}`
-                      : `solid 2px ${LIGHT_GREEN}`,
-                  borderLeft: 0,
-                  borderRight: 0,
-                },
+                '&:hover': !disableHover &&
+                  !isSaving && {
+                    background:
+                      viewMode === CategoriesPageMode.EDIT
+                        ? getRepeatingLinearGradient(category?.color, 0.3)
+                        : isActive &&
+                          !doesAnySubcategoryWithinCurrentCategoryActive
+                        ? LIGHT_RED
+                        : LIGHT_GREEN,
+                    border:
+                      viewMode === CategoriesPageMode.EDIT
+                        ? `solid 2px ${getHexFromRGBAObject({
+                            ...getRgbaObjectFromHexString(category?.color),
+                            a: 0.3,
+                          })}`
+                        : isActive &&
+                          !doesAnySubcategoryWithinCurrentCategoryActive
+                        ? `solid 2px ${LIGHT_RED}`
+                        : `solid 2px ${LIGHT_GREEN}`,
+                    borderLeft: 0,
+                    borderRight: 0,
+                  },
               }}
               onClick={() =>
                 !isSaving &&
@@ -327,10 +323,11 @@ export default function CategoryCard({
                 borderTopRightRadius: 12,
                 borderBottomRightRadius: 12,
                 cursor: !isSaving && 'pointer',
-                '&:hover': !isSaving && {
-                  borderLeft: `0px`,
-                  background: LIGHT_SILVER,
-                },
+                '&:hover': !disableHover &&
+                  !isSaving && {
+                    borderLeft: `0px`,
+                    background: LIGHT_SILVER,
+                  },
               }}
               onClick={() =>
                 !isSaving && reverseExpandSubcategories(category, categories)
@@ -375,6 +372,7 @@ export default function CategoryCard({
                           (subcategory) => (
                             <SubcategoryCard
                               key={subcategory.id}
+                              disableHover={disableHover}
                               subcategory={subcategory}
                               categories={categories}
                               setCategories={setCategories}
@@ -397,6 +395,7 @@ export default function CategoryCard({
                           {category.subcategories.length <
                           limits.subcategoriesLimit ? (
                             <AddNew
+                              disableHover={disableHover}
                               type={CreateNewType.SUBCATEGORY}
                               data={{ categoryId: category.id }}
                               isEditing={isEditing}
