@@ -13,6 +13,7 @@ import NavSection from '../../../components/nav-section';
 import navConfig from './config';
 import {useRouter} from 'next/router';
 import {getRandomRgbObjectForSliderPicker} from '../../../utils/getRandomRgbObjectForSliderPicker';
+import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
 
 // ----------------------------------------------------------------------
 
@@ -74,7 +75,7 @@ export default function Nav({ openNav, onCloseNav, user, setUser }) {
           <StyledAccount>
             <Box sx={{ ml: 0 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {user.email.split('@')[0]}
+                {capitalizeFirstLetter(user.email.split('@')[0] ?? '')}
               </Typography>
             </Box>
           </StyledAccount>
