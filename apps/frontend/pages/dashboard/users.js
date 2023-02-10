@@ -1,33 +1,33 @@
-import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
-import { useState } from 'react';
+import {Helmet} from 'react-helmet-async';
+import {filter} from 'lodash';
+import {sentenceCase} from 'change-case';
+import {useState} from 'react';
 // @mui
 import {
-  Card,
-  Table,
-  Stack,
-  Paper,
   Avatar,
   Button,
-  Popover,
+  Card,
   Checkbox,
-  TableRow,
+  Container,
+  IconButton,
   MenuItem,
+  Paper,
+  Popover,
+  Stack,
+  Table,
   TableBody,
   TableCell,
-  Container,
-  Typography,
-  IconButton,
   TableContainer,
   TablePagination,
+  TableRow,
+  Typography,
 } from '@mui/material';
 // components
 import Label from '../../components/label';
 import Iconify from '../../components/iconify';
 import Scrollbar from '../../components/scrollbar';
 // sections
-import { UserListHead, UserListToolbar } from '../../sections/@dashboard/user';
+import {UserListHead, UserListToolbar} from '../../sections/@dashboard/user';
 // mock
 import USERLIST from '../../_mock/user';
 import DashboardLayout from '../../layouts/dashboard';
@@ -159,7 +159,7 @@ export default function Users() {
   const isNotFound = !filteredUsers.length && !!filterName;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout user={{ email: 'test' }}>
       <Helmet>
         <title> User | Minimal UI </title>
       </Helmet>

@@ -2,11 +2,13 @@ import { Helmet } from 'react-helmet-async';
 import { faker } from '@faker-js/faker';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Grid, Container, Typography } from '@mui/material';
+import { Container, Grid, Typography } from '@mui/material';
 // components
 import Iconify from '../../components/iconify';
 // sections
 import dynamic from 'next/dynamic';
+import DashboardLayout from '../../layouts/dashboard';
+
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
   { ssr: false }
@@ -44,15 +46,13 @@ const AppTasks = dynamic(
   { ssr: false }
 );
 
-import DashboardLayout from '../../layouts/dashboard';
-
 // ----------------------------------------------------------------------
 
 export default function Index() {
   const theme = useTheme();
 
   return (
-    <DashboardLayout>
+    <DashboardLayout user={{ email: 'random@email' }}>
       <Helmet>
         <title> Dashboard | Minimal UI </title>
       </Helmet>
