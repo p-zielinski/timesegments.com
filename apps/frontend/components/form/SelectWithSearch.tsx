@@ -34,9 +34,11 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
             groupBy={grouping || null}
             options={options}
             defaultValue={field.value}
+            // @ts-ignore
             onChange={(e, valueObj: { value: string; label: string }) => {
               form.setFieldValue(name, valueObj?.value || '');
             }}
+            // @ts-ignore
             value={options.find((o) => o.value === field.value) || null}
             renderInput={(params) => (
               <TextField

@@ -1,13 +1,9 @@
-import { Helmet } from 'react-helmet-async';
+import {Helmet} from 'react-helmet-async';
 // @mui
-import { Grid, Button, Container, Stack, Typography } from '@mui/material';
+import {Button, Container, Grid, Stack, Typography} from '@mui/material';
 // components
 import Iconify from '../../components/iconify';
-import {
-  BlogPostCard,
-  BlogPostsSort,
-  BlogPostsSearch,
-} from '../../sections/@dashboard/blog';
+import {BlogPostCard, BlogPostsSearch, BlogPostsSort,} from '../../sections/@dashboard/blog';
 // mock
 import POSTS from '../../_mock/blog';
 import DashboardLayout from '../../layouts/dashboard';
@@ -24,7 +20,7 @@ const SORT_OPTIONS = [
 
 export default function Blog() {
   return (
-    <DashboardLayout>
+    <DashboardLayout user={{ email: '' }} setUser={() => null}>
       <Helmet>
         <title> Dashboard: Blog | Minimal UI </title>
       </Helmet>

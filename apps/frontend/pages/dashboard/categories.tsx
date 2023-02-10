@@ -1,23 +1,15 @@
-import { Helmet } from 'react-helmet-async';
-import { useEffect, useState } from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useState} from 'react';
 // @mui
-import { Container, Stack, Typography } from '@mui/material';
+import {Container, Stack, Typography} from '@mui/material';
 // components
-import {
-  ProductSort,
-  CategoryList,
-  ProductCartWidget,
-} from '../../sections/@dashboard/categories';
+import {CategoryList, ProductCartWidget, ProductSort,} from '../../sections/@dashboard/categories';
 
 import DashboardLayout from '../../layouts/dashboard';
 
-import {
-  Limits,
-  MeExtendedOption,
-  UserWithCategoriesAndSubcategories,
-} from '@test1/shared';
-import { Category } from '@prisma/client';
-import { CategoriesPageMode } from '../../enum/categoriesPageMode';
+import {Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
+import {Category} from '@prisma/client';
+import {CategoriesPageMode} from '../../enum/categoriesPageMode';
 
 // ----------------------------------------------------------------------
 
@@ -45,7 +37,7 @@ export default function Categories({ user, limits }: Props) {
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   return (
-    <DashboardLayout>
+    <DashboardLayout user={{ email: '' }} setUser={() => null}>
       <Helmet>
         <title> Categories </title>
       </Helmet>
