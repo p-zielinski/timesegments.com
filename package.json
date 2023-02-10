@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
-    "start:frontend": "nx serve frontend --prod",
+    "start:frontend": "nx serve frontend --prod --port=$PORT",
     "start:backend": "prisma migrate dev; nx serve backend --prod --port=$PORT",
     "build:frontend": "nx build frontend --prod --verbose",
     "build:backend": "nx build backend --prod",
