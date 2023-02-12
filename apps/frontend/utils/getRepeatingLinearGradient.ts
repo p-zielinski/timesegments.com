@@ -4,7 +4,8 @@ import { getRgbaObjectFromHexString } from './getRgbaObjectFromHexString';
 export const getRepeatingLinearGradient = (
   hexValueOfRgb = `ffffff`,
   alpha = 1,
-  numberOfDegrees = 45
+  numberOfDegrees = 45,
+  mode = true
 ) => {
   return hexValueOfRgb === 'ffffff'
     ? 'white'
@@ -15,12 +16,12 @@ export const getRepeatingLinearGradient = (
         )},
         ${getHexFromRGBAObject(
           getRgbaObjectFromHexString(hexValueOfRgb, alpha)
-        )} 10px,
+        )} ${mode ? '10px' : '50px'},
         ${getHexFromRGBAObject(
           getRgbaObjectFromHexString(hexValueOfRgb, alpha / 5)
-        )} 150px,
+        )} ${mode ? '10px' : '50px'},
         ${getHexFromRGBAObject(
           getRgbaObjectFromHexString(hexValueOfRgb, alpha / 5)
-        )} 28px
+        )} ${mode ? '20px' : '100px'}
         )`;
 };

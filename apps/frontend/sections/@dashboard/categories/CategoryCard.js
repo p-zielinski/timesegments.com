@@ -224,17 +224,20 @@ export default function CategoryCard({
                   width: `60px`,
                   minWidth: '60px',
                   p: 2,
-                  background: isActive ? LIGHT_GREEN : LIGHT_RED,
+                  background: isSaving
+                    ? IS_SAVING_HEX
+                    : getRepeatingLinearGradient(category?.color, 0.3),
                   border: isSaving
                     ? `solid 2px ${IS_SAVING_HEX}`
                     : isActive
-                    ? `solid 2px ${LIGHT_GREEN}`
-                    : `solid 2px ${LIGHT_RED}`,
-                  borderLeft: isSaving
-                    ? `solid 2px ${IS_SAVING_HEX}`
-                    : isActive
-                    ? `solid 2px ${LIGHT_GREEN}`
-                    : `solid 2px ${LIGHT_RED}`,
+                    ? `solid 2px ${getHexFromRGBAObject({
+                        ...getRgbaObjectFromHexString(category?.color),
+                        a: 0.3,
+                      })}`
+                    : `solid 2px ${getHexFromRGBAObject({
+                        ...getRgbaObjectFromHexString(category?.color),
+                        a: 0.3,
+                      })}`,
                   borderRight: 0,
                   borderTopLeftRadius: 12,
                   borderBottomLeftRadius: 12,
@@ -244,10 +247,18 @@ export default function CategoryCard({
             <Box
               sx={{
                 color: isSaving && IS_SAVING_HEX,
-                background: getRepeatingLinearGradient(
-                  isSaving ? IS_SAVING_HEX : category?.color,
-                  0.3
-                ),
+                background: isSaving
+                  ? SUPER_LIGHT_SILVER
+                  : viewMode === CategoriesPageMode.EDIT
+                  ? getRepeatingLinearGradient(
+                      isSaving ? IS_SAVING_HEX : category?.color,
+                      0.3,
+                      45,
+                      false
+                    )
+                  : isActive
+                  ? LIGHT_GREEN
+                  : LIGHT_RED,
                 flex: 1,
                 border: isSaving
                   ? `solid 2px ${IS_SAVING_HEX}`
@@ -268,22 +279,14 @@ export default function CategoryCard({
                   viewMode === CategoriesPageMode.VIEW &&
                   'pointer',
                 '&:hover': !disableHover &&
-                  !isSaving && {
+                  !isSaving &&
+                  viewMode === CategoriesPageMode.VIEW && {
                     background:
-                      viewMode === CategoriesPageMode.EDIT
-                        ? getRepeatingLinearGradient(category?.color, 0.3)
-                        : isActive &&
-                          !doesAnySubcategoryWithinCurrentCategoryActive
+                      isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? LIGHT_RED
                         : LIGHT_GREEN,
                     border:
-                      viewMode === CategoriesPageMode.EDIT
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            ...getRgbaObjectFromHexString(category?.color),
-                            a: 0.3,
-                          })}`
-                        : isActive &&
-                          !doesAnySubcategoryWithinCurrentCategoryActive
+                      isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? `solid 2px ${LIGHT_RED}`
                         : `solid 2px ${LIGHT_GREEN}`,
                     borderLeft: 0,

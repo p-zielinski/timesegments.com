@@ -10,7 +10,7 @@ import {
 import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
@@ -146,7 +146,9 @@ export default function EditCategory({
                   minHeight: 54,
                   background: getRepeatingLinearGradient(
                     isSaving ? IS_SAVING_HEX : values.color?.hex,
-                    0.3
+                    0.3,
+                    45,
+                    false
                   ),
                   border: `solid 2px ${
                     isSaving
@@ -218,7 +220,8 @@ export default function EditCategory({
                       ? getRepeatingLinearGradient(
                           isSaving ? IS_SAVING_HEX : '000000',
                           isSaving ? 0.2 : 0.05,
-                          135
+                          135,
+                          false
                         )
                       : LIGHT_GREEN,
                   minHeight: 58,

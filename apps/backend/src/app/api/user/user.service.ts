@@ -67,36 +67,47 @@ export class UserService {
     };
   }
 
-  public async cancelAllActive(userId: string) {
-    const { categories, subcategories } = (await this.prisma.user.findFirst({
-      where: { id: userId },
-      include: { categories: true, subcategories: true },
-    })) || { categories: [], subcategories: [] };
-    const activeCategories = categories.filter((category) => category.active);
-    const activeSubcategories = subcategories.filter(
-      (subcategory) => subcategory.active
-    );
-    const activeTimeLog =
-      await this.timeLogService.findFirstTimeLogWhereNotEnded(userId);
-    if (
-      !(activeTimeLog || activeCategories.length || activeSubcategories.length)
-    ) {
+  public async cancelAllActive(user: User): Promise<
+    | {
+        success: true;
+        message: string;
+      }
+    | { success: false; error: string }
+  > {
+    const timeLogNotEnded =
+      await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
+    if (!timeLogNotEnded) {
       return {
-        status: true,
+        success: true,
         message: 'All activities were cancelled successfully.',
       };
     }
-    activeCategories.forEach((category) =>
-      this.categoryService.setCategoryActiveState(category.id, false)
+    await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+    const category = await this.categoryService.setCategoryActiveState(
+      timeLogNotEnded.categoryId,
+      false
     );
-    activeSubcategories.forEach((subcategory) =>
-      this.subcategoryService.setSubcategoryActiveState(subcategory.id, false)
-    );
-    if (activeTimeLog) {
-      await this.timeLogService.setTimeLogAsEnded(activeTimeLog.id); //don't wait
+    if (timeLogNotEnded.subcategoryId) {
+      const subcategory =
+        await this.subcategoryService.setSubcategoryActiveState(
+          timeLogNotEnded.subcategoryId,
+          false
+        );
+      if (subcategory.active !== false) {
+        return {
+          success: false,
+          error: 'Could not set subcategory active state',
+        };
+      }
+    }
+    if (category.active !== false) {
+      return {
+        success: false,
+        error: 'Could not set category active state',
+      };
     }
     return {
-      status: true,
+      success: true,
       message: 'All activities were cancelled successfully.',
     };
   }
