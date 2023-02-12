@@ -256,7 +256,9 @@ export default function AddNew({
                   minHeight: 54,
                   background: getRepeatingLinearGradient(
                     isSaving ? IS_SAVING_HEX : values.color?.hex,
-                    0.3
+                    0.3,
+                    45,
+                    false
                   ),
                   border: `solid 2px ${
                     isSaving
@@ -346,7 +348,8 @@ export default function AddNew({
                       ? getRepeatingLinearGradient(
                           isSaving ? IS_SAVING_HEX : '000000',
                           isSaving ? 0.2 : 0.05,
-                          135
+                          135,
+                          false
                         )
                       : LIGHT_GREEN,
                   minHeight: 58,

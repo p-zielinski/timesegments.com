@@ -13,6 +13,7 @@ import {ShowNoShowType} from '../../../enum/showNoShowType';
 import ShowLimitReached from './ShowLimitReached';
 import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import EditCategoriesButtonComponent from './EditCategoriesButtonComponent';
+import CancelCard from './CancelCard';
 
 // ----------------------------------------------------------------------
 
@@ -107,6 +108,15 @@ export default function CategoryList({
               )}
             </Box>
           </Grid>
+        )}
+        {viewMode === CategoriesPageMode.VIEW && (
+          <CancelCard
+            disableHover={disableHover}
+            categories={categories}
+            setCategories={setCategories}
+            isSaving={isSaving}
+            setIsSaving={setIsSaving}
+          />
         )}
         {viewMode === CategoriesPageMode.VIEW &&
           numberOfCategoriesAndSubcategoriesCombined > 10 && (
