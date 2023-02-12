@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  password      String
-  tokens        Token[]
-  categories    Category[]
-  subcategories Subcategory[]
-  timeLogs      TimeLog[]
-  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
+  id                String            @id @default(cuid())
+  email             String            @unique
+  password          String
+  tokens            Token[]
+  categories        Category[]
+  subcategories     Subcategory[]
+  sortingCategories ColumnSortOption  @default(NEWEST)
+  timeLogs          TimeLog[]
+  createdAt         DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime          @updatedAt @db.Timestamptz(3)
 }
 
 model Token {
@@ -80,4 +81,11 @@ model Comment {
   timeLogId     String      @unique
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
+}
+
+enum ColumnSortOption {
+  NEWEST
+  OLDEST
+  ALPHABETICAL
+  REVERSE_ALPHABETICAL
 }

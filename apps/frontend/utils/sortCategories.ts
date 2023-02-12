@@ -1,8 +1,7 @@
-import { ColumnSortOption } from '@test1/shared';
-import { Category } from '@prisma/client';
+import { CategoryWithSubcategories, ColumnSortOption } from '@test1/shared';
 
 export const sortCategories = (
-  categories: Category[],
+  categories: CategoryWithSubcategories[],
   sortOption: ColumnSortOption
 ) => {
   switch (sortOption) {
@@ -11,7 +10,6 @@ export const sortCategories = (
         .map((category) => {
           return {
             ...category,
-            // @ts-ignore
             subcategories: category.subcategories.sort(
               (subcategory1, subcategory2) =>
                 (subcategory1?.name ?? '').localeCompare(
@@ -28,7 +26,6 @@ export const sortCategories = (
         .map((category) => {
           return {
             ...category,
-            // @ts-ignore
             subcategories: category.subcategories.sort(
               (subcategory2, subcategory1) =>
                 (subcategory1?.name ?? '').localeCompare(
@@ -46,7 +43,6 @@ export const sortCategories = (
         .map((category) => {
           return {
             ...category,
-            // @ts-ignore
             subcategories: category.subcategories.sort(
               (subcategory1, subcategory2) =>
                 new Date(subcategory1?.createdAt).getTime() -
@@ -64,7 +60,6 @@ export const sortCategories = (
         .map((category) => {
           return {
             ...category,
-            // @ts-ignore
             subcategories: category.subcategories.sort(
               (subcategory2, subcategory1) =>
                 new Date(subcategory1?.createdAt).getTime() -
