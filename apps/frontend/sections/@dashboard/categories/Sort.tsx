@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 // @mui
-import { Menu, Button, MenuItem, Typography } from '@mui/material';
+import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import { ColumnSortOption } from '@test1/shared';
+import {CategoryWithSubcategories, ColumnSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
-import { sortCategories } from '../../../utils/sortCategories';
+import {sortCategories} from '../../../utils/sortCategories';
+import {User} from '@prisma/client';
+import {handleFetch} from '../../../utils/handleFetch';
 
 // ----------------------------------------------------------------------
 
@@ -16,7 +18,10 @@ const SORT_BY_OPTIONS = [
   },
   {
     value: ColumnSortOption.REVERSE_ALPHABETICAL,
-    label: capitalize(ColumnSortOption.REVERSE_ALPHABETICAL),
+    label: capitalize(ColumnSortOption.REVERSE_ALPHABETICAL).replaceAll(
+      '_',
+      ' '
+    ),
   },
   {
     value: ColumnSortOption.NEWEST,
@@ -28,8 +33,18 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function ShopProductSort({ categories, setCategories }) {
-  const [sortOrder, setSortOrder] = useState(ColumnSortOption.NEWEST);
+export default function Sort({
+  user,
+  categories,
+  setCategories,
+}: {
+  user: User;
+  categories: CategoryWithSubcategories[];
+  setCategories: (categories: CategoryWithSubcategories[]) => unknown;
+}) {
+  const [sortOrder, setSortOrder] = useState(
+    (user?.sortingCategories as ColumnSortOption) ?? ColumnSortOption.NEWEST
+  );
   const [open, setOpen] = useState(null);
 
   useEffect(() => {
@@ -47,18 +62,29 @@ export default function ShopProductSort({ categories, setCategories }) {
         ].join(',');
       })
       .join(','),
+    user?.id,
   ]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
-  const handleClose = (option) => {
+  const handleClose = (option?: any) => {
     setOpen(null);
     if (!option) {
       return;
     }
+
     setSortOrder(option.value);
+    setUsersSortingCategories(option.value); //don't wait
+  };
+
+  const setUsersSortingCategories = async (option: ColumnSortOption) => {
+    await handleFetch({
+      pathOrUrl: 'user/set-sorting-categories',
+      body: { sortingCategories: option },
+      method: 'POST',
+    });
   };
 
   return (
@@ -93,7 +119,7 @@ export default function ShopProductSort({ categories, setCategories }) {
         {SORT_BY_OPTIONS.map((option) => (
           <MenuItem
             key={option.value}
-            selected={option.value === setSortOrder}
+            selected={option.value === sortOrder}
             onClick={() => handleClose(option)}
             sx={{ typography: 'body2' }}
           >

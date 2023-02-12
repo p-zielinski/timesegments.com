@@ -7,12 +7,11 @@ import useResponsive from '../hooks/useResponsive';
 // sections
 import {AuthForm} from '../sections/auth';
 import {useEffect, useState} from 'react';
-import {AuthPageState, Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
-import {Category} from '@prisma/client';
+import {AuthPageState, CategoryWithSubcategories, Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
 import {CategoriesPageMode} from '../enum/categoriesPageMode';
 import {RenderAuthLink} from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
-import {CategoryList, ProductSort} from '../sections/@dashboard/categories';
+import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
 
 // ---------------------------------------------------------------------
@@ -63,7 +62,7 @@ export default function Index({
   const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
 
   //Categories page states
-  const [categories, setCategories] = useState<Category[]>(
+  const [categories, setCategories] = useState<CategoryWithSubcategories[]>(
     user?.categories || []
   );
   const [viewMode, setViewMode] = useState<CategoriesPageMode>(
@@ -165,7 +164,8 @@ export default function Index({
             flexShrink={0}
             sx={{ mt: -3, mb: 3 }}
           >
-            <ProductSort
+            <Sort
+              user={user}
               categories={categories}
               setCategories={setCategories}
             />

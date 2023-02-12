@@ -1,15 +1,16 @@
-import {Injectable} from '@nestjs/common';
-import {PrismaService} from '../../prisma.service';
-import {hashString} from '../../common/hashString';
-import {ConfigService} from '@nestjs/config';
-import {JwtService} from '@nestjs/jwt';
-import {checkHashedString} from '../../common/checkHashedString';
-import {TokenService} from '../token/token.service';
-import {CategoryService} from '../category/category.service';
-import {SubcategoryService} from '../subcategory/subcategory.service';
-import {TimeLogService} from '../time-log/time-log.service';
-import {User, Prisma} from '@prisma/client';
-import {Limits, MeExtendedOption} from '@test1/shared';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma.service';
+import { hashString } from '../../common/hashString';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { checkHashedString } from '../../common/checkHashedString';
+import { TokenService } from '../token/token.service';
+import { CategoryService } from '../category/category.service';
+import { SubcategoryService } from '../subcategory/subcategory.service';
+import { TimeLogService } from '../time-log/time-log.service';
+import { Prisma, User } from '@prisma/client';
+import { ColumnSortOption, Limits, MeExtendedOption } from '@test1/shared';
+import { LoggerService } from '../../common/logger/loger.service';
 
 @Injectable()
 export class UserService {
@@ -20,9 +21,9 @@ export class UserService {
     private readonly tokenService: TokenService,
     private readonly categoryService: CategoryService,
     private readonly subcategoryService: SubcategoryService,
-    private readonly timeLogService: TimeLogService
-  ) {
-  }
+    private readonly timeLogService: TimeLogService,
+    private loggerService: LoggerService
+  ) {}
 
   public async getMeExtended(
     id: string,
@@ -36,7 +37,7 @@ export class UserService {
       extend.includes(MeExtendedOption.CATEGORIES) &&
       extend.includes(MeExtendedOption.SUBCATEGORIES)
     ) {
-      include.categories = {include: {subcategories: true}};
+      include.categories = { include: { subcategories: true } };
     } else if (extend.includes(MeExtendedOption.CATEGORIES)) {
       include.categories = true;
     }
@@ -54,20 +55,23 @@ export class UserService {
       );
     }
     return {
-      user: (extend.includes(MeExtendedOption.CATEGORIES) ||
-        extend.includes(MeExtendedOption.SUBCATEGORIES)) ? await this.prisma.user.findFirst({
-        where: {id},
-        include,
-      }) : undefined,
+      user:
+        extend.includes(MeExtendedOption.CATEGORIES) ||
+        extend.includes(MeExtendedOption.SUBCATEGORIES)
+          ? await this.prisma.user.findFirst({
+              where: { id },
+              include,
+            })
+          : undefined,
       limits: Object.keys(limits).length ? limits : undefined,
     };
   }
 
   public async cancelAllActive(userId: string) {
-    const {categories, subcategories} = (await this.prisma.user.findFirst({
-      where: {id: userId},
-      include: {categories: true, subcategories: true},
-    })) || {categories: [], subcategories: []};
+    const { categories, subcategories } = (await this.prisma.user.findFirst({
+      where: { id: userId },
+      include: { categories: true, subcategories: true },
+    })) || { categories: [], subcategories: [] };
     const activeCategories = categories.filter((category) => category.active);
     const activeSubcategories = subcategories.filter(
       (subcategory) => subcategory.active
@@ -115,7 +119,7 @@ export class UserService {
         },
       });
       if (!options?.generateToken) {
-        return {success: true, user: newUser};
+        return { success: true, user: newUser };
       }
       const token = await this.tokenService.generateToken(
         newUser.id,
@@ -128,11 +132,11 @@ export class UserService {
           tokenId: token.id,
           expiresAt: token.expiresAt,
         }),
-        user: newUser
+        user: newUser,
       };
     } catch (error) {
       if (error?.meta?.target?.includes('email')) {
-        return {success: false, error: 'This email is already taken'};
+        return { success: false, error: 'This email is already taken' };
       }
       return {
         success: false,
@@ -152,7 +156,7 @@ export class UserService {
     | { success: true; token: string; user: User }
   > {
     const requestedUser = await this.prisma.user.findFirst({
-      where: {email: data.email},
+      where: { email: data.email },
     });
     const VALIDATION_ERROR = {
       success: false,
@@ -176,6 +180,29 @@ export class UserService {
         expiresAt: token.expiresAt,
       }),
       user: requestedUser,
+    };
+  }
+
+  async setSortingCategories(user: User, sortingCategories: ColumnSortOption) {
+    if (user.sortingCategories === sortingCategories) {
+      return { success: true, sortingCategories };
+    }
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { sortingCategories },
+        select: { sortingCategories: true },
+      });
+      if (updatedUser.sortingCategories === sortingCategories) {
+        return { success: true, sortingCategories };
+      }
+    } catch (error) {
+      this.loggerService.error(error);
+    }
+
+    return {
+      success: false,
+      error: `Could not update sortingCategories to: ${ColumnSortOption}`,
     };
   }
 }

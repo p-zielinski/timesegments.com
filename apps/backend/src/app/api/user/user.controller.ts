@@ -13,6 +13,7 @@ import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
+import { SetSortingCategoriesDto } from './dto/setSortingCategories';
 
 @Controller('user')
 export class UserController {
@@ -81,6 +82,23 @@ export class UserController {
   ) {
     const { extend } = meExtendedDto;
     return await this.userService.getMeExtended(user.id, extend);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('set-sorting-categories')
+  async handleRequestSetSortingCategories(
+    @UserDecorator() user: User,
+    @Body() setSortingCategoriesDto: SetSortingCategoriesDto
+  ) {
+    const { sortingCategories } = setSortingCategoriesDto;
+    const updateSortingCategoriesStatus =
+      await this.userService.setSortingCategories(user, sortingCategories);
+    if (!updateSortingCategoriesStatus.success) {
+      throw new BadRequestException({
+        error: updateSortingCategoriesStatus.error,
+      });
+    }
+    return updateSortingCategoriesStatus;
   }
 
   @UseGuards(JwtAuthGuard)

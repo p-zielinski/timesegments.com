@@ -1,6 +1,7 @@
 export enum ColumnSortOption {
-  NEWEST = 'newest',
-  OLDEST = 'oldest',
-  ALPHABETICAL = 'alphabetical',
-  REVERSE_ALPHABETICAL = 'reverse alphabetical',
+  //remember to keep this file in sync with prisma schema
+  NEWEST = 'NEWEST',
+  OLDEST = 'OLDEST',
+  ALPHABETICAL = 'ALPHABETICAL',
+  REVERSE_ALPHABETICAL = 'REVERSE_ALPHABETICAL',
 }
