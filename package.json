@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nx serve",
     "start:frontend": "nx serve frontend --prod --port=$PORT --hostname 0.0.0.0",
-    "start:backend": "prisma migrate dev; nx serve backend --prod --port=$PORT",
+    "start:backend": "prisma migrate dev;prisma generate; nx serve backend --prod --port=$PORT",
     "build:frontend": "nx build frontend",
     "build:backend": "nx build backend --prod",
     "test": "nx test",
