@@ -245,10 +245,24 @@ export class SubcategoryService {
     return { success: true, subcategory: updatedSubcategory };
   }
 
-  public async findActive(userId: string) {
-    return await this.prisma.subcategory.findFirst({
-      where: { userId, active: true },
+  async setSubcategoryAsDeleted(subcategoryId: string, user: User) {
+    const subcategoryWithUser = await this.findIfNotDeleted(subcategoryId, {
+      user: true,
     });
+    if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Subcategory not found, bad request`,
+      };
+    }
+    if (subcategoryWithUser.active || subcategoryWithUser.visible) {
+      return {
+        success: false,
+        error: `Category cannot be deleted, bad request`,
+      };
+    }
+    const updatedSubcategory = await this.updateDeleted(subcategoryId, true);
+    return { success: true, subcategory: updatedSubcategory };
   }
 
   public async setSubcategoryActiveState(
@@ -279,6 +293,13 @@ export class SubcategoryService {
     return await this.prisma.subcategory.update({
       where: { id: subcategoryId },
       data: { visible },
+    });
+  }
+
+  private async updateDeleted(subcategoryId: string, deleted: boolean) {
+    return await this.prisma.subcategory.update({
+      where: { id: subcategoryId },
+      data: { deleted },
     });
   }
 

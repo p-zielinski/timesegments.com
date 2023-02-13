@@ -13,6 +13,7 @@ import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
 import { SetSubcategoryActiveDto } from './dto/setSubcategoryActive.dto';
+import { SetSubcategoryDeletedDto } from './dto/setSubcategoryDeleted.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('subcategory')
@@ -78,23 +79,42 @@ export class SubcategoryController {
   }
 
   @Post('update')
-  async handleRequestRenameSubcategory(
+  async handleRequestUpdateSubcategory(
     @UserDecorator() user: User,
     @Body() updateSubcategoryDto: UpdateSubcategoryDto
   ) {
     const { subcategoryId, name, color } = updateSubcategoryDto;
-    const updateCategoryStatus =
+    const updateSubcategoryStatus =
       await this.subcategoryService.updateSubcategory(
         user,
         subcategoryId,
         name,
         color
       );
-    if (!updateCategoryStatus.success) {
+    if (!updateSubcategoryStatus.success) {
       throw new BadRequestException({
-        error: updateCategoryStatus.error,
+        error: updateSubcategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return updateSubcategoryStatus;
+  }
+
+  @Post('set-as-deleted')
+  async handleRequestSetSubcategoryAsDeleted(
+    @UserDecorator() user: User,
+    @Body() setSubcategoryDeletedDto: SetSubcategoryDeletedDto
+  ) {
+    const { subcategoryId } = setSubcategoryDeletedDto;
+    const setSubcategoryAsDeletedStatus =
+      await this.subcategoryService.setSubcategoryAsDeleted(
+        subcategoryId,
+        user
+      );
+    if (!setSubcategoryAsDeletedStatus.success) {
+      throw new BadRequestException({
+        error: setSubcategoryAsDeletedStatus.error,
+      });
+    }
+    return setSubcategoryAsDeletedStatus;
   }
 }

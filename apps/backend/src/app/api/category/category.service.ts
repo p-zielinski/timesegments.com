@@ -204,6 +204,26 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
+  async setCategoryAsDeleted(categoryId: string, user: User) {
+    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
+      user: true,
+    });
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Category not found, bad request`,
+      };
+    }
+    if (categoryWithUser.active || categoryWithUser.visible) {
+      return {
+        success: false,
+        error: `Category cannot be deleted, bad request`,
+      };
+    }
+    const updatedCategory = await this.updateDeleted(categoryId, true);
+    return { success: true, category: updatedCategory };
+  }
+
   public async findIfNotDeleted(
     categoryId: string,
     include: Prisma.CategoryInclude = null
@@ -229,6 +249,13 @@ export class CategoryService {
     return await this.prisma.category.update({
       where: { id: categoryId },
       data: { visible },
+    });
+  }
+
+  private async updateDeleted(categoryId: string, deleted: boolean) {
+    return await this.prisma.category.update({
+      where: { id: categoryId },
+      data: { deleted },
     });
   }
 
