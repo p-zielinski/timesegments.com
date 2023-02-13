@@ -43,7 +43,7 @@ export default function Sort({
   setCategories: (categories: CategoryWithSubcategories[]) => unknown;
 }) {
   const [sortOrder, setSortOrder] = useState(
-    (user?.sortingCategories as ColumnSortOption) ?? ColumnSortOption.NEWEST
+    (user.sortingCategories as ColumnSortOption) ?? ColumnSortOption.NEWEST
   );
   const [open, setOpen] = useState(null);
 
