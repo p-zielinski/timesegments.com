@@ -12,7 +12,7 @@ import { UpdateSubcategoryDto } from './dto/updateSubcategoryDto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
-import { SetSubcategoryActiveDto } from './setSubcategoryActive.dto';
+import { SetSubcategoryActiveDto } from './dto/setSubcategoryActive.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('subcategory')

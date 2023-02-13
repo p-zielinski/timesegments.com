@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
-import { User, Category, Prisma } from '@prisma/client';
+import { Category, Prisma, User } from '@prisma/client';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
 
@@ -46,7 +46,7 @@ export class CategoryService {
     visible: boolean,
     user: User
   ): Promise<{ success: boolean; error?: string; category?: Category }> {
-    const categoryWithUser = await this.findFirstUseId(categoryId, {
+    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
     });
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
@@ -82,7 +82,7 @@ export class CategoryService {
     expandSubcategories: boolean,
     user: User
   ): Promise<{ success: boolean; error?: string; category?: Category }> {
-    const categoryWithUser = await this.findFirstUseId(categoryId, {
+    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
     });
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
@@ -116,7 +116,7 @@ export class CategoryService {
   ): Promise<
     { success: true; category?: Category } | { success: false; error: string }
   > {
-    const categoryWithUser = await this.findFirstUseId(categoryId, {
+    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
     });
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
@@ -181,7 +181,7 @@ export class CategoryService {
     color: string,
     user: User
   ) {
-    const categoryWithUser = await this.findFirstUseId(categoryId, {
+    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
     });
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
@@ -204,19 +204,13 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
-  public async findFirstUseId(
+  public async findIfNotDeleted(
     categoryId: string,
     include: Prisma.CategoryInclude = null
   ) {
     return await this.prisma.category.findFirst({
-      where: { id: categoryId },
+      where: { id: categoryId, deleted: false },
       include,
-    });
-  }
-
-  public async findActive(userId: string) {
-    return await this.prisma.category.findFirst({
-      where: { userId, active: true },
     });
   }
 

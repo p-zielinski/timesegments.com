@@ -9,7 +9,7 @@
     "build:frontend": "prisma generate;nx build frontend",
     "build:backend": "prisma generate;nx build backend --prod",
     "test": "nx test",
-    "dev": "nx run-many --target serve --projects=backend,frontend --parallel=2"
+    "dev": "prisma migrate dev && nx run-many --target serve --projects=backend,frontend --parallel=2"
   },
   "private": true,
   "dependencies": {
