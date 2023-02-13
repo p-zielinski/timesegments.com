@@ -6,7 +6,7 @@
     "start": "nx serve",
     "start:frontend": "nx serve frontend --prod --port=$PORT --hostname 0.0.0.0",
     "start:backend": "prisma migrate dev; nx serve backend --prod --port=$PORT",
-    "build:frontend": "nx build frontend",
+    "build:frontend": "prisma generate;nx build frontend",
     "build:backend": "prisma generate;nx build backend --prod",
     "test": "nx test",
     "dev": "nx run-many --target serve --projects=backend,frontend --parallel=2"
