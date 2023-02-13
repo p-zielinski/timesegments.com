@@ -192,24 +192,29 @@ export default function Index({
 export const getServerSideProps = async (context: any) => {
   const { jwt_token } = context.req.cookies;
 
-  const responseUser = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
-    {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        jwt_token,
-      },
-      body: JSON.stringify({
-        extend: [
-          MeExtendedOption.CATEGORIES,
-          MeExtendedOption.SUBCATEGORIES,
-          MeExtendedOption.CATEGORIES_LIMIT,
-          MeExtendedOption.SUBCATEGORIES_LIMIT,
-        ],
-      }),
-    }
-  );
+  let responseUser;
+  try {
+    responseUser = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          jwt_token,
+        },
+        body: JSON.stringify({
+          extend: [
+            MeExtendedOption.CATEGORIES,
+            MeExtendedOption.SUBCATEGORIES,
+            MeExtendedOption.CATEGORIES_LIMIT,
+            MeExtendedOption.SUBCATEGORIES_LIMIT,
+          ],
+        }),
+      }
+    );
+  } catch (e) {
+    console.log(e);
+  }
   let user: UserWithCategoriesAndSubcategories, limits: Limits;
   try {
     const response = await responseUser.json();
