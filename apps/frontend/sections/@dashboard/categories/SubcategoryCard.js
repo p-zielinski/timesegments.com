@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import {Box, Card, Stack, Typography} from '@mui/material';
 // utils
 import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
-import {getRepeatingLinearGradient} from '../../../utils/getRepeatingLinearGradient';
+import {getRepeatingLinearGradient} from '../../../utils/colors/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
-import {getHexFromRGBAObject} from '../../../utils/getHexFromRGBAObject';
-import {getRgbaObjectFromHexString} from '../../../utils/getRgbaObjectFromHexString';
+import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
+import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import EditSubcategory from './EditSubcategory';
 import {handleFetch} from '../../../utils/handleFetch';
