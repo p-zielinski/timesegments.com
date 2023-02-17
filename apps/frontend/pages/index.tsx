@@ -13,6 +13,7 @@ import {RenderAuthLink} from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
 import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
+import {refreshToken} from '../utils/refreshToken';
 
 // ---------------------------------------------------------------------
 
@@ -51,6 +52,10 @@ export default function Index({
   user: serverSideFetchedUser,
   limits: serverSideFetchedLimits,
 }: Props) {
+  useEffect(() => {
+    refreshToken();
+  }, []);
+
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
     serverSideFetchedUser
   );

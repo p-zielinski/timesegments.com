@@ -1,4 +1,4 @@
-import cookie from 'cookie-cutter';
+import Cookies from 'js-cookie';
 import fetch from 'node-fetch';
 
 export const handleFetch = async ({
@@ -15,7 +15,7 @@ export const handleFetch = async ({
   sentToken?: boolean;
 }) => {
   let statusCode;
-  const jwt_token = sentToken ? cookie.get('jwt_token') : undefined;
+  const jwt_token = sentToken ? Cookies.get('jwt_token') : undefined;
   const url = !pathOrUrl
     ? process.env.NEXT_PUBLIC_API_URL
     : pathOrUrl?.includes('https://')
