@@ -8,6 +8,8 @@ import { faker } from '@faker-js/faker';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
+import { useEffect } from 'react';
+import { refreshToken } from '../../utils/refreshToken';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -15,50 +17,54 @@ const AppNewsUpdate = dynamic(
 );
 const AppOrderTimeline = dynamic(
   () => import('../../sections/@dashboard/app/AppOrderTimeline'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppCurrentVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentVisits'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppWebsiteVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppWebsiteVisits'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppTrafficBySite = dynamic(
   () => import('../../sections/@dashboard/app/AppTrafficBySite'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppWidgetSummary = dynamic(
   () => import('../../sections/@dashboard/app/AppWidgetSummary'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppCurrentSubject = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentSubject'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppConversionRates = dynamic(
   () => import('../../sections/@dashboard/app/AppConversionRates'),
-  { ssr: false }
+  {ssr: false}
 );
 const AppTasks = dynamic(
   () => import('../../sections/@dashboard/app/AppTasks'),
-  { ssr: false }
+  {ssr: false}
 );
 
 // ----------------------------------------------------------------------
 
 export default function Index() {
+  useEffect(() => {
+    refreshToken();
+  }, []);
+
   const theme = useTheme();
 
   return (
-    <DashboardLayout user={{ email: 'random@email' }}>
+    <DashboardLayout user={{email: 'random@email'}}>
       <Helmet>
         <title> Dashboard | Minimal UI </title>
       </Helmet>
 
       <Container maxWidth="xl">
-        <Typography variant="h4" sx={{ mb: 5 }}>
+        <Typography variant="h4" sx={{mb: 5}}>
           Hi, Welcome back
         </Typography>
 
@@ -142,10 +148,10 @@ export default function Index() {
             <AppCurrentVisits
               title="Current Visits"
               chartData={[
-                { label: 'America', value: 4344 },
-                { label: 'Asia', value: 5435 },
-                { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 },
+                {label: 'America', value: 4344},
+                {label: 'Asia', value: 5435},
+                {label: 'Europe', value: 1443},
+                {label: 'Africa', value: 4443},
               ]}
               chartColors={[
                 theme.palette.primary.main,
@@ -161,16 +167,16 @@ export default function Index() {
               title="Conversion Rates"
               subheader="(+43%) than last year"
               chartData={[
-                { label: 'Italy', value: 400 },
-                { label: 'Japan', value: 430 },
-                { label: 'China', value: 448 },
-                { label: 'Canada', value: 470 },
-                { label: 'France', value: 540 },
-                { label: 'Germany', value: 580 },
-                { label: 'South Korea', value: 690 },
-                { label: 'Netherlands', value: 1100 },
-                { label: 'United States', value: 1200 },
-                { label: 'United Kingdom', value: 1380 },
+                {label: 'Italy', value: 400},
+                {label: 'Japan', value: 430},
+                {label: 'China', value: 448},
+                {label: 'Canada', value: 470},
+                {label: 'France', value: 540},
+                {label: 'Germany', value: 580},
+                {label: 'South Korea', value: 690},
+                {label: 'Netherlands', value: 1100},
+                {label: 'United States', value: 1200},
+                {label: 'United Kingdom', value: 1380},
               ]}
             />
           </Grid>
@@ -187,9 +193,9 @@ export default function Index() {
                 'Math',
               ]}
               chartData={[
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
+                {name: 'Series 1', data: [80, 50, 30, 40, 100, 20]},
+                {name: 'Series 2', data: [20, 30, 40, 80, 20, 80]},
+                {name: 'Series 3', data: [44, 76, 78, 13, 43, 10]},
               ]}
               chartColors={[...Array(6)].map(
                 () => theme.palette.text.secondary
@@ -284,11 +290,11 @@ export default function Index() {
             <AppTasks
               title="Tasks"
               list={[
-                { id: '1', label: 'Create FireStone Logo' },
-                { id: '2', label: 'Add SCSS and JS files if required' },
-                { id: '3', label: 'Stakeholder Meeting' },
-                { id: '4', label: 'Scoping & Estimations' },
-                { id: '5', label: 'Sprint Showcase' },
+                {id: '1', label: 'Create FireStone Logo'},
+                {id: '2', label: 'Add SCSS and JS files if required'},
+                {id: '3', label: 'Stakeholder Meeting'},
+                {id: '4', label: 'Scoping & Estimations'},
+                {id: '5', label: 'Sprint Showcase'},
               ]}
             />
           </Grid>

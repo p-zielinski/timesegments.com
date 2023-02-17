@@ -40,10 +40,7 @@ export default function AuthForm({
       method: 'POST',
     });
     if (response.statusCode === 201) {
-      await Cookies.set('jwt_token', response.token, {
-        expires: 34560000,
-        path: '/',
-      });
+      await Cookies.set('jwt_token', response.token, { expires: 7, path: '' });
       setUser(response.user);
       setCategories(response.user?.categories ?? []);
       setLimits(response.limits);
