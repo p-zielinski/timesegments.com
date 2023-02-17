@@ -75,7 +75,7 @@ export default function Index({
   );
 
   useEffect(() => {
-    if (viewMode === CategoriesPageMode.EDIT) {
+    if (viewMode === CategoriesPageMode.EDIT || !user) {
       return;
     }
     if (!categories.length) {
