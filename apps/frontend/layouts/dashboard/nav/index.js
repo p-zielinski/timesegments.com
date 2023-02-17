@@ -12,7 +12,7 @@ import NavSection from '../../../components/nav-section';
 //
 import navConfig from './config';
 import {useRouter} from 'next/router';
-import {getRandomRgbObjectForSliderPicker} from '../../../utils/getRandomRgbObjectForSliderPicker';
+import {getRandomRgbObjectForSliderPicker} from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
 
 // ----------------------------------------------------------------------

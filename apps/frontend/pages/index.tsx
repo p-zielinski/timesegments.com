@@ -70,6 +70,9 @@ export default function Index({
   );
 
   useEffect(() => {
+    if (viewMode === CategoriesPageMode.EDIT) {
+      return;
+    }
     if (!categories.length) {
       setViewMode(CategoriesPageMode.EDIT);
     } else {

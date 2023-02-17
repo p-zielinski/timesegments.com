@@ -14,6 +14,7 @@ import { UserDecorator } from '../../common/paramDecorators/user.decorator';
 import { User } from '@prisma/client';
 import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetExpandSubcategoriesDto } from './dto/setExpandSubcategories.dto';
+import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('category')
@@ -98,7 +99,7 @@ export class CategoryController {
   }
 
   @Post('update')
-  async handleRequestRenameCategory(
+  async handleRequestUpdateCategory(
     @UserDecorator() user: User,
     @Body() updateCategoryDto: UpdateCategoryDto
   ) {
@@ -115,5 +116,21 @@ export class CategoryController {
       });
     }
     return updateCategoryStatus;
+  }
+
+  @Post('set-as-deleted')
+  async handleRequestSetCategoryAsDeleted(
+    @UserDecorator() user: User,
+    @Body() setCategoryDeletedDto: SetCategoryDeletedDto
+  ) {
+    const { categoryId } = setCategoryDeletedDto;
+    const setCategoryAsDeletedStatus =
+      await this.categoryService.setCategoryAsDeleted(categoryId, user);
+    if (!setCategoryAsDeletedStatus.success) {
+      throw new BadRequestException({
+        error: setCategoryAsDeletedStatus.error,
+      });
+    }
+    return setCategoryAsDeletedStatus;
   }
 }

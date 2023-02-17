@@ -37,9 +37,14 @@ export class UserService {
       extend.includes(MeExtendedOption.CATEGORIES) &&
       extend.includes(MeExtendedOption.SUBCATEGORIES)
     ) {
-      include.categories = { include: { subcategories: true } };
+      include.categories = {
+        where: { deleted: false },
+        include: {
+          subcategories: { where: { deleted: false } },
+        },
+      };
     } else if (extend.includes(MeExtendedOption.CATEGORIES)) {
-      include.categories = true;
+      include.categories = { where: { deleted: false } };
     }
 
     const limits: { categoriesLimit?: number; subcategoriesLimit?: number } =

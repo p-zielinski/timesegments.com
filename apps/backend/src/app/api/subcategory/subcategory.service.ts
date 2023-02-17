@@ -21,7 +21,7 @@ export class SubcategoryService {
     name: string,
     color: string
   ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> {
-    const categoryWithUser = await this.categoryService.findFirstUseId(
+    const categoryWithUser = await this.categoryService.findIfNotDeleted(
       categoryId,
       {
         user: true,
@@ -64,7 +64,7 @@ export class SubcategoryService {
     visible: boolean,
     user: User
   ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> {
-    const subcategoryWithUser = await this.findFirstUseId(subcategoryId, {
+    const subcategoryWithUser = await this.findIfNotDeleted(subcategoryId, {
       user: true,
     });
     if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
@@ -109,7 +109,7 @@ export class SubcategoryService {
       }
     | { success: false; error: string }
   > {
-    const subcategoryWithUserAndCategory = await this.findFirstUseId(
+    const subcategoryWithUserAndCategory = await this.findIfNotDeleted(
       subcategoryId,
       {
         user: true,
@@ -219,7 +219,7 @@ export class SubcategoryService {
     name: string,
     color?: string
   ) {
-    const subcategoryWithUser = await this.findFirstUseId(subcategoryId, {
+    const subcategoryWithUser = await this.findIfNotDeleted(subcategoryId, {
       user: true,
     });
     if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
@@ -245,10 +245,24 @@ export class SubcategoryService {
     return { success: true, subcategory: updatedSubcategory };
   }
 
-  public async findActive(userId: string) {
-    return await this.prisma.subcategory.findFirst({
-      where: { userId, active: true },
+  async setSubcategoryAsDeleted(subcategoryId: string, user: User) {
+    const subcategoryWithUser = await this.findIfNotDeleted(subcategoryId, {
+      user: true,
     });
+    if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Subcategory not found, bad request`,
+      };
+    }
+    if (subcategoryWithUser.active || subcategoryWithUser.visible) {
+      return {
+        success: false,
+        error: `Category cannot be deleted, bad request`,
+      };
+    }
+    const updatedSubcategory = await this.updateDeleted(subcategoryId, true);
+    return { success: true, subcategory: updatedSubcategory };
   }
 
   public async setSubcategoryActiveState(
@@ -265,12 +279,12 @@ export class SubcategoryService {
     return await this.prisma.subcategory.count({ where: { categoryId } });
   }
 
-  private async findFirstUseId(
+  private async findIfNotDeleted(
     subcategoryId: string,
     include: Prisma.SubcategoryInclude = null
   ) {
     return await this.prisma.subcategory.findFirst({
-      where: { id: subcategoryId },
+      where: { id: subcategoryId, deleted: false },
       include,
     });
   }
@@ -279,6 +293,13 @@ export class SubcategoryService {
     return await this.prisma.subcategory.update({
       where: { id: subcategoryId },
       data: { visible },
+    });
+  }
+
+  private async updateDeleted(subcategoryId: string, deleted: boolean) {
+    return await this.prisma.subcategory.update({
+      where: { id: subcategoryId },
+      data: { deleted },
     });
   }
 

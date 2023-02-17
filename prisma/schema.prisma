@@ -41,6 +41,7 @@ model Category {
   visible             Boolean     @default(true)
   expandSubcategories Boolean     @default(true)
   timeLogs            TimeLog[]
+  deleted             Boolean     @default(false)
   createdAt           DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt           DateTime    @updatedAt @db.Timestamptz(3)
 }
@@ -56,6 +57,7 @@ model Subcategory {
   active        Boolean     @default(false)
   visible       Boolean     @default(true)
   timeLogs      TimeLog[]
+  deleted       Boolean     @default(false)
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }

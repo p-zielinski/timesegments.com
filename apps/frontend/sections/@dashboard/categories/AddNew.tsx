@@ -1,5 +1,5 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
+import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import {
   BLUE,
   GREEN,
@@ -10,19 +10,19 @@ import {
   RED,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
+import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React from 'react';
-import { getRandomRgbObjectForSliderPicker } from '../../../utils/getRandomRgbObjectForSliderPicker';
+import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
 import { CreateNewType } from '../../../enum/createNewType';
 import capitalize from 'capitalize';
-import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
-import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { Checkbox } from '../Form/Checkbox';
 import { handleFetch } from '../../../utils/handleFetch';

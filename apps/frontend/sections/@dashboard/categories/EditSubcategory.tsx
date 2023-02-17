@@ -1,5 +1,5 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/getRepeatingLinearGradient';
+import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import {
   GREEN,
   IS_SAVING_HEX,
@@ -7,18 +7,18 @@ import {
   LIGHT_RED,
   RED,
 } from '../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../utils/getHexFromRGBAObject';
+import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { SliderPicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../Form/Text';
-import { getRgbaObjectFromHexString } from '../../../utils/getRgbaObjectFromHexString';
+import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { Checkbox } from '../Form/Checkbox';
 import { styled } from '@mui/material/styles';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/getColorShadeBasedOnSliderPickerSchema';
-import { getHexFromRGBObject } from '../../../utils/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { handleFetch } from '../../../utils/handleFetch';
 
 export default function EditSubcategory({
