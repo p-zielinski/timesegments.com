@@ -28,6 +28,8 @@ import { Checkbox } from '../Form/Checkbox';
 import { handleFetch } from '../../../utils/handleFetch';
 
 export default function AddNew({
+  controlValue,
+  setControlValue,
   disableHover,
   type,
   data = {},

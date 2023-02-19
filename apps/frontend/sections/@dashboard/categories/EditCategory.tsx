@@ -21,6 +21,8 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
 
 export default function EditCategory({
+  controlValue,
+  setControlValue,
   categories,
   setCategories,
   category,

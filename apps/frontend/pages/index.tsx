@@ -59,6 +59,11 @@ export default function Index({
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
     serverSideFetchedUser
   );
+  const [controlValue, setControlValue] = useState(undefined);
+
+  useEffect(() => {
+    setControlValue(user?.controlValue);
+  }, [user]);
 
   const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits);
 
@@ -181,6 +186,8 @@ export default function Index({
         </Stack>
 
         <CategoryList
+          controlValue={controlValue}
+          setControlValue={setControlValue}
           disableHover={disableHover}
           isSaving={isSaving}
           setIsSaving={setIsSaving}

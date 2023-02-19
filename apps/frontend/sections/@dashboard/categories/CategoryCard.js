@@ -36,6 +36,8 @@ CategoryCard.propTypes = {
 };
 
 export default function CategoryCard({
+  controlValue,
+  setControlValue,
   category,
   categories,
   setCategories,
@@ -158,6 +160,8 @@ export default function CategoryCard({
       {isEditing.categoryId === category.id &&
       viewMode === CategoriesPageMode.EDIT ? (
         <EditCategory
+          controlValue={controlValue}
+          setControlValue={setControlValue}
           categories={categories}
           setCategories={setCategories}
           category={category}
@@ -577,6 +581,8 @@ export default function CategoryCard({
                         getVisibleSubcategories(category, categories).map(
                           (subcategory) => (
                             <SubcategoryCard
+                              controlValue={controlValue}
+                              setControlValue={setControlValue}
                               key={subcategory.id}
                               disableHover={disableHover}
                               subcategory={subcategory}
@@ -601,6 +607,8 @@ export default function CategoryCard({
                           {category.subcategories.length <
                           limits.subcategoriesLimit ? (
                             <AddNew
+                              controlValue={controlValue}
+                              setControlValue={setControlValue}
                               disableHover={disableHover}
                               type={CreateNewType.SUBCATEGORY}
                               data={{ categoryId: category.id }}

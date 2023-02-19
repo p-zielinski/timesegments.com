@@ -49,7 +49,7 @@ export default function CancelCard({
   };
 
   return (
-    <Grid key={'edit_categories_bottom'} item xs={1} sm={1} md={1}>
+    <Grid key={'cancel_active'} item xs={1} sm={1} md={1}>
       <Card
         sx={{
           p: 2,

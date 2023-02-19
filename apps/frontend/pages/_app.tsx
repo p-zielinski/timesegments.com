@@ -5,7 +5,7 @@ import ScrollToTop from '../components/scroll-to-top';
 import { HelmetProvider } from 'react-helmet-async';
 import './styles.css';
 import { Provider } from 'react-redux';
-import { store } from '../store/store';
+import { store } from '../store/StoreContext';
 
 function CustomApp({ Component, pageProps }: AppProps) {
   return (

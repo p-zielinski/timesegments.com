@@ -25,6 +25,8 @@ CategoryList.propTypes = {
 };
 
 export default function CategoryList({
+  controlValue,
+  setControlValue,
   disableHover,
   categories,
   setCategories,
@@ -94,6 +96,8 @@ export default function CategoryList({
               )}
               {categories.length < limits.categoriesLimit ? (
                 <AddNew
+                  controlValue={controlValue}
+                  setControlValue={setControlValue}
                   disableHover={disableHover}
                   type={CreateNewType.CATEGORY}
                   isEditing={isEditing}
@@ -131,6 +135,8 @@ export default function CategoryList({
           ? getCategories(categories).map((category) => (
               <Grid key={category.id} item xs={1} sm={1} md={1}>
                 <CategoryCard
+                  controlValue={controlValue}
+                  setControlValue={setControlValue}
                   disableHover={disableHover}
                   viewMode={viewMode}
                   isEditing={isEditing}

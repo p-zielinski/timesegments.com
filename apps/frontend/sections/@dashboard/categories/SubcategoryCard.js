@@ -32,6 +32,8 @@ SubcategoryCard.propTypes = {
 };
 
 export default function SubcategoryCard({
+  controlValue,
+  setControlValue,
   disableHover,
   subcategory,
   categories,
