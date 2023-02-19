@@ -4,8 +4,6 @@ import ThemeProvider from '../theme';
 import ScrollToTop from '../components/scroll-to-top';
 import { HelmetProvider } from 'react-helmet-async';
 import './styles.css';
-import { Provider } from 'react-redux';
-import { store } from '../store/StoreContext';
 
 function CustomApp({ Component, pageProps }: AppProps) {
   return (
@@ -15,9 +13,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
         <Head>
           <title>Welcome to frontend!</title>
         </Head>
-        <Provider store={store}>
-          <Component {...pageProps} />
-        </Provider>
+        <Component {...pageProps} />
       </ThemeProvider>
     </HelmetProvider>
   );

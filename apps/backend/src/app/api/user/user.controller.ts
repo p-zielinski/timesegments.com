@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import { LoginOrRegisterDto } from './dto/loginOrRegister.dto';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
-import { UserDecorator } from '../../common/paramDecorators/user.decorator';
+import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';

@@ -25,6 +25,17 @@ export class UserService {
     private loggerService: LoggerService
   ) {}
 
+  public async checkControlValue(user: User, controlValue: string) {
+    if (user.controlValue !== controlValue) {
+      return {
+        controlValue: true,
+      };
+    }
+    return {
+      controlValue: false,
+    };
+  }
+
   public async getMeExtended(
     id: string,
     extend: MeExtendedOption[]

@@ -9,17 +9,22 @@ import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
 import { UpdateCategoryDto } from './dto/updateCategoryDto';
 import { ChangeVisibilityCategoryDto } from './dto/changeVisibilityCategory.dto';
-import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
-import { UserDecorator } from '../../common/paramDecorators/user.decorator';
+import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetExpandSubcategoriesDto } from './dto/setExpandSubcategories.dto';
 import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
+import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { LoggerService } from '../../common/logger/loger.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, CheckControlValueGuard)
 @Controller('category')
 export class CategoryController {
-  constructor(private categoryService: CategoryService) {}
+  constructor(
+    private categoryService: CategoryService,
+    private loggerService: LoggerService
+  ) {}
 
   @Post('create')
   async handleRequestCreateCategory(

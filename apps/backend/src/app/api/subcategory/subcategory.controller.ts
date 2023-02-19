@@ -5,17 +5,18 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { UserDecorator } from '../../common/paramDecorators/user.decorator';
+import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { SubcategoryService } from './subcategory.service';
 import { UpdateSubcategoryDto } from './dto/updateSubcategoryDto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
-import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
 import { SetSubcategoryActiveDto } from './dto/setSubcategoryActive.dto';
 import { SetSubcategoryDeletedDto } from './dto/setSubcategoryDeleted.dto';
+import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, CheckControlValueGuard)
 @Controller('subcategory')
 export class SubcategoryController {
   constructor(private subcategoryService: SubcategoryService) {}
