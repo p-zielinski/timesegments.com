@@ -150,7 +150,7 @@ export default function SubcategoryCard({
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
-      setIsSaving(true);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -162,6 +162,8 @@ export default function SubcategoryCard({
   ) {
     return (
       <EditSubcategory
+        controlValue={controlValue}
+        setControlValue={setControlValue}
         disableHover={disableHover}
         category={category}
         categories={categories}
