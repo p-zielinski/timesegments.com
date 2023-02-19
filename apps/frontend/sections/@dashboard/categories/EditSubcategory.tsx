@@ -91,7 +91,7 @@ export default function EditSubcategory({
       },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.subcategory) {
+    if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories.map((subcategory) => {
