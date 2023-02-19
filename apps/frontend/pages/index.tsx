@@ -54,6 +54,8 @@ export default function Index({
   user: serverSideFetchedUser,
   limits: serverSideFetchedLimits,
 }: Props) {
+  const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
+
   useEffect(() => {
     refreshToken();
   }, []);
@@ -70,6 +72,15 @@ export default function Index({
   useEffect(() => {
     if (user && !controlValue) {
       fetchExtendedUser();
+    }
+    if (user) {
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+      }
+      const intervalId = setInterval(() => {
+        fetchExtendedUser();
+      }, 2 * 60 * 1000);
+      setRefreshIntervalId(intervalId);
     }
   }, [controlValue]);
 
@@ -90,6 +101,13 @@ export default function Index({
     if (response.statusCode === StatusCodes.CREATED && response?.user) {
       setUser(response.user);
       setCategories(response.user?.categories ?? []);
+      setControlValue(response.user?.controlValue);
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      setUser(undefined);
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        setRefreshIntervalId(undefined);
+      }
     }
     setIsSaving(false);
     return;
