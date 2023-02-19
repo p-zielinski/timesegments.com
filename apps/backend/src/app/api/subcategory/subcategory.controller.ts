@@ -15,11 +15,15 @@ import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategor
 import { SetSubcategoryActiveDto } from './dto/setSubcategoryActive.dto';
 import { SetSubcategoryDeletedDto } from './dto/setSubcategoryDeleted.dto';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { UserService } from '../user/user.service';
 
 @UseGuards(JwtAuthGuard, CheckControlValueGuard)
 @Controller('subcategory')
 export class SubcategoryController {
-  constructor(private subcategoryService: SubcategoryService) {}
+  constructor(
+    private subcategoryService: SubcategoryService,
+    private userService: UserService
+  ) {}
 
   @Post('create')
   async handleRequestCreateSubcategory(
@@ -40,7 +44,10 @@ export class SubcategoryController {
         error: createCategoryStatus.error,
       });
     }
-    return createCategoryStatus;
+    return {
+      ...createCategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('change-visibility')
@@ -60,7 +67,10 @@ export class SubcategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return {
+      ...updateCategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('set-active')
@@ -76,7 +86,10 @@ export class SubcategoryController {
         error: updateSubcategoryStatus.error,
       });
     }
-    return updateSubcategoryStatus;
+    return {
+      ...updateSubcategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('update')
@@ -97,7 +110,10 @@ export class SubcategoryController {
         error: updateSubcategoryStatus.error,
       });
     }
-    return updateSubcategoryStatus;
+    return {
+      ...updateSubcategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('set-as-deleted')
@@ -116,6 +132,9 @@ export class SubcategoryController {
         error: setSubcategoryAsDeletedStatus.error,
       });
     }
-    return setSubcategoryAsDeletedStatus;
+    return {
+      ...setSubcategoryAsDeletedStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 }
