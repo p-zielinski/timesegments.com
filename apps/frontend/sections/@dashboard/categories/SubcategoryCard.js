@@ -21,6 +21,7 @@ import EditSubcategory from './EditSubcategory';
 import {handleFetch} from '../../../utils/handleFetch';
 import React from 'react';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
+import {StatusCodes} from 'http-status-codes';
 
 // ----------------------------------------------------------------------
 
@@ -55,7 +56,11 @@ export default function SubcategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'subcategory/change-visibility',
-      body: { subcategoryId: subcategory.id, visible: !subcategory.visible },
+      body: {
+        subcategoryId: subcategory.id,
+        visible: !subcategory.visible,
+        controlValue,
+      },
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.subcategory) {
@@ -70,6 +75,12 @@ export default function SubcategoryCard({
           return { ...category, subcategories };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -79,7 +90,7 @@ export default function SubcategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'subcategory/set-active',
-      body: { subcategoryId: subcategory.id },
+      body: { subcategoryId: subcategory.id, controlValue },
       method: 'POST',
     });
     if (
@@ -102,6 +113,12 @@ export default function SubcategoryCard({
           return { ...category, active: false, subcategories };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -111,7 +128,7 @@ export default function SubcategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'subcategory/set-as-deleted',
-      body: { subcategoryId: subcategory.id },
+      body: { subcategoryId: subcategory.id, controlValue },
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.subcategory) {
@@ -128,6 +145,12 @@ export default function SubcategoryCard({
           return _category;
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      setIsSaving(true);
     }
     setIsSaving(false);
     return;

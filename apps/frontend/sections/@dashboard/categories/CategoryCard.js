@@ -28,6 +28,7 @@ import ShowLimitReached from './ShowLimitReached';
 import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import {handleFetch} from '../../../utils/handleFetch';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
+import {StatusCodes} from 'http-status-codes';
 
 // ----------------------------------------------------------------------
 
@@ -87,10 +88,14 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/change-visibility',
-      body: { categoryId: category.id, visible: !category.visible },
+      body: {
+        categoryId: category.id,
+        visible: !category.visible,
+        controlValue,
+      },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories;
@@ -100,6 +105,12 @@ export default function CategoryCard({
           return { ...category, subcategories };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -109,10 +120,10 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: { categoryId: category.id },
+      body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories.map((subcategory) => {
@@ -125,17 +136,33 @@ export default function CategoryCard({
           return { ...category, active: false, subcategories };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
   };
 
   const setCategoryExpandSubcategoriesInDB = async (value) => {
-    await handleFetch({
+    const response = await handleFetch({
       pathOrUrl: 'category/set-expand-subcategories',
-      body: { categoryId: category.id, expandSubcategories: value },
+      body: {
+        categoryId: category.id,
+        expandSubcategories: value,
+        controlValue,
+      },
       method: 'POST',
     });
+    if (response.controlValue) {
+      setControlValue(response.controlValue);
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      setIsSaving(true);
+    }
     return;
   };
 
@@ -143,13 +170,19 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-as-deleted',
-      body: { categoryId: category.id },
+      body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.category) {
       setCategories(
         categories.filter((category) => category.id !== response?.category.id)
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

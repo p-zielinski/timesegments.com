@@ -11,6 +11,7 @@ import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, User } from '@prisma/client';
 import { ColumnSortOption, Limits, MeExtendedOption } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
+import { nanoid } from 'nanoid';
 
 @Injectable()
 export class UserService {
@@ -25,15 +26,10 @@ export class UserService {
     private loggerService: LoggerService
   ) {}
 
-  public async checkControlValue(user: User, controlValue: string) {
-    if (user.controlValue !== controlValue) {
-      return {
-        controlValue: true,
-      };
-    }
-    return {
-      controlValue: false,
-    };
+  public getNewControlValue(user: User): string {
+    const newControlValue = nanoid();
+    this.updateControlValue(user.id, newControlValue);
+    return newControlValue;
   }
 
   public async getMeExtended(
@@ -231,5 +227,12 @@ export class UserService {
       success: false,
       error: `Could not update sortingCategories to: ${ColumnSortOption}`,
     };
+  }
+
+  private async updateControlValue(userId: string, controlValue: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { controlValue },
+    });
   }
 }
