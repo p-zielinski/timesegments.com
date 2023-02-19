@@ -14,10 +14,18 @@ import { User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories';
+import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { ControlValueDto } from './dto/checkControlValue';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @Post('check-control-value')
+  checkControlValue(@Body() controlValueDto: ControlValueDto) {
+    return { success: true };
+  }
 
   @Post('register')
   async handleRequestCreateNewUser(
