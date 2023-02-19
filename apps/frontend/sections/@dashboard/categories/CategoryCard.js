@@ -28,6 +28,7 @@ import ShowLimitReached from './ShowLimitReached';
 import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import {handleFetch} from '../../../utils/handleFetch';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
+import {StatusCodes} from 'http-status-codes';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +37,8 @@ CategoryCard.propTypes = {
 };
 
 export default function CategoryCard({
+  controlValue,
+  setControlValue,
   category,
   categories,
   setCategories,
@@ -85,10 +88,14 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/change-visibility',
-      body: { categoryId: category.id, visible: !category.visible },
+      body: {
+        categoryId: category.id,
+        visible: !category.visible,
+        controlValue,
+      },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories;
@@ -98,6 +105,12 @@ export default function CategoryCard({
           return { ...category, subcategories };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -107,10 +120,10 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: { categoryId: category.id },
+      body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories.map((subcategory) => {
@@ -123,17 +136,33 @@ export default function CategoryCard({
           return { ...category, active: false, subcategories };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
   };
 
   const setCategoryExpandSubcategoriesInDB = async (value) => {
-    await handleFetch({
+    const response = await handleFetch({
       pathOrUrl: 'category/set-expand-subcategories',
-      body: { categoryId: category.id, expandSubcategories: value },
+      body: {
+        categoryId: category.id,
+        expandSubcategories: value,
+        controlValue,
+      },
       method: 'POST',
     });
+    if (response.controlValue) {
+      setControlValue(response.controlValue);
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      setIsSaving(true);
+    }
     return;
   };
 
@@ -141,13 +170,19 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-as-deleted',
-      body: { categoryId: category.id },
+      body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.category) {
       setCategories(
         categories.filter((category) => category.id !== response?.category.id)
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -158,6 +193,8 @@ export default function CategoryCard({
       {isEditing.categoryId === category.id &&
       viewMode === CategoriesPageMode.EDIT ? (
         <EditCategory
+          controlValue={controlValue}
+          setControlValue={setControlValue}
           categories={categories}
           setCategories={setCategories}
           category={category}
@@ -577,6 +614,8 @@ export default function CategoryCard({
                         getVisibleSubcategories(category, categories).map(
                           (subcategory) => (
                             <SubcategoryCard
+                              controlValue={controlValue}
+                              setControlValue={setControlValue}
                               key={subcategory.id}
                               disableHover={disableHover}
                               subcategory={subcategory}
@@ -601,6 +640,8 @@ export default function CategoryCard({
                           {category.subcategories.length <
                           limits.subcategoriesLimit ? (
                             <AddNew
+                              controlValue={controlValue}
+                              setControlValue={setControlValue}
                               disableHover={disableHover}
                               type={CreateNewType.SUBCATEGORY}
                               data={{ categoryId: category.id }}

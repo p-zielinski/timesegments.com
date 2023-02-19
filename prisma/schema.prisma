@@ -18,6 +18,7 @@ model User {
   timeLogs          TimeLog[]
   createdAt         DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime          @updatedAt @db.Timestamptz(3)
+  controlValue      String            @default("new user")
 }
 
 model Token {

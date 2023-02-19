@@ -19,8 +19,11 @@ import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function EditCategory({
+  controlValue,
+  setControlValue,
   categories,
   setCategories,
   category,
@@ -74,7 +77,12 @@ export default function EditCategory({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/update',
-      body: { categoryId: category.id, name: categoryName, color },
+      body: {
+        categoryId: category.id,
+        name: categoryName,
+        color,
+        controlValue,
+      },
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.category) {
@@ -97,6 +105,12 @@ export default function EditCategory({
         categoryId: undefined,
         createNew: undefined,
       });
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

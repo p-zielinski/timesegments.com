@@ -5,20 +5,25 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { UserDecorator } from '../../common/paramDecorators/user.decorator';
+import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { SubcategoryService } from './subcategory.service';
 import { UpdateSubcategoryDto } from './dto/updateSubcategoryDto';
 import { CreateSubcategoryDto } from './dto/createSubcategory.dto';
-import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { ChangeVisibilitySubcategoryDto } from './dto/changeVisibilitySubcategory.dto';
 import { SetSubcategoryActiveDto } from './dto/setSubcategoryActive.dto';
 import { SetSubcategoryDeletedDto } from './dto/setSubcategoryDeleted.dto';
+import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { UserService } from '../user/user.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, CheckControlValueGuard)
 @Controller('subcategory')
 export class SubcategoryController {
-  constructor(private subcategoryService: SubcategoryService) {}
+  constructor(
+    private subcategoryService: SubcategoryService,
+    private userService: UserService
+  ) {}
 
   @Post('create')
   async handleRequestCreateSubcategory(
@@ -39,7 +44,10 @@ export class SubcategoryController {
         error: createCategoryStatus.error,
       });
     }
-    return createCategoryStatus;
+    return {
+      ...createCategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('change-visibility')
@@ -59,7 +67,10 @@ export class SubcategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return {
+      ...updateCategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('set-active')
@@ -75,7 +86,10 @@ export class SubcategoryController {
         error: updateSubcategoryStatus.error,
       });
     }
-    return updateSubcategoryStatus;
+    return {
+      ...updateSubcategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('update')
@@ -96,7 +110,10 @@ export class SubcategoryController {
         error: updateSubcategoryStatus.error,
       });
     }
-    return updateSubcategoryStatus;
+    return {
+      ...updateSubcategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('set-as-deleted')
@@ -115,6 +132,9 @@ export class SubcategoryController {
         error: setSubcategoryAsDeletedStatus.error,
       });
     }
-    return setSubcategoryAsDeletedStatus;
+    return {
+      ...setSubcategoryAsDeletedStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 }

@@ -14,6 +14,8 @@ import DashboardLayout from '../layouts/dashboard';
 import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
 import {refreshToken} from '../utils/refreshToken';
+import {handleFetch} from '../utils/handleFetch';
+import {StatusCodes} from 'http-status-codes';
 
 // ---------------------------------------------------------------------
 
@@ -52,6 +54,8 @@ export default function Index({
   user: serverSideFetchedUser,
   limits: serverSideFetchedLimits,
 }: Props) {
+  const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
+
   useEffect(() => {
     refreshToken();
   }, []);
@@ -59,6 +63,81 @@ export default function Index({
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
     serverSideFetchedUser
   );
+  const [controlValue, setControlValue] = useState(user?.controlValue);
+
+  useEffect(() => {
+    setControlValue(user?.controlValue);
+  }, [user?.controlValue]);
+
+  useEffect(() => {
+    if (user && !controlValue) {
+      fetchExtendedUser();
+    }
+    if (user) {
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+      }
+      const intervalId = setInterval(() => {
+        checkControlValue();
+      }, 2 * 60 * 1000);
+      setRefreshIntervalId(intervalId);
+    }
+  }, [controlValue]);
+
+  const checkControlValue = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'user/check-control-value',
+      body: {
+        controlValue,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setIsSaving(false);
+      return;
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      setUser(undefined);
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        setRefreshIntervalId(undefined);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      return fetchExtendedUser();
+    }
+    console.log(response);
+    setIsSaving(false);
+    return;
+  };
+
+  const fetchExtendedUser = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'user/me-extended',
+      body: {
+        extend: [
+          MeExtendedOption.CATEGORIES,
+          MeExtendedOption.SUBCATEGORIES,
+          MeExtendedOption.CATEGORIES_LIMIT,
+          MeExtendedOption.SUBCATEGORIES_LIMIT,
+        ],
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED && response?.user) {
+      setUser(response.user);
+      setCategories(response.user?.categories ?? []);
+      setControlValue(response.user?.controlValue);
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      setUser(undefined);
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        setRefreshIntervalId(undefined);
+      }
+    }
+    setIsSaving(false);
+    return;
+  };
 
   const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits);
 
@@ -181,6 +260,8 @@ export default function Index({
         </Stack>
 
         <CategoryList
+          controlValue={controlValue}
+          setControlValue={setControlValue}
           disableHover={disableHover}
           isSaving={isSaving}
           setIsSaving={setIsSaving}

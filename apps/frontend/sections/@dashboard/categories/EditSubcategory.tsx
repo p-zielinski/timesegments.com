@@ -20,8 +20,11 @@ import { styled } from '@mui/material/styles';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { handleFetch } from '../../../utils/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function EditSubcategory({
+  controlValue,
+  setControlValue,
   category,
   categories,
   setCategories,
@@ -84,10 +87,11 @@ export default function EditSubcategory({
         subcategoryId: subcategory.id,
         name: categoryName,
         color: inheritColor ? undefined : color,
+        controlValue,
       },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.subcategory) {
+    if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories.map((subcategory) => {
@@ -104,6 +108,12 @@ export default function EditSubcategory({
         subcategoryId: undefined,
         createNew: undefined,
       });
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

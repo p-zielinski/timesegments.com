@@ -26,8 +26,11 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { Checkbox } from '../Form/Checkbox';
 import { handleFetch } from '../../../utils/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function AddNew({
+  controlValue,
+  setControlValue,
   disableHover,
   type,
   data = {},
@@ -77,7 +80,7 @@ export default function AddNew({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/create',
-      body: { name, color },
+      body: { name, color, controlValue },
       method: 'POST',
     });
     if (response.statusCode === 201 && response?.category) {
@@ -107,10 +110,11 @@ export default function AddNew({
         categoryId: category.id,
         name,
         color: inheritColor ? undefined : color,
+        controlValue,
       },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.subcategory) {
+    if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
       setCategories(
         categories.map((_category) => {
           if (_category.id === category.id) {
@@ -130,6 +134,12 @@ export default function AddNew({
         subcategoryId: undefined,
         createNew: undefined,
       });
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

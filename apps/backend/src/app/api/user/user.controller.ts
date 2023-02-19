@@ -8,16 +8,24 @@ import {
 } from '@nestjs/common';
 import { LoginOrRegisterDto } from './dto/loginOrRegister.dto';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../../common/auth/jwt-auth.guard';
-import { UserDecorator } from '../../common/paramDecorators/user.decorator';
+import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories';
+import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { ControlValueDto } from './dto/checkControlValue';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @Post('check-control-value')
+  checkControlValue(@Body() controlValueDto: ControlValueDto) {
+    return { success: true };
+  }
 
   @Post('register')
   async handleRequestCreateNewUser(

@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { User, Token } from '@prisma/client';
+import { Token, User } from '@prisma/client';
 import { TokenService } from '../../api/token/token.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -36,13 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       this.tokenService.deleteOne(token.id); //don't wait
       return false;
     }
-    const tokenWithoutUserRelation = {};
-    Object.keys(token).forEach((key) => {
-      if (key !== 'user') {
-        tokenWithoutUserRelation[key] = token[key];
-      }
-    });
-
+    const tokenWithoutUserRelation = { ...token, user: undefined };
     return {
       user: token.user,
       currentToken: tokenWithoutUserRelation as Token,

@@ -1,8 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class SetSubcategoryDeletedDto {
+export class ControlValueDto {
   @IsString()
   controlValue: string;
-  @IsString()
-  subcategoryId: string;
 }
