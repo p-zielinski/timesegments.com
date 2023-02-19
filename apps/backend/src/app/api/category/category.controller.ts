@@ -109,7 +109,10 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return {
+      ...updateCategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 
   @Post('update')

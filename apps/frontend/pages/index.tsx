@@ -14,6 +14,8 @@ import DashboardLayout from '../layouts/dashboard';
 import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
 import {refreshToken} from '../utils/refreshToken';
+import {handleFetch} from '../utils/handleFetch';
+import {StatusCodes} from 'http-status-codes';
 
 // ---------------------------------------------------------------------
 
@@ -63,7 +65,35 @@ export default function Index({
 
   useEffect(() => {
     setControlValue(user?.controlValue);
-  }, [user]);
+  }, [user?.controlValue]);
+
+  useEffect(() => {
+    if (user && !controlValue) {
+      fetchExtendedUser();
+    }
+  }, [controlValue]);
+
+  const fetchExtendedUser = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'user/me-extended',
+      body: {
+        extend: [
+          MeExtendedOption.CATEGORIES,
+          MeExtendedOption.SUBCATEGORIES,
+          MeExtendedOption.CATEGORIES_LIMIT,
+          MeExtendedOption.SUBCATEGORIES_LIMIT,
+        ],
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED && response?.user) {
+      setUser(response.user);
+      setCategories(response.user?.categories ?? []);
+    }
+    setIsSaving(false);
+    return;
+  };
 
   const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits);
 
