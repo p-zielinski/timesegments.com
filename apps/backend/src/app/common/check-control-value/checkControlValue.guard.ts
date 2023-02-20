@@ -16,8 +16,11 @@ export class CheckControlValueGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     try {
       const { user } = request.user;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      if (user.controlValue === request.body.controlValue!) {
+      const bodyControlValue = request.body?.controlValue;
+      if (
+        typeof bodyControlValue === 'string' &&
+        user.controlValue === request.body.controlValue
+      ) {
         return true;
       }
     } catch (error) {
