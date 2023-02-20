@@ -19,6 +19,7 @@ import { SubcategoryService } from './api/subcategory/subcategory.service';
 import { CategoryService } from './api/category/category.service';
 import { TimeLogService } from './api/time-log/time-log.service';
 import { TokenController } from './api/token/token.controller';
+import { TimeLogController } from './api/time-log/time-log.controller';
 
 //nx g @nrwl/nest:service --project backend --directory app/api
 
@@ -41,6 +42,7 @@ import { TokenController } from './api/token/token.controller';
     CategoryController,
     SubcategoryController,
     TokenController,
+    TimeLogController,
   ],
   providers: [
     LoggerService,
