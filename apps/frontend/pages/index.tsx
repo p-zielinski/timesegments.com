@@ -273,7 +273,6 @@ export default function Index({
           setIsEditing={setIsEditing}
           limits={limits}
         />
-        {controlValue}
       </Container>
     </DashboardLayout>
   );
