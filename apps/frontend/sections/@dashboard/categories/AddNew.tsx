@@ -83,7 +83,7 @@ export default function AddNew({
       body: { name, color, controlValue },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories([
         { ...response.category, subcategories: [] },
         ...categories,

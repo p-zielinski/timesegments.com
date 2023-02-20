@@ -173,7 +173,7 @@ export default function CategoryCard({
       body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.filter((category) => category.id !== response?.category.id)
       );

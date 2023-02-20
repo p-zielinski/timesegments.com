@@ -115,6 +115,8 @@ export default function CategoryList({
         )}
         {viewMode === CategoriesPageMode.VIEW && (
           <CancelCard
+            controlValue={controlValue}
+            setControlValue={setControlValue}
             disableHover={disableHover}
             categories={categories}
             setCategories={setCategories}

@@ -13,6 +13,7 @@ import recoverSchema from '../../yupSchemas/recover';
 import {InputText} from '../../components/form/Text';
 import {handleFetch} from '../../utils/handleFetch';
 import {SelectWithSearch} from '../../components/form/SelectWithSearch';
+import {StatusCodes} from 'http-status-codes';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({
@@ -39,7 +40,7 @@ export default function AuthForm({
       body: emailAndPassword,
       method: 'POST',
     });
-    if (response.statusCode === 201) {
+    if (response.statusCode === StatusCodes.CREATED) {
       await Cookies.set('jwt_token', response.token, { expires: 7, path: '' });
       setUser(response.user);
       setCategories(response.user?.categories ?? []);

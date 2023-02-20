@@ -63,7 +63,7 @@ export default function SubcategoryCard({
       },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.subcategory) {
+    if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
       setCategories(
         categories.map((category) => {
           const subcategories = category.subcategories.map((subcategory) => {
@@ -94,7 +94,7 @@ export default function SubcategoryCard({
       method: 'POST',
     });
     if (
-      response.statusCode === 201 &&
+      response.statusCode === StatusCodes.CREATED &&
       response?.subcategory &&
       response?.category
     ) {
@@ -131,7 +131,7 @@ export default function SubcategoryCard({
       body: { subcategoryId: subcategory.id, controlValue },
       method: 'POST',
     });
-    if (response.statusCode === 201 && response?.subcategory) {
+    if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
       setCategories(
         categories.map((_category) => {
           if (_category.id === category.id) {
