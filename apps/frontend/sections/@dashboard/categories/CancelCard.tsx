@@ -8,8 +8,11 @@ import {
 import Iconify from '../../../components/iconify';
 import React, { useEffect, useState } from 'react';
 import { handleFetch } from '../../../utils/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function CancelCard({
+  controlValue,
+  setControlValue,
   disableHover,
   isSaving,
   setIsSaving,
@@ -29,10 +32,12 @@ export default function CancelCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/cancel-all-active',
-      body: {},
+      body: {
+        controlValue,
+      },
       method: 'POST',
     });
-    if (response.statusCode === 201) {
+    if (response.statusCode === StatusCodes.CREATED) {
       setCategories(
         categories.map((category) => {
           return {
@@ -44,6 +49,12 @@ export default function CancelCard({
           };
         })
       );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
   };

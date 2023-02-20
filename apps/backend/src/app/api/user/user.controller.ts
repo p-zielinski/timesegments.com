@@ -15,7 +15,6 @@ import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
-import { ControlValueDto } from './dto/checkControlValue';
 
 @Controller('user')
 export class UserController {
@@ -23,7 +22,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('check-control-value')
-  checkControlValue(@Body() controlValueDto: ControlValueDto) {
+  checkControlValue() {
     return { success: true };
   }
 
@@ -109,7 +108,7 @@ export class UserController {
     return updateSortingCategoriesStatus;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('cancel-all-active')
   async handleRequestCancelAllActive(@UserDecorator() user: User) {
     const cancelAllActiveStatus = await this.userService.cancelAllActive(user);
