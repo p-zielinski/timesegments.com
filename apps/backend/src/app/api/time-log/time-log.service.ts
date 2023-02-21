@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
@@ -7,11 +7,14 @@ import { SubcategoryService } from '../subcategory/subcategory.service';
 export class TimeLogService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService,
+    @Inject(forwardRef(() => SubcategoryService))
     private subcategoryService: SubcategoryService
   ) {}
 
   public async findAll(userId: string) {
+    //TODO delete it
     const allTimeLogs = await this.prisma.timeLog.findMany({
       where: { userId },
     });
@@ -23,7 +26,13 @@ export class TimeLogService {
         allSubcategoriesIds.add(timeLog.subcategoryId);
       }
     });
-    return { allTimeLogs, success: true };
+    const allCategories = await this.categoryService.findManyIfInIdList([
+      ...allCategoriesIds,
+    ] as string[]);
+    const allSubcategories = await this.subcategoryService.findManyIfInIdList([
+      ...allSubcategoriesIds,
+    ] as string[]);
+    return { allTimeLogs, allCategories, allSubcategories, success: true };
   }
 
   public async findFirstTimeLogWhereNotEnded(userId: string) {
