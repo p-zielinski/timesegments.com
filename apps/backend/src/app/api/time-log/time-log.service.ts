@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class TimeLogService {
@@ -11,7 +12,32 @@ export class TimeLogService {
     private categoryService: CategoryService,
     @Inject(forwardRef(() => SubcategoryService))
     private subcategoryService: SubcategoryService
-  ) {}
+  ) {
+    this.findFromTo();
+  }
+
+  public async findFromTo(userId = 'cldydg9tn0000qwfp0tzof4ws') {
+    const fromRaw = {
+      year: 2022,
+      month: 12,
+      day: 20,
+    };
+    const toRaw = {
+      year: 2022,
+      month: 12,
+      day: 20,
+    };
+    const fromTime = DateTime.fromObject(
+      { ...fromRaw, hour: 0, minute: 0, second: 0 },
+      { zone: 'Poland' }
+    );
+    const toTime = DateTime.fromObject(
+      { ...fromRaw, hour: 24, minute: 0, second: 0 },
+      { zone: 'Poland' }
+    );
+    console.log(fromTime.toISO());
+    console.log(toTime.toISO());
+  }
 
   public async findAll(userId: string) {
     //TODO delete it
