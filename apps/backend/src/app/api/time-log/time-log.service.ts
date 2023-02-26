@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { DateTime } from 'luxon';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class TimeLogService {
@@ -12,31 +13,46 @@ export class TimeLogService {
     private categoryService: CategoryService,
     @Inject(forwardRef(() => SubcategoryService))
     private subcategoryService: SubcategoryService
-  ) {
-    this.findFromTo();
-  }
+  ) {}
 
-  public async findFromTo(userId = 'cldydg9tn0000qwfp0tzof4ws') {
-    const fromRaw = {
-      year: 2022,
-      month: 12,
-      day: 20,
-    };
-    const toRaw = {
-      year: 2022,
-      month: 12,
-      day: 20,
-    };
+  public async findFromTo(
+    user: User,
+    fromRaw: {
+      year: 2023;
+      month: 2;
+      day: 12;
+    },
+    toRaw = {
+      year: 2023,
+      month: 2,
+      day: 12,
+    }
+  ) {
     const fromTime = DateTime.fromObject(
       { ...fromRaw, hour: 0, minute: 0, second: 0 },
       { zone: 'Poland' }
     );
     const toTime = DateTime.fromObject(
-      { ...fromRaw, hour: 24, minute: 0, second: 0 },
+      { ...toRaw, hour: 24, minute: 0, second: 0 },
       { zone: 'Poland' }
     );
     console.log(fromTime.toISO());
     console.log(toTime.toISO());
+    console.log(
+      await this.prisma.timeLog.findMany({
+        where: {
+          userId: user.id,
+          OR: [
+            {
+              createdAt: { gte: fromTime.toISO(), lte: toTime.toISO() },
+            },
+            {
+              endedAt: { gte: fromTime.toISO(), lte: toTime.toISO() },
+            },
+          ],
+        },
+      })
+    );
   }
 
   public async findAll(userId: string) {
