@@ -139,6 +139,7 @@ export class UserService {
             data.plainPassword,
             this.configService.get<number>('SALT_ROUNDS')
           ),
+          timezone: 'EUROPE__WARSAW',
         },
       });
       if (!options?.generateToken) {
