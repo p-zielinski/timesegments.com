@@ -224,6 +224,12 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
+  public async findManyIfInIdList(categoriesIds: string[]) {
+    return await this.prisma.category.findMany({
+      where: { id: { in: categoriesIds } },
+    });
+  }
+
   public async findIfNotDeleted(
     categoryId: string,
     include: Prisma.CategoryInclude = null

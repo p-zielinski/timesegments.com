@@ -1,9 +1,9 @@
 // @mui
 import PropTypes from 'prop-types';
-import { Card, Typography, CardHeader, CardContent } from '@mui/material';
-import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
+import {Box, Card, CardContent, CardHeader, Typography} from '@mui/material';
+import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,} from '@mui/lab';
 // utils
-import { fDateTime } from '../../../utils/formatTime';
+import {fDateTime} from '../../../utils/formatTime';
 
 // ----------------------------------------------------------------------
 
@@ -27,7 +27,20 @@ export default function AppOrderTimeline({ title, subheader, list, ...other }) {
       >
         <Timeline>
           {list.map((item, index) => (
-            <OrderItem key={item.id} item={item} isLast={index === list.length - 1} />
+            <OrderItem
+              key={item.id}
+              item={item}
+              isLast={index === list.length - 1}
+            />
+          ))}
+        </Timeline>
+        <Timeline>
+          {list.map((item, index) => (
+            <OrderItem
+              key={item.id}
+              item={item}
+              isLast={index === list.length - 1}
+            />
           ))}
         </Timeline>
       </CardContent>
@@ -51,24 +64,27 @@ function OrderItem({ item, isLast }) {
   return (
     <TimelineItem>
       <TimelineSeparator>
-        <TimelineDot
-          color={
-            (type === 'order1' && 'primary') ||
-            (type === 'order2' && 'success') ||
-            (type === 'order3' && 'info') ||
-            (type === 'order4' && 'warning') ||
-            'error'
-          }
-        />
+        <TimelineDot sx={{ background: 'blue' }} />
         {isLast ? null : <TimelineConnector />}
       </TimelineSeparator>
 
       <TimelineContent>
         <Typography variant="subtitle2">{title}</Typography>
-
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {fDateTime(time)}
-        </Typography>
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            From: {fDateTime(time)}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            To: {fDateTime(time)}
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Duration: 4 hours 10 minutes
+          </Typography>
+        </Box>
       </TimelineContent>
     </TimelineItem>
   );

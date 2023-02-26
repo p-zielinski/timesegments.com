@@ -275,6 +275,12 @@ export class SubcategoryService {
     });
   }
 
+  public async findManyIfInIdList(subcategoriesIds: string[]) {
+    return await this.prisma.subcategory.findMany({
+      where: { id: { in: subcategoriesIds } },
+    });
+  }
+
   private async countCategorySubcategories(categoryId: string) {
     return await this.prisma.subcategory.count({ where: { categoryId } });
   }
