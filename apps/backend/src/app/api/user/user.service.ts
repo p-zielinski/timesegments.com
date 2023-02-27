@@ -8,10 +8,16 @@ import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
-import { Prisma, User } from '@prisma/client';
-import { ColumnSortOption, Limits, MeExtendedOption } from '@test1/shared';
+import { Prisma, Timezone, User } from '@prisma/client';
+import {
+  ColumnSortOption,
+  Limits,
+  MeExtendedOption,
+  Timezones,
+} from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
+import { findValueOfEnum } from '../../common/findValueOfEnum';
 
 @Injectable()
 export class UserService {
@@ -125,7 +131,7 @@ export class UserService {
   }
 
   public async createNewUser(
-    data: { email: string; plainPassword: string },
+    data: { email: string; plainPassword: string; timezone: Timezones },
     options?: { generateToken: boolean }
   ): Promise<
     | { success: false; error: string }
@@ -139,7 +145,7 @@ export class UserService {
             data.plainPassword,
             this.configService.get<number>('SALT_ROUNDS')
           ),
-          timezone: 'EUROPE__WARSAW',
+          timezone: findValueOfEnum(Timezones, data.timezone) as Timezone,
         },
       });
       if (!options?.generateToken) {

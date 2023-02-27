@@ -9,7 +9,7 @@ type SelectWithSearchProps = {
   label?: string;
   name: string;
   options: { value: number | string; label: string }[];
-  grouping?: (option) => string;
+  groupBy?: (option) => string;
   helperText?: string;
 };
 
@@ -18,7 +18,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   name,
   options,
   helperText,
-  grouping,
+  groupBy,
 }) => {
   return (
     <FastField autoComplete="nope" name={name}>
@@ -31,7 +31,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
             disablePortal
             disableClearable
             sx={{ mb: -1 }}
-            groupBy={grouping || null}
+            groupBy={groupBy}
             options={options}
             defaultValue={field.value}
             // @ts-ignore
