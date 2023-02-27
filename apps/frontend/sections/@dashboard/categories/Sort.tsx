@@ -17,8 +17,8 @@ const SORT_BY_OPTIONS = [
     label: capitalize(ColumnSortOption.ALPHABETICAL),
   },
   {
-    value: ColumnSortOption.REVERSE_ALPHABETICAL,
-    label: capitalize(ColumnSortOption.REVERSE_ALPHABETICAL).replaceAll(
+    value: ColumnSortOption.REVERSED_ALPHABETICAL,
+    label: capitalize(ColumnSortOption.REVERSED_ALPHABETICAL).replaceAll(
       '_',
       ' '
     ),

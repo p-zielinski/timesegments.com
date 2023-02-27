@@ -4,16 +4,18 @@ import {IconButton, InputAdornment, Link, Stack} from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {Formik} from 'formik';
 import Cookies from 'js-cookie';
-import loginRegisterSchema from '../../yupSchemas/loginRegister';
+import loginSchema from '../../yupSchemas/login';
 // components
 import Iconify from '../../components/iconify';
 import {useRouter} from 'next/router';
 import {AuthPageState} from '@test1/shared';
 import recoverSchema from '../../yupSchemas/recover';
+import registerSchema from '../../yupSchemas/register';
 import {InputText} from '../../components/form/Text';
 import {handleFetch} from '../../utils/handleFetch';
 import {SelectWithSearch} from '../../components/form/SelectWithSearch';
 import {StatusCodes} from 'http-status-codes';
+import {timezoneOptions} from '../../consts/timezoneOptions';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({
@@ -23,6 +25,21 @@ export default function AuthForm({
   setCategories,
   setLimits,
 }) {
+  const getTimezoneOptionsForSelectWithSearch = () => {
+    const timezoneOptionsResult = [];
+    for (const key of Object.keys(timezoneOptions)) {
+      for (const timezone of timezoneOptions[key]) {
+        timezoneOptionsResult.push({
+          groupBy: key,
+          label: timezone.name,
+          value: timezone.value,
+        });
+      }
+    }
+    return timezoneOptionsResult;
+  };
+  const timezoneOptionsForSelect = getTimezoneOptionsForSelectWithSearch();
+
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
 
@@ -53,25 +70,27 @@ export default function AuthForm({
 
   return (
     <Formik
-      initialValues={{ email: '', password: '' }}
+      initialValues={{ email: '', password: '', timezone: '' }}
       onSubmit={async (values, { setSubmitting }) => {
         setError(undefined);
-        const emailAndPassword = {
+        const valuesAndEmailToLowerCase = {
           ...values,
           email: values.email?.toLowerCase() || '',
         };
         if (authPageState === AuthPageState.LOGIN) {
-          await onLoginOrRegister(emailAndPassword, 'login');
+          await onLoginOrRegister(valuesAndEmailToLowerCase, 'login');
         }
         if (authPageState === AuthPageState.REGISTER) {
-          await onLoginOrRegister(emailAndPassword, 'register');
+          await onLoginOrRegister(valuesAndEmailToLowerCase, 'register');
         }
         setSubmitting(false);
       }}
       validationSchema={
-        [AuthPageState.LOGIN, AuthPageState.REGISTER].includes(authPageState)
-          ? loginRegisterSchema
-          : recoverSchema
+        AuthPageState.LOGIN === authPageState
+          ? loginSchema
+          : AuthPageState.RECOVER_ACCOUNT === authPageState
+          ? recoverSchema
+          : registerSchema
       }
     >
       {({
@@ -122,21 +141,10 @@ export default function AuthForm({
               )}
               {authPageState === AuthPageState.REGISTER && (
                 <SelectWithSearch
-                  name="countryId"
-                  grouping={(option) => (option.popular ? 'Popular' : 'Other')}
-                  label="Country"
-                  options={[]
-                    .sort((a, b) => {
-                      if (a.popular !== b.popular) {
-                        return a.popular ? -1 : 1;
-                      }
-                      return a.label.localeCompare(b.label);
-                    })
-                    .map((e) => ({
-                      value: `${e.value}`,
-                      label: e.label,
-                      popular: e.popular,
-                    }))}
+                  name="timezone"
+                  groupBy={(option) => option.groupBy}
+                  label="Timezone"
+                  options={timezoneOptionsForSelect}
                 />
               )}
             </Stack>

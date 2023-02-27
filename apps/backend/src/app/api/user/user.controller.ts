@@ -6,7 +6,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { LoginOrRegisterDto } from './dto/loginOrRegister.dto';
+import { LoginOrRegisterDto } from './dto/login.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
@@ -15,6 +15,7 @@ import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('user')
 export class UserController {
@@ -27,12 +28,10 @@ export class UserController {
   }
 
   @Post('register')
-  async handleRequestCreateNewUser(
-    @Body() loginOrRegisterDto: LoginOrRegisterDto
-  ) {
-    const { email, password } = loginOrRegisterDto;
+  async handleRequestCreateNewUser(@Body() registerDto: RegisterDto) {
+    const { email, password, timezone } = registerDto;
     const registeringResult = await this.userService.createNewUser(
-      { email, plainPassword: password },
+      { email, plainPassword: password, timezone },
       { generateToken: true }
     );
     if (registeringResult.success === false) {

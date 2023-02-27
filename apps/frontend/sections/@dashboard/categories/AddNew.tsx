@@ -93,6 +93,12 @@ export default function AddNew({
         categoryId: undefined,
         createNew: undefined,
       });
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

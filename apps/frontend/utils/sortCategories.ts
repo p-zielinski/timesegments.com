@@ -21,7 +21,7 @@ export const sortCategories = (
         .sort((category1, category2) =>
           (category1?.name ?? '').localeCompare(category2?.name ?? '')
         );
-    case ColumnSortOption.REVERSE_ALPHABETICAL:
+    case ColumnSortOption.REVERSED_ALPHABETICAL:
       return categories
         .map((category) => {
           return {
