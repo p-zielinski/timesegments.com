@@ -13,19 +13,37 @@ export class TimeLogService {
     private categoryService: CategoryService,
     @Inject(forwardRef(() => SubcategoryService))
     private subcategoryService: SubcategoryService
-  ) {}
+  ) {
+    (async () => {
+      console.log(
+        await this.findFromTo(
+          { id: `clelsxxw00000qws8r9o7ek7u` } as User,
+          {
+            year: 2023,
+            month: 2,
+            day: 14,
+          },
+          {
+            year: 2023,
+            month: 10,
+            day: 28,
+          }
+        )
+      );
+    })();
+  }
 
   public async findFromTo(
     user: User,
     fromRaw: {
-      year: 2023;
-      month: 2;
-      day: 12;
+      year: number;
+      month: number;
+      day: number;
     },
-    toRaw = {
-      year: 2023,
-      month: 2,
-      day: 12,
+    toRaw: {
+      year: number;
+      month: number;
+      day: number;
     }
   ) {
     const fromTime = DateTime.fromObject(
@@ -36,23 +54,39 @@ export class TimeLogService {
       { ...toRaw, hour: 24, minute: 0, second: 0 },
       { zone: 'Poland' }
     );
-    console.log(fromTime.toISO());
-    console.log(toTime.toISO());
-    console.log(
-      await this.prisma.timeLog.findMany({
-        where: {
-          userId: user.id,
-          OR: [
-            {
-              createdAt: { gte: fromTime.toISO(), lte: toTime.toISO() },
-            },
-            {
-              endedAt: { gte: fromTime.toISO(), lte: toTime.toISO() },
-            },
-          ],
-        },
-      })
-    );
+    const fromTimeIso = fromTime.toISO();
+    const toTimeIso = toTime.toISO();
+    if (!fromTimeIso || !toTimeIso) {
+      throw new Error('Date not valid');
+    }
+    const result = await this.prisma.timeLog.findMany({
+      where: {
+        userId: user.id,
+        OR: [
+          {
+            createdAt: { gte: fromTime.toISO(), lte: toTime.toISO() },
+          },
+          {
+            endedAt: { gte: fromTime.toISO(), lte: toTime.toISO() },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+    if (result.length > 0) {
+      return result;
+    }
+    return await this.prisma.timeLog.findFirst({
+      where: {
+        userId: user.id,
+        createdAt: { lte: toTime.toISO() },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   public async findAll(userId: string) {
