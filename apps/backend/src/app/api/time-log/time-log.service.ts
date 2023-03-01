@@ -4,6 +4,8 @@ import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { DateTime } from 'luxon';
 import { User } from '@prisma/client';
+import { FromToDate, Timezones } from '@test1/shared';
+import { findValueOfEnum } from '../../common/findValueOfEnum';
 
 @Injectable()
 export class TimeLogService {
@@ -17,24 +19,17 @@ export class TimeLogService {
 
   public async findFromToTimeLogs(
     user: User,
-    fromRaw: {
-      year: number;
-      month: number;
-      day: number;
-    },
-    toRaw: {
-      year: number;
-      month: number;
-      day: number;
-    }
+    fromRaw: FromToDate,
+    toRaw: FromToDate
   ) {
+    const usersTimezone = findValueOfEnum(Timezones, user.timezone);
     const fromDateTime = DateTime.fromObject(
       { ...fromRaw, hour: 0, minute: 0, second: 0 },
-      { zone: user.timezone }
+      { zone: usersTimezone }
     );
     const toDateTime = DateTime.fromObject(
       { ...toRaw, hour: 24, minute: 0, second: 0 },
-      { zone: user.timezone }
+      { zone: usersTimezone }
     );
     const fromDateIso = fromDateTime.toISO();
     const toDateIso = toDateTime.toISO();

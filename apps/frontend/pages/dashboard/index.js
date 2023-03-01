@@ -10,6 +10,7 @@ import { faker } from '@faker-js/faker';
 import DashboardLayout from '../../layouts/dashboard';
 import { useEffect } from 'react';
 import { refreshToken } from '../../utils/refreshToken';
+import { Test } from '../../sections/@dashboard/test';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -17,35 +18,35 @@ const AppNewsUpdate = dynamic(
 );
 const AppOrderTimeline = dynamic(
   () => import('../../sections/@dashboard/app/AppOrderTimeline'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppCurrentVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentVisits'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppWebsiteVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppWebsiteVisits'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppTrafficBySite = dynamic(
   () => import('../../sections/@dashboard/app/AppTrafficBySite'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppWidgetSummary = dynamic(
   () => import('../../sections/@dashboard/app/AppWidgetSummary'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppCurrentSubject = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentSubject'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppConversionRates = dynamic(
   () => import('../../sections/@dashboard/app/AppConversionRates'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppTasks = dynamic(
   () => import('../../sections/@dashboard/app/AppTasks'),
-  {ssr: false}
+  { ssr: false }
 );
 
 // ----------------------------------------------------------------------
@@ -58,16 +59,17 @@ export default function Index() {
   const theme = useTheme();
 
   return (
-    <DashboardLayout user={{email: 'random@email'}}>
+    <DashboardLayout user={{ email: 'random@email' }}>
       <Helmet>
         <title> Dashboard | Minimal UI </title>
       </Helmet>
 
       <Container maxWidth="xl">
-        <Typography variant="h4" sx={{mb: 5}}>
+        <Typography variant="h4" sx={{ mb: 5 }}>
           Hi, Welcome back
         </Typography>
 
+        <Test />
         <Grid container spacing={3}>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
           {/*  <AppWebsiteVisits*/}
@@ -184,52 +186,21 @@ export default function Index() {
           <Grid item xs={12} md={6} lg={4}>
             <AppOrderTimeline
               title="Today"
-              list={[...Array(50)].map((_, index) => ({
-                id: faker.datatype.uuid(),
-                title: [
-                  '1983, orders, $4220',
-                  '12 Invoices have been paid',
-                  'Order #37745 from September',
-                  'New order placed #XF-2356',
-                  'New order placed #XF-2346',
-                ][index % 5],
-                type: `order${index + 1}`,
-                time: faker.date.past(),
-              }))}
-            />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4}>
-            <AppOrderTimeline
-              title="Today"
-              list={[...Array(50)].map((_, index) => ({
-                id: faker.datatype.uuid(),
-                title: [
-                  '1983, orders, $4220',
-                  '12 Invoices have been paid',
-                  'Order #37745 from September',
-                  'New order placed #XF-2356',
-                  'New order placed #XF-2346',
-                ][index % 5],
-                type: `order${index + 1}`,
-                time: faker.date.past(),
-              }))}
-            />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4}>
-            <AppOrderTimeline
-              title="Today"
-              list={[...Array(50)].map((_, index) => ({
-                id: faker.datatype.uuid(),
-                title: [
-                  '1983, orders, $4220',
-                  '12 Invoices have been paid',
-                  'Order #37745 from September',
-                  'New order placed #XF-2356',
-                  'New order placed #XF-2346',
-                ][index % 5],
-                type: `order${index + 1}`,
-                time: faker.date.past(),
-              }))}
+              list={
+                [] ||
+                [...Array(50)].map((_, index) => ({
+                  id: faker.datatype.uuid(),
+                  title: [
+                    '1983, orders, $4220',
+                    '12 Invoices have been paid',
+                    'Order #37745 from September',
+                    'New order placed #XF-2356',
+                    'New order placed #XF-2346',
+                  ][index % 5],
+                  type: `order${index + 1}`,
+                  time: faker.date.past(),
+                }))
+              }
             />
           </Grid>
 
@@ -289,11 +260,11 @@ export default function Index() {
             <AppTasks
               title="Tasks"
               list={[
-                {id: '1', label: 'Create FireStone Logo'},
-                {id: '2', label: 'Add SCSS and JS files if required'},
-                {id: '3', label: 'Stakeholder Meeting'},
-                {id: '4', label: 'Scoping & Estimations'},
-                {id: '5', label: 'Sprint Showcase'},
+                { id: '1', label: 'Create FireStone Logo' },
+                { id: '2', label: 'Add SCSS and JS files if required' },
+                { id: '3', label: 'Stakeholder Meeting' },
+                { id: '4', label: 'Scoping & Estimations' },
+                { id: '5', label: 'Sprint Showcase' },
               ]}
             />
           </Grid>
