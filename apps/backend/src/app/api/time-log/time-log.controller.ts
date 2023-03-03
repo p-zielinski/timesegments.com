@@ -1,4 +1,10 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
@@ -16,7 +22,13 @@ export class TimeLogController {
     @Body() fromToDatesDto: FromToDatesDto
   ) {
     const { from, to } = fromToDatesDto;
-    console.log(from, to);
-    return await this.timeLogService.findFromToTimeLogs(user, from, to);
+    const findFromToTimeLogsResult =
+      await this.timeLogService.findFromToTimeLogs(user, from, to);
+    if (findFromToTimeLogsResult.success === false) {
+      throw new BadRequestException({
+        error: findFromToTimeLogsResult.error,
+      });
+    }
+    return findFromToTimeLogsResult;
   }
 }

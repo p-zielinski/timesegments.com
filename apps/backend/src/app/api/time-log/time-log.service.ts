@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { DateTime } from 'luxon';
-import { User } from '@prisma/client';
+import { TimeLog, User } from '@prisma/client';
 import { FromToDate, Timezones } from '@test1/shared';
 import { findValueOfEnum } from '../../common/findValueOfEnum';
 
@@ -21,7 +21,9 @@ export class TimeLogService {
     user: User,
     fromRaw: FromToDate,
     toRaw: FromToDate
-  ) {
+  ): Promise<
+    { success: false; error: string } | { success: true; timeLogs: TimeLog[] }
+  > {
     const usersTimezone = findValueOfEnum(Timezones, user.timezone);
     const fromDateTime = DateTime.fromObject(
       { ...fromRaw, hour: 0, minute: 0, second: 0 },
@@ -34,10 +36,10 @@ export class TimeLogService {
     const fromDateIso = fromDateTime.toISO();
     const toDateIso = toDateTime.toISO();
     if (!fromDateIso || !toDateIso) {
-      throw new Error('Date not valid');
+      return { success: false, error: 'Date not valid' };
     }
     if (fromDateTime.ts > toDateTime.ts) {
-      throw new Error('From date is past to date');
+      return { success: false, error: 'Date not valid' };
     }
     const results = await this.prisma.timeLog.findMany({
       where: {
@@ -56,7 +58,7 @@ export class TimeLogService {
       },
     });
     if (results.length > 0) {
-      return results;
+      return { success: true, timeLogs: results };
     }
     const result = await this.prisma.timeLog.findFirst({
       where: {
@@ -67,14 +69,16 @@ export class TimeLogService {
         createdAt: 'desc',
       },
     });
-    if (
-      !result ||
-      !result.endedAt ||
-      DateTime.fromJSDate(result.endedAt).ts < fromDateTime.ts
-    ) {
-      return [];
-    }
-    return [result];
+
+    return {
+      success: true,
+      timeLogs:
+        !result ||
+        !result.endedAt ||
+        DateTime.fromJSDate(result.endedAt).ts < fromDateTime.ts
+          ? []
+          : [result],
+    };
   }
 
   public async findFirstTimeLogWhereNotEnded(userId: string) {
