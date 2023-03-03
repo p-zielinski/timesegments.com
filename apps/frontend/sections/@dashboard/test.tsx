@@ -1,35 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { handleFetch } from '../../utils/handleFetch';
-import { StatusCodes } from 'http-status-codes';
 import { FromToDate } from '@test1/shared';
 
 type TestProps = {
   from: FromToDate;
-  to: FromToDate;
+  to?: FromToDate;
 };
 
 export const Test: React.FC<TestProps> = ({ from, to }) => {
   const [isFetched, setIsFetched] = useState(false);
+  const [timeLogs, setTimeLogs] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
 
-  const fetchData = async (
-    from: FromToDate,
-    to: FromToDate
-  ): Promise<undefined> => {
-    const response = await handleFetch({
-      pathOrUrl: 'user/' + endpoint,
-      body: emailAndPassword,
+  useEffect(() => {
+    (async () => {
+      const result = await fetchTimeLogs(from, to);
+      if (result.statusCode === 201) {
+        setTimeLogs(result.timeLogs);
+        setCategories(result.categories);
+        setSubcategories(result.subcategories);
+      }
+      setIsFetched(true);
+    })();
+  }, []);
+
+  const fetchTimeLogs = async (from: FromToDate, to?: FromToDate) => {
+    return await handleFetch({
+      pathOrUrl: 'time-log/find-extended',
+      body: {
+        from,
+        to: to ?? from,
+      },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED) {
-      await Cookies.set('jwt_token', response.token, { expires: 7, path: '' });
-      setUser(response.user);
-      setCategories(response.user?.categories ?? []);
-      setLimits(response.limits);
-      return true;
-    }
-    setError(new Error(response.error));
-    return;
   };
 
-  return <>{isFetched}nope</>;
+  if (!isFetched) {
+    return <>Fetching</>;
+  }
+
+  return (
+    <>
+      {JSON.stringify(timeLogs)}
+      {JSON.stringify(categories)}
+      {JSON.stringify(subcategories)}
+    </>
+  );
 };

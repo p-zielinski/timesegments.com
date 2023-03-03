@@ -16,14 +16,18 @@ export class TimeLogController {
   constructor(private timeLogService: TimeLogService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post('find')
+  @Post('find-extended')
   async handleRequestGetAll(
     @UserDecorator() user: User,
     @Body() fromToDatesDto: FromToDatesDto
   ) {
     const { from, to } = fromToDatesDto;
     const findFromToTimeLogsResult =
-      await this.timeLogService.findFromToTimeLogs(user, from, to);
+      await this.timeLogService.findFromToTimeLogsEnrichedWithCategoriesAndSubcategories(
+        user,
+        from,
+        to
+      );
     if (findFromToTimeLogsResult.success === false) {
       throw new BadRequestException({
         error: findFromToTimeLogsResult.error,

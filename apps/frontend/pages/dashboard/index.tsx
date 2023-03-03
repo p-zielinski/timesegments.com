@@ -8,9 +8,10 @@ import { faker } from '@faker-js/faker';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { refreshToken } from '../../utils/refreshToken';
 import { Test } from '../../sections/@dashboard/test';
+import { User } from '@prisma/client';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -51,7 +52,13 @@ const AppTasks = dynamic(
 
 // ----------------------------------------------------------------------
 
-export default function Index() {
+type Props = {
+  user: User;
+};
+
+export default function Index({ user: serverSideFetchedUser }: Props) {
+  const [user, setUser] = useState<User>(serverSideFetchedUser);
+
   useEffect(() => {
     refreshToken();
   }, []);
@@ -59,7 +66,7 @@ export default function Index() {
   const theme = useTheme();
 
   return (
-    <DashboardLayout user={{ email: 'random@email' }}>
+    <DashboardLayout user={{ email: 'random@email' }} setUser={setUser}>
       <Helmet>
         <title> Dashboard | Minimal UI </title>
       </Helmet>
@@ -69,7 +76,13 @@ export default function Index() {
           Hi, Welcome back
         </Typography>
 
-        <Test />
+        <Test
+          from={{
+            day: 22,
+            month: 2,
+            year: 2023,
+          }}
+        />
         <Grid container spacing={3}>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
           {/*  <AppWebsiteVisits*/}
@@ -201,6 +214,7 @@ export default function Index() {
                   time: faker.date.past(),
                 }))
               }
+              subheader={undefined}
             />
           </Grid>
 
@@ -253,6 +267,7 @@ export default function Index() {
                   ),
                 },
               ]}
+              subheader={undefined}
             />
           </Grid>
 
@@ -266,6 +281,7 @@ export default function Index() {
                 { id: '4', label: 'Scoping & Estimations' },
                 { id: '5', label: 'Sprint Showcase' },
               ]}
+              subheader={undefined}
             />
           </Grid>
         </Grid>
@@ -273,3 +289,31 @@ export default function Index() {
     </DashboardLayout>
   );
 }
+
+export const getServerSideProps = async (context) => {
+  const { jwt_token } = context.req.cookies;
+
+  let responseUser;
+  try {
+    responseUser = await fetch(process.env.NEXT_PUBLIC_API_URL + 'user/me', {
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        jwt_token,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+  }
+  let user;
+  try {
+    const response = await responseUser.json();
+    user = response.user;
+  } catch (e) {
+    console.log(e);
+  }
+
+  return {
+    props: { user: user ?? null },
+  };
+};

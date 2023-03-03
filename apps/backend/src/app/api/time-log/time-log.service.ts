@@ -17,7 +17,64 @@ export class TimeLogService {
     private subcategoryService: SubcategoryService
   ) {}
 
-  public async findFromToTimeLogs(
+  public async findFromToTimeLogsEnrichedWithCategoriesAndSubcategories(
+    user: User,
+    fromRaw: FromToDate,
+    toRaw: FromToDate
+  ) {
+    const findFromToTimeLogsResult = await this.findFromToTimeLogs(
+      user,
+      fromRaw,
+      toRaw
+    );
+    const { success } = findFromToTimeLogsResult;
+    if (!success || !findFromToTimeLogsResult.timeLogs) {
+      return { ...findFromToTimeLogsResult, categories: [], subcategories: [] };
+    }
+    const { timeLogs } = findFromToTimeLogsResult;
+    const allCategoriesIdsFoundInTimeLogs = new Set();
+    const allSubcategoriesIdsFoundInTimeLogs = new Set();
+    timeLogs.forEach((timeLog) => {
+      if (typeof timeLog.categoryId === 'string') {
+        allCategoriesIdsFoundInTimeLogs.add(timeLog.categoryId);
+      }
+      if (timeLog.subcategoryId) {
+        allSubcategoriesIdsFoundInTimeLogs.add(timeLog.subcategoryId);
+      }
+    });
+    const categories = await this.categoryService.findManyIfInIdList([
+      ...allCategoriesIdsFoundInTimeLogs,
+    ] as string[]);
+    const subcategories = await this.subcategoryService.findManyIfInIdList([
+      ...allSubcategoriesIdsFoundInTimeLogs,
+    ] as string[]);
+    return { ...findFromToTimeLogsResult, categories, subcategories };
+  }
+
+  public async findFirstTimeLogWhereNotEnded(userId: string) {
+    return await this.prisma.timeLog.findFirst({
+      where: { userId, endedAt: null },
+    });
+  }
+
+  public async setTimeLogAsEnded(id: string) {
+    return await this.prisma.timeLog.update({
+      where: { id },
+      data: { endedAt: new Date() },
+    });
+  }
+
+  public async createNew(
+    userId: string,
+    categoryId?: string,
+    subcategoryId?: string
+  ) {
+    return await this.prisma.timeLog.create({
+      data: { userId, categoryId, subcategoryId },
+    });
+  }
+
+  private async findFromToTimeLogs(
     user: User,
     fromRaw: FromToDate,
     toRaw: FromToDate
@@ -79,28 +136,5 @@ export class TimeLogService {
           ? []
           : [result],
     };
-  }
-
-  public async findFirstTimeLogWhereNotEnded(userId: string) {
-    return await this.prisma.timeLog.findFirst({
-      where: { userId, endedAt: null },
-    });
-  }
-
-  public async setTimeLogAsEnded(id: string) {
-    return await this.prisma.timeLog.update({
-      where: { id },
-      data: { endedAt: new Date() },
-    });
-  }
-
-  public async createNew(
-    userId: string,
-    categoryId?: string,
-    subcategoryId?: string
-  ) {
-    return await this.prisma.timeLog.create({
-      data: { userId, categoryId, subcategoryId },
-    });
   }
 }
