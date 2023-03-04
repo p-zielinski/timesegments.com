@@ -22,6 +22,7 @@ export class TimeLogService {
     fromRaw: FromToDate,
     toRaw: FromToDate
   ) {
+    //TODO LIMIT IT TO MAX 32 DAYS
     const findFromToTimeLogsResult = await this.findFromToTimeLogs(
       user,
       fromRaw,
