@@ -103,7 +103,7 @@ export class TimeLogService {
         userId: user.id,
         OR: [
           {
-            createdAt: { gte: fromDateTime.toISO(), lte: toDateTime.toISO() },
+            startedAt: { gte: fromDateTime.toISO(), lte: toDateTime.toISO() },
           },
           {
             endedAt: { gte: fromDateTime.toISO(), lte: toDateTime.toISO() },
@@ -111,7 +111,7 @@ export class TimeLogService {
         ],
       },
       orderBy: {
-        createdAt: 'asc',
+        startedAt: 'asc',
       },
     });
     if (results.length > 0) {
@@ -120,10 +120,10 @@ export class TimeLogService {
     const result = await this.prisma.timeLog.findFirst({
       where: {
         userId: user.id,
-        createdAt: { lte: toDateTime.toISO() },
+        startedAt: { lte: toDateTime.toISO() },
       },
       orderBy: {
-        createdAt: 'desc',
+        startedAt: 'desc',
       },
     });
 
