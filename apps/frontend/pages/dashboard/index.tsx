@@ -11,7 +11,9 @@ import DashboardLayout from '../../layouts/dashboard';
 import { useEffect, useState } from 'react';
 import { refreshToken } from '../../utils/refreshToken';
 import { Test } from '../../sections/@dashboard/test';
-import { User } from '@prisma/client';
+import { Category, Subcategory, TimeLog, User } from '@prisma/client';
+import { DateTime } from 'luxon';
+import { Timezones } from '@test1/shared';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -54,9 +56,17 @@ const AppTasks = dynamic(
 
 type Props = {
   user: User;
+  allTimeLogs: TimeLog[];
+  categories: Category[];
+  subcategories: Subcategory[];
 };
 
-export default function Index({ user: serverSideFetchedUser }: Props) {
+export default function Index({
+  user: serverSideFetchedUser,
+  allTimeLogs,
+  categories,
+  subcategories,
+}: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
 
   useEffect(() => {
@@ -299,27 +309,65 @@ export default function Index({ user: serverSideFetchedUser }: Props) {
 export const getServerSideProps = async (context) => {
   const { jwt_token } = context.req.cookies;
 
-  let responseUser;
+  let user;
   try {
-    responseUser = await fetch(process.env.NEXT_PUBLIC_API_URL + 'user/me', {
-      method: 'GET',
-      headers: {
-        'Content-type': 'application/json',
-        jwt_token,
-      },
-    });
+    const responseUser = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + 'user/me',
+      {
+        method: 'GET',
+        headers: {
+          'Content-type': 'application/json',
+          jwt_token,
+        },
+      }
+    );
+    user = (await responseUser.json()).user;
   } catch (e) {
     console.log(e);
   }
-  let user;
+
+  if (!user) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/',
+      },
+    };
+  }
+
+  let allTimeLogs = [];
+  let categories = [];
+  let subcategories = [];
+
   try {
-    const response = await responseUser.json();
-    user = response.user;
+    const now = DateTime.now().setZone(Timezones[user.timezone]);
+    const to = { month: now.month, year: now.year, day: now.day };
+    const sevenDaysAgo = now.minus({ days: 7 });
+    const from = {
+      month: sevenDaysAgo.month,
+      year: sevenDaysAgo.year,
+      day: sevenDaysAgo.day,
+    };
+    const responseTimeLogs = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + 'time-log/find-extended',
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          jwt_token,
+        },
+        body: JSON.stringify({ from, to }),
+      }
+    );
+    const response = await responseTimeLogs.json();
+    allTimeLogs = response?.timeLogs ?? [];
+    categories = response?.categories ?? [];
+    subcategories = response?.subcategories ?? [];
   } catch (e) {
     console.log(e);
   }
 
   return {
-    props: { user: user ?? null },
+    props: { user: user ?? null, allTimeLogs, categories, subcategories },
   };
 };

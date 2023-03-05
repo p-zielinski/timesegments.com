@@ -10,9 +10,8 @@ type TestProps = {
   to?: FromToDate;
 };
 
-export const Test: React.FC<TestProps> = ({ user, from, to }) => {
+export const Test: React.FC<TestProps> = ({user, from, to}) => {
   const usersTimezone = Timezones[user.timezone];
-  const [isFetched, setIsFetched] = useState(false);
   const [allTimeLogs, setAllTimeLogs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -25,7 +24,6 @@ export const Test: React.FC<TestProps> = ({ user, from, to }) => {
         setCategories(result.categories);
         setSubcategories(result.subcategories);
       }
-      setIsFetched(true);
     })();
   }, []);
 
@@ -47,16 +45,12 @@ export const Test: React.FC<TestProps> = ({ user, from, to }) => {
     return await handleFetch({
       pathOrUrl: 'time-log/find-extended',
       body: {
-        from,
-        to: to ?? from,
+        from: {},
+        to: {},
       },
       method: 'POST',
     });
   };
-
-  if (!isFetched) {
-    return <>Fetching</>;
-  }
 
   return (
     <>
