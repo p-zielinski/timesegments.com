@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { handleFetch } from '../../utils/handleFetch';
 import { FromToDate, Timezones } from '@test1/shared';
 import { User } from '@prisma/client';
-import { DateTime } from 'luxon';
+import { findTimeLogsWithinCurrentPeriod } from '../../utils/findTimeLogsWithinCurrentPeriod';
 
 type TestProps = {
   user: User;
@@ -10,7 +10,7 @@ type TestProps = {
   to?: FromToDate;
 };
 
-export const Test: React.FC<TestProps> = ({user, from, to}) => {
+export const Test: React.FC<TestProps> = ({ user, from, to }) => {
   const usersTimezone = Timezones[user.timezone];
   const [isFetched, setIsFetched] = useState(false);
   const [allTimeLogs, setAllTimeLogs] = useState([]);
@@ -29,39 +29,19 @@ export const Test: React.FC<TestProps> = ({user, from, to}) => {
     })();
   }, []);
 
-  const x = (date: FromToDate) => {
-    const fromDateTime = DateTime.fromObject(
-      {...date, hour: 0, minute: 0, second: 0},
-      {zone: usersTimezone}
-    );
-    const toDateTime = DateTime.fromObject(
-      {...date, hour: 24, minute: 0, second: 0},
-      {zone: usersTimezone}
-    );
-    const timeLogs = [];
-    allTimeLogs.forEach((timeLog) => {
-      const timeLogStartedAt = DateTime.fromISO(timeLog.startedAt);
-      const timeLogEndedAt = timeLog.endedAt
-        ? DateTime.fromISO(timeLog.endedAt, {
-          zone: usersTimezone,
-        })
-        : DateTime.now().set(date).setZone(usersTimezone);
-      if (fromDateTime.ts > timeLogEndedAt.ts) {
-        return
-      }
-      if (fromDateTime.ts < timeLogStartedAt.ts && toDateTime.ts > timeLogEndedAt.ts) {
-
-      }
-    });
-    return timeLogs;
-  };
-
-
-  x({
-    day: 2,
-    month: 3,
-    year: 2023,
-  });
+  console.log(
+    findTimeLogsWithinCurrentPeriod({
+      allTimeLogs: allTimeLogs,
+      timezone: usersTimezone,
+      fromDate: {
+        day: 2,
+        month: 3,
+        year: 2023,
+      },
+      categories,
+      subcategories,
+    })
+  );
 
   const fetchTimeLogs = async (from: FromToDate, to?: FromToDate) => {
     return await handleFetch({
