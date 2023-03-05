@@ -17,7 +17,6 @@ import {
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
-import { findValueOfEnum } from '../../common/findValueOfEnum';
 
 @Injectable()
 export class UserService {

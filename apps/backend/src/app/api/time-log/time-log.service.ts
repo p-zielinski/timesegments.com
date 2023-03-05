@@ -5,7 +5,6 @@ import { SubcategoryService } from '../subcategory/subcategory.service';
 import { DateTime } from 'luxon';
 import { TimeLog, User } from '@prisma/client';
 import { FromToDate, Timezones } from '@test1/shared';
-import { findValueOfEnum } from '../../common/findValueOfEnum';
 
 @Injectable()
 export class TimeLogService {
@@ -82,7 +81,7 @@ export class TimeLogService {
   ): Promise<
     { success: false; error: string } | { success: true; timeLogs: TimeLog[] }
   > {
-    const usersTimezone = findValueOfEnum(Timezones, user.timezone);
+    const usersTimezone = Timezones[user.timezone];
     const fromDateTime = DateTime.fromObject(
       { ...fromRaw, hour: 0, minute: 0, second: 0 },
       { zone: usersTimezone }

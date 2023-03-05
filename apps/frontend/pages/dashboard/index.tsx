@@ -77,9 +77,15 @@ export default function Index({ user: serverSideFetchedUser }: Props) {
         </Typography>
 
         <Test
+          user={user}
           from={{
-            day: 22,
-            month: 2,
+            day: 2,
+            month: 3,
+            year: 2023,
+          }}
+          to={{
+            day: 6,
+            month: 3,
             year: 2023,
           }}
         />
