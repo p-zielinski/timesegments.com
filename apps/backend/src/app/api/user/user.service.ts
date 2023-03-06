@@ -144,7 +144,7 @@ export class UserService {
             data.plainPassword,
             this.configService.get<number>('SALT_ROUNDS')
           ),
-          timezone: findValueOfEnum(Timezones, data.timezone) as Timezone,
+          timezone: Timezones[data.timezone] as Timezone,
         },
       });
       if (!options?.generateToken) {

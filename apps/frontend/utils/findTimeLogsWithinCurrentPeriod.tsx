@@ -2,13 +2,66 @@ import { Category, Subcategory, TimeLog } from '@prisma/client';
 import { FromToDate, Timezones } from '@test1/shared';
 import { DateTime } from 'luxon';
 
+export type TimeLogWithinCurrentPeriodISO =
+  | {
+      isIsoString: true;
+      ended: true;
+      startedAt: string;
+      endedAt: string;
+      categories: Category | undefined;
+      subcategories: Subcategory | undefined;
+      periodTotalMs: number;
+      periodInHours: number;
+      periodInMinutes: number;
+      periodInSeconds: number;
+    }
+  | {
+      isIsoString: true;
+      ended: false;
+      startedAt: string;
+      endedAt: undefined;
+      categories: Category | undefined;
+      subcategories: Subcategory | undefined;
+      periodTotalMs: undefined;
+      periodInHours: undefined;
+      periodInMinutes: undefined;
+      periodInSeconds: undefined;
+    };
+
+export type TimeLogWithinCurrentPeriod =
+  | {
+      isIsoString: false;
+      ended: true;
+      startedAt: DateTime;
+      endedAt: DateTime;
+      categories: Category | undefined;
+      subcategories: Subcategory | undefined;
+      periodTotalMs: number;
+      periodInHours: number;
+      periodInMinutes: number;
+      periodInSeconds: number;
+    }
+  | {
+      isIsoString: false;
+      ended: false;
+      startedAt: DateTime;
+      endedAt: undefined;
+      categories: Category | undefined;
+      subcategories: Subcategory | undefined;
+      periodTotalMs: undefined;
+      periodInHours: undefined;
+      periodInMinutes: undefined;
+      periodInSeconds: undefined;
+    };
+
 export const findTimeLogsWithinCurrentPeriod = ({
   allTimeLogs,
   timezone,
   fromDate,
   toDate,
-  categories = [],
-  subcategories = [],
+  categories,
+  subcategories,
+  options,
 }: {
   allTimeLogs: TimeLog[];
   timezone: Timezones;
@@ -16,7 +69,8 @@ export const findTimeLogsWithinCurrentPeriod = ({
   toDate?: FromToDate;
   categories: Category[];
   subcategories: Subcategory[];
-}) => {
+  options?: { asIso: true };
+}): TimeLogWithinCurrentPeriod[] | TimeLogWithinCurrentPeriodISO[] => {
   const fromDateTime = DateTime.fromObject(
     { ...fromDate, hour: 0, minute: 0, second: 0 },
     { zone: timezone }
@@ -73,23 +127,28 @@ export const findTimeLogsWithinCurrentPeriod = ({
     const startedAt = DateTime.fromISO(timeLog.startedAt, {
       zone: timezone,
     });
+    const endedAt = timeLog?.endedAt
+      ? typeof timeLog.endedAt === 'string'
+        ? DateTime.fromISO(timeLog.endedAt, {
+            zone: timezone,
+          })
+        : timeLog.endedAt
+      : undefined;
     const ended = !!timeLog.endedAt;
-    let periodInSeconds, periodInMinutes, periodInHours;
+    let periodTotalMs, periodInSeconds, periodInMinutes, periodInHours;
     if (ended) {
-      const periodMs = timeLog.endedAt.ts - startedAt.ts;
-      const periodInSecondsTotal = Math.floor(periodMs / 1000);
+      const periodTotalMs = (endedAt.ts - startedAt.ts) as number;
+      const periodInSecondsTotal = Math.floor(periodTotalMs / 1000);
       const periodInMinutesTotal = Math.floor(periodInSecondsTotal / 60);
       periodInHours = Math.floor(periodInMinutesTotal / 60);
       periodInMinutes = periodInMinutesTotal % 60;
       periodInSeconds = periodInSecondsTotal % 60;
     }
     return {
-      startedAt,
-      endedAt: timeLog.endedAt,
+      isIsoString: !!options?.asIso,
       ended,
-      periodMs: timeLog.endedAt?.ts
-        ? timeLog.endedAt.ts - startedAt.ts
-        : undefined,
+      startedAt: options?.asIso ? startedAt.toISOTime() : startedAt,
+      endedAt: options?.asIso ? endedAt.toISOTime() : endedAt,
       category: timeLog.categoryId
         ? categories.find((category) => category.id === timeLog.categoryId)
         : undefined,
@@ -98,9 +157,12 @@ export const findTimeLogsWithinCurrentPeriod = ({
             (subcategory) => subcategory.id === timeLog.subcategoryId
           )
         : undefined,
+      periodTotalMs,
       periodInHours,
       periodInMinutes,
       periodInSeconds,
     };
-  });
+  }) as unknown as
+    | TimeLogWithinCurrentPeriod[]
+    | TimeLogWithinCurrentPeriodISO[];
 };

@@ -10,10 +10,19 @@ import { faker } from '@faker-js/faker';
 import DashboardLayout from '../../layouts/dashboard';
 import { useEffect, useState } from 'react';
 import { refreshToken } from '../../utils/refreshToken';
-import { Test } from '../../sections/@dashboard/test';
-import { Category, Subcategory, TimeLog, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
+import { DisplayTimeLogsWithCurrentDate } from '../../sections/@dashboard/DisplayTimeLogsWithCurrentDate';
+import {
+  findTimeLogsWithinCurrentPeriod,
+  TimeLogWithinCurrentPeriodISO,
+} from '../../utils/findTimeLogsWithinCurrentPeriod';
+import {
+  TimeLogsWithinDate,
+  TimeLogsWithinDateISO,
+} from '../../types/timeLogsWithinDate';
+import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -56,18 +65,38 @@ const AppTasks = dynamic(
 
 type Props = {
   user: User;
-  allTimeLogs: TimeLog[];
-  categories: Category[];
-  subcategories: Subcategory[];
+  timeLogsWithDatesISO: TimeLogsWithinDateISO[];
 };
 
 export default function Index({
   user: serverSideFetchedUser,
-  allTimeLogs,
-  categories,
-  subcategories,
+  timeLogsWithDatesISO,
 }: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
+  const [timeLogsWithDates, setTimeLogsWithDates] = useState<
+    TimeLogsWithinDate[]
+  >(
+    timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
+      return {
+        date: timeLogWithDatesISO.date,
+        timeLogsExtended: timeLogWithDatesISO.timeLogsExtended.map(
+          (timeLogExtended) => {
+            return {
+              ...timeLogExtended,
+              startedAt: DateTime.fromISO(timeLogExtended.startedAt),
+              endedAt: timeLogExtended.ended
+                ? DateTime.fromISO(timeLogExtended.endedAt)
+                : undefined,
+            };
+          }
+        ),
+      };
+    }) as unknown as TimeLogsWithinDate[]
+  );
+  const [isFetched, setIsFetched] = useState(true);
+  const [activeDate, setActiveDate] = useState(
+    DateTime.now().setZone(Timezones[user.timezone])
+  );
 
   useEffect(() => {
     refreshToken();
@@ -76,7 +105,7 @@ export default function Index({
   const theme = useTheme();
 
   return (
-    <DashboardLayout user={{ email: 'random@email' }} setUser={setUser}>
+    <DashboardLayout user={user} setUser={setUser}>
       <Helmet>
         <title> Dashboard | Minimal UI </title>
       </Helmet>
@@ -86,18 +115,13 @@ export default function Index({
           Hi, Welcome back
         </Typography>
 
-        <Test
+        <DisplayTimeLogsWithCurrentDate
           user={user}
-          from={{
-            day: 2,
-            month: 3,
-            year: 2023,
-          }}
-          to={{
-            day: 6,
-            month: 3,
-            year: 2023,
-          }}
+          timeLogsWithDates={timeLogsWithDates}
+          setTimeLogsWithDates={setTimeLogsWithDates}
+          setIsFetched={setIsFetched}
+          activeDate={activeDate}
+          setActiveDate={setActiveDate}
         />
         <Grid container spacing={3}>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
@@ -215,26 +239,23 @@ export default function Index({
           <Grid item xs={12} md={6} lg={4}>
             <AppOrderTimeline
               title="Today"
-              list={
-                [] ||
-                [...Array(50)].map((_, index) => ({
-                  id: faker.datatype.uuid(),
-                  title: [
-                    '1983, orders, $4220',
-                    '12 Invoices have been paid',
-                    'Order #37745 from September',
-                    'New order placed #XF-2356',
-                    'New order placed #XF-2346',
-                  ][index % 5],
-                  type: `order${index + 1}`,
-                  time: faker.date.past(),
-                }))
-              }
+              list={[...Array(50)].map((_, index) => ({
+                id: faker.datatype.uuid(),
+                title: [
+                  '1983, orders, $4220',
+                  '12 Invoices have been paid',
+                  'Order #37745 from September',
+                  'New order placed #XF-2356',
+                  'New order placed #XF-2346',
+                ][index % 5],
+                type: `order${index + 1}`,
+                time: faker.date.past(),
+              }))}
               subheader={undefined}
             />
           </Grid>
 
-          <Grid item xs={12} md={6} lg={4}>
+          <Grid item xs={12} md={6} lg={4} sx={{ gap: 2 }}>
             <AppTrafficBySite
               title="Traffic by Site"
               list={[
@@ -285,9 +306,6 @@ export default function Index({
               ]}
               subheader={undefined}
             />
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={8}>
             <AppTasks
               title="Tasks"
               list={[
@@ -339,15 +357,16 @@ export const getServerSideProps = async (context) => {
   let categories = [];
   let subcategories = [];
 
+  const now = DateTime.now().setZone(Timezones[user.timezone]);
+  const to = { month: now.month, year: now.year, day: now.day };
+  const sevenDaysAgo = now.minus({ days: 7 });
+  const from = {
+    month: sevenDaysAgo.month,
+    year: sevenDaysAgo.year,
+    day: sevenDaysAgo.day,
+  };
+
   try {
-    const now = DateTime.now().setZone(Timezones[user.timezone]);
-    const to = { month: now.month, year: now.year, day: now.day };
-    const sevenDaysAgo = now.minus({ days: 7 });
-    const from = {
-      month: sevenDaysAgo.month,
-      year: sevenDaysAgo.year,
-      day: sevenDaysAgo.day,
-    };
     const responseTimeLogs = await fetch(
       process.env.NEXT_PUBLIC_API_URL + 'time-log/find-extended',
       {
@@ -367,7 +386,32 @@ export const getServerSideProps = async (context) => {
     console.log(e);
   }
 
+  const timeLogsWithDates = [] as TimeLogsWithinDateISO[];
+
+  for (let i = 0; i <= 7; i++) {
+    const nDaysAgo = i > 0 ? now.minus({ days: i }) : now;
+    const date = {
+      month: nDaysAgo.month,
+      year: nDaysAgo.year,
+      day: nDaysAgo.day,
+    };
+    timeLogsWithDates.push({
+      date,
+      timeLogsExtended: findTimeLogsWithinCurrentPeriod({
+        allTimeLogs,
+        timezone: Timezones[user.timezone],
+        fromDate: date,
+        categories,
+        subcategories,
+        options: { asIso: true },
+      }) as TimeLogWithinCurrentPeriodISO[],
+    });
+  }
+
   return {
-    props: { user: user ?? null, allTimeLogs, categories, subcategories },
+    props: {
+      user: user,
+      timeLogsWithDatesISO: deleteUndefinedFromObject(timeLogsWithDates),
+    },
   };
 };
