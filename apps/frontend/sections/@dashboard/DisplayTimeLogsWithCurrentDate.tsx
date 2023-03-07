@@ -2,6 +2,12 @@ import React from 'react';
 import { TimeLogsWithinDate } from '../../types/timeLogsWithinDate';
 import { DateTime } from 'luxon';
 import { User } from '@prisma/client';
+import dynamic from 'next/dynamic';
+
+const AppOrderTimeline = dynamic(
+  () => import('../../sections/@dashboard/app/AppOrderTimeline'),
+  { ssr: false }
+);
 
 type TestProps = {
   user: User;
@@ -20,5 +26,11 @@ export const DisplayTimeLogsWithCurrentDate: React.FC<TestProps> = ({
   activeDate,
   setActiveDate,
 }) => {
-  return <>aa</>;
+  console.log(timeLogsWithDates);
+  return (
+    <AppOrderTimeline
+      title="Today"
+      timeLogsExtended={timeLogsWithDates[4].timeLogsExtended}
+    />
+  );
 };

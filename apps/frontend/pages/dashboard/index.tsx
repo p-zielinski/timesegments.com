@@ -3,8 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useTheme } from '@mui/material/styles';
 import { Container, Grid, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
-import Iconify from '../../components/iconify';
-import { faker } from '@faker-js/faker';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
@@ -28,10 +26,7 @@ const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
   { ssr: false }
 );
-const AppOrderTimeline = dynamic(
-  () => import('../../sections/@dashboard/app/AppOrderTimeline'),
-  { ssr: false }
-);
+
 const AppCurrentVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentVisits'),
   { ssr: false }
@@ -115,15 +110,17 @@ export default function Index({
           Hi, Welcome back
         </Typography>
 
-        <DisplayTimeLogsWithCurrentDate
-          user={user}
-          timeLogsWithDates={timeLogsWithDates}
-          setTimeLogsWithDates={setTimeLogsWithDates}
-          setIsFetched={setIsFetched}
-          activeDate={activeDate}
-          setActiveDate={setActiveDate}
-        />
         <Grid container spacing={3}>
+          <Grid item xs={12} md={6} lg={6}>
+            <DisplayTimeLogsWithCurrentDate
+              user={user}
+              timeLogsWithDates={timeLogsWithDates}
+              setTimeLogsWithDates={setTimeLogsWithDates}
+              setIsFetched={setIsFetched}
+              activeDate={activeDate}
+              setActiveDate={setActiveDate}
+            />
+          </Grid>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
           {/*  <AppWebsiteVisits*/}
           {/*    title="Website Visits"*/}
@@ -235,89 +232,6 @@ export default function Index({
           {/*    }))}*/}
           {/*  />*/}
           {/*</Grid>*/}
-
-          <Grid item xs={12} md={6} lg={4}>
-            <AppOrderTimeline
-              title="Today"
-              list={[...Array(50)].map((_, index) => ({
-                id: faker.datatype.uuid(),
-                title: [
-                  '1983, orders, $4220',
-                  '12 Invoices have been paid',
-                  'Order #37745 from September',
-                  'New order placed #XF-2356',
-                  'New order placed #XF-2346',
-                ][index % 5],
-                type: `order${index + 1}`,
-                time: faker.date.past(),
-              }))}
-              subheader={undefined}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={4} sx={{ gap: 2 }}>
-            <AppTrafficBySite
-              title="Traffic by Site"
-              list={[
-                {
-                  name: 'FaceBook',
-                  value: 323234,
-                  icon: (
-                    <Iconify
-                      icon={'eva:facebook-fill'}
-                      color="#1877F2"
-                      width={32}
-                    />
-                  ),
-                },
-                {
-                  name: 'Google',
-                  value: 341212,
-                  icon: (
-                    <Iconify
-                      icon={'eva:google-fill'}
-                      color="#DF3E30"
-                      width={32}
-                    />
-                  ),
-                },
-                {
-                  name: 'Linkedin',
-                  value: 411213,
-                  icon: (
-                    <Iconify
-                      icon={'eva:linkedin-fill'}
-                      color="#006097"
-                      width={32}
-                    />
-                  ),
-                },
-                {
-                  name: 'Twitter',
-                  value: 443232,
-                  icon: (
-                    <Iconify
-                      icon={'eva:twitter-fill'}
-                      color="#1C9CEA"
-                      width={32}
-                    />
-                  ),
-                },
-              ]}
-              subheader={undefined}
-            />
-            <AppTasks
-              title="Tasks"
-              list={[
-                { id: '1', label: 'Create FireStone Logo' },
-                { id: '2', label: 'Add SCSS and JS files if required' },
-                { id: '3', label: 'Stakeholder Meeting' },
-                { id: '4', label: 'Scoping & Estimations' },
-                { id: '5', label: 'Sprint Showcase' },
-              ]}
-              subheader={undefined}
-            />
-          </Grid>
         </Grid>
       </Container>
     </DashboardLayout>

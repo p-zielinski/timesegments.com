@@ -1,22 +1,13 @@
 // @mui
-import PropTypes from 'prop-types';
 import {Box, Card, CardContent, CardHeader, Typography} from '@mui/material';
-import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,} from '@mui/lab';
+import {Timeline, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,} from '@mui/lab'; // utils
 // utils
-import {fDateTime} from '../../../utils/formatTime';
-
 // ----------------------------------------------------------------------
 
-AppOrderTimeline.propTypes = {
-  title: PropTypes.string,
-  subheader: PropTypes.string,
-  list: PropTypes.array.isRequired,
-};
-
-export default function AppOrderTimeline({ title, subheader, list, ...other }) {
+export default function AppOrderTimeline({ title, timeLogsExtended }) {
   return (
-    <Card {...other}>
-      <CardHeader title={title} subheader={subheader} />
+    <Card>
+      <CardHeader title={title} />
 
       <CardContent
         sx={{
@@ -26,21 +17,8 @@ export default function AppOrderTimeline({ title, subheader, list, ...other }) {
         }}
       >
         <Timeline>
-          {list.map((item, index) => (
-            <OrderItem
-              key={item.id}
-              item={item}
-              isLast={index === list.length - 1}
-            />
-          ))}
-        </Timeline>
-        <Timeline>
-          {list.map((item, index) => (
-            <OrderItem
-              key={item.id}
-              item={item}
-              isLast={index === list.length - 1}
-            />
+          {timeLogsExtended.map((timeLogExtended) => (
+            <OrderItem timeLogExtended={timeLogExtended} />
           ))}
         </Timeline>
       </CardContent>
@@ -50,41 +28,58 @@ export default function AppOrderTimeline({ title, subheader, list, ...other }) {
 
 // ----------------------------------------------------------------------
 
-OrderItem.propTypes = {
-  isLast: PropTypes.bool,
-  item: PropTypes.shape({
-    time: PropTypes.instanceOf(Date),
-    title: PropTypes.string,
-    type: PropTypes.string,
-  }),
-};
-
-function OrderItem({ item, isLast }) {
-  const { type, title, time } = item;
+function OrderItem({ timeLogExtended }) {
+  const color =
+    timeLogExtended?.subcategory?.color ?? timeLogExtended?.category?.color;
+  const periodInHours = timeLogExtended.periodInHours;
+  const periodInMinutes = timeLogExtended.periodInMinutes;
+  const periodInSeconds = timeLogExtended.periodInSeconds;
   return (
     <TimelineItem>
       <TimelineSeparator>
-        <TimelineDot sx={{ background: 'blue' }} />
-        {isLast ? null : <TimelineConnector />}
+        <TimelineDot sx={{ background: color }} />
       </TimelineSeparator>
 
       <TimelineContent>
-        <Typography variant="subtitle2">{title}</Typography>
+        <Typography variant="subtitle2">
+          {timeLogExtended.category?.name}
+          {timeLogExtended.subcategory && (
+            <> - {timeLogExtended.subcategory?.name}</>
+          )}
+        </Typography>
         <Box sx={{ display: 'flex', direction: 'column' }}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            From: {fDateTime(time)}
+            From:{' '}
+            {timeLogExtended.startedAt.toLocaleString({
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+            })}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', direction: 'column' }}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            To: {fDateTime(time)}
+            To:{' '}
+            {timeLogExtended.endedAt?.toLocaleString({
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+            }) ?? 'now'}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', direction: 'column' }}>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Duration: 4 hours 10 minutes
-          </Typography>
-        </Box>
+        {timeLogExtended.ended && (
+          <Box sx={{ display: 'flex', direction: 'column' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Duration: {periodInHours} hour{periodInHours !== 1 && 's'}{' '}
+              {periodInMinutes} minute{periodInMinutes !== 1 && 's'}{' '}
+              {periodInSeconds} second{periodInSeconds !== 1 && 's'}
+            </Typography>
+          </Box>
+        )}
       </TimelineContent>
     </TimelineItem>
   );
