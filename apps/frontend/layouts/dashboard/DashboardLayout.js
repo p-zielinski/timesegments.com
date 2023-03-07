@@ -31,12 +31,12 @@ const Main = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function DashboardLayout({ children, user, setUser }) {
+export default function DashboardLayout({ children, user, setUser, title }) {
   const [open, setOpen] = useState(false);
 
   return (
     <StyledRoot>
-      <Header onOpenNav={() => setOpen(true)} />
+      <Header onOpenNav={() => setOpen(true)} title={title} />
 
       <Nav
         openNav={open}

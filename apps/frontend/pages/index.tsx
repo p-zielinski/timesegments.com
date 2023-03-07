@@ -233,7 +233,11 @@ export default function Index({
   }
 
   return (
-    <DashboardLayout user={user} setUser={setUser}>
+    <DashboardLayout
+      user={user}
+      setUser={setUser}
+      title={'Categories & subcategories'}
+    >
       <Helmet>
         <title>Categories</title>
       </Helmet>

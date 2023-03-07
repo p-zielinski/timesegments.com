@@ -100,9 +100,9 @@ export default function Index({
   const theme = useTheme();
 
   return (
-    <DashboardLayout user={user} setUser={setUser}>
+    <DashboardLayout user={user} setUser={setUser} title={'Dashboard'}>
       <Helmet>
-        <title> Dashboard | Minimal UI </title>
+        <title>Dashboard</title>
       </Helmet>
 
       <Container maxWidth="xl">
