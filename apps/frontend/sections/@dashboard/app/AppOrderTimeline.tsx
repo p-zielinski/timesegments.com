@@ -5,6 +5,8 @@ import {nanoid} from 'nanoid'; // utils
 import {DateTime} from 'luxon';
 import {Timezones} from '@test1/shared';
 import {deleteIfValueIsFalseFromObject} from '../../../utils/deleteIfValueIsFalseFromObject';
+import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
+import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 // utils
 // ----------------------------------------------------------------------
 
@@ -64,7 +66,7 @@ export default function AppOrderTimeline({ user, timeLogsWithDate }) {
           },
         }}
       >
-        <Timeline>
+        <Timeline sx={{ gap: '5px' }}>
           {timeLogsWithDate.timeLogsExtended?.length
             ? timeLogsWithDate.timeLogsExtended.map((timeLogExtended) => (
                 <OrderItem key={nanoid()} timeLogExtended={timeLogExtended} />
@@ -98,7 +100,17 @@ function OrderItem({ timeLogExtended }) {
   };
 
   return (
-    <TimelineItem>
+    <TimelineItem
+      sx={{
+        background: getHexFromRGBAObject(
+          getRgbaObjectFromHexString(color, 0.2)
+        ),
+        borderRadius: '10px',
+        gap: '10px',
+        pl: 1.5,
+        pr: 1.5,
+      }}
+    >
       <TimelineSeparator>
         <TimelineDot sx={{ background: color }} />
       </TimelineSeparator>
