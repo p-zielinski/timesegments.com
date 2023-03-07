@@ -6,12 +6,11 @@ import dynamic from 'next/dynamic';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { refreshToken } from '../../utils/refreshToken';
 import { User } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { Timezones } from '@test1/shared';
-import { DisplayTimeLogsWithCurrentDate } from '../../sections/@dashboard/DisplayTimeLogsWithCurrentDate';
+import { FromToDate, Timezones } from '@test1/shared';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriodISO,
@@ -55,6 +54,10 @@ const AppTasks = dynamic(
   () => import('../../sections/@dashboard/app/AppTasks'),
   { ssr: false }
 );
+const AppOrderTimeline = dynamic(
+  () => import('../../sections/@dashboard/app/AppOrderTimeline'),
+  { ssr: false }
+);
 
 // ----------------------------------------------------------------------
 
@@ -68,7 +71,7 @@ export default function Index({
   timeLogsWithDatesISO,
 }: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
-  const [timeLogsWithDates, setTimeLogsWithDates] = useState<
+  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
     TimeLogsWithinDate[]
   >(
     timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
@@ -88,9 +91,25 @@ export default function Index({
       };
     }) as unknown as any
   );
-
+  const [isFetching, setIsFetching] = useState(false);
   const [activeDate, setActiveDate] = useState(
-    DateTime.now().setZone(Timezones[user.timezone])
+    DateTime.now().setZone(Timezones[user.timezone]).c
+  );
+  const findActiveTimeLogsWithinDate = (
+    date: FromToDate,
+    timeLogsWithinDates: TimeLogsWithinDate[]
+  ) => {
+    return timeLogsWithinDates.find((timeLogsWithinDate) => {
+      return (
+        timeLogsWithinDate.date.year === date.year &&
+        timeLogsWithinDate.date.month === date.month &&
+        timeLogsWithinDate.date.day === date.day
+      );
+    });
+  };
+
+  const [activeTimeLogsWithinDate, setActiveTimeLogsWithinDate] = useState(
+    findActiveTimeLogsWithinDate(activeDate, timeLogsWithinDates)
   );
 
   useEffect(() => {
@@ -112,12 +131,9 @@ export default function Index({
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>
-            <DisplayTimeLogsWithCurrentDate
+            <AppOrderTimeline
               user={user}
-              timeLogsWithDates={timeLogsWithDates}
-              setTimeLogsWithDates={setTimeLogsWithDates}
-              activeDate={activeDate}
-              setActiveDate={setActiveDate}
+              timeLogsWithinDate={activeTimeLogsWithinDate}
             />
           </Grid>
           {/*<Grid item xs={12} md={6} lg={8}>*/}

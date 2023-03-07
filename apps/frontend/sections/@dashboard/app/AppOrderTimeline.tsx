@@ -10,7 +10,7 @@ import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFro
 // utils
 // ----------------------------------------------------------------------
 
-export default function AppOrderTimeline({ user, timeLogsWithDate }) {
+export default function AppOrderTimeline({ user, timeLogsWithinDate }) {
   const daysDifference = deleteIfValueIsFalseFromObject(
     DateTime.now()
       .setZone(Timezones[user.timezone])
@@ -20,7 +20,7 @@ export default function AppOrderTimeline({ user, timeLogsWithDate }) {
         seconds: 0,
         milliseconds: 0,
       })
-      .diff(timeLogsWithDate.date, ['years', 'months', 'days'])
+      .diff(timeLogsWithinDate.date, ['years', 'months', 'days'])
       .toObject()
   );
 
@@ -49,7 +49,7 @@ export default function AppOrderTimeline({ user, timeLogsWithDate }) {
     return `(${[years, months, days].filter((text) => !!text).join(' ')} ago)`;
   };
 
-  const title = `${timeLogsWithDate.date.toLocaleString({
+  const title = `${timeLogsWithinDate.date.toLocaleString({
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -67,8 +67,8 @@ export default function AppOrderTimeline({ user, timeLogsWithDate }) {
         }}
       >
         <Timeline sx={{ gap: '5px' }}>
-          {timeLogsWithDate.timeLogsExtended?.length
-            ? timeLogsWithDate.timeLogsExtended.map((timeLogExtended) => (
+          {timeLogsWithinDate.timeLogsExtended?.length
+            ? timeLogsWithinDate.timeLogsExtended.map((timeLogExtended) => (
                 <OrderItem key={nanoid()} timeLogExtended={timeLogExtended} />
               ))
             : 'no data'}
