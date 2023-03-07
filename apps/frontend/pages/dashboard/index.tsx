@@ -73,7 +73,7 @@ export default function Index({
   >(
     timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
       return {
-        date: timeLogWithDatesISO.date,
+        date: DateTime.fromObject(timeLogWithDatesISO.date),
         timeLogsExtended: timeLogWithDatesISO.timeLogsExtended.map(
           (timeLogExtended) => {
             return {
@@ -86,9 +86,9 @@ export default function Index({
           }
         ),
       };
-    }) as unknown as TimeLogsWithinDate[]
+    }) as unknown as any
   );
-  const [isFetched, setIsFetched] = useState(true);
+
   const [activeDate, setActiveDate] = useState(
     DateTime.now().setZone(Timezones[user.timezone])
   );
@@ -116,7 +116,6 @@ export default function Index({
               user={user}
               timeLogsWithDates={timeLogsWithDates}
               setTimeLogsWithDates={setTimeLogsWithDates}
-              setIsFetched={setIsFetched}
               activeDate={activeDate}
               setActiveDate={setActiveDate}
             />

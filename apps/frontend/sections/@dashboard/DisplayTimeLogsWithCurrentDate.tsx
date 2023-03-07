@@ -13,7 +13,6 @@ type TestProps = {
   user: User;
   timeLogsWithDates: TimeLogsWithinDate[];
   setTimeLogsWithDates: (timeLogsWithinDate: TimeLogsWithinDate[]) => void;
-  setIsFetched: (isFetched: boolean) => void;
   activeDate: DateTime;
   setActiveDate: (date: DateTime) => void;
 };
@@ -22,15 +21,11 @@ export const DisplayTimeLogsWithCurrentDate: React.FC<TestProps> = ({
   user,
   timeLogsWithDates,
   setTimeLogsWithDates,
-  setIsFetched,
   activeDate,
   setActiveDate,
 }) => {
   console.log(timeLogsWithDates);
   return (
-    <AppOrderTimeline
-      title="Today"
-      timeLogsExtended={timeLogsWithDates[4].timeLogsExtended}
-    />
+    <AppOrderTimeline user={user} timeLogsWithDate={timeLogsWithDates[0]} />
   );
 };

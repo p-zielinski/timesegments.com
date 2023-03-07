@@ -148,7 +148,7 @@ export const findTimeLogsWithinCurrentPeriod = ({
       isIsoString: !!options?.asIso,
       ended,
       startedAt: options?.asIso ? startedAt.toISOTime() : startedAt,
-      endedAt: options?.asIso ? endedAt.toISOTime() : endedAt,
+      endedAt: options?.asIso && ended ? endedAt.toISOTime() : endedAt,
       category: timeLog.categoryId
         ? categories.find((category) => category.id === timeLog.categoryId)
         : undefined,
