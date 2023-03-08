@@ -1,64 +1,15 @@
 // @mui
-import {Box, Card, CardContent, CardHeader, Typography} from '@mui/material';
+import {Box, Card, CardContent, Typography} from '@mui/material';
 import {Timeline, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,} from '@mui/lab';
 import {nanoid} from 'nanoid'; // utils
-import {DateTime} from 'luxon';
-import {Timezones} from '@test1/shared';
-import {deleteIfValueIsFalseFromObject} from '../../../utils/deleteIfValueIsFalseFromObject';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 // utils
 // ----------------------------------------------------------------------
 
-export default function AppOrderTimeline({ user, timeLogsWithinDate }) {
-  const daysDifference = deleteIfValueIsFalseFromObject(
-    DateTime.now()
-      .setZone(Timezones[user.timezone])
-      .set({
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        milliseconds: 0,
-      })
-      .diff(timeLogsWithinDate.date, ['years', 'months', 'days'])
-      .toObject()
-  );
-
-  const mapDaysDifferenceToText = (daysDifference: {
-    years?: number;
-    months?: number;
-    days?: number;
-  }) => {
-    if (Object.keys(daysDifference).length === 0) {
-      return '(Today)';
-    }
-    const years = daysDifference.years
-      ? `${daysDifference.years} year${daysDifference.years !== 1 ? 's' : ''}`
-      : undefined;
-
-    const months = daysDifference.months
-      ? `${daysDifference.months} month${
-          daysDifference.months !== 1 ? 's' : ''
-        }`
-      : undefined;
-
-    const days = daysDifference.days
-      ? `${daysDifference.days} day${daysDifference.days !== 1 ? 's' : ''}`
-      : undefined;
-
-    return `(${[years, months, days].filter((text) => !!text).join(' ')} ago)`;
-  };
-
-  const title = `${timeLogsWithinDate.date.toLocaleString({
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })} ${mapDaysDifferenceToText(daysDifference)}`;
-
+export default function AppOrderTimeline({ user, timeLogsExtended }) {
   return (
     <Card>
-      <CardHeader title={title} />
-
       <CardContent
         sx={{
           '& .MuiTimelineItem-missingOppositeContent:before': {
@@ -66,9 +17,9 @@ export default function AppOrderTimeline({ user, timeLogsWithinDate }) {
           },
         }}
       >
-        <Timeline sx={{ gap: '5px' }}>
-          {timeLogsWithinDate.timeLogsExtended?.length
-            ? timeLogsWithinDate.timeLogsExtended.map((timeLogExtended) => (
+        <Timeline sx={{ gap: 1.5, m: -2 }}>
+          {timeLogsExtended?.length
+            ? timeLogsExtended.map((timeLogExtended) => (
                 <OrderItem key={nanoid()} timeLogExtended={timeLogExtended} />
               ))
             : 'no data'}

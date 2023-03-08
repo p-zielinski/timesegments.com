@@ -20,6 +20,7 @@ import {
   TimeLogsWithinDateISO,
 } from '../../types/timeLogsWithinDate';
 import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
+import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalseFromObject';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -93,7 +94,12 @@ export default function Index({
   );
   const [isFetching, setIsFetching] = useState(false);
   const [activeDate, setActiveDate] = useState(
-    DateTime.now().setZone(Timezones[user.timezone]).c
+    DateTime.now().setZone(Timezones[user.timezone]).set({
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    })
   );
   const findActiveTimeLogsWithinDate = (
     date: FromToDate,
@@ -116,6 +122,57 @@ export default function Index({
     refreshToken();
   }, []);
 
+  const getTitle = (activeDate: DateTime) => {
+    const daysDifference = deleteIfValueIsFalseFromObject(
+      DateTime.now()
+        .setZone(Timezones[user.timezone])
+        .set({
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0,
+        })
+        .diff(activeDate, ['years', 'months', 'days'])
+        .toObject()
+    );
+    const mapDaysDifferenceToText = (daysDifference: {
+      years?: number;
+      months?: number;
+      days?: number;
+    }) => {
+      if (Object.keys(daysDifference).length === 0) {
+        return '(Today)';
+      }
+      const years = daysDifference.years
+        ? `${daysDifference.years} year${daysDifference.years !== 1 ? 's' : ''}`
+        : undefined;
+
+      const months = daysDifference.months
+        ? `${daysDifference.months} month${
+            daysDifference.months !== 1 ? 's' : ''
+          }`
+        : undefined;
+
+      const days = daysDifference.days
+        ? `${daysDifference.days} day${daysDifference.days !== 1 ? 's' : ''}`
+        : undefined;
+
+      return `(${[years, months, days]
+        .filter((text) => !!text)
+        .join(' ')} ago)`;
+    };
+
+    return `${activeDate.toLocaleString({
+      day: 'numeric',
+    })} ${activeDate.toLocaleString({
+      month: 'long',
+    })}, ${activeDate.toLocaleString({
+      year: 'numeric',
+    })} ${mapDaysDifferenceToText(daysDifference)}`;
+  };
+
+  const [title, setTitle] = useState(getTitle(activeDate));
+
   const theme = useTheme();
 
   return (
@@ -126,14 +183,14 @@ export default function Index({
 
       <Container maxWidth="xl">
         <Typography variant="h4" sx={{ mb: 5 }}>
-          Hi, Welcome back
+          {title}
         </Typography>
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>
             <AppOrderTimeline
               user={user}
-              timeLogsWithinDate={activeTimeLogsWithinDate}
+              timeLogsExtended={activeTimeLogsWithinDate.timeLogsExtended}
             />
           </Grid>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
