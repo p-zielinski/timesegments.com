@@ -17,7 +17,6 @@ import {
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
-import { findValueOfEnum } from '../../common/findValueOfEnum';
 
 @Injectable()
 export class UserService {
@@ -145,7 +144,7 @@ export class UserService {
             data.plainPassword,
             this.configService.get<number>('SALT_ROUNDS')
           ),
-          timezone: findValueOfEnum(Timezones, data.timezone) as Timezone,
+          timezone: Timezones[data.timezone] as Timezone,
         },
       });
       if (!options?.generateToken) {

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import {styled} from '@mui/material/styles';
 import {AppBar, Box, IconButton, Stack, Toolbar} from '@mui/material';
@@ -7,7 +6,7 @@ import {bgBlur} from '../../../utils/cssStyles';
 // components
 import Iconify from '../../../components/iconify';
 //
-import Searchbar from './Searchbar';
+import TitleBar from './TitleBar';
 // ----------------------------------------------------------------------
 
 const NAV_WIDTH = 280;
@@ -34,11 +33,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-Header.propTypes = {
-  onOpenNav: PropTypes.func,
-};
-
-export default function Header({ onOpenNav }) {
+export default function Header({ onOpenNav, title }) {
   return (
     <StyledRoot>
       <StyledToolbar>
@@ -52,7 +47,7 @@ export default function Header({ onOpenNav }) {
         >
           <Iconify icon="eva:menu-2-fill" />
         </IconButton>
-        <Searchbar />
+        <TitleBar title={title} />
         <Box sx={{ flexGrow: 1 }} />
         <Stack
           direction="row"

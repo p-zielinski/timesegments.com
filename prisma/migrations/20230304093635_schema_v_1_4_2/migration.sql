@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "TimeLog" ADD COLUMN "startedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "TimeLog" SET "startedAt" = "createdAt"

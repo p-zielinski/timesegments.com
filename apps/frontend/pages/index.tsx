@@ -233,7 +233,11 @@ export default function Index({
   }
 
   return (
-    <DashboardLayout user={user} setUser={setUser}>
+    <DashboardLayout
+      user={user}
+      setUser={setUser}
+      title={'Categories & subcategories'}
+    >
       <Helmet>
         <title>Categories</title>
       </Helmet>
@@ -281,9 +285,9 @@ export default function Index({
 export const getServerSideProps = async (context: any) => {
   const { jwt_token } = context.req.cookies;
 
-  let responseUser;
+  let user: UserWithCategoriesAndSubcategories, limits: Limits;
   try {
-    responseUser = await fetch(
+    const responseUser = await fetch(
       process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
       {
         method: 'POST',
@@ -301,11 +305,6 @@ export const getServerSideProps = async (context: any) => {
         }),
       }
     );
-  } catch (e) {
-    console.log(e);
-  }
-  let user: UserWithCategoriesAndSubcategories, limits: Limits;
-  try {
     const response = await responseUser.json();
     user = response.user;
     limits = response.limits;

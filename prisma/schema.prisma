@@ -75,6 +75,7 @@ model TimeLog {
   subcategoryId String?
   createdAt     DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
+  startedAt     DateTime      @default(now()) @db.Timestamptz(3)
   endedAt       DateTime?     @db.Timestamptz(3)
 }
 
