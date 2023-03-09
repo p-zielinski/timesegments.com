@@ -30,35 +30,35 @@ const AppNewsUpdate = dynamic(
 
 const AppCurrentVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentVisits'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppWebsiteVisits = dynamic(
   () => import('../../sections/@dashboard/app/AppWebsiteVisits'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppTrafficBySite = dynamic(
   () => import('../../sections/@dashboard/app/AppTrafficBySite'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppWidgetSummary = dynamic(
   () => import('../../sections/@dashboard/app/AppWidgetSummary'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppCurrentSubject = dynamic(
   () => import('../../sections/@dashboard/app/AppCurrentSubject'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppConversionRates = dynamic(
   () => import('../../sections/@dashboard/app/AppConversionRates'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppTasks = dynamic(
   () => import('../../sections/@dashboard/app/AppTasks'),
-  {ssr: false}
+  { ssr: false }
 );
 const AppOrderTimeline = dynamic(
   () => import('../../sections/@dashboard/app/AppOrderTimeline'),
-  {ssr: false}
+  { ssr: false }
 );
 
 // ----------------------------------------------------------------------
@@ -69,9 +69,9 @@ type Props = {
 };
 
 export default function Index({
-                                user: serverSideFetchedUser,
-                                timeLogsWithDatesISO,
-                              }: Props) {
+  user: serverSideFetchedUser,
+  timeLogsWithDatesISO,
+}: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
     TimeLogsWithinDate[]
@@ -104,7 +104,7 @@ export default function Index({
   );
 
   const add1Day = () => {
-    setActiveDate(activeDate.minus({days: 1}));
+    setActiveDate(activeDate.minus({ days: 1 }));
   };
 
   const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
@@ -128,8 +128,8 @@ export default function Index({
       if (timeLogsWithinActiveDate) {
         return timeLogsWithinActiveDate;
       }
-      setIsFetching(true)
-      setIsFetching(false)
+      setIsFetching(true);
+      setIsFetching(false);
 
       return [] as TimeLogWithinCurrentPeriod[]; //fetch from backend
     };
@@ -138,7 +138,6 @@ export default function Index({
     setTimeLogsWithinActiveDate(
       findTimeLogsWithinActiveDate(activeDate.c, timeLogsWithinDates)
     );
-
   }, [activeDate]);
 
   useEffect(() => {
@@ -172,8 +171,8 @@ export default function Index({
 
       const months = daysDifference.months
         ? `${daysDifference.months} month${
-          daysDifference.months !== 1 ? 's' : ''
-        }`
+            daysDifference.months !== 1 ? 's' : ''
+          }`
         : undefined;
 
       const days = daysDifference.days
@@ -205,7 +204,7 @@ export default function Index({
       </Helmet>
 
       <Container maxWidth="xl">
-        <Typography variant="h4" sx={{mb: 5}} onClick={() => add1Day()}>
+        <Typography variant="h4" sx={{ mb: 5 }} onClick={() => add1Day()}>
           {title}
         </Typography>
 
@@ -334,7 +333,7 @@ export default function Index({
 }
 
 export const getServerSideProps = async (context) => {
-  const {jwt_token} = context.req.cookies;
+  const { jwt_token } = context.req.cookies;
 
   let user;
   try {
@@ -367,8 +366,8 @@ export const getServerSideProps = async (context) => {
   let subcategories = [];
 
   const now = DateTime.now().setZone(Timezones[user.timezone]);
-  const to = {month: now.month, year: now.year, day: now.day};
-  const sevenDaysAgo = now.minus({days: 7});
+  const to = { month: now.month, year: now.year, day: now.day };
+  const sevenDaysAgo = now.minus({ days: 7 });
   const from = {
     month: sevenDaysAgo.month,
     year: sevenDaysAgo.year,
@@ -384,7 +383,7 @@ export const getServerSideProps = async (context) => {
           'Content-type': 'application/json',
           jwt_token,
         },
-        body: JSON.stringify({from, to}),
+        body: JSON.stringify({ from, to }),
       }
     );
     const response = await responseTimeLogs.json();
@@ -398,7 +397,7 @@ export const getServerSideProps = async (context) => {
   const timeLogsWithDates = [] as TimeLogsWithinDateISO[];
 
   for (let i = 0; i <= 7; i++) {
-    const nDaysAgo = i > 0 ? now.minus({days: i}) : now;
+    const nDaysAgo = i > 0 ? now.minus({ days: i }) : now;
     const date = {
       month: nDaysAgo.month,
       year: nDaysAgo.year,
@@ -412,7 +411,7 @@ export const getServerSideProps = async (context) => {
         fromDate: date,
         categories,
         subcategories,
-        options: {asIso: true},
+        options: { asIso: true },
       }) as TimeLogWithinCurrentPeriodISO[],
     });
   }
