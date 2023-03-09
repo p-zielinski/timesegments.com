@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Container, Grid, Typography } from '@mui/material';
+import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 // components
 // sections
@@ -22,6 +22,15 @@ import {
 } from '../../types/timeLogsWithinDate';
 import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
 import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalseFromObject';
+import { handleFetch } from '../../utils/handleFetch';
+import {
+  GREEN,
+  LIGHT_GREEN,
+  LIGHT_RED,
+  RED,
+  ULTRA_LIGHT_GREEN,
+  ULTRA_LIGHT_RED,
+} from '../../consts/colors';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -103,8 +112,25 @@ export default function Index({
     })
   );
 
-  const add1Day = () => {
-    setActiveDate(activeDate.minus({ days: 1 }));
+  const changeDay = (numberOfDays: number) => {
+    if (numberOfDays === 0) {
+      return;
+    }
+    if (numberOfDays > 0) {
+      return setActiveDate(activeDate.plus({ days: numberOfDays }));
+    } else {
+      return setActiveDate(activeDate.minus({ days: -numberOfDays }));
+    }
+  };
+
+  const changeMonth = (numberOfMonths: number) => {
+    if (numberOfMonths === 0) {
+      return;
+    }
+    if (numberOfMonths > 0) {
+      return setActiveDate(activeDate.plus({ months: numberOfMonths }));
+    }
+    return setActiveDate(activeDate.minus({ months: numberOfMonths }));
   };
 
   const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
@@ -112,10 +138,10 @@ export default function Index({
   >([]);
 
   useEffect(() => {
-    const findTimeLogsWithinActiveDate = (
+    const findOrFetchTimeLogsWithinActiveDate = async (
       date: FromToDate,
       timeLogsWithinDates: TimeLogsWithinDate[]
-    ) => {
+    ): Promise<TimeLogWithinCurrentPeriod[]> => {
       const timeLogsWithinActiveDate = timeLogsWithinDates.find(
         (timeLogsWithinDate) => {
           return (
@@ -129,15 +155,45 @@ export default function Index({
         return timeLogsWithinActiveDate;
       }
       setIsFetching(true);
-      setIsFetching(false);
-
-      return [] as TimeLogWithinCurrentPeriod[]; //fetch from backend
+      //update setTimeLogsWithinDates while fetching data
+      const response = await handleFetch({
+        pathOrUrl: 'time-log/find-extended',
+        body: { from: { ...activeDate.c }, to: { ...activeDate.c } },
+        method: 'POST',
+      });
+      if (response.statusCode === 201) {
+        const timeLogsExtendedForActiveDate = findTimeLogsWithinCurrentPeriod({
+          allTimeLogs: response.timeLogs,
+          userTimezone: Timezones[user.timezone],
+          fromDate: activeDate.c,
+          toDate: activeDate.c,
+          categories: response.categories,
+          subcategories: response.subcategories,
+        });
+        setTimeLogsWithinDates([
+          ...timeLogsWithinDates,
+          {
+            date: activeDate.c,
+            timeLogsExtended: timeLogsExtendedForActiveDate,
+          },
+        ] as TimeLogsWithinDate[]);
+        setIsFetching(false);
+        return timeLogsExtendedForActiveDate as TimeLogWithinCurrentPeriod[];
+      }
+      //handle error, error while fetching
+      return [] as TimeLogWithinCurrentPeriod[];
     };
 
     setTitle(getTitle(activeDate));
-    setTimeLogsWithinActiveDate(
-      findTimeLogsWithinActiveDate(activeDate.c, timeLogsWithinDates)
-    );
+
+    (async () => {
+      setTimeLogsWithinActiveDate(
+        await findOrFetchTimeLogsWithinActiveDate(
+          activeDate.c,
+          timeLogsWithinDates
+        )
+      );
+    })();
   }, [activeDate]);
 
   useEffect(() => {
@@ -197,6 +253,28 @@ export default function Index({
 
   const theme = useTheme();
 
+  const previousDatesButtonSx = {
+    m: 1,
+    borderColor: LIGHT_RED,
+    color: RED,
+    '&:hover': {
+      borderColor: RED,
+      color: RED,
+      background: ULTRA_LIGHT_RED,
+    },
+  };
+
+  const futureDatesButtonSx = {
+    m: 1,
+    borderColor: LIGHT_GREEN,
+    color: GREEN,
+    '&:hover': {
+      borderColor: GREEN,
+      color: GREEN,
+      background: ULTRA_LIGHT_GREEN,
+    },
+  };
+
   return (
     <DashboardLayout user={user} setUser={setUser} title={'Dashboard'}>
       <Helmet>
@@ -204,9 +282,53 @@ export default function Index({
       </Helmet>
 
       <Container maxWidth="xl">
-        <Typography variant="h4" sx={{ mb: 5 }} onClick={() => add1Day()}>
+        <Typography variant="h4" sx={{ mb: 2 }}>
           {title}
         </Typography>
+        <Box sx={{ mb: 2 }}>
+          <Button
+            variant="outlined"
+            sx={previousDatesButtonSx}
+            onClick={() => changeDay(-1)}
+          >
+            -1 day
+          </Button>
+          <Button
+            variant="outlined"
+            sx={previousDatesButtonSx}
+            onClick={() => changeDay(-7)}
+          >
+            -1 week
+          </Button>
+          <Button
+            variant="outlined"
+            sx={previousDatesButtonSx}
+            onClick={() => changeMonth(-1)}
+          >
+            -1 month
+          </Button>
+          <Button
+            variant="outlined"
+            sx={futureDatesButtonSx}
+            onClick={() => changeDay(1)}
+          >
+            +1 day
+          </Button>
+          <Button
+            variant="outlined"
+            sx={futureDatesButtonSx}
+            onClick={() => changeDay(7)}
+          >
+            +1 week
+          </Button>
+          <Button
+            variant="outlined"
+            sx={futureDatesButtonSx}
+            onClick={() => changeMonth(1)}
+          >
+            +1 month
+          </Button>
+        </Box>
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>

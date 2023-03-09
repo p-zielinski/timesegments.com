@@ -1,4 +1,5 @@
-export const LIGHT_GREEN = `rgb(185, 232, 191)`;
+export const ULTRA_LIGHT_GREEN = `rgb(239, 255, 240)`;
+export const LIGHT_GREEN = `rgb(177, 231, 184)`;
 export const GREEN = `rgb(81, 171, 92)`;
 
 export const LIGHT_RED = `rgb(254, 198, 198)`;
