@@ -7,7 +7,7 @@ import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFro
 // utils
 // ----------------------------------------------------------------------
 
-export default function AppOrderTimeline({ user, timeLogsExtended }) {
+export default function AppOrderTimeline({ user, timeLogsWithinActiveDate }) {
   return (
     <Card>
       <CardContent
@@ -18,8 +18,8 @@ export default function AppOrderTimeline({ user, timeLogsExtended }) {
         }}
       >
         <Timeline sx={{ gap: 1.5, m: -2 }}>
-          {timeLogsExtended?.length
-            ? timeLogsExtended.map((timeLogExtended) => (
+          {timeLogsWithinActiveDate?.length
+            ? timeLogsWithinActiveDate.map((timeLogExtended) => (
                 <OrderItem key={nanoid()} timeLogExtended={timeLogExtended} />
               ))
             : 'no data'}

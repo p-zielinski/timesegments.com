@@ -56,7 +56,7 @@ export type TimeLogWithinCurrentPeriod =
 
 export const findTimeLogsWithinCurrentPeriod = ({
   allTimeLogs,
-  timezone,
+  userTimezone,
   fromDate,
   toDate,
   categories,
@@ -64,7 +64,7 @@ export const findTimeLogsWithinCurrentPeriod = ({
   options,
 }: {
   allTimeLogs: TimeLog[];
-  timezone: Timezones;
+  userTimezone: Timezones;
   fromDate: FromToDate;
   toDate?: FromToDate;
   categories: Category[];
@@ -73,20 +73,20 @@ export const findTimeLogsWithinCurrentPeriod = ({
 }): TimeLogWithinCurrentPeriod[] | TimeLogWithinCurrentPeriodISO[] => {
   const fromDateTime = DateTime.fromObject(
     { ...fromDate, hour: 0, minute: 0, second: 0 },
-    { zone: timezone }
+    { zone: userTimezone }
   );
   const toDateTime = DateTime.fromObject(
     { ...(toDate ?? fromDate), hour: 24, minute: 0, second: 0 },
-    { zone: timezone }
+    { zone: userTimezone }
   );
   const timeLogs = [];
   allTimeLogs.forEach((timeLog) => {
     const timeLogStartedAt = DateTime.fromISO(timeLog.startedAt);
     const timeLogEndedAt = timeLog.endedAt
       ? DateTime.fromISO(timeLog.endedAt, {
-          zone: timezone,
+          zone: userTimezone,
         })
-      : DateTime.now().setZone(timezone);
+      : DateTime.now().setZone(userTimezone);
     if (fromDateTime.ts > timeLogEndedAt.ts) {
       return;
     }
@@ -125,12 +125,12 @@ export const findTimeLogsWithinCurrentPeriod = ({
   });
   return timeLogs.map((timeLog) => {
     const startedAt = DateTime.fromISO(timeLog.startedAt, {
-      zone: timezone,
+      zone: userTimezone,
     });
     const endedAt = timeLog?.endedAt
       ? typeof timeLog.endedAt === 'string'
         ? DateTime.fromISO(timeLog.endedAt, {
-            zone: timezone,
+            zone: userTimezone,
           })
         : timeLog.endedAt
       : undefined;

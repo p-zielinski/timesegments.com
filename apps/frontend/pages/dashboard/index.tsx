@@ -13,6 +13,7 @@ import { DateTime } from 'luxon';
 import { FromToDate, Timezones } from '@test1/shared';
 import {
   findTimeLogsWithinCurrentPeriod,
+  TimeLogWithinCurrentPeriod,
   TimeLogWithinCurrentPeriodISO,
 } from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {
@@ -101,22 +102,38 @@ export default function Index({
       milliseconds: 0,
     })
   );
-  const findActiveTimeLogsWithinDate = (
-    date: FromToDate,
-    timeLogsWithinDates: TimeLogsWithinDate[]
-  ) => {
-    return timeLogsWithinDates.find((timeLogsWithinDate) => {
-      return (
-        timeLogsWithinDate.date.year === date.year &&
-        timeLogsWithinDate.date.month === date.month &&
-        timeLogsWithinDate.date.day === date.day
-      );
-    });
-  };
 
-  const [activeTimeLogsWithinDate, setActiveTimeLogsWithinDate] = useState(
-    findActiveTimeLogsWithinDate(activeDate, timeLogsWithinDates)
-  );
+  const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
+    TimeLogWithinCurrentPeriod[]
+  >([]);
+
+  useEffect(() => {
+    const findTimeLogsWithinActiveDate = (
+      date: FromToDate,
+      timeLogsWithinDates: TimeLogsWithinDate[]
+    ) => {
+      const timeLogsWithinActiveDate = timeLogsWithinDates.find(
+        (timeLogsWithinDate) => {
+          return (
+            timeLogsWithinDate.date.year === date.year &&
+            timeLogsWithinDate.date.month === date.month &&
+            timeLogsWithinDate.date.day === date.day
+          );
+        }
+      )?.timeLogsExtended;
+      if (timeLogsWithinActiveDate) {
+        return timeLogsWithinActiveDate;
+      }
+
+      return [] as TimeLogWithinCurrentPeriod[]; //fetch from backend
+    };
+
+    setTimeLogsWithinActiveDate(
+      findTimeLogsWithinActiveDate(activeDate.c, timeLogsWithinDates)
+    );
+  }, [activeDate]);
+
+  console.log(timeLogsWithinActiveDate);
 
   useEffect(() => {
     refreshToken();
@@ -190,7 +207,7 @@ export default function Index({
           <Grid item xs={12} md={6} lg={6}>
             <AppOrderTimeline
               user={user}
-              timeLogsExtended={activeTimeLogsWithinDate.timeLogsExtended}
+              timeLogsWithinActiveDate={timeLogsWithinActiveDate}
             />
           </Grid>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
@@ -385,7 +402,7 @@ export const getServerSideProps = async (context) => {
       date,
       timeLogsExtended: findTimeLogsWithinCurrentPeriod({
         allTimeLogs,
-        timezone: Timezones[user.timezone],
+        userTimezone: Timezones[user.timezone],
         fromDate: date,
         categories,
         subcategories,
