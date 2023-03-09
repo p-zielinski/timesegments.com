@@ -14,6 +14,14 @@ export const handleFetch = async ({
   additionalHeaders?: object;
   sentToken?: boolean;
 }) => {
+  console.log(
+    pathOrUrl,
+    process.env.NEXT_PUBLIC_API_URL,
+    pathOrUrl?.includes('https://'),
+    pathOrUrl,
+    process.env.NEXT_PUBLIC_API_URL + pathOrUrl
+  );
+
   let statusCode;
   const jwt_token = sentToken ? Cookies.get('jwt_token') : undefined;
   const url = !pathOrUrl
