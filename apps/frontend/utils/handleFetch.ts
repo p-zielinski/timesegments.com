@@ -14,13 +14,14 @@ export const handleFetch = async ({
   additionalHeaders?: object;
   sentToken?: boolean;
 }) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   let statusCode;
   const jwt_token = sentToken ? Cookies.get('jwt_token') : undefined;
   const url = !pathOrUrl
-    ? process.env.NEXT_PUBLIC_API_URL
+    ? apiUrl
     : pathOrUrl?.includes('https://')
     ? pathOrUrl
-    : process.env.NEXT_PUBLIC_API_URL + pathOrUrl;
+    : apiUrl + pathOrUrl;
   const fetchBody = ['GET'].includes(method.toUpperCase())
     ? undefined
     : JSON.stringify(body);
