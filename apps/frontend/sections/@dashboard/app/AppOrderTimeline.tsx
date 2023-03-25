@@ -269,7 +269,7 @@ function DetailPeriod({ timeLogExtended, user }) {
           {timeLogExtended.category?.name}
           {timeLogExtended.subcategory && (
             <> - {timeLogExtended.subcategory?.name}</>
-          )}
+          )}{' '}
           <span
             style={{
               color: getHexFromRGBObject(
