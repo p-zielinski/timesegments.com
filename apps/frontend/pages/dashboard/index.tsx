@@ -351,13 +351,13 @@ export default function Index({
               onChange={() => setShowDetails(!showDetails)}
               inputProps={{ 'aria-label': 'controlled' }}
               sx={{
-                '.Mui-disabled': {
+                '& .Mui-disabled': {
                   color: '#e886a9',
                 },
-                '.Mui-checked': {
+                '& .Mui-checked': {
                   color: '#e886a9',
                 },
-                '.Mui-checked + .MuiSwitch-track': {
+                '& .Mui-checked + .MuiSwitch-track': {
                   backgroundColor: '#e886a9',
                 },
                 '& .MuiSwitch-track': {

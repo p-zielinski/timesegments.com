@@ -4,15 +4,41 @@ import {Timeline, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,
 import {nanoid} from 'nanoid'; // utils
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
+import {useEffect, useState} from 'react';
+import {DateTime} from 'luxon';
+import {Timezones} from '@test1/shared';
+import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 // utils
 // ----------------------------------------------------------------------
+
+const getDuration = (totalPeriodInMs) => {
+  const periodInSecondsTotal = Math.floor(totalPeriodInMs / 1000);
+  const periodInMinutesTotal = Math.floor(periodInSecondsTotal / 60);
+  const durationHours = Math.floor(periodInMinutesTotal / 60);
+  const durationMinutes = periodInMinutesTotal % 60;
+  const durationSeconds = periodInSecondsTotal % 60;
+
+  const hours = durationHours
+    ? `${durationHours} hour${durationHours !== 1 ? 's' : ''}`
+    : undefined;
+  const minutes = durationMinutes
+    ? `${durationMinutes} minute${durationMinutes !== 1 ? 's' : ''}`
+    : undefined;
+  const seconds =
+    durationSeconds || (!hours && !minutes)
+      ? `${durationSeconds} second${durationSeconds !== 1 ? 's' : ''}`
+      : undefined;
+
+  return [hours, minutes, seconds].filter((text) => text).join(' ');
+};
 
 export default function AppOrderTimeline({
   user,
   timeLogsWithinActiveDate,
   showDetails,
 }) {
-  const getGroupedTimeLogsWithDate = (timeLogsWithinActiveDate) => {
+  const getGroupedTimeLogsWithDateSorted = (timeLogsWithinActiveDate) => {
     const grouped = [];
     timeLogsWithinActiveDate.forEach((x) => {
       let index;
@@ -37,30 +63,43 @@ export default function AppOrderTimeline({
         grouped.push([x]);
       }
     });
-    return grouped.map((group) => {
-      const category = group[0]?.category;
-      const subcategory = group[0]?.subcategory;
-      const notFinishedPeriod = group.find(
-        (timeLogsWithinDate) => timeLogsWithinDate.ended === false
-      );
-      const ended = !notFinishedPeriod;
-      const totalPeriodInMsWithoutUnfinishedTimeLog = group.reduce(
-        (accumulator, currentValue) => {
-          if (currentValue.ended) {
-            return accumulator + currentValue.periodTotalMs;
-          }
-          return accumulator;
-        },
-        0
-      );
-      return {
-        category,
-        subcategory,
-        notFinishedPeriod,
-        ended,
-        totalPeriodInMsWithoutUnfinishedTimeLog,
-      };
-    });
+    return grouped
+      .map((group) => {
+        const category = group[0]?.category;
+        const subcategory = group[0]?.subcategory;
+        const notFinishedPeriod = group.find(
+          (timeLogsWithinDate) => timeLogsWithinDate.ended === false
+        );
+        const ended = !notFinishedPeriod;
+        const totalPeriodInMsWithoutUnfinishedTimeLog = group.reduce(
+          (accumulator, currentValue) => {
+            if (currentValue.ended) {
+              return accumulator + currentValue.periodTotalMs;
+            }
+            return accumulator;
+          },
+          0
+        );
+        return {
+          category,
+          subcategory,
+          notFinishedPeriod,
+          ended,
+          totalPeriodInMsWithoutUnfinishedTimeLog,
+        };
+      })
+      .sort((a, b) => {
+        if (a.ended === false) {
+          return -1;
+        }
+        if (b.ended === false) {
+          return 1;
+        }
+        return (
+          b.totalPeriodInMsWithoutUnfinishedTimeLog -
+          a.totalPeriodInMsWithoutUnfinishedTimeLog
+        );
+      });
   };
 
   return (
@@ -76,14 +115,23 @@ export default function AppOrderTimeline({
           <Timeline sx={{ gap: 1.5, m: -2 }}>
             {showDetails
               ? timeLogsWithinActiveDate
-                  .sort((a, b) => (a.startedAt || 0) - (b.startedAt || 0))
+                  .sort((a, b) => b.startedAt - a.startedAt)
                   .map((timeLogExtended) => (
-                    <OrderItem
-                      key={nanoid()}
+                    <DetailPeriod
                       timeLogExtended={timeLogExtended}
+                      user={user}
+                      key={nanoid()}
                     />
                   ))
-              : 'nope'}
+              : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
+                  (group) => (
+                    <GroupedPeriod
+                      group={group}
+                      user={user}
+                      key={group.subcategory?.id || group.category?.id}
+                    ></GroupedPeriod>
+                  )
+                )}
           </Timeline>
         ) : (
           'no data'
@@ -95,24 +143,34 @@ export default function AppOrderTimeline({
 
 // ----------------------------------------------------------------------
 
-function OrderItem({ timeLogExtended }) {
-  const color =
-    timeLogExtended?.subcategory?.color ?? timeLogExtended?.category?.color;
+function GroupedPeriod({ group, user }) {
+  const [totalPeriodInMs, setTotalPeriodInMs] = useState(
+    group.totalPeriodInMsWithoutUnfinishedTimeLog
+  );
+  useEffect(() => {
+    if (!group.notFinishedPeriod) {
+      return;
+    }
+    const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+      const now = DateTime.now().setZone(Timezones[user.timezone]);
+      const unfinishedPeriodDuration =
+        now.ts - group.notFinishedPeriod.startedAt.ts;
+      if (isNaN(unfinishedPeriodDuration)) {
+        return console.log(`unfinishedPeriodDuration is NaN`);
+      }
+      setTotalPeriodInMs(
+        group.totalPeriodInMsWithoutUnfinishedTimeLog + unfinishedPeriodDuration
+      );
+    };
+    setTotalPeriodInMsWithUnfinishedTimeLog();
+    const intervalId = setInterval(
+      () => setTotalPeriodInMsWithUnfinishedTimeLog(),
+      1000
+    );
+    return () => clearInterval(intervalId);
+  }, []);
 
-  const duration = (durationHours, durationMinutes, durationSeconds) => {
-    const hours = durationHours
-      ? `${durationHours} hour${durationHours !== 1 ? 's' : ''}`
-      : undefined;
-    const minutes = durationMinutes
-      ? `${durationMinutes} minute${durationMinutes !== 1 ? 's' : ''}`
-      : undefined;
-    const seconds =
-      durationSeconds || (!hours && !minutes)
-        ? `${durationSeconds} second${durationSeconds !== 1 ? 's' : ''}`
-        : undefined;
-
-    return [hours, minutes, seconds].filter((text) => text).join(' ');
-  };
+  const color = group?.subcategory?.color ?? group?.category?.color;
 
   return (
     <TimelineItem
@@ -124,6 +182,82 @@ function OrderItem({ timeLogExtended }) {
         gap: '10px',
         pl: 1.5,
         pr: 1.5,
+        minHeight: '55px',
+        height: '55px',
+      }}
+    >
+      <TimelineSeparator>
+        <TimelineDot sx={{ background: color, mb: 0 }} />
+      </TimelineSeparator>
+      <TimelineContent>
+        <Typography variant="subtitle2">
+          {group.category?.name}
+          {group.subcategory && <> - {group.subcategory?.name}</>}{' '}
+          <span
+            style={{
+              color: getHexFromRGBObject(
+                getColorShadeBasedOnSliderPickerSchema(
+                  getRgbaObjectFromHexString(color)
+                )
+              ),
+              fontWeight: 400,
+            }}
+          >
+            {group.notFinishedPeriod && '*active*'}
+          </span>
+        </Typography>
+        <Box sx={{ display: 'flex', direction: 'column', mb: 3 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0 }}>
+            Duration: <b>{getDuration(totalPeriodInMs)}</b>
+          </Typography>
+        </Box>
+      </TimelineContent>
+    </TimelineItem>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function DetailPeriod({ timeLogExtended, user }) {
+  const [totalPeriodInMs, setTotalPeriodInMs] = useState(
+    timeLogExtended.periodTotalMs
+  );
+  const [calculating, setCalculating] = useState(true);
+  useEffect(() => {
+    if (timeLogExtended.periodTotalMs || timeLogExtended.ended === true) {
+      return;
+    }
+    const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+      const now = DateTime.now().setZone(Timezones[user.timezone]);
+      const totalPeriodInMs = now.ts - timeLogExtended.startedAt.ts;
+      if (isNaN(totalPeriodInMs)) {
+        return console.log(`totalPeriodInMs is NaN`);
+      }
+      setCalculating(false);
+      setTotalPeriodInMs(totalPeriodInMs);
+    };
+    setTotalPeriodInMsWithUnfinishedTimeLog();
+    setCalculating(false);
+    const intervalId = setInterval(
+      () => setTotalPeriodInMsWithUnfinishedTimeLog(),
+      1000
+    );
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const color =
+    timeLogExtended?.subcategory?.color ?? timeLogExtended?.category?.color;
+
+  return (
+    <TimelineItem
+      sx={{
+        background: getHexFromRGBAObject(
+          getRgbaObjectFromHexString(color, 0.2)
+        ),
+        borderRadius: '10px',
+        gap: '10px',
+        pr: 1.5,
+        pl: 1.5,
       }}
     >
       <TimelineSeparator>
@@ -161,20 +295,18 @@ function OrderItem({ timeLogExtended }) {
             </b>
           </Typography>
         </Box>
-        {timeLogExtended.ended && (
-          <Box sx={{ display: 'flex', direction: 'column' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Duration:{' '}
-              <b>
-                {duration(
-                  timeLogExtended.periodInHours,
-                  timeLogExtended.periodInMinutes,
-                  timeLogExtended.periodInSeconds
-                )}
-              </b>
-            </Typography>
-          </Box>
-        )}
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Duration:{' '}
+            <b>
+              {totalPeriodInMs
+                ? getDuration(totalPeriodInMs)
+                : calculating
+                ? 'calculating'
+                : 'error'}
+            </b>
+          </Typography>
+        </Box>
       </TimelineContent>
     </TimelineItem>
   );
