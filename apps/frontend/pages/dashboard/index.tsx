@@ -1,7 +1,15 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Box, Button, Container, Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  FormControlLabel,
+  Grid,
+  Switch,
+  Typography,
+} from '@mui/material';
 import dynamic from 'next/dynamic';
 // components
 // sections
@@ -111,6 +119,7 @@ export default function Index({
       milliseconds: 0,
     })
   );
+  const [showDetails, setShowDetails] = useState(false);
 
   const changeDay = (numberOfDays: number) => {
     if (numberOfDays === 0) {
@@ -329,6 +338,57 @@ export default function Index({
             +1 month
           </Button>
         </Box>
+
+        <FormControlLabel
+          sx={{
+            m: 1,
+            mb: 2,
+            mt: -1,
+            color: '#926f7b',
+          }}
+          control={
+            <Switch
+              checked={showDetails}
+              onChange={() => setShowDetails(!showDetails)}
+              inputProps={{ 'aria-label': 'controlled' }}
+              sx={{
+                '.Mui-disabled': {
+                  color: '#e886a9',
+                },
+                '.Mui-checked': {
+                  color: '#e886a9',
+                },
+                '.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: '#e886a9',
+                },
+                '& .MuiSwitch-track': {
+                  borderRadius: 22 / 2,
+                  '&:before, &:after': {
+                    content: '""',
+                    position: 'absolute',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: 16,
+                    height: 16,
+                  },
+                  '&:before': {
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+                      theme.palette.getContrastText(theme.palette.primary.main)
+                    )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+                    left: 12,
+                  },
+                  '&:after': {
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+                      theme.palette.getContrastText(theme.palette.primary.main)
+                    )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+                    right: 12,
+                  },
+                },
+              }}
+            />
+          }
+          label="details"
+        />
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>
