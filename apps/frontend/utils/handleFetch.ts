@@ -14,6 +14,12 @@ export const handleFetch = async ({
   additionalHeaders?: object;
   sentToken?: boolean;
 }) => {
+  if (
+    typeof process.env.NEXT_PUBLIC_API_URL !== 'string' ||
+    process.env.NEXT_PUBLIC_API_URL.includes('localhost')
+  ) {
+    console.log({ NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL });
+  }
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   let statusCode;
   const jwt_token = sentToken ? Cookies.get('jwt_token') : undefined;
