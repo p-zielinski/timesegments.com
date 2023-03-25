@@ -270,6 +270,18 @@ function DetailPeriod({ timeLogExtended, user }) {
           {timeLogExtended.subcategory && (
             <> - {timeLogExtended.subcategory?.name}</>
           )}
+          <span
+            style={{
+              color: getHexFromRGBObject(
+                getColorShadeBasedOnSliderPickerSchema(
+                  getRgbaObjectFromHexString(color)
+                )
+              ),
+              fontWeight: 400,
+            }}
+          >
+            {!timeLogExtended.ended && '*active*'}
+          </span>
         </Typography>
         <Box sx={{ display: 'flex', direction: 'column' }}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
