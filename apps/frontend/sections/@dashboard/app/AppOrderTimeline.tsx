@@ -7,7 +7,62 @@ import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFro
 // utils
 // ----------------------------------------------------------------------
 
-export default function AppOrderTimeline({ user, timeLogsWithinActiveDate }) {
+export default function AppOrderTimeline({
+  user,
+  timeLogsWithinActiveDate,
+  showDetails,
+}) {
+  const getGroupedTimeLogsWithDate = (timeLogsWithinActiveDate) => {
+    const grouped = [];
+    timeLogsWithinActiveDate.forEach((x) => {
+      let index;
+      for (const i in grouped) {
+        if (grouped[i][0]?.category?.id === x?.category?.id) {
+          if (
+            grouped[i][0]?.subcategory === undefined &&
+            x?.subcategory === undefined
+          ) {
+            index = i;
+            break;
+          }
+          if (grouped[i][0]?.subcategory?.id === x?.subcategory?.id) {
+            index = i;
+            break;
+          }
+        }
+      }
+      if (index) {
+        grouped[index] = [...grouped[index], x];
+      } else {
+        grouped.push([x]);
+      }
+    });
+    return grouped.map((group) => {
+      const category = group[0]?.category;
+      const subcategory = group[0]?.subcategory;
+      const notFinishedPeriod = group.find(
+        (timeLogsWithinDate) => timeLogsWithinDate.ended === false
+      );
+      const ended = !notFinishedPeriod;
+      const totalPeriodInMsWithoutUnfinishedTimeLog = group.reduce(
+        (accumulator, currentValue) => {
+          if (currentValue.ended) {
+            return accumulator + currentValue.periodTotalMs;
+          }
+          return accumulator;
+        },
+        0
+      );
+      return {
+        category,
+        subcategory,
+        notFinishedPeriod,
+        ended,
+        totalPeriodInMsWithoutUnfinishedTimeLog,
+      };
+    });
+  };
+
   return (
     <Card>
       <CardContent
@@ -17,13 +72,22 @@ export default function AppOrderTimeline({ user, timeLogsWithinActiveDate }) {
           },
         }}
       >
-        <Timeline sx={{ gap: 1.5, m: -2 }}>
-          {timeLogsWithinActiveDate?.length
-            ? timeLogsWithinActiveDate.map((timeLogExtended) => (
-                <OrderItem key={nanoid()} timeLogExtended={timeLogExtended} />
-              ))
-            : 'no data'}
-        </Timeline>
+        {timeLogsWithinActiveDate?.length ? (
+          <Timeline sx={{ gap: 1.5, m: -2 }}>
+            {showDetails
+              ? timeLogsWithinActiveDate
+                  .sort((a, b) => (a.startedAt || 0) - (b.startedAt || 0))
+                  .map((timeLogExtended) => (
+                    <OrderItem
+                      key={nanoid()}
+                      timeLogExtended={timeLogExtended}
+                    />
+                  ))
+              : 'nope'}
+          </Timeline>
+        ) : (
+          'no data'
+        )}
       </CardContent>
     </Card>
   );

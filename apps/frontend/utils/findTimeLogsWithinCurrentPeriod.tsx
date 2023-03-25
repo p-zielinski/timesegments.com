@@ -135,7 +135,7 @@ export const findTimeLogsWithinCurrentPeriod = ({
         : timeLog.endedAt
       : undefined;
     const ended = !!timeLog.endedAt;
-    let periodTotalMs, periodInSeconds, periodInMinutes, periodInHours;
+    let periodInSeconds, periodInMinutes, periodInHours;
     if (ended) {
       const periodTotalMs = (endedAt.ts - startedAt.ts) as number;
       const periodInSecondsTotal = Math.floor(periodTotalMs / 1000);
@@ -157,7 +157,7 @@ export const findTimeLogsWithinCurrentPeriod = ({
             (subcategory) => subcategory.id === timeLog.subcategoryId
           )
         : undefined,
-      periodTotalMs,
+      periodTotalMs: ended ? endedAt.ts - startedAt.ts : undefined,
       periodInHours,
       periodInMinutes,
       periodInSeconds,

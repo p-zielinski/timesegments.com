@@ -338,13 +338,12 @@ export default function Index({
             +1 month
           </Button>
         </Box>
-
         <FormControlLabel
           sx={{
             m: 1,
             mb: 2,
             mt: -1,
-            color: '#926f7b',
+            color: '#c97a9a',
           }}
           control={
             <Switch
@@ -395,6 +394,7 @@ export default function Index({
             <AppOrderTimeline
               user={user}
               timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+              showDetails={showDetails}
             />
           </Grid>
           {/*<Grid item xs={12} md={6} lg={8}>*/}
