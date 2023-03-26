@@ -361,8 +361,10 @@ export default function Index({
                   backgroundColor: '#e886a9',
                 },
                 '& .MuiSwitch-track': {
+                  color: '#e886a9',
                   borderRadius: 22 / 2,
                   '&:before, &:after': {
+                    color: '#e886a9',
                     content: '""',
                     position: 'absolute',
                     top: '50%',

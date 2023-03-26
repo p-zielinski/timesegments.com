@@ -4,16 +4,7 @@ import {Box, Card, Grid, Stack, Typography} from '@mui/material';
 // utils
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';
-import {
-  GREEN,
-  IS_SAVING_HEX,
-  LIGHT_GREEN,
-  LIGHT_RED,
-  LIGHT_SILVER,
-  RED,
-  SUPER_LIGHT_SILVER,
-  ULTRA_LIGHT_RED,
-} from '../../../consts/colors';
+import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
 import {getRepeatingLinearGradient} from '../../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
@@ -222,10 +213,6 @@ export default function CategoryCard({
                 borderTopLeftRadius: 12,
                 borderBottomLeftRadius: 12,
                 cursor: !isSaving && !category.active && 'pointer',
-                '&:hover': !disableHover &&
-                  !isSaving && {
-                    background: LIGHT_SILVER,
-                  },
               }}
               onClick={() =>
                 !isSaving &&
@@ -278,10 +265,6 @@ export default function CategoryCard({
                 '&:hover': !disableHover &&
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW && {
-                    background:
-                      isActive && !doesAnySubcategoryWithinCurrentCategoryActive
-                        ? LIGHT_RED
-                        : LIGHT_GREEN,
                     border:
                       isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? `solid 2px ${LIGHT_RED}`
@@ -325,7 +308,6 @@ export default function CategoryCard({
                   !isSaving && {
                     borderLeft: `0px`,
                     borderColor: LIGHT_RED,
-                    background: ULTRA_LIGHT_RED,
                   },
               }}
               onClick={() => !isSaving && setCategoryAsDeleted()}
@@ -373,7 +355,6 @@ export default function CategoryCard({
                       !isSaving &&
                       !category.active && {
                         color: !category.visible ? GREEN : RED,
-                        background: LIGHT_SILVER,
                       },
                   }}
                   onClick={() =>
@@ -417,9 +398,6 @@ export default function CategoryCard({
                         borderBottom: `solid 2px ${
                           category.visible ? LIGHT_SILVER : LIGHT_RED
                         }`,
-                        background: category.visible
-                          ? LIGHT_SILVER
-                          : ULTRA_LIGHT_RED,
                       },
                   }}
                   onClick={() => {
@@ -521,10 +499,6 @@ export default function CategoryCard({
                 '&:hover': !disableHover &&
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW && {
-                    background:
-                      isActive && !doesAnySubcategoryWithinCurrentCategoryActive
-                        ? LIGHT_RED
-                        : LIGHT_GREEN,
                     border:
                       isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? `solid 2px ${LIGHT_RED}`
@@ -569,7 +543,6 @@ export default function CategoryCard({
                 '&:hover': !disableHover &&
                   !isSaving && {
                     borderLeft: `0px`,
-                    background: LIGHT_SILVER,
                   },
               }}
               onClick={() =>
