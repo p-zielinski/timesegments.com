@@ -239,6 +239,7 @@ export default function SubcategoryCard({
                 !isSaving &&
                 viewMode === CategoriesPageMode.VIEW && {
                   border: isActive ? `solid 2px ${RED}` : `solid 2px ${GREEN}`,
+                  borderStyle: 'dashed',
                   borderLeft: 0,
                   borderRight: 0,
                 },
@@ -364,6 +365,7 @@ export default function SubcategoryCard({
                         borderBottom: `solid 2px ${
                           subcategory.visible ? LIGHT_SILVER : RED
                         }`,
+                        borderStyle: 'dashed',
                       },
                   }}
                   onClick={() => {
@@ -475,6 +477,7 @@ export default function SubcategoryCard({
                       ? `solid 2px ${RED}`
                       : `solid 2px ${GREEN}`,
                     borderLeft: 0,
+                    borderStyle: 'dashed',
                   },
               }}
               onClick={() =>
