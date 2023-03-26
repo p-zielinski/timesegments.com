@@ -269,6 +269,7 @@ export default function CategoryCard({
                       isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? `solid 2px ${RED}`
                         : `solid 2px ${GREEN}`,
+                    borderStyle: 'dashed',
                     borderLeft: 0,
                     borderRight: 0,
                   },
@@ -503,6 +504,7 @@ export default function CategoryCard({
                       isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? `solid 2px ${RED}`
                         : `solid 2px ${GREEN}`,
+                    borderStyle: 'dashed',
                     borderLeft: 0,
                     borderRight: 0,
                   },
