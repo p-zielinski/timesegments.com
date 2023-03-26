@@ -490,7 +490,18 @@ export default function CategoryCard({
                       ? `solid 2px ${LIGHT_GREEN}`
                       : `solid 2px ${LIGHT_RED}`,
                 borderLeft: 0,
-                borderRight: 0,
+                borderRight:
+                  getVisibleSubcategories(category, categories).length ||
+                  viewMode !== CategoriesPageMode.VIEW
+                    ? 0
+                    : isActive
+                      ? `solid 2px ${LIGHT_GREEN}`
+                      : `solid 2px ${LIGHT_RED}`,
+                borderRadius:
+                  getVisibleSubcategories(category, categories).length ||
+                  viewMode !== CategoriesPageMode.VIEW
+                    ? 0
+                    : '12px',
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,
                 cursor:
@@ -504,9 +515,15 @@ export default function CategoryCard({
                       isActive && !doesAnySubcategoryWithinCurrentCategoryActive
                         ? `solid 2px ${RED}`
                         : `solid 2px ${GREEN}`,
-                    borderStyle: 'dashed',
                     borderLeft: 0,
-                    borderRight: 0,
+                    borderRight:
+                      getVisibleSubcategories(category, categories).length ||
+                      viewMode !== CategoriesPageMode.VIEW
+                        ? 0
+                        : !isActive
+                          ? `solid 2px ${GREEN}`
+                          : `solid 2px ${RED}`,
+                    borderStyle: 'dashed',
                   },
               }}
               onClick={() =>
@@ -527,40 +544,43 @@ export default function CategoryCard({
                 </Typography>
               </Stack>
             </Box>
-            <Box
-              sx={{
-                width: `60px`,
-                p: 2,
-                color: isSaving
-                  ? IS_SAVING_HEX
-                  : !getCategory(category, categories)?.expandSubcategories
-                    ? GREEN
-                    : RED,
-                background: `white`,
-                border: `solid 2px ${LIGHT_SILVER}`,
-                borderLeft: `0px`,
-                borderTopRightRadius: 12,
-                borderBottomRightRadius: 12,
-                cursor: !isSaving && 'pointer',
-                '&:hover': !disableHover &&
-                  !isSaving && {
-                    borderLeft: `0px`,
-                  },
-              }}
-              onClick={() =>
-                !isSaving && reverseExpandSubcategories(category, categories)
-              }
-            >
-              <Iconify
-                icon={
-                  getCategory(category, categories)?.expandSubcategories
-                    ? 'eva:chevron-up-fill'
-                    : 'eva:chevron-down-fill'
+            {(getVisibleSubcategories(category, categories).length ||
+              viewMode !== CategoriesPageMode.VIEW) && (
+              <Box
+                sx={{
+                  width: `60px`,
+                  p: 2,
+                  color: isSaving
+                    ? IS_SAVING_HEX
+                    : !getCategory(category, categories)?.expandSubcategories
+                      ? GREEN
+                      : RED,
+                  background: `white`,
+                  border: `solid 2px ${LIGHT_SILVER}`,
+                  borderLeft: `0px`,
+                  borderTopRightRadius: 12,
+                  borderBottomRightRadius: 12,
+                  cursor: !isSaving && 'pointer',
+                  '&:hover': !disableHover &&
+                    !isSaving && {
+                      borderLeft: `0px`,
+                    },
+                }}
+                onClick={() =>
+                  !isSaving && reverseExpandSubcategories(category, categories)
                 }
-                width={50}
-                sx={{m: -2, position: 'absolute', bottom: 27, right: 20}}
-              />
-            </Box>
+              >
+                <Iconify
+                  icon={
+                    getCategory(category, categories)?.expandSubcategories
+                      ? 'eva:chevron-up-fill'
+                      : 'eva:chevron-down-fill'
+                  }
+                  width={50}
+                  sx={{m: -2, position: 'absolute', bottom: 27, right: 20}}
+                />
+              </Box>
+            )}
           </Box>
         </Card>
       )}

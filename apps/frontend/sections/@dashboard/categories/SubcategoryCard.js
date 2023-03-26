@@ -365,7 +365,6 @@ export default function SubcategoryCard({
                         borderBottom: `solid 2px ${
                           subcategory.visible ? LIGHT_SILVER : RED
                         }`,
-                        borderStyle: 'dashed',
                       },
                   }}
                   onClick={() => {
