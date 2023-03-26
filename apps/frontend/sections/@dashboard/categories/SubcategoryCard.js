@@ -238,9 +238,7 @@ export default function SubcategoryCard({
               '&:hover': !disableHover &&
                 !isSaving &&
                 viewMode === CategoriesPageMode.VIEW && {
-                  border: isActive
-                    ? `solid 2px ${LIGHT_RED}`
-                    : `solid 2px ${LIGHT_GREEN}`,
+                  border: isActive ? `solid 2px ${RED}` : `solid 2px ${GREEN}`,
                   borderLeft: 0,
                   borderRight: 0,
                 },
@@ -279,7 +277,7 @@ export default function SubcategoryCard({
               '&:hover': !disableHover &&
                 !isSaving && {
                   borderLeft: `0px`,
-                  borderColor: LIGHT_RED,
+                  borderColor: RED,
                 },
             }}
             onClick={() => !isSaving && setSubcategoryAsDeleted()}
@@ -361,10 +359,10 @@ export default function SubcategoryCard({
                     '&:hover': !disableHover &&
                       !isSaving && {
                         borderTop: `solid 2px ${
-                          subcategory.visible ? LIGHT_SILVER : LIGHT_RED
+                          subcategory.visible ? LIGHT_SILVER : RED
                         }`,
                         borderBottom: `solid 2px ${
-                          subcategory.visible ? LIGHT_SILVER : LIGHT_RED
+                          subcategory.visible ? LIGHT_SILVER : RED
                         }`,
                       },
                   }}
@@ -474,8 +472,8 @@ export default function SubcategoryCard({
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW && {
                     border: isActive
-                      ? `solid 2px ${LIGHT_RED}`
-                      : `solid 2px ${LIGHT_GREEN}`,
+                      ? `solid 2px ${RED}`
+                      : `solid 2px ${GREEN}`,
                     borderLeft: 0,
                   },
               }}
