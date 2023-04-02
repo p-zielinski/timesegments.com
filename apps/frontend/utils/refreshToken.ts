@@ -6,6 +6,7 @@ export const refreshToken = () => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}token/return-token-set-cookie`, {
       method: 'POST',
       headers: {
+        withCredentials: 'true',
         'Content-Type': 'application/json',
         jwt_token,
       },

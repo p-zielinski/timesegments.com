@@ -31,16 +31,12 @@ export class TokenController {
     const date = new Date();
     date.setDate(date.getDate() + returnTokenSetCookieDto.days);
     const cookieConfig = {
-      maxAge: 1000 * 60 * 60 * 24 * (returnTokenSetCookieDto.days || 400),
-      httpOnly: true,
-      secure: true,
+      maxAge: 1000 * 60 * 60 * 24 * (returnTokenSetCookieDto.days || 1),
       sameSite: true,
+      httpOnly: true,
+      secure: true, // important!
     };
-    response.cookie(
-      'jwt_token',
-      (headers as Partial<{ jwt_token: string }>).jwt_token,
-      cookieConfig
-    );
+    response.cookie('jwt_token', 123, cookieConfig);
   }
 
   @Post('revoke')
