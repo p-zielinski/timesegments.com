@@ -28,20 +28,20 @@ CategoryCard.propTypes = {
 };
 
 export default function CategoryCard({
-                                       controlValue,
-                                       setControlValue,
-                                       category,
-                                       categories,
-                                       setCategories,
-                                       viewMode,
-                                       isEditing,
-                                       setIsEditing,
-                                       isSaving,
-                                       setIsSaving,
-                                       limits,
-                                       disableHover,
-                                     }) {
-  const {active: isActive} = category;
+  controlValue,
+  setControlValue,
+  category,
+  categories,
+  setCategories,
+  viewMode,
+  isEditing,
+  setIsEditing,
+  isSaving,
+  setIsSaving,
+  limits,
+  disableHover,
+}) {
+  const { active: isActive } = category;
 
   const doesAnySubcategoryWithinCurrentCategoryActive =
     !!category.subcategories.find((subcategory) => subcategory.active);
@@ -56,7 +56,7 @@ export default function CategoryCard({
             expandSubcategories: !_category.expandSubcategories,
           };
         }
-        return {..._category};
+        return { ..._category };
       })
     );
   };
@@ -66,8 +66,8 @@ export default function CategoryCard({
       categories
         .find((_category) => _category.id === category.id)
         ?.subcategories?.filter((subcategory) =>
-        viewMode === CategoriesPageMode.EDIT ? true : subcategory.visible
-      ) || []
+          viewMode === CategoriesPageMode.EDIT ? true : subcategory.visible
+        ) || []
     );
   };
 
@@ -91,9 +91,9 @@ export default function CategoryCard({
         categories.map((category) => {
           const subcategories = category.subcategories;
           if (category.id === response.category?.id) {
-            return {...response.category, subcategories};
+            return { ...response.category, subcategories };
           }
-          return {...category, subcategories};
+          return { ...category, subcategories };
         })
       );
       if (response.controlValue) {
@@ -111,7 +111,7 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: {categoryId: category.id, controlValue},
+      body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
@@ -122,9 +122,9 @@ export default function CategoryCard({
             return subcategory;
           });
           if (category.id === response.category?.id) {
-            return {...response.category, subcategories};
+            return { ...response.category, subcategories };
           }
-          return {...category, active: false, subcategories};
+          return { ...category, active: false, subcategories };
         })
       );
       if (response.controlValue) {
@@ -161,7 +161,7 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-as-deleted',
-      body: {categoryId: category.id, controlValue},
+      body: { categoryId: category.id, controlValue },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
@@ -180,7 +180,7 @@ export default function CategoryCard({
   };
 
   return (
-    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {isEditing.categoryId === category.id &&
       viewMode === CategoriesPageMode.EDIT ? (
         <EditCategory
@@ -196,7 +196,7 @@ export default function CategoryCard({
         />
       ) : isEditing?.deleteCategory === category.id ? (
         <Card>
-          <Box sx={{display: 'flex'}}>
+          <Box sx={{ display: 'flex' }}>
             <Box
               sx={{
                 width: `60px`,
@@ -206,8 +206,8 @@ export default function CategoryCard({
                 background: isSaving
                   ? `white`
                   : category.active
-                    ? SUPER_LIGHT_SILVER
-                    : 'white',
+                  ? SUPER_LIGHT_SILVER
+                  : 'white',
                 border: `solid 2px ${LIGHT_SILVER}`,
                 borderRight: `0px`,
                 borderTopLeftRadius: 12,
@@ -241,15 +241,15 @@ export default function CategoryCard({
                 background: isSaving
                   ? SUPER_LIGHT_SILVER
                   : viewMode === CategoriesPageMode.EDIT
-                    ? getRepeatingLinearGradient(
+                  ? getRepeatingLinearGradient(
                       isSaving ? IS_SAVING_HEX : getHexFromRGBAString(RED),
                       0.3,
                       45,
                       false
                     )
-                    : isActive
-                      ? LIGHT_GREEN
-                      : LIGHT_RED,
+                  : isActive
+                  ? LIGHT_GREEN
+                  : LIGHT_RED,
                 flex: 1,
                 border: isSaving
                   ? `solid 2px ${IS_SAVING_HEX}`
@@ -278,7 +278,7 @@ export default function CategoryCard({
             >
               <Stack
                 spacing={1}
-                sx={{p: 3}}
+                sx={{ p: 3 }}
                 direction="row"
                 alignItems="center"
                 justifyContent="left"
@@ -286,7 +286,7 @@ export default function CategoryCard({
                 <Typography variant="subtitle3" noWrap>
                   DELETE:{' '}
                   <span
-                    style={{fontWeight: 'bold', textDecoration: 'underline'}}
+                    style={{ fontWeight: 'bold', textDecoration: 'underline' }}
                   >
                     {getCategory(category, categories)?.name?.toUpperCase()}
                   </span>{' '}
@@ -328,7 +328,7 @@ export default function CategoryCard({
         </Card>
       ) : (
         <Card>
-          <Box sx={{display: 'flex'}}>
+          <Box sx={{ display: 'flex' }}>
             {viewMode === CategoriesPageMode.EDIT && (
               <>
                 <Box
@@ -340,13 +340,13 @@ export default function CategoryCard({
                       isSaving || category.active
                         ? IS_SAVING_HEX
                         : category.visible
-                          ? GREEN
-                          : RED,
+                        ? GREEN
+                        : RED,
                     background: isSaving
                       ? `white`
                       : category.active
-                        ? SUPER_LIGHT_SILVER
-                        : 'white',
+                      ? SUPER_LIGHT_SILVER
+                      : 'white',
                     border: `solid 2px ${LIGHT_SILVER}`,
                     borderRight: `0px`,
                     borderTopLeftRadius: 12,
@@ -385,8 +385,8 @@ export default function CategoryCard({
                     color: isSaving
                       ? IS_SAVING_HEX
                       : category.visible
-                        ? GREEN
-                        : RED,
+                      ? GREEN
+                      : RED,
                     background: `white`,
                     borderTop: `solid 2px ${LIGHT_SILVER}`,
                     borderBottom: `solid 2px ${LIGHT_SILVER}`,
@@ -449,11 +449,11 @@ export default function CategoryCard({
                   border: isSaving
                     ? `solid 2px ${IS_SAVING_HEX}`
                     : isActive
-                      ? `solid 2px ${getHexFromRGBAObject({
+                    ? `solid 2px ${getHexFromRGBAObject({
                         ...getRgbaObjectFromHexString(category?.color),
                         a: 0.3,
                       })}`
-                      : `solid 2px ${getHexFromRGBAObject({
+                    : `solid 2px ${getHexFromRGBAObject({
                         ...getRgbaObjectFromHexString(category?.color),
                         a: 0.3,
                       })}`,
@@ -469,34 +469,34 @@ export default function CategoryCard({
                 background: isSaving
                   ? SUPER_LIGHT_SILVER
                   : viewMode === CategoriesPageMode.EDIT
-                    ? getRepeatingLinearGradient(
+                  ? getRepeatingLinearGradient(
                       isSaving ? IS_SAVING_HEX : category?.color,
                       0.3,
                       45,
                       false
                     )
-                    : isActive
-                      ? LIGHT_GREEN
-                      : LIGHT_RED,
+                  : isActive
+                  ? LIGHT_GREEN
+                  : LIGHT_RED,
                 flex: 1,
                 border: isSaving
                   ? `solid 2px ${IS_SAVING_HEX}`
                   : viewMode === CategoriesPageMode.EDIT
-                    ? `solid 2px ${getHexFromRGBAObject({
+                  ? `solid 2px ${getHexFromRGBAObject({
                       ...getRgbaObjectFromHexString(category?.color),
                       a: 0.3,
                     })}`
-                    : isActive
-                      ? `solid 2px ${LIGHT_GREEN}`
-                      : `solid 2px ${LIGHT_RED}`,
+                  : isActive
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
                 borderLeft: 0,
                 borderRight:
                   getVisibleSubcategories(category, categories).length ||
                   viewMode !== CategoriesPageMode.VIEW
                     ? 0
                     : isActive
-                      ? `solid 2px ${LIGHT_GREEN}`
-                      : `solid 2px ${LIGHT_RED}`,
+                    ? `solid 2px ${LIGHT_GREEN}`
+                    : `solid 2px ${LIGHT_RED}`,
                 borderRadius:
                   getVisibleSubcategories(category, categories).length ||
                   viewMode !== CategoriesPageMode.VIEW
@@ -521,8 +521,8 @@ export default function CategoryCard({
                       viewMode !== CategoriesPageMode.VIEW
                         ? 0
                         : !isActive
-                          ? `solid 2px ${GREEN}`
-                          : `solid 2px ${RED}`,
+                        ? `solid 2px ${GREEN}`
+                        : `solid 2px ${RED}`,
                     borderStyle: 'dashed',
                   },
               }}
@@ -534,7 +534,7 @@ export default function CategoryCard({
             >
               <Stack
                 spacing={1}
-                sx={{p: 3}}
+                sx={{ p: 3 }}
                 direction="row"
                 alignItems="center"
                 justifyContent="left"
@@ -553,8 +553,8 @@ export default function CategoryCard({
                   color: isSaving
                     ? IS_SAVING_HEX
                     : !getCategory(category, categories)?.expandSubcategories
-                      ? GREEN
-                      : RED,
+                    ? GREEN
+                    : RED,
                   background: `white`,
                   border: `solid 2px ${LIGHT_SILVER}`,
                   borderLeft: `0px`,
@@ -577,7 +577,7 @@ export default function CategoryCard({
                       : 'eva:chevron-down-fill'
                   }
                   width={50}
-                  sx={{m: -2, position: 'absolute', bottom: 27, right: 20}}
+                  sx={{ m: -2, position: 'absolute', bottom: 27, right: 20 }}
                 />
               </Box>
             )}
@@ -585,10 +585,13 @@ export default function CategoryCard({
         </Card>
       )}
 
-      {getCategory(category, categories)?.expandSubcategories ||
-      getVisibleSubcategories(category, categories).filter(
-        (subcategory) => subcategory.active
-      ).length ? (
+      {viewMode === CategoriesPageMode.VIEW &&
+      !getVisibleSubcategories(category, categories)
+        .length ? undefined : getCategory(category, categories)
+          ?.expandSubcategories ||
+        getVisibleSubcategories(category, categories).filter(
+          (subcategory) => subcategory.active
+        ).length ? (
         <Grid container spacing={2} columns={12}>
           <Grid key={'edit_categories'} item xs={1} sm={1} md={1}></Grid>
           <Grid item xs={11} sm={11} md={11}>
@@ -602,34 +605,29 @@ export default function CategoryCard({
                   {getVisibleSubcategories(category, categories) ||
                   viewMode === CategoriesPageMode.EDIT ? (
                     <Box
-                      sx={{display: 'flex', flexDirection: 'column', gap: 2}}
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
                       {getVisibleSubcategories(category, categories).length ||
-                      viewMode === CategoriesPageMode.EDIT ? (
-                        getVisibleSubcategories(category, categories).map(
-                          (subcategory) => (
-                            <SubcategoryCard
-                              controlValue={controlValue}
-                              setControlValue={setControlValue}
-                              key={subcategory.id}
-                              disableHover={disableHover}
-                              subcategory={subcategory}
-                              categories={categories}
-                              setCategories={setCategories}
-                              isEditing={isEditing}
-                              setIsEditing={setIsEditing}
-                              viewMode={viewMode}
-                              isSaving={isSaving}
-                              setIsSaving={setIsSaving}
-                            />
+                      viewMode === CategoriesPageMode.EDIT
+                        ? getVisibleSubcategories(category, categories).map(
+                            (subcategory) => (
+                              <SubcategoryCard
+                                controlValue={controlValue}
+                                setControlValue={setControlValue}
+                                key={subcategory.id}
+                                disableHover={disableHover}
+                                subcategory={subcategory}
+                                categories={categories}
+                                setCategories={setCategories}
+                                isEditing={isEditing}
+                                setIsEditing={setIsEditing}
+                                viewMode={viewMode}
+                                isSaving={isSaving}
+                                setIsSaving={setIsSaving}
+                              />
+                            )
                           )
-                        )
-                      ) : (
-                        <ShowNoShow
-                          isSaving={isSaving}
-                          type={ShowNoShowType.SUBCATEGORIES}
-                        />
-                      )}
+                        : undefined}
                       {viewMode === CategoriesPageMode.EDIT && (
                         <>
                           {category.subcategories.length <
@@ -639,7 +637,7 @@ export default function CategoryCard({
                               setControlValue={setControlValue}
                               disableHover={disableHover}
                               type={CreateNewType.SUBCATEGORY}
-                              data={{categoryId: category.id}}
+                              data={{ categoryId: category.id }}
                               isEditing={isEditing}
                               setIsEditing={setIsEditing}
                               category={category}
@@ -659,9 +657,9 @@ export default function CategoryCard({
                   ) : undefined}
                 </>
               ) : viewMode === CategoriesPageMode.EDIT ||
-              getVisibleSubcategories(category, categories).filter(
-                (subcategory) => subcategory.active
-              ).length ? (
+                getVisibleSubcategories(category, categories).filter(
+                  (subcategory) => subcategory.active
+                ).length ? (
                 getVisibleSubcategories(category, categories)
                   .filter((subcategory) => subcategory.active)
                   .map((subcategory) => (

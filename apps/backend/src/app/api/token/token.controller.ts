@@ -2,9 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Headers,
   Post,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { TokenService } from './token.service';
@@ -13,31 +11,11 @@ import { Token, User } from '@prisma/client';
 import { RevokeSingleTokenDto } from './dto/revokeSingleToken.dto';
 import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
-import { Response } from 'express';
-import { ReturnTokenSetCookieDto } from './dto/returnTokenSetCookie.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('token')
 export class TokenController {
   constructor(private tokenService: TokenService) {}
-
-  @Post('return-token-set-cookie')
-  returnCookie(
-    @UserDecorator() user: User,
-    @Res({ passthrough: true }) response: Response,
-    @Headers() headers: Headers,
-    @Body() returnTokenSetCookieDto: ReturnTokenSetCookieDto
-  ) {
-    const date = new Date();
-    date.setDate(date.getDate() + returnTokenSetCookieDto.days);
-    const cookieConfig = {
-      maxAge: 1000 * 60 * 60 * 24 * (returnTokenSetCookieDto.days || 1),
-      sameSite: true,
-      httpOnly: true,
-      secure: true, // important!
-    };
-    response.cookie('jwt_token', 123, cookieConfig);
-  }
 
   @Post('revoke')
   async handleRequestRevokeToken(

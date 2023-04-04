@@ -13,19 +13,19 @@ import {RenderAuthLink} from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
 import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
-import {refreshToken} from '../utils/refreshToken';
 import {handleFetch} from '../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
+import Cookies from 'cookies';
 
 // ---------------------------------------------------------------------
 
-const StyledRoot = styled('div')(({theme}) => ({
+const StyledRoot = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     display: 'flex',
   },
 }));
 
-const StyledSection = styled('div')(({theme}) => ({
+const StyledSection = styled('div')(({ theme }) => ({
   width: '100%',
   maxWidth: 480,
   display: 'flex',
@@ -35,7 +35,7 @@ const StyledSection = styled('div')(({theme}) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-const StyledContent = styled('div')(({theme}) => ({
+const StyledContent = styled('div')(({ theme }) => ({
   maxWidth: 480,
   margin: 'auto',
   minHeight: '100vh',
@@ -51,14 +51,10 @@ type Props = {
 };
 
 export default function Index({
-                                user: serverSideFetchedUser,
-                                limits: serverSideFetchedLimits,
-                              }: Props) {
+  user: serverSideFetchedUser,
+  limits: serverSideFetchedLimits,
+}: Props) {
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
-
-  useEffect(() => {
-    refreshToken();
-  }, []);
 
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
     serverSideFetchedUser
@@ -191,7 +187,7 @@ export default function Index({
         <StyledRoot>
           {mdUp && (
             <StyledSection>
-              <Typography variant="h3" sx={{px: 5, mt: 10, mb: 5}}>
+              <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
                 Hi, Welcome Back
               </Typography>
               <img
@@ -207,11 +203,11 @@ export default function Index({
                 {currentPageState === AuthPageState.LOGIN
                   ? `Sign in to ${process.env.NEXT_PUBLIC_APP_NAME}`
                   : currentPageState === AuthPageState.REGISTER
-                    ? `Sign up to ${process.env.NEXT_PUBLIC_APP_NAME}`
-                    : `Recover account`}
+                  ? `Sign up to ${process.env.NEXT_PUBLIC_APP_NAME}`
+                  : `Recover account`}
               </Typography>
 
-              <Typography variant="body2" sx={{mb: 3}}>
+              <Typography variant="body2" sx={{ mb: 3 }}>
                 <RenderAuthLink
                   currentPageState={currentPageState}
                   setCurrentPageState={setCurrentPageState}
@@ -253,7 +249,7 @@ export default function Index({
             direction="row"
             spacing={1}
             flexShrink={0}
-            sx={{mt: -3, mb: 3}}
+            sx={{ mt: -3, mb: 3 }}
           >
             <Sort
               user={user}
@@ -282,37 +278,46 @@ export default function Index({
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const {jwt_token} = context.req.cookies;
-
+export const getServerSideProps = async ({ req, res }) => {
+  const cookies = new Cookies(req, res);
+  const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndSubcategories, limits: Limits;
-  try {
-    const responseUser = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
-      {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          jwt_token,
-        },
-        body: JSON.stringify({
-          extend: [
-            MeExtendedOption.CATEGORIES,
-            MeExtendedOption.SUBCATEGORIES,
-            MeExtendedOption.CATEGORIES_LIMIT,
-            MeExtendedOption.SUBCATEGORIES_LIMIT,
-          ],
-        }),
-      }
-    );
-    const response = await responseUser.json();
-    user = response.user;
-    limits = response.limits;
-  } catch (e) {
-    console.log(e);
+  if (jwt_token) {
+    try {
+      const responseUser = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
+        {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+            jwt_token,
+          },
+          body: JSON.stringify({
+            extend: [
+              MeExtendedOption.CATEGORIES,
+              MeExtendedOption.SUBCATEGORIES,
+              MeExtendedOption.CATEGORIES_LIMIT,
+              MeExtendedOption.SUBCATEGORIES_LIMIT,
+            ],
+          }),
+        }
+      );
+      const response = await responseUser.json();
+      user = response.user;
+      limits = response.limits;
+    } catch (e) {
+      console.log(e);
+      cookies.set('jwt_token');
+    }
+    cookies.set('jwt_token', jwt_token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: true,
+      maxAge: 1000 * 60 * 60 * 24 * 400,
+    });
   }
 
   return {
-    props: {user: user ?? null, limits: limits ?? null},
+    props: { user: user ?? null, limits: limits ?? null },
   };
 };

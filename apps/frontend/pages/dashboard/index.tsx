@@ -15,7 +15,6 @@ import dynamic from 'next/dynamic';
 // sections
 import DashboardLayout from '../../layouts/dashboard';
 import React, { useEffect, useState } from 'react';
-import { refreshToken } from '../../utils/refreshToken';
 import { User } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { FromToDate, Timezones } from '@test1/shared';
@@ -39,6 +38,7 @@ import {
   ULTRA_LIGHT_GREEN,
   ULTRA_LIGHT_RED,
 } from '../../consts/colors';
+import Cookies from 'cookies';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -204,10 +204,6 @@ export default function Index({
       );
     })();
   }, [activeDate]);
-
-  useEffect(() => {
-    refreshToken();
-  }, []);
 
   const getTitle = (activeDate: DateTime) => {
     const daysDifference = deleteIfValueIsFalseFromObject(
@@ -516,8 +512,9 @@ export default function Index({
   );
 }
 
-export const getServerSideProps = async (context) => {
-  const { jwt_token } = context.req.cookies;
+export const getServerSideProps = async ({ req, res }) => {
+  const cookies = new Cookies(req, res);
+  const jwt_token = cookies.get('jwt_token');
 
   let user;
   try {
@@ -534,6 +531,7 @@ export const getServerSideProps = async (context) => {
     user = (await responseUser.json()).user;
   } catch (e) {
     console.log(e);
+    cookies.set('jwt_token');
   }
 
   if (!user) {
@@ -544,6 +542,13 @@ export const getServerSideProps = async (context) => {
       },
     };
   }
+
+  cookies.set('jwt_token', jwt_token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: true,
+    maxAge: 1000 * 60 * 60 * 24 * 400,
+  });
 
   let allTimeLogs = [];
   let categories = [];
