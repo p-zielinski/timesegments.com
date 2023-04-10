@@ -12,4 +12,4 @@ export const subcategoriesLimit = isNumber(
   ? Number(process.env?.['MAX_NUMBER_OF_SUBCATEGORIES_PER_CATEGORY'])
   : 10;
 
-export const jwtSecretToken = process.env?.['JWT_SECRET_TOKEN'];
+export const jwtSecretToken: string = process.env?.['JWT_SECRET_TOKEN'];

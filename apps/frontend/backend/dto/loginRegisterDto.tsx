@@ -1,4 +1,4 @@
-export const registerDto = {
+export const loginRegisterDto = {
   type: 'object',
   properties: {
     email: { type: 'string' },
