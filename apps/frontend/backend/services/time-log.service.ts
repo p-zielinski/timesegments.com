@@ -1,10 +1,9 @@
-import { PrismaClient, TimeLog, User } from '@prisma/client';
+import { TimeLog, User } from '@prisma/client';
 import { FromToDate, Timezones } from '@test1/shared';
 import { DateTime } from 'luxon';
 import { findManyCategoriesIfInIdList } from './category.service';
 import { findManySubcategoriesIfInIdList } from './subcategory.service';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma.service';
 
 export const findFromToTimeLogsEnrichedWithCategoriesAndSubcategories = async (
   user: User,

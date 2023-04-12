@@ -1,11 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { loginRegisterDto } from '../../../backend/dto/loginRegisterDto';
+import { loginRegisterDto } from '../../../backend/dto/user/loginRegisterDto';
 import { MeExtendedOption } from '@test1/shared';
 import {
   getMeExtended,
   validateUser,
 } from '../../../backend/services/user.service';
 import { validateRequestBody } from '../../../backend/utils/validateRequestBody';
+import {
+  internalServerErrorResponse,
+  noResponse,
+} from '../../../backend/utils/responses';
 
 export default async function loginController(
   req: NextApiRequest,
@@ -31,22 +35,15 @@ export default async function loginController(
           }
           const { user, limits } = await getMeExtended(
             validatingResult.user.id,
-            [
-              MeExtendedOption.CATEGORIES,
-              MeExtendedOption.SUBCATEGORIES,
-              MeExtendedOption.CATEGORIES_LIMIT,
-              MeExtendedOption.SUBCATEGORIES_LIMIT,
-            ]
+            Object.values(MeExtendedOption)
           );
-          return res.status(200).json({ ...validatingResult, user, limits });
+          return res.status(201).json({ ...validatingResult, user, limits });
         }
         default:
-          return res
-            .status(400)
-            .json({ error: 'No Response for This Request' });
+          return noResponse(res);
       }
     } catch (error) {
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return internalServerErrorResponse(res);
     }
   })();
 }

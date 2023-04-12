@@ -7,12 +7,7 @@ export const meExtendedDto = {
       type: 'array',
       items: {
         type: 'string',
-        enum: [
-          MeExtendedOption.CATEGORIES,
-          MeExtendedOption.SUBCATEGORIES,
-          MeExtendedOption.CATEGORIES_LIMIT,
-          MeExtendedOption.SUBCATEGORIES_LIMIT,
-        ],
+        enum: Object.values(MeExtendedOption),
       },
     },
   },

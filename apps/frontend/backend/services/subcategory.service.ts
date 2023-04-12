@@ -1,19 +1,15 @@
-import {
-  Category,
-  Prisma,
-  PrismaClient,
-  Subcategory,
-  User,
-} from '@prisma/client';
+import { Category, Prisma, Subcategory, User } from '@prisma/client';
 import {
   createNewTimeLog,
   findFirstTimeLogWhereNotEnded,
   setTimeLogAsEnded,
 } from './time-log.service';
-import { setCategoryActiveState } from './category.service';
+import {
+  findCategoryIfNotDeleted,
+  setCategoryActiveState,
+} from './category.service';
 import { subcategoriesLimit } from './config.service';
-
-const prisma = new PrismaClient();
+import { prisma } from './prisma.service';
 
 export const createSubcategory = async (
   user: User,
@@ -21,7 +17,7 @@ export const createSubcategory = async (
   name: string,
   color: string
 ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> => {
-  const categoryWithUser = await findIfNotDeleted(categoryId, {
+  const categoryWithUser = await findCategoryIfNotDeleted(categoryId, {
     user: true,
   });
   if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
@@ -61,7 +57,7 @@ export const updateVisibilitySubcategory = async (
   visible: boolean,
   user: User
 ): Promise<{ success: boolean; error?: string; subcategory?: Subcategory }> => {
-  const subcategoryWithUser = await findIfNotDeleted(subcategoryId, {
+  const subcategoryWithUser = await findSubcategoryIfNotDeleted(subcategoryId, {
     user: true,
   });
   if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
@@ -103,10 +99,13 @@ export const setSubcategoryActive = async (
     }
   | { success: false; error: string }
 > => {
-  const subcategoryWithUserAndCategory = await findIfNotDeleted(subcategoryId, {
-    user: true,
-    category: true,
-  });
+  const subcategoryWithUserAndCategory = await findSubcategoryIfNotDeleted(
+    subcategoryId,
+    {
+      user: true,
+      category: true,
+    }
+  );
   if (
     !subcategoryWithUserAndCategory ||
     subcategoryWithUserAndCategory?.user?.id !== user.id
@@ -200,7 +199,7 @@ export const updateSubcategory = async (
   name: string,
   color?: string
 ) => {
-  const subcategoryWithUser = await findIfNotDeleted(subcategoryId, {
+  const subcategoryWithUser = await findSubcategoryIfNotDeleted(subcategoryId, {
     user: true,
   });
   if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
@@ -230,7 +229,7 @@ export const setSubcategoryAsDeleted = async (
   subcategoryId: string,
   user: User
 ) => {
-  const subcategoryWithUser = await findIfNotDeleted(subcategoryId, {
+  const subcategoryWithUser = await findSubcategoryIfNotDeleted(subcategoryId, {
     user: true,
   });
   if (!subcategoryWithUser || subcategoryWithUser?.user?.id !== user.id) {
@@ -271,7 +270,7 @@ const countCategorySubcategoriesNotDeleted = async (categoryId: string) => {
   return await prisma.subcategory.count({ where: { categoryId } });
 };
 
-const findIfNotDeleted = async (
+const findSubcategoryIfNotDeleted = async (
   subcategoryId: string,
   include: Prisma.SubcategoryInclude = null
 ) => {

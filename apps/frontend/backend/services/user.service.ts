@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Timezone, User } from '@prisma/client';
+import { Prisma, Timezone, User } from '@prisma/client';
 import { isNumber } from 'lodash';
 import { hashString } from '../utils/hashString';
 import { generateToken } from './token.service';
@@ -13,8 +13,8 @@ import {
 } from './time-log.service';
 import { setCategoryActiveState } from './category.service';
 import { setSubcategoryActiveState } from './subcategory.service';
+import { prisma } from './prisma.service';
 
-const prisma = new PrismaClient();
 export const createNewUser = async (
   data: { email: string; plainPassword: string; timezone: Timezone },
   options?: { generateToken: boolean }

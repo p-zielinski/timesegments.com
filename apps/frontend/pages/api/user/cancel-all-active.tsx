@@ -1,15 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
+  badResponse,
+  defaultOkResponse,
   internalServerErrorResponse,
+  invalidControlValueResponse,
   noResponse,
   unauthorizedResponse,
 } from '../../../backend/utils/responses';
-import { setSortingCategories } from '../../../backend/services/user.service';
+import { cancelAllActive } from '../../../backend/services/user.service';
 import { validateRequestToken } from '../../../backend/utils/validateRequestToken';
 import { validateRequestBody } from '../../../backend/utils/validateRequestBody';
-import { setSortingCategoriesDto } from '../../../backend/dto/user/setSortingCategoriesDto';
+import { cancelAllActiveDto } from '../../../backend/dto/user/cancelAllActiveDto';
 
-export default async function setSortingCategoriesController(
+export default async function cancelAllActiveController(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -17,25 +20,26 @@ export default async function setSortingCategoriesController(
     try {
       switch (req.method) {
         case 'POST': {
+          const { errors } = validateRequestBody(cancelAllActiveDto, req);
+          if (errors) {
+            return badResponse(res, { errors });
+          }
+          const { controlValue } = req.body;
           const validationResult = await validateRequestToken(req);
           if (!validationResult) {
             return unauthorizedResponse(res);
           }
           const { user } = validationResult;
-          const { errors } = validateRequestBody(setSortingCategoriesDto, req);
-          if (errors) {
-            return res.status(400).json({ errors });
+          if (user.controlValue !== controlValue) {
+            return invalidControlValueResponse(res);
           }
-          const updateSortingCategoriesStatus = await setSortingCategories(
-            user,
-            req.body
-          );
-          if (!updateSortingCategoriesStatus.success) {
-            return res.status(400).json({
-              error: updateSortingCategoriesStatus.error,
+          const cancelAllActiveStatus = await cancelAllActive(user);
+          if (cancelAllActiveStatus.success === false) {
+            return badResponse(res, {
+              error: cancelAllActiveStatus.error,
             });
           }
-          return res.status(201).json(updateSortingCategoriesStatus);
+          return defaultOkResponse(res, cancelAllActiveStatus);
         }
         default:
           return noResponse(res);
