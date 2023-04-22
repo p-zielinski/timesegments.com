@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { Prisma, Token, User } from '@prisma/client';
-import { prisma } from './prisma.service';
+import { Prisma, PrismaClient, Token, User } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const isDate = (date: object) => {
   return date instanceof Date && !isNaN(date.valueOf());

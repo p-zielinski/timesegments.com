@@ -1,13 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { validateRequestToken } from '../../../backend/utils/validateRequestToken';
-import {
-  internalServerErrorResponse,
-  noResponse,
-  unauthorizedResponse,
-} from '../../../backend/utils/responses';
-import { validateRequestBody } from '../../../backend/utils/validateRequestBody';
-import { fromToDatesDto } from '../../../backend/dto/time-log/fromToDatesDto';
-import { findFromToTimeLogsEnrichedWithCategoriesAndSubcategories } from '../../../backend/services/time-log.service';
 
 export default async function findExtendedController(
   req: NextApiRequest,
@@ -17,34 +8,41 @@ export default async function findExtendedController(
     try {
       switch (req.method) {
         case 'POST': {
-          const validationResult = await validateRequestToken(req);
-          if (!validationResult) {
-            return unauthorizedResponse(res);
-          }
-          const { user } = validationResult;
-          const { errors } = validateRequestBody(fromToDatesDto, req);
-          if (errors) {
-            return res.status(400).json({ errors });
-          }
-          const { from, to } = req.body;
-          const findFromToTimeLogsResult =
-            await findFromToTimeLogsEnrichedWithCategoriesAndSubcategories(
-              user,
-              from,
-              to
-            );
-          if (findFromToTimeLogsResult.success === false) {
-            return res.status(400).json({
-              error: findFromToTimeLogsResult.error,
-            });
-          }
-          return res.status(201).json(findFromToTimeLogsResult);
+          // const { body, errors } = validateRequest(registerDto, req.body, res);
+          // if (errors) {
+          //   return res.status(400).json({ errors });
+          // }
+          // const { email, password: plainPassword } = body;
+          // const registeringResult = await createNewUser(
+          //   {
+          //     email,
+          //     plainPassword,
+          //     timezone: 'EUROPE__WARSAW',
+          //   },
+          //   { generateToken: true }
+          // );
+          // if (registeringResult.success === false) {
+          //   return res.status(400).json({
+          //     error: registeringResult.error,
+          //   });
+          // }
+          // const { limits } = await getMeExtended(registeringResult.user.id, [
+          //   MeExtendedOption.CATEGORIES_LIMIT,
+          //   MeExtendedOption.SUBCATEGORIES_LIMIT,
+          // ]);
+          // return res.status(200).json({
+          //   ...registeringResult,
+          //   user: { ...registeringResult.user, categories: [] },
+          //   limits,
+          // });
         }
         default:
-          return noResponse(res);
+          return res
+            .status(400)
+            .json({ error: 'No Response for This Request' });
       }
     } catch (error) {
-      return internalServerErrorResponse(res);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
   })();
 }

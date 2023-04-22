@@ -1,10 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-  internalServerErrorResponse,
-  noResponse,
-  unauthorizedResponse,
-} from '../../../backend/utils/responses';
+import { unauthorizedResponse } from '../../../backend/utils/responses';
 import { validateRequestToken } from '../../../backend/utils/validateRequestToken';
 
 export default async function meController(
@@ -20,13 +16,15 @@ export default async function meController(
             return unauthorizedResponse(res);
           }
           const { user } = validationResult;
-          return res.status(200).json({ user });
+          return res.status(200).json(user);
         }
         default:
-          return noResponse(res);
+          return res
+            .status(400)
+            .json({ error: 'No Response for This Request' });
       }
     } catch (error) {
-      return internalServerErrorResponse(res);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
   })();
 }

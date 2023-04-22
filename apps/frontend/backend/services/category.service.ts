@@ -1,4 +1,4 @@
-import { Category, Prisma, User } from '@prisma/client';
+import { Category, Prisma, PrismaClient, User } from '@prisma/client';
 import {
   createNewTimeLog,
   findFirstTimeLogWhereNotEnded,
@@ -6,8 +6,8 @@ import {
 } from './time-log.service';
 import { setSubcategoryActiveState } from './subcategory.service';
 import { categoriesLimit } from './config.service';
-import { prisma } from './prisma.service';
 
+const prisma = new PrismaClient();
 export const createCategory = async (
   user: User,
   name: string,

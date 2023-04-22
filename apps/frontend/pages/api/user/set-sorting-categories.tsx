@@ -1,15 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import {
-  internalServerErrorResponse,
-  noResponse,
-  unauthorizedResponse,
-} from '../../../backend/utils/responses';
+import { unauthorizedResponse } from '../../../backend/utils/responses';
 import { setSortingCategories } from '../../../backend/services/user.service';
 import { validateRequestToken } from '../../../backend/utils/validateRequestToken';
-import { validateRequestBody } from '../../../backend/utils/validateRequestBody';
-import { setSortingCategoriesDto } from '../../../backend/dto/user/setSortingCategoriesDto';
 
-export default async function setSortingCategoriesController(
+export default async function meController(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -22,10 +16,6 @@ export default async function setSortingCategoriesController(
             return unauthorizedResponse(res);
           }
           const { user } = validationResult;
-          const { errors } = validateRequestBody(setSortingCategoriesDto, req);
-          if (errors) {
-            return res.status(400).json({ errors });
-          }
           const updateSortingCategoriesStatus = await setSortingCategories(
             user,
             req.body
@@ -35,13 +25,15 @@ export default async function setSortingCategoriesController(
               error: updateSortingCategoriesStatus.error,
             });
           }
-          return res.status(201).json(updateSortingCategoriesStatus);
+          return res.status(200).json(updateSortingCategoriesStatus);
         }
         default:
-          return noResponse(res);
+          return res
+            .status(400)
+            .json({ error: 'No Response for This Request' });
       }
     } catch (error) {
-      return internalServerErrorResponse(res);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
   })();
 }

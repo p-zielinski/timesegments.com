@@ -2,9 +2,15 @@ import { NextApiRequest } from 'next';
 import { verifyJWT } from '../services/jwt.service';
 import { findOneToken } from '../services/token.service';
 
+const getBearerToken = (req: NextApiRequest) => {
+  const authorization = req.headers?.authorization;
+  if (typeof authorization !== 'string' || authorization?.length < 8)
+    return null;
+  return authorization.slice(7);
+};
 export const validateRequestToken = async (req: NextApiRequest) => {
-  const rawToken = req.headers?.jwt_token;
-  if (!rawToken || typeof rawToken !== 'string') {
+  const rawToken = getBearerToken(req);
+  if (!rawToken) {
     return false;
   }
   const jwtPayload = verifyJWT(rawToken);
