@@ -1,11 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { loginRegisterDto } from '../../../backend/dto/loginRegisterDto';
+import validateRequest from '../../../backend/utils/validateRequest';
+import { registerDto } from '../../../backend/dto/registerDto';
+import { createNewUser, getMeExtended } from '../../../backend/services/user';
 import { MeExtendedOption } from '@test1/shared';
-import {
-  createNewUser,
-  getMeExtended,
-} from '../../../backend/services/user.service';
-import { validateRequestBody } from '../../../backend/utils/validateRequestBody';
 
 export default async function registerController(
   req: NextApiRequest,
@@ -15,11 +12,11 @@ export default async function registerController(
     try {
       switch (req.method) {
         case 'POST': {
-          const { errors } = validateRequestBody(loginRegisterDto, req);
+          const { body, errors } = validateRequest(registerDto, req.body, res);
           if (errors) {
             return res.status(400).json({ errors });
           }
-          const { email, password: plainPassword } = req.body;
+          const { email, password: plainPassword } = body;
           const registeringResult = await createNewUser(
             {
               email,

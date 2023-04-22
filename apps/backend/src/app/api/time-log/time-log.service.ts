@@ -64,7 +64,7 @@ export class TimeLogService {
     });
   }
 
-  public async createNewTimeLog(
+  public async createNew(
     userId: string,
     categoryId?: string,
     subcategoryId?: string
