@@ -25,7 +25,7 @@ export default async function setCookie(
 
           res.setHeader(
             'Set-Cookie',
-            `${name}=${value}; path=/; max-age=${1000 * 60 * 60 * 24 * 400}`
+            `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 400}`
           );
           return res.status(200).json({});
         }
