@@ -29,7 +29,7 @@ import { TimeLogController } from './api/time-log/time-log.controller';
       validationSchema: ValidationSchema,
     }),
     JwtModule.register({
-      secret: process.env['JWT' + '_SECRET'],
+      secret: process.env.JWT_SECRET,
       signOptions: { noTimestamp: true },
     }),
   ],

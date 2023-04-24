@@ -3,18 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Token, User } from '@prisma/client';
 import { TokenService } from '../../api/token/token.service';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(
-    private tokenService: TokenService,
-    private readonly configService: ConfigService
-  ) {
+  constructor(private tokenService: TokenService) {
     super({
       jwtFromRequest: ExtractJwt.fromHeader('jwt_token'),
       ignoreExpiration: true,
-      secretOrKey: configService.get<number>('JWT_SECRET'),
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 
@@ -23,7 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     tokenId?: string;
     expiresAt?: string;
   }): Promise<{ user: User; currentToken: Token } | false> {
-    console.log(payload);
     if (!payload?.tokenId || !payload?.userId) {
       return false;
     }
