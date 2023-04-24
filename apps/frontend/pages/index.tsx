@@ -279,7 +279,6 @@ export default function Index({
 
 export const getServerSideProps = async ({req, res}) => {
   const cookies = new Cookies(req, res);
-  console.log(req.cookies);
   const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndSubcategories, limits: Limits;
   if (jwt_token) {
@@ -303,6 +302,7 @@ export const getServerSideProps = async ({req, res}) => {
         }
       );
       const response = await responseUser.json();
+      console.log(response);
       user = response.user;
       limits = response.limits;
     } catch (e) {
