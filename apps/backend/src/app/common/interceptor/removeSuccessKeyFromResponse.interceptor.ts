@@ -1,11 +1,10 @@
 import {
+  CallHandler,
+  ExecutionContext,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
-import setKeyInObjectAsUndefined from '../setKeyInObjectAsUndefined';
 
 @Injectable()
 export class RemoveSuccessKeyFromResponse implements NestInterceptor {
@@ -14,7 +13,7 @@ export class RemoveSuccessKeyFromResponse implements NestInterceptor {
       .handle()
       .pipe(
         map((data) =>
-          !!data && typeof data === 'object'
+          !!data && data instanceof Object
             ? { ...data, success: undefined }
             : data
         )
