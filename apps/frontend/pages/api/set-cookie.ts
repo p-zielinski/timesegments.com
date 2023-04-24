@@ -16,7 +16,7 @@ export default async function setCookie(
     try {
       switch (req.method) {
         case 'POST': {
-          const { name, value } = req.body;
+          const {name, value} = req.body;
           if (!validateString(name) || !validateString(value)) {
             return res.status(400).json({
               error:
@@ -32,7 +32,7 @@ export default async function setCookie(
             name,
             value,
             httpOnly: process.env.NODE_ENV === 'production',
-            secure: process.env.NODE_ENV === 'production',
+            secure: false,
             sameSite: false,
             maxAge: 1000 * 60 * 60 * 24 * 400,
           });
@@ -42,10 +42,10 @@ export default async function setCookie(
         default:
           return res
             .status(400)
-            .json({ error: 'No Response for This Request' });
+            .json({error: 'No Response for This Request'});
       }
     } catch (error) {
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({error: 'Internal Server Error'});
     }
   })();
 }
