@@ -1,10 +1,7 @@
-import {Helmet} from 'react-helmet-async';
-// @mui
+import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
-import {Container, Stack, Typography} from '@mui/material';
-// hooks
-import useResponsive from '../hooks/useResponsive';
-// sections
+import {Container, Stack, Typography} from '@mui/material'; // hooks
+import useResponsive from '../hooks/useResponsive'; // sections
 import {AuthForm} from '../sections/auth';
 import {useEffect, useState} from 'react';
 import {AuthPageState, CategoryWithSubcategories, Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
@@ -15,7 +12,7 @@ import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import Cookies from 'cookies';
+import Cookies from 'cookies'; // ---------------------------------------------------------------------
 
 // ---------------------------------------------------------------------
 
@@ -175,10 +172,6 @@ export default function Index({
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
-
-  useEffect(() => {
-    fetchExtendedUser();
-  }, []);
 
   if (!user) {
     return (

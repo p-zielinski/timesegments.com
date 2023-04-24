@@ -15,7 +15,7 @@ export class CheckControlValueGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
-      const { user } = request.user;
+      const { user } = request;
       const bodyControlValue = request.body?.controlValue;
       if (
         typeof bodyControlValue === 'string' &&
