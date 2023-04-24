@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromHeader('jwt_token'),
       jsonWebTokenOptions: { ignoreExpiration: true },
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: '123',
     });
   }
 
@@ -23,7 +23,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     tokenId?: string;
     expiresAt?: string;
   }): Promise<{ user: User; currentToken: Token } | false> {
-    console.log(payload);
     if (!payload?.tokenId || !payload?.userId) {
       return false;
     }
