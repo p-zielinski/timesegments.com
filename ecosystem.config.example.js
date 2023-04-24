@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'timesegs-frontend',
       version: '1.0.0',
-      script: 'npm run start:frontend',
+      script: 'npm run build:frontend && npm run start:frontend',
       env: {
         PORT: 20122,
         NEXT_PUBLIC_APP_NAME: 'Timesegs',
@@ -13,7 +13,7 @@ module.exports = {
     {
       name: 'timesegs-backend',
       version: '1.0.0',
-      script: 'npm run start:backend',
+      script: 'npm run build:backend && npm run start:backend',
       env: {
         PORT: 30122,
         DATABASE_URL:

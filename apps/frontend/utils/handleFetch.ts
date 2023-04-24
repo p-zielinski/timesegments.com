@@ -14,8 +14,8 @@ export const handleFetch = async ({
   additionalHeaders?: object;
   sentToken?: boolean;
 }) => {
-  console.log({ NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL });
   if (typeof process.env.NEXT_PUBLIC_API_URL !== 'string') {
+    console.log({ NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL });
     throw new Error('misconfiguration of NEXT_PUBLIC_API_URL');
   }
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
