@@ -18,12 +18,12 @@ import {timezoneOptions} from '../../consts/timezoneOptions';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({
-  authPageState,
-  setAuthPageState,
-  setUser,
-  setCategories,
-  setLimits,
-}) {
+                                   authPageState,
+                                   setAuthPageState,
+                                   setUser,
+                                   setCategories,
+                                   setLimits,
+                                 }) {
   const getTimezoneOptionsForSelectWithSearch = () => {
     const timezoneOptionsResult = [];
     for (const key of Object.keys(timezoneOptions)) {
@@ -58,9 +58,15 @@ export default function AuthForm({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
+      if (typeof process.env.NEXT_PUBLIC_FRONTEND_URL !== 'string') {
+        console.log({
+          NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
+        });
+        throw new Error('misconfiguration of NEXT_PUBLIC_API_URL');
+      }
       await handleFetch({
         pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
-        body: { name: 'jwt_token', value: response.token },
+        body: {name: 'jwt_token', value: response.token},
         method: 'POST',
       });
       setUser(response.user);
@@ -74,8 +80,8 @@ export default function AuthForm({
 
   return (
     <Formik
-      initialValues={{ email: '', password: '', timezone: '' }}
-      onSubmit={async (values, { setSubmitting }) => {
+      initialValues={{email: '', password: '', timezone: ''}}
+      onSubmit={async (values, {setSubmitting}) => {
         setError(undefined);
         const valuesAndEmailToLowerCase = {
           ...values,
@@ -93,20 +99,20 @@ export default function AuthForm({
         AuthPageState.LOGIN === authPageState
           ? loginSchema
           : AuthPageState.RECOVER_ACCOUNT === authPageState
-          ? recoverSchema
-          : registerSchema
+            ? recoverSchema
+            : registerSchema
       }
     >
       {({
-        handleSubmit,
-        isSubmitting,
-        values,
-        errors,
-        isValid,
-        setFieldValue,
-        touched,
-        setErrors,
-      }) => {
+          handleSubmit,
+          isSubmitting,
+          values,
+          errors,
+          isValid,
+          setFieldValue,
+          touched,
+          setErrors,
+        }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         useEffect(() => {
           setErrors({});
@@ -115,7 +121,7 @@ export default function AuthForm({
         return (
           <>
             <Stack spacing={3}>
-              <InputText type="text" name="email" label="Email address" />
+              <InputText type="text" name="email" label="Email address"/>
               {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
                 authPageState
               ) && (
@@ -157,13 +163,13 @@ export default function AuthForm({
               direction="row"
               alignItems="center"
               justifyContent="end"
-              sx={{ my: 2, mt: 1 }}
+              sx={{my: 2, mt: 1}}
             >
               {authPageState !== AuthPageState.RECOVER_ACCOUNT && (
                 <Link
                   variant="subtitle2"
                   underline="hover"
-                  sx={{ cursor: 'pointer' }}
+                  sx={{cursor: 'pointer'}}
                   onClick={() =>
                     setAuthPageState(AuthPageState.RECOVER_ACCOUNT)
                   }
