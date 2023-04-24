@@ -524,7 +524,7 @@ export const getServerSideProps = async ({ req, res }) => {
         method: 'GET',
         headers: {
           'Content-type': 'application/json',
-          jwt_token,
+          authorization: `Bearer ${jwt_token}`,
         },
       }
     );
