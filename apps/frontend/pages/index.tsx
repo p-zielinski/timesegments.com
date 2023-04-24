@@ -19,13 +19,13 @@ import Cookies from 'cookies';
 
 // ---------------------------------------------------------------------
 
-const StyledRoot = styled('div')(({theme}) => ({
+const StyledRoot = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     display: 'flex',
   },
 }));
 
-const StyledSection = styled('div')(({theme}) => ({
+const StyledSection = styled('div')(({ theme }) => ({
   width: '100%',
   maxWidth: 480,
   display: 'flex',
@@ -35,7 +35,7 @@ const StyledSection = styled('div')(({theme}) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-const StyledContent = styled('div')(({theme}) => ({
+const StyledContent = styled('div')(({ theme }) => ({
   maxWidth: 480,
   margin: 'auto',
   minHeight: '100vh',
@@ -51,9 +51,9 @@ type Props = {
 };
 
 export default function Index({
-                                user: serverSideFetchedUser,
-                                limits: serverSideFetchedLimits,
-                              }: Props) {
+  user: serverSideFetchedUser,
+  limits: serverSideFetchedLimits,
+}: Props) {
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
 
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
@@ -176,6 +176,10 @@ export default function Index({
     setDisableHover(isMobile);
   }, [isMobile]);
 
+  useEffect(() => {
+    fetchExtendedUser();
+  }, []);
+
   if (!user) {
     return (
       <>
@@ -186,7 +190,7 @@ export default function Index({
         <StyledRoot>
           {mdUp && (
             <StyledSection>
-              <Typography variant="h3" sx={{px: 5, mt: 10, mb: 5}}>
+              <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
                 Hi, Welcome Back
               </Typography>
               <img
@@ -202,11 +206,11 @@ export default function Index({
                 {currentPageState === AuthPageState.LOGIN
                   ? `Sign in to ${process.env.NEXT_PUBLIC_APP_NAME}`
                   : currentPageState === AuthPageState.REGISTER
-                    ? `Sign up to ${process.env.NEXT_PUBLIC_APP_NAME}`
-                    : `Recover account`}
+                  ? `Sign up to ${process.env.NEXT_PUBLIC_APP_NAME}`
+                  : `Recover account`}
               </Typography>
 
-              <Typography variant="body2" sx={{mb: 3}}>
+              <Typography variant="body2" sx={{ mb: 3 }}>
                 <RenderAuthLink
                   currentPageState={currentPageState}
                   setCurrentPageState={setCurrentPageState}
@@ -248,7 +252,7 @@ export default function Index({
             direction="row"
             spacing={1}
             flexShrink={0}
-            sx={{mt: -3, mb: 3}}
+            sx={{ mt: -3, mb: 3 }}
           >
             <Sort
               user={user}
@@ -277,7 +281,7 @@ export default function Index({
   );
 }
 
-export const getServerSideProps = async ({req, res}) => {
+export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndSubcategories, limits: Limits;
@@ -318,6 +322,6 @@ export const getServerSideProps = async ({req, res}) => {
   }
 
   return {
-    props: {user: user ?? null, limits: limits ?? null},
+    props: { user: user ?? null, limits: limits ?? null },
   };
 };
