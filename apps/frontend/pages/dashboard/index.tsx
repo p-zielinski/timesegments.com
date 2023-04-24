@@ -544,9 +544,9 @@ export const getServerSideProps = async ({ req, res }) => {
   }
 
   cookies.set('jwt_token', jwt_token, {
-    httpOnly: true,
-    secure: false,
-    sameSite: true,
+    httpOnly: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: false,
     maxAge: 1000 * 60 * 60 * 24 * 400,
   });
 

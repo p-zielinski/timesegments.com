@@ -8,6 +8,7 @@ module.exports = {
         PORT: 20122,
         NEXT_PUBLIC_APP_NAME: 'Timesegs',
         NEXT_PUBLIC_API_URL: 'https://timesegs-backend.cytr.us/api/',
+        NEXT_PUBLIC_FRONTEND_URL: 'https://timesegs.cytr.us/',
       },
     },
     {
