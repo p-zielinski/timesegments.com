@@ -570,7 +570,7 @@ export const getServerSideProps = async ({ req, res }) => {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',
-          jwt_token,
+          authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({ from, to }),
       }

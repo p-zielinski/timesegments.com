@@ -36,7 +36,7 @@ export const handleFetch = async ({
       headers: {
         ...additionalHeaders,
         'Content-Type': 'application/json',
-        jwt_token,
+        authorization: `Bearer ${jwt_token}`,
       },
     });
     statusCode = rawResponse.statusCode || rawResponse.status;

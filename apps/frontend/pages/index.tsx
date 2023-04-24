@@ -293,7 +293,7 @@ export const getServerSideProps = async ({ req, res }) => {
           method: 'POST',
           headers: {
             'Content-type': 'application/json',
-            jwt_token,
+            authorization: `Bearer ${jwt_token}`,
           },
           body: JSON.stringify({
             extend: [
@@ -306,7 +306,6 @@ export const getServerSideProps = async ({ req, res }) => {
         }
       );
       const response = await responseUser.json();
-      console.log(response);
       user = response.user;
       limits = response.limits;
     } catch (e) {
