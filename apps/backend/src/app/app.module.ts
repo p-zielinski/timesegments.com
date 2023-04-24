@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserService } from './api/user/user.service';
 import { PrismaService } from './prisma.service';
@@ -21,8 +20,6 @@ import { TimeLogService } from './api/time-log/time-log.service';
 import { TokenController } from './api/token/token.controller';
 import { TimeLogController } from './api/time-log/time-log.controller';
 
-//nx g @nrwl/nest:service --project backend --directory app/api
-
 @Module({
   imports: [
     PrismaModule.forRoot({
@@ -32,12 +29,11 @@ import { TimeLogController } from './api/time-log/time-log.controller';
       validationSchema: ValidationSchema,
     }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env['JWT_SECRET'],
       signOptions: { noTimestamp: true },
     }),
   ],
   controllers: [
-    AppController,
     UserController,
     CategoryController,
     SubcategoryController,
