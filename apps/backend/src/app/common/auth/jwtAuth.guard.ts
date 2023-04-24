@@ -50,13 +50,15 @@ export class JwtAuthGuard implements CanActivate {
       const tokenWithoutUserRelation = { ...token, user: undefined };
       request['user'] = token.user;
       request['currentToken'] = tokenWithoutUserRelation as Token;
-    } catch {
+    } catch (error) {
+      console.log(error);
       throw new UnauthorizedException();
     }
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string {
+    console.log(request.headers);
     const { jwt_token } = request.headers;
     return typeof jwt_token === 'string' ? jwt_token : undefined;
   }
