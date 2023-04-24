@@ -17,6 +17,7 @@ import {
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
+import { findKeyOfValueInObject } from '../../common/findKeyOfValueInObject';
 
 @Injectable()
 export class UserService {
@@ -144,7 +145,10 @@ export class UserService {
             data.plainPassword,
             this.configService.get<number>('SALT_ROUNDS')
           ),
-          timezone: Timezones[data.timezone] as Timezone,
+          timezone: findKeyOfValueInObject(
+            Timezones,
+            data.timezone
+          ) as Timezone,
         },
       });
       if (!options?.generateToken) {
