@@ -22,6 +22,7 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const jwtToken = this.extractTokenFromHeader(request);
     if (!jwtToken) {
+      console.log('missing jwt token');
       throw new UnauthorizedException();
     }
     try {
@@ -29,12 +30,14 @@ export class JwtAuthGuard implements CanActivate {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
       if (!payload?.tokenId || !payload?.userId) {
+        console.log('missing correct payload');
         return false;
       }
       const token = await this.tokenService.findOne(payload.tokenId, {
         user: true,
       });
       if (!token?.id || !token?.user?.id) {
+        console.log('missing token lub user in database');
         return false;
       }
       if (
