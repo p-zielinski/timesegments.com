@@ -4,9 +4,9 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
-    "start:frontend": "nx serve frontend --prod --skip-nx-cache --port=$PORT --hostname 0.0.0.0",
+    "start:frontend": "nx serve frontend --prod --port=$PORT --hostname 0.0.0.0",
     "start:backend": "prisma migrate dev; nx serve backend --prod",
-    "build:frontend": "prisma generate;nx build frontend --prod",
+    "build:frontend": "prisma generate;nx build frontend --prod --skip-nx-cache",
     "build:backend": "prisma generate;nx build backend --prod",
     "build:all": "prisma generate;nx build frontend --prod;nx build backend --prod",
     "test": "nx test",
