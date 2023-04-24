@@ -1,11 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { NextResponse } from 'next/server';
 
 const validateString = (string: any): boolean => {
   if (typeof string !== 'string') {
     return false;
   }
-  return !(string.length === 0 || string.length > 100);
+  return string.length !== 0;
 };
 
 export default async function setCookie(
@@ -16,7 +15,7 @@ export default async function setCookie(
     try {
       switch (req.method) {
         case 'POST': {
-          const {name, value} = req.body;
+          const { name, value } = req.body;
           if (!validateString(name) || !validateString(value)) {
             return res.status(400).json({
               error:
@@ -24,28 +23,19 @@ export default async function setCookie(
             });
           }
 
-          // To change a cookie, first create a response
-          const response = NextResponse.next();
-
-          // Setting a cookie with additional options
-          response.cookies.set({
-            name,
-            value,
-            httpOnly: false,
-            secure: false,
-            sameSite: false,
-            maxAge: 1000 * 60 * 60 * 24 * 400,
-          });
-
-          return response;
+          res.setHeader(
+            'Set-Cookie',
+            `${name}=${value}; path=/; max-age=${1000 * 60 * 60 * 24 * 400}`
+          );
+          return res.status(200).json({});
         }
         default:
           return res
             .status(400)
-            .json({error: 'No Response for This Request'});
+            .json({ error: 'No Response for This Request' });
       }
     } catch (error) {
-      return res.status(500).json({error: 'Internal Server Error'});
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
   })();
 }

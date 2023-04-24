@@ -23,7 +23,7 @@ export const handleFetch = async ({
   const jwt_token = sentToken ? Cookies.get('jwt_token') : undefined;
   const url = !pathOrUrl
     ? apiUrl
-    : pathOrUrl?.includes('https://')
+    : pathOrUrl?.includes('https://') || pathOrUrl?.includes('http://')
     ? pathOrUrl
     : apiUrl + pathOrUrl;
   const fetchBody = ['GET'].includes(method.toUpperCase())
