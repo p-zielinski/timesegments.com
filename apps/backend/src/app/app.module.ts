@@ -9,7 +9,6 @@ import { UserController } from './api/user/user.controller';
 import { ConfigModule } from '@nestjs/config';
 import { ValidationSchema } from '../configs/validationSchema';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './common/auth/jwt.strategy';
 import { TokenService } from './api/token/token.service';
 import { LoggerService } from './common/logger/loger.service';
 import { CategoryController } from './api/category/category.controller';
@@ -29,7 +28,7 @@ import { TimeLogController } from './api/time-log/time-log.controller';
       validationSchema: ValidationSchema,
     }),
     JwtModule.register({
-      secret: '123' || process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET,
       signOptions: { noTimestamp: true },
     }),
   ],
@@ -42,7 +41,6 @@ import { TimeLogController } from './api/time-log/time-log.controller';
   ],
   providers: [
     LoggerService,
-    JwtStrategy,
     AppService,
     PrismaService,
     UserService,

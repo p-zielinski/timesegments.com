@@ -4,6 +4,6 @@ import { Token } from '@prisma/client';
 export const CurrentTokenDecorator = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): Token => {
     const request = ctx.switchToHttp().getRequest();
-    return request.user.currentToken;
+    return request.currentToken;
   }
 );
