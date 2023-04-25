@@ -16,7 +16,6 @@ import {getRandomRgbObjectForSliderPicker} from '../../../utils/colors/getRandom
 import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 
 // ----------------------------------------------------------------------
@@ -42,8 +41,8 @@ export default function Nav({ openNav, onCloseNav, user, setUser }) {
   const [color] = useState(
     getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
-        getRgbaObjectFromHexString(getRandomRgbObjectForSliderPicker().hex),
-        'bright'
+        getRandomRgbObjectForSliderPicker().rgb,
+        'very bright'
       )
     )
   );

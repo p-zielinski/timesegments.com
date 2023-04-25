@@ -1,6 +1,6 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
-import {Container, Stack, Typography} from '@mui/material'; // hooks
+import {Box, Container, Stack, Typography} from '@mui/material'; // hooks
 import useResponsive from '../hooks/useResponsive'; // sections
 import {AuthForm} from '../sections/auth';
 import {useEffect, useState} from 'react';
@@ -17,7 +17,6 @@ import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObj
 import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
-
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -36,16 +35,6 @@ const StyledSection = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-const StyledContent = styled('div')(({ theme }) => ({
-  maxWidth: 480,
-  margin: 'auto',
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  flexDirection: 'column',
-  padding: theme.spacing(12, 0),
-}));
-
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
   limits: Limits;
@@ -58,6 +47,16 @@ export default function Index({
   limits: serverSideFetchedLimits,
   randomSliderColor: randomSliderColor,
 }: Props) {
+  const StyledContent = styled('div')(({ theme }) => ({
+    maxWidth: 480,
+    margin: 'auto',
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: isMobile ? 'start' : 'center',
+    flexDirection: 'column',
+    padding: theme.spacing(isMobile ? 6 : 12, 0),
+  }));
+
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
 
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
@@ -190,13 +189,14 @@ export default function Index({
         <StyledRoot>
           {mdUp && (
             <StyledSection>
-              <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
-                Hi, Welcome Back
+              <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 3 }}>
+                {currentPageState === AuthPageState.REGISTER
+                  ? 'Welcome!'
+                  : 'Hi, Welcome Back'}
               </Typography>
-              <img
-                src="/assets/illustrations/illustration_login.png"
-                alt="login"
-              />
+              <Box sx={{ ml: 5, mr: 5, mt: 0 }}>
+                <img src="/assets/clock.png" alt="login" />
+              </Box>
             </StyledSection>
           )}
 
@@ -346,7 +346,7 @@ export const getServerSideProps = async ({ req, res }) => {
       randomSliderColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,
-          'bright'
+          'very bright'
         )
       ),
     },
