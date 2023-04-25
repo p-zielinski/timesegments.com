@@ -23,7 +23,10 @@ const createRandomRGBObject = () => {
   }
 };
 
-export const getRandomRgbObjectForSliderPicker = () => {
+export const getRandomRgbObjectForSliderPicker = (): {
+  rgb: { r: number; g: number; b: number; a?: number };
+  hex: string;
+} => {
   const rgbObject = createRandomRGBObject();
   const newRgbObject = {};
   for (const key of Object.keys(rgbObject)) {
@@ -34,5 +37,8 @@ export const getRandomRgbObjectForSliderPicker = () => {
     newRgbObject[key] = Math.floor(rgbObject[key] / 2) + 64;
   }
   const hex = getHexFromRGBObject(newRgbObject);
-  return { rgb: newRgbObject, hex };
+  return {
+    rgb: newRgbObject as { r: number; g: number; b: number; a?: number },
+    hex,
+  };
 };

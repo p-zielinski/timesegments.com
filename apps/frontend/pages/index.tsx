@@ -12,7 +12,11 @@ import {CategoryList, Sort} from '../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import Cookies from 'cookies'; // ---------------------------------------------------------------------
+import Cookies from 'cookies';
+import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObjectForSliderPicker';
+import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
+import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
 
 // ---------------------------------------------------------------------
 
@@ -45,11 +49,14 @@ const StyledContent = styled('div')(({ theme }) => ({
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
   limits: Limits;
+
+  randomSliderColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
   limits: serverSideFetchedLimits,
+  randomSliderColor: randomSliderColor,
 }: Props) {
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
 
@@ -197,10 +204,29 @@ export default function Index({
             <StyledContent>
               <Typography variant="h4" gutterBottom>
                 {currentPageState === AuthPageState.LOGIN
-                  ? `Sign in to ${process.env.NEXT_PUBLIC_APP_NAME}`
+                  ? `Sign in to `
                   : currentPageState === AuthPageState.REGISTER
-                  ? `Sign up to ${process.env.NEXT_PUBLIC_APP_NAME}`
+                  ? `Sign up to `
                   : `Recover account`}
+                {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
+                  currentPageState
+                ) && (
+                  <span
+                    style={{
+                      color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
+                    }}
+                  >
+                    TimeSeg
+                    <span
+                      style={{
+                        color: randomSliderColor,
+                      }}
+                    >
+                      ment
+                    </span>
+                    s.com
+                  </span>
+                )}
               </Typography>
 
               <Typography variant="body2" sx={{ mb: 3 }}>
@@ -314,6 +340,15 @@ export const getServerSideProps = async ({ req, res }) => {
   }
 
   return {
-    props: { user: user ?? null, limits: limits ?? null },
+    props: {
+      user: user ?? null,
+      limits: limits ?? null,
+      randomSliderColor: getHexFromRGBObject(
+        getColorShadeBasedOnSliderPickerSchema(
+          getRandomRgbObjectForSliderPicker().rgb,
+          'bright'
+        )
+      ),
+    },
   };
 };

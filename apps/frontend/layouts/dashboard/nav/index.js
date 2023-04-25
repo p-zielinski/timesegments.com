@@ -14,6 +14,10 @@ import navConfig from './config';
 import {useRouter} from 'next/router';
 import {getRandomRgbObjectForSliderPicker} from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
+import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
+import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
+import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +39,14 @@ Nav.propTypes = {
 };
 
 export default function Nav({ openNav, onCloseNav, user, setUser }) {
-  const [color, setColor] = useState(getRandomRgbObjectForSliderPicker().hex);
+  const [color] = useState(
+    getHexFromRGBObject(
+      getColorShadeBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(getRandomRgbObjectForSliderPicker().hex),
+        'bright'
+      )
+    )
+  );
   const router = useRouter();
 
   const isDesktop = useResponsive('up', 'lg');
@@ -60,14 +71,22 @@ export default function Nav({ openNav, onCloseNav, user, setUser }) {
       <Typography
         variant="subtitle2"
         sx={{
-          color,
+          color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
           px: 2.5,
           py: 3,
           display: 'inline-flex',
           fontSize: 20,
         }}
       >
-        {process.env.NEXT_PUBLIC_APP_NAME}
+        TimeSeg
+        <span
+          style={{
+            color: color,
+          }}
+        >
+          ment
+        </span>
+        s.com
       </Typography>
 
       <Box sx={{ mb: 3, mx: 2.5 }}>
