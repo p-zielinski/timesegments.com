@@ -11,7 +11,7 @@ const navConfig = [
   },
   {
     title: 'settings',
-    path: '/settings',
+    path: '/dashboard/settings',
     icon: `material-symbols:settings`,
   },
   {
