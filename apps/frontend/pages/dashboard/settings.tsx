@@ -1,13 +1,16 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {Box, Container, Grid, Stack, Typography} from '@mui/material'; // components
 import DashboardLayout from '../../layouts/dashboard';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRepeatingLinearGradient} from '../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
 import {LIGHT_RED} from '../../consts/colors';
-import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker'; // ----------------------------------------------------------------------
+import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
+import {isMobile} from 'react-device-detect';
+import {handleFetch} from '../../utils/handleFetch';
+import {StatusCodes} from 'http-status-codes';
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +40,75 @@ export default function Index({
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [openedSettingOption, setOpenedSettingOption] =
     useState<SettingOption>(undefined);
+
+  const [disableHover, setDisableHover] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [controlValue, setControlValue] = useState(user?.controlValue);
+  const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
+
+  const fetchMe = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'user/me',
+      method: 'GET',
+    });
+    if (response.statusCode === StatusCodes.CREATED && response?.user) {
+      setUser(response.user);
+      setControlValue(response.user?.controlValue);
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      setUser(undefined);
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        setRefreshIntervalId(undefined);
+      }
+    }
+    setIsSaving(false);
+    return;
+  };
+
+  const checkControlValue = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'user/check-control-value',
+      body: {
+        controlValue,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setIsSaving(false);
+      return;
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      setUser(undefined);
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        setRefreshIntervalId(undefined);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      return fetchMe();
+    }
+    setIsSaving(false);
+    return;
+  };
+
+  useEffect(() => {
+    if (user && !controlValue) {
+      fetchMe();
+    }
+    if (user) {
+      if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+      }
+      const intervalId = setInterval(() => {
+        checkControlValue();
+      }, 2 * 60 * 1000);
+      setRefreshIntervalId(intervalId);
+    }
+  }, [controlValue]);
+
+  useEffect(() => {
+    setDisableHover(isMobile);
+  }, [isMobile]);
 
   const allSettingOptions = Object.keys(SettingOption);
 
@@ -85,7 +157,6 @@ export default function Index({
                           borderRight: 0,
                           borderTopLeftRadius: 12,
                           borderBottomLeftRadius: 12,
-                          cursor: 'hover',
                         }}
                       />
                       <Box
@@ -113,7 +184,7 @@ export default function Index({
                           borderTopLeftRadius: 0,
                           borderBottomLeftRadius: 0,
                           cursor: 'pointer',
-                          '&:hover': {
+                          '&:hover': !disableHover && {
                             border: isActive
                               ? `solid 2px ${LIGHT_RED}`
                               : `solid 2px ${getHexFromRGBAObject({
