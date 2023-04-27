@@ -6,25 +6,37 @@ import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRepeatingLinearGradient} from '../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
-import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
-import {LIGHT_GREEN, LIGHT_RED, SUPER_LIGHT_SILVER,} from '../../consts/colors';
+import {LIGHT_RED} from '../../consts/colors';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
-type Props = {
-  user: User;
+enum SettingOption {
+  SET_NAME = 'Set name',
+  CHANGE_PASSWORD = 'Change password',
+  CHANGE_EMAIL = 'Change email',
+  CHANGE_TIMEZONE = 'Change timezone',
+}
+
+type OptionsColors = {
+  SET_NAME: string;
+  CHANGE_PASSWORD: string;
+  CHANGE_EMAIL: string;
+  CHANGE_TIMEZONE: string;
 };
 
-export default function Index({ user: serverSideFetchedUser }: Props) {
+type Props = {
+  user: User;
+  optionsColors: OptionsColors;
+};
+
+export default function Index({
+  user: serverSideFetchedUser,
+  optionsColors,
+}: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [openedSettingOption, setOpenedSettingOption] =
     useState<SettingOption>(undefined);
-
-  enum SettingOption {
-    CHANGE_PASSWORD = 'Change password',
-    CHANGE_EMAIL = 'Change email',
-  }
 
   const allSettingOptions = Object.keys(SettingOption);
 
@@ -35,86 +47,103 @@ export default function Index({ user: serverSideFetchedUser }: Props) {
       </Helmet>
       <Container>
         <Grid container spacing={2} columns={1}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              width: '100%',
-            }}
-          >
-            {allSettingOptions.map((currentSettingOption) => {
-              const isActive =
-                openedSettingOption === SettingOption[currentSettingOption];
-              return (
-                <Box key={currentSettingOption}>
-                  <Box
-                    sx={{ display: 'flex', width: '100%' }}
-                    onClick={() =>
-                      isActive
-                        ? setOpenedSettingOption(undefined)
-                        : setOpenedSettingOption(
-                            SettingOption[currentSettingOption]
-                          )
-                    }
-                  >
+          <Grid item xs={1} sm={1} md={1}>
+            <Box sx={{ gap: 2, display: 'flex', flexDirection: 'column' }}>
+              {allSettingOptions.map((currentSettingOption) => {
+                const isActive =
+                  openedSettingOption === SettingOption[currentSettingOption];
+                return (
+                  <Box key={currentSettingOption}>
                     <Box
-                      sx={{
-                        width: `60px`,
-                        minWidth: '60px',
-                        p: 2,
-                        background: getRepeatingLinearGradient(
-                          getRandomRgbObjectForSliderPicker().hex,
-                          0.3
-                        ),
-                        border: `solid 2px ${getHexFromRGBAObject({
-                          ...getRgbaObjectFromHexString('#aaaaaa'),
-                          a: 0.3,
-                        })}`,
-                        borderRight: 0,
-                        borderTopLeftRadius: 12,
-                        borderBottomLeftRadius: 12,
-                        cursor: 'hover',
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        background: isActive ? LIGHT_GREEN : SUPER_LIGHT_SILVER,
-                        flex: 1,
-                        border: `solid 2px ${
-                          isActive ? LIGHT_GREEN : LIGHT_RED
-                        }`,
-                        borderLeft: 0,
-                        borderRadius: '12px',
-                        borderTopLeftRadius: 0,
-                        borderBottomLeftRadius: 0,
-                        '&:hover': {
-                          border: isActive
-                            ? `solid 2px ${LIGHT_RED}`
-                            : `solid 2px ${LIGHT_GREEN}`,
-                          borderStyle: isActive ? 'solid' : 'dashed',
-                          borderLeft: 0,
-                        },
-                      }}
+                      sx={{ display: 'flex', width: '100%' }}
+                      onClick={() =>
+                        isActive
+                          ? setOpenedSettingOption(undefined)
+                          : setOpenedSettingOption(
+                              SettingOption[currentSettingOption]
+                            )
+                      }
                     >
-                      <Stack
-                        spacing={1}
-                        sx={{ p: 3 }}
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="left"
+                      <Box
+                        sx={{
+                          width: `60px`,
+                          minWidth: '60px',
+                          p: 2,
+                          background: getRepeatingLinearGradient(
+                            optionsColors[currentSettingOption].hex,
+                            0.3
+                          ),
+                          border: isActive
+                            ? `solid 2px ${getHexFromRGBAObject({
+                                ...optionsColors[currentSettingOption].rgb,
+                                a: 0.5,
+                              })}`
+                            : `solid 2px ${getHexFromRGBAObject({
+                                ...optionsColors[currentSettingOption].rgb,
+                                a: 0.3,
+                              })}`,
+                          borderRight: 0,
+                          borderTopLeftRadius: 12,
+                          borderBottomLeftRadius: 12,
+                          cursor: 'hover',
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          background: isActive
+                            ? getHexFromRGBAObject({
+                                ...optionsColors[currentSettingOption].rgb,
+                                a: 0.24,
+                              })
+                            : getHexFromRGBAObject({
+                                ...optionsColors[currentSettingOption].rgb,
+                                a: 0.1,
+                              }),
+                          flex: 1,
+                          border: `solid 2px ${
+                            isActive
+                              ? getHexFromRGBAObject({
+                                  ...optionsColors[currentSettingOption].rgb,
+                                  a: 0.5,
+                                })
+                              : LIGHT_RED
+                          }`,
+                          borderLeft: 0,
+                          borderRadius: '12px',
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                          cursor: 'pointer',
+                          '&:hover': {
+                            border: isActive
+                              ? `solid 2px ${LIGHT_RED}`
+                              : `solid 2px ${getHexFromRGBAObject({
+                                  ...optionsColors[currentSettingOption].rgb,
+                                  a: 0.5,
+                                })}`,
+                            borderStyle: isActive ? 'solid' : 'dashed',
+                            borderLeft: 0,
+                          },
+                        }}
                       >
-                        <Typography variant="subtitle2" noWrap>
-                          {SettingOption[currentSettingOption]}
-                        </Typography>
-                      </Stack>
+                        <Stack
+                          spacing={1}
+                          sx={{ p: 3 }}
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="left"
+                        >
+                          <Typography variant="subtitle2" noWrap>
+                            {SettingOption[currentSettingOption]}
+                          </Typography>
+                        </Stack>
+                      </Box>
                     </Box>
+                    {isActive && <Box>active</Box>}
                   </Box>
-                  {isActive && <Box>active</Box>}
-                </Box>
-              );
-            })}
-          </Box>
+                );
+              })}
+            </Box>
+          </Grid>
         </Grid>
       </Container>
     </DashboardLayout>
@@ -162,6 +191,12 @@ export const getServerSideProps = async ({ req, res }) => {
   return {
     props: {
       user: user,
+      optionsColors: Object.fromEntries(
+        Object.entries(SettingOption).map((keyAndValue) => [
+          keyAndValue[0],
+          getRandomRgbObjectForSliderPicker(),
+        ])
+      ),
     },
   };
 };
