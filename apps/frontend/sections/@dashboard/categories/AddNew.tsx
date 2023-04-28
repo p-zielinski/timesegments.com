@@ -349,6 +349,7 @@ export default function AddNew({
                       type="text"
                       name={`${type}Name`}
                       label={`${capitalize(type)} name`}
+                      TextField={StyledTextField}
                       helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
                       disabled={isSaving}
                     />

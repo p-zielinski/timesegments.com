@@ -6,11 +6,12 @@ import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRepeatingLinearGradient} from '../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
-import {LIGHT_RED} from '../../consts/colors';
+import {LIGHT_RED, RED} from '../../consts/colors';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
+import EditName from '../../sections/@dashboard/settings/EditName'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -186,7 +187,7 @@ export default function Index({
                           cursor: 'pointer',
                           '&:hover': !disableHover && {
                             border: isActive
-                              ? `solid 2px ${LIGHT_RED}`
+                              ? `solid 2px ${RED}`
                               : `solid 2px ${getHexFromRGBAObject({
                                   ...optionsColors[currentSettingOption].rgb,
                                   a: 0.5,
@@ -209,7 +210,24 @@ export default function Index({
                         </Stack>
                       </Box>
                     </Box>
-                    {isActive && <Box>active</Box>}
+
+                    {isActive && (
+                      <>
+                        {openedSettingOption === SettingOption.SET_NAME && (
+                          <EditName
+                            controlValue={controlValue}
+                            setControlValue={setControlValue}
+                            disableHover={disableHover}
+                            user={user}
+                            setUser={setUser}
+                            isSaving={isSaving}
+                            setIsSaving={setIsSaving}
+                            color={optionsColors[currentSettingOption]}
+                            setOpenedSettingOption={setOpenedSettingOption}
+                          />
+                        )}
+                      </>
+                    )}
                   </Box>
                 );
               })}

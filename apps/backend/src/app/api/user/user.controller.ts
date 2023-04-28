@@ -16,6 +16,7 @@ import { MeExtendedOption } from '@test1/shared';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 import { RegisterDto } from './dto/register.dto';
+import { SetNameDto } from './dto/setName.dto';
 
 @Controller('user')
 export class UserController {
@@ -88,6 +89,22 @@ export class UserController {
   ) {
     const { extend } = meExtendedDto;
     return await this.userService.getMeExtended(user.id, extend);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('set-name')
+  async handleRequestSetName(
+    @UserDecorator() user: User,
+    @Body() setNameDto: SetNameDto
+  ) {
+    const { name } = setNameDto;
+    const updateNameStatus = await this.userService.setName(user, name);
+    if (!updateNameStatus.success) {
+      throw new BadRequestException({
+        error: updateNameStatus.error,
+      });
+    }
+    return updateNameStatus;
   }
 
   @UseGuards(JwtAuthGuard)

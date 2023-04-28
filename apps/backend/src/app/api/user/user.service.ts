@@ -216,6 +216,29 @@ export class UserService {
     };
   }
 
+  async setName(user: User, name: string) {
+    if (user.name === name) {
+      return { success: true, name };
+    }
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { name, controlValue: nanoid() },
+        select: { name: true, controlValue: true },
+      });
+      if (updatedUser.name === name) {
+        return { success: true, name, controlValue: updatedUser.controlValue };
+      }
+    } catch (error) {
+      this.loggerService.error(error);
+    }
+
+    return {
+      success: false,
+      error: `Could not update sortingCategories to: ${ColumnSortOption}`,
+    };
+  }
+
   async setSortingCategories(user: User, sortingCategories: ColumnSortOption) {
     if (user.sortingCategories === sortingCategories) {
       return { success: true, sortingCategories };
