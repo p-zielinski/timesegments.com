@@ -12,23 +12,20 @@ import Iconify from '../../../components/iconify';
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../../../components/form/Text';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
-import { StatusCodes } from 'http-status-codes';
+import { Timezones } from '@test1/shared';
+import InputText from '../../../components/form/Text';
 
-export default function EditName({
-  controlValue,
-  setControlValue,
+export default function ChangePassword({
   disableHover,
   user,
   isSaving,
   setIsSaving,
   color,
-  setUser,
   setOpenedSettingOption,
 }) {
   let StyledTextField, darkHexColor;
@@ -67,45 +64,55 @@ export default function EditName({
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
   const [initialValues, setInitialValues] = useState({
-    name: user.name || '',
+    currentPassword: '',
+    newPassword: '',
+    newPassword2: '',
   });
 
-  const saveName = async (name: string, resetForm: () => void) => {
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string,
+    resetForm: () => void
+  ) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'user/set-name',
-      body: { name },
+      pathOrUrl: 'user/change-timezone',
+      body: { currentPassword, newPassword },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED) {
-      setInitialValues({
-        name,
-      });
-      resetForm();
-      setUser({ ...user, name });
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
-      }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
-      return; //skip setting isSaving(false)
-    }
+    // if (response.statusCode === StatusCodes.CREATED) {
+    //   setInitialValues({
+    //     timezone,
+    //   });
+    //   resetForm();
+    //   setUser({ ...user, timezone });
+    //   if (response.controlValue) {
+    //     setControlValue(response.controlValue);
+    //   }
+    // } else if (response.statusCode === StatusCodes.CONFLICT) {
+    //   setControlValue(undefined);
+    //   return; //skip setting isSaving(false)
+    // }
     setIsSaving(false);
     return;
   };
 
   const validationSchema = yup.object().shape({
-    name: yup.string().test((value) => {
-      return value !== (user.name || '');
+    timezone: yup.string().test((value) => {
+      return value !== (Timezones[user.timezone] || '');
     }),
   });
 
   return (
-    <Box key={initialValues.name}>
+    <Card>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await saveName(values.name, resetForm);
+          await changePassword(
+            values.currentPassword,
+            values.newPassword,
+            resetForm
+          );
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
@@ -114,7 +121,7 @@ export default function EditName({
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
-            <Card sx={{ mt: 2 }}>
+            <Box sx={{ mt: 2, boxSizing: 'content-box' }}>
               <Box>
                 <Box
                   sx={{
@@ -140,6 +147,7 @@ export default function EditName({
                             a: 0.3,
                           })
                     }`,
+                    mb: '-3px',
                     borderBottom: '0px',
                   }}
                 >
@@ -164,16 +172,38 @@ export default function EditName({
                           />
                         )}
                       </Box>
-                      <InputText
-                        type="text"
-                        name={'name'}
-                        label={`Your name`}
-                        TextField={StyledTextField}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
-                      />
+                      <Box>
+                        <InputText
+                          type="password"
+                          name={'currentPassword'}
+                          label={`Current password`}
+                          TextField={StyledTextField}
+                          helperTextColor={
+                            isSaving ? IS_SAVING_HEX : darkHexColor
+                          }
+                          disabled={isSaving}
+                        />
+                        <InputText
+                          type="password"
+                          name={'newPassword'}
+                          label={`New password`}
+                          TextField={StyledTextField}
+                          helperTextColor={
+                            isSaving ? IS_SAVING_HEX : darkHexColor
+                          }
+                          disabled={isSaving}
+                        />
+                        <InputText
+                          type="password"
+                          name={'newPassword2'}
+                          label={`Repeat new password`}
+                          TextField={StyledTextField}
+                          helperTextColor={
+                            isSaving ? IS_SAVING_HEX : darkHexColor
+                          }
+                          disabled={isSaving}
+                        />
+                      </Box>
                     </Stack>
                   </Box>
                 </Box>
@@ -260,7 +290,7 @@ export default function EditName({
                     />
                     <Stack spacing={2} sx={{ ml: 5 }}>
                       <Typography variant="subtitle2" noWrap>
-                        SAVE NAME
+                        SAVE NEW PASSWORD
                       </Typography>
                     </Stack>
                   </Box>
@@ -329,10 +359,10 @@ export default function EditName({
                   </Box>
                 </Box>
               </Box>
-            </Card>
+            </Box>
           );
         }}
       </Formik>
-    </Box>
+    </Card>
   );
 }

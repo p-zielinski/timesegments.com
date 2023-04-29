@@ -14,7 +14,7 @@ import {InputText} from '../../components/form/Text';
 import {handleFetch} from '../../utils/handleFetch';
 import {SelectWithSearch} from '../../components/form/SelectWithSearch';
 import {StatusCodes} from 'http-status-codes';
-import {timezoneOptions} from '../../consts/timezoneOptions';
+import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSelect';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({
@@ -24,21 +24,6 @@ export default function AuthForm({
                                    setCategories,
                                    setLimits,
                                  }) {
-  const getTimezoneOptionsForSelectWithSearch = () => {
-    const timezoneOptionsResult = [];
-    for (const key of Object.keys(timezoneOptions)) {
-      for (const timezone of timezoneOptions[key]) {
-        timezoneOptionsResult.push({
-          groupBy: key,
-          label: timezone.name,
-          value: timezone.value,
-        });
-      }
-    }
-    return timezoneOptionsResult;
-  };
-  const timezoneOptionsForSelect = getTimezoneOptionsForSelectWithSearch();
-
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
 
@@ -120,7 +105,7 @@ export default function AuthForm({
 
         return (
           <>
-            <Stack spacing={3}>
+            <Stack spacing={1}>
               <InputText type="text" name="email" label="Email address"/>
               {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
                 authPageState

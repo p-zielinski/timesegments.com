@@ -17,6 +17,8 @@ import { SetSortingCategoriesDto } from './dto/setSortingCategories';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 import { RegisterDto } from './dto/register.dto';
 import { SetNameDto } from './dto/setName.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
+import { ChangeTimezoneDto } from './dto/changeTimezone.dto';
 
 @Controller('user')
 export class UserController {
@@ -91,7 +93,7 @@ export class UserController {
     return await this.userService.getMeExtended(user.id, extend);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('set-name')
   async handleRequestSetName(
     @UserDecorator() user: User,
@@ -105,6 +107,45 @@ export class UserController {
       });
     }
     return updateNameStatus;
+  }
+
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @Post('change-password')
+  async handleRequestChangePassword(
+    @UserDecorator() user: User,
+    @Body() changePasswordDto: ChangePasswordDto
+  ) {
+    const { currentPassword, newPassword } = changePasswordDto;
+    const changePasswordStatus = await this.userService.changePassword(
+      user,
+      currentPassword,
+      newPassword
+    );
+    if (!changePasswordStatus.success) {
+      throw new BadRequestException({
+        error: changePasswordStatus.error,
+      });
+    }
+    return changePasswordStatus;
+  }
+
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @Post('change-timezone')
+  async handleRequestChangeTimezone(
+    @UserDecorator() user: User,
+    @Body() changeTimezoneDto: ChangeTimezoneDto
+  ) {
+    const { timezone } = changeTimezoneDto;
+    const changePasswordStatus = await this.userService.changeTimezone(
+      user,
+      timezone
+    );
+    if (!changePasswordStatus.success) {
+      throw new BadRequestException({
+        error: changePasswordStatus.error,
+      });
+    }
+    return changePasswordStatus;
   }
 
   @UseGuards(JwtAuthGuard)

@@ -13,7 +13,7 @@ import Iconify from '../../../components/iconify';
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../Form/Text';
+import { InputText } from '../../../components/form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';

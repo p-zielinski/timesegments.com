@@ -11,15 +11,17 @@ import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgb
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import EditName from '../../sections/@dashboard/settings/EditName'; // ----------------------------------------------------------------------
+import EditName from '../../sections/@dashboard/settings/EditName';
+import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';
+import ChangePassword from '../../sections/@dashboard/settings/ChangePassword'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
 enum SettingOption {
+  CHANGE_TIMEZONE = 'Change timezone',
   SET_NAME = 'Set name',
   CHANGE_PASSWORD = 'Change password',
   CHANGE_EMAIL = 'Change email',
-  CHANGE_TIMEZONE = 'Change timezone',
 }
 
 type OptionsColors = {
@@ -118,10 +120,17 @@ export default function Index({
       <Helmet>
         <title>Dashboard</title>
       </Helmet>
-      <Container>
+      <Container sx={{ minHeight: 'calc(100vh - 200px)' }}>
         <Grid container spacing={2} columns={1}>
           <Grid item xs={1} sm={1} md={1}>
-            <Box sx={{ gap: 2, display: 'flex', flexDirection: 'column' }}>
+            <Box
+              sx={{
+                gap: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                height: '1--%',
+              }}
+            >
               {allSettingOptions.map((currentSettingOption) => {
                 const isActive =
                   openedSettingOption === SettingOption[currentSettingOption];
@@ -220,6 +229,31 @@ export default function Index({
                             disableHover={disableHover}
                             user={user}
                             setUser={setUser}
+                            isSaving={isSaving}
+                            setIsSaving={setIsSaving}
+                            color={optionsColors[currentSettingOption]}
+                            setOpenedSettingOption={setOpenedSettingOption}
+                          />
+                        )}
+                        {openedSettingOption ===
+                          SettingOption.CHANGE_TIMEZONE && (
+                          <ChangeTimezone
+                            controlValue={controlValue}
+                            setControlValue={setControlValue}
+                            disableHover={disableHover}
+                            user={user}
+                            setUser={setUser}
+                            isSaving={isSaving}
+                            setIsSaving={setIsSaving}
+                            color={optionsColors[currentSettingOption]}
+                            setOpenedSettingOption={setOpenedSettingOption}
+                          />
+                        )}
+                        {openedSettingOption ===
+                          SettingOption.CHANGE_PASSWORD && (
+                          <ChangePassword
+                            disableHover={disableHover}
+                            user={user}
                             isSaving={isSaving}
                             setIsSaving={setIsSaving}
                             color={optionsColors[currentSettingOption]}

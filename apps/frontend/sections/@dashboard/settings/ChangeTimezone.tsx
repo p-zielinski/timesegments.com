@@ -1,4 +1,4 @@
-import { Box, Card, Stack, TextField, Typography } from '@mui/material';
+import { Box, Stack, TextField, Typography } from '@mui/material';
 import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import {
   GREEN,
@@ -12,15 +12,17 @@ import Iconify from '../../../components/iconify';
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../../../components/form/Text';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { timezoneOptionsForSelect } from '../Form/timezoneOptionsForSelect';
+import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
+import { Timezones } from '@test1/shared';
 
-export default function EditName({
+export default function ChangeTimezone({
   controlValue,
   setControlValue,
   disableHover,
@@ -67,22 +69,22 @@ export default function EditName({
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
   const [initialValues, setInitialValues] = useState({
-    name: user.name || '',
+    timezone: Timezones[user.timezone] || '',
   });
 
-  const saveName = async (name: string, resetForm: () => void) => {
+  const saveTimezone = async (timezone: string, resetForm: () => void) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'user/set-name',
-      body: { name },
+      pathOrUrl: 'user/change-timezone',
+      body: { timezone, controlValue },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setInitialValues({
-        name,
+        timezone,
       });
       resetForm();
-      setUser({ ...user, name });
+      setUser({ ...user, timezone });
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
@@ -95,17 +97,17 @@ export default function EditName({
   };
 
   const validationSchema = yup.object().shape({
-    name: yup.string().test((value) => {
-      return value !== (user.name || '');
+    timezone: yup.string().test((value) => {
+      return value !== (Timezones[user.timezone] || '');
     }),
   });
 
   return (
-    <Box key={initialValues.name}>
+    <Box key={initialValues.timezone}>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await saveName(values.name, resetForm);
+          await saveTimezone(values.timezone, resetForm);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
@@ -114,7 +116,7 @@ export default function EditName({
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
-            <Card sx={{ mt: 2 }}>
+            <Box sx={{ mt: 2, boxSizing: 'content-box' }}>
               <Box>
                 <Box
                   sx={{
@@ -140,6 +142,7 @@ export default function EditName({
                             a: 0.3,
                           })
                     }`,
+                    mb: '-3px',
                     borderBottom: '0px',
                   }}
                 >
@@ -164,16 +167,19 @@ export default function EditName({
                           />
                         )}
                       </Box>
-                      <InputText
-                        type="text"
-                        name={'name'}
-                        label={`Your name`}
-                        TextField={StyledTextField}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
-                      />
+                      <Box>
+                        <SelectWithSearch
+                          name="timezone"
+                          groupBy={(option) => option.groupBy}
+                          label="Timezone"
+                          options={timezoneOptionsForSelect}
+                          TextField={StyledTextField}
+                          helperTextColor={
+                            isSaving ? IS_SAVING_HEX : darkHexColor
+                          }
+                          disabled={isSaving}
+                        />
+                      </Box>
                     </Stack>
                   </Box>
                 </Box>
@@ -253,9 +259,9 @@ export default function EditName({
                       width={42}
                       sx={{
                         m: -2,
-                        position: 'absolute',
-                        bottom: 25,
-                        left: 25,
+                        position: 'relative',
+                        bottom: -12,
+                        left: 8,
                       }}
                     />
                     <Stack spacing={2} sx={{ ml: 5 }}>
@@ -321,15 +327,15 @@ export default function EditName({
                       width={42}
                       sx={{
                         m: -2,
-                        position: 'absolute',
-                        bottom: 26,
-                        right: 24,
+                        position: 'relative',
+                        bottom: -22,
+                        right: -24,
                       }}
                     />
                   </Box>
                 </Box>
               </Box>
-            </Card>
+            </Box>
           );
         }}
       </Formik>

@@ -17,7 +17,7 @@ import React from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../Form/Text';
+import { InputText } from '../../../components/form/Text';
 import { CreateNewType } from '../../../enum/createNewType';
 import capitalize from 'capitalize';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';

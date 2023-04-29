@@ -13,7 +13,7 @@ import Iconify from '../../../components/iconify';
 import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../Form/Text';
+import { InputText } from '../../../components/form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { Checkbox } from '../Form/Checkbox';
 import { styled } from '@mui/material/styles';

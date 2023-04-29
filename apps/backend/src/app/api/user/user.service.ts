@@ -235,7 +235,77 @@ export class UserService {
 
     return {
       success: false,
-      error: `Could not update sortingCategories to: ${ColumnSortOption}`,
+      error: `Could not update name to: ${name}`,
+    };
+  }
+
+  async changePassword(
+    user: User,
+    currentPassword: string,
+    newPassword: string
+  ) {
+    if (currentPassword === newPassword) {
+      return { success: true };
+    }
+    if (!(await checkHashedString(currentPassword, user.password))) {
+      return {
+        success: false,
+        error: `Wrong password`,
+      };
+    }
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: await hashString(
+            newPassword,
+            this.configService.get<number>('SALT_ROUNDS')
+          ),
+        },
+      });
+      if (updatedUser) {
+        return { success: true };
+      }
+    } catch (error) {
+      this.loggerService.error(error);
+    }
+
+    return {
+      success: false,
+      error: `Could not update password, please try again`,
+    };
+  }
+
+  async changeTimezone(user: User, _timezone: Timezones) {
+    const timezone = findKeyOfValueInObject(Timezones, _timezone) as Timezone;
+    if (user.timezone === timezone) {
+      return { success: true, timezone };
+    }
+    if (!timezone)
+      return {
+        success: false,
+        error: `Invalid timezone: ${_timezone}`,
+      };
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { timezone, controlValue: nanoid() },
+        select: { timezone: true, controlValue: true },
+      });
+      if (updatedUser.timezone === timezone) {
+        return {
+          success: true,
+          timezone,
+          controlValue: updatedUser.controlValue,
+        };
+      }
+    } catch (error) {
+      this.loggerService.error(error);
+    }
+
+    return {
+      success: false,
+      error: `Could not update timezone to: ${timezone}`,
     };
   }
 

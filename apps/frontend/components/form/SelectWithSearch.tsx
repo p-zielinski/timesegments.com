@@ -2,8 +2,9 @@ import React from 'react';
 import { FastField } from 'formik';
 import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
+import { TextField as DefaultTextField } from '@mui/material';
 import helperTextHandler from '../../helperFunctions/helperTextHandler';
+import { StyledComponent } from 'styled-components';
 
 type SelectWithSearchProps = {
   label?: string;
@@ -11,6 +12,9 @@ type SelectWithSearchProps = {
   options: { value: number | string; label: string }[];
   groupBy?: (option) => string;
   helperText?: string;
+  disabled?: boolean;
+  TextField?: StyledComponent<any>;
+  helperTextColor?: string;
 };
 
 export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
@@ -19,6 +23,9 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   options,
   helperText,
   groupBy,
+  disabled = false,
+  TextField = DefaultTextField,
+  helperTextColor = '#888888',
 }) => {
   return (
     <FastField autoComplete="nope" name={name}>
@@ -42,7 +49,9 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
             value={options.find((o) => o.value === field.value) || null}
             renderInput={(params) => (
               <TextField
+                disabled={disabled}
                 {...params}
+                size="small"
                 autoComplete="nope"
                 helperText={helperTextHandler(meta, helperText)}
                 focused={
@@ -57,6 +66,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                     mt: helperText?.match(/optional/i) ? 0 : '-3px',
                     ml: '4px',
                     mb: helperText?.match(/optional/i) ? -0.5 : -1,
+                    color: helperTextColor,
                   },
                 }}
                 sx={{ mb: 0 }}
