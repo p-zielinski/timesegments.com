@@ -49,7 +49,6 @@ export const InputText: React.FC<InputTextProps> = ({
               autoComplete="nope"
               value={field.value || ''}
               InputLabelProps={{
-                required: true,
                 sx: {
                   background: 'rgba(255,255,255,.5)',
                   borderRadius: '7px',

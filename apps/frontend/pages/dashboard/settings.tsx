@@ -6,14 +6,17 @@ import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRepeatingLinearGradient} from '../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
-import {LIGHT_RED, RED} from '../../consts/colors';
+import {IS_SAVING_HEX, LIGHT_RED, RED, SUPER_LIGHT_SILVER,} from '../../consts/colors';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 import EditName from '../../sections/@dashboard/settings/EditName';
 import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';
-import ChangePassword from '../../sections/@dashboard/settings/ChangePassword'; // ----------------------------------------------------------------------
+import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
+import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
+import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -134,12 +137,72 @@ export default function Index({
               {allSettingOptions.map((currentSettingOption) => {
                 const isActive =
                   openedSettingOption === SettingOption[currentSettingOption];
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.SET_NAME
+                ) {
+                  return (
+                    <EditName
+                      key={`${currentSettingOption}-active`}
+                      controlValue={controlValue}
+                      setControlValue={setControlValue}
+                      disableHover={disableHover}
+                      user={user}
+                      setUser={setUser}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      color={optionsColors[currentSettingOption]}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                    />
+                  );
+                }
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.CHANGE_TIMEZONE
+                ) {
+                  return (
+                    <ChangeTimezone
+                      key={`${currentSettingOption}-active`}
+                      controlValue={controlValue}
+                      setControlValue={setControlValue}
+                      disableHover={disableHover}
+                      user={user}
+                      setUser={setUser}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      color={optionsColors[currentSettingOption]}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                    />
+                  );
+                }
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.CHANGE_PASSWORD
+                ) {
+                  return (
+                    <ChangePassword
+                      key={`${currentSettingOption}-active`}
+                      disableHover={disableHover}
+                      user={user}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      color={optionsColors[currentSettingOption]}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                    />
+                  );
+                }
+
                 return (
                   <Box key={currentSettingOption}>
                     <Box
                       sx={{ display: 'flex', width: '100%' }}
                       onClick={() =>
-                        isActive
+                        isSaving
+                          ? null
+                          : isActive
                           ? setOpenedSettingOption(undefined)
                           : setOpenedSettingOption(
                               SettingOption[currentSettingOption]
@@ -152,10 +215,17 @@ export default function Index({
                           minWidth: '60px',
                           p: 2,
                           background: getRepeatingLinearGradient(
-                            optionsColors[currentSettingOption].hex,
+                            isSaving
+                              ? IS_SAVING_HEX
+                              : optionsColors[currentSettingOption].hex,
                             0.3
                           ),
-                          border: isActive
+                          border: isSaving
+                            ? `solid 2px ${getHexFromRGBAObject({
+                                ...getRgbaObjectFromHexString(IS_SAVING_HEX),
+                                a: 0.5,
+                              })}`
+                            : isActive
                             ? `solid 2px ${getHexFromRGBAObject({
                                 ...optionsColors[currentSettingOption].rgb,
                                 a: 0.5,
@@ -171,7 +241,17 @@ export default function Index({
                       />
                       <Box
                         sx={{
-                          background: isActive
+                          color: isSaving
+                            ? IS_SAVING_HEX
+                            : getHexFromRGBObject(
+                                getColorShadeBasedOnSliderPickerSchema(
+                                  optionsColors[currentSettingOption].rgb,
+                                  'normal'
+                                )
+                              ),
+                          background: isSaving
+                            ? SUPER_LIGHT_SILVER
+                            : isActive
                             ? getHexFromRGBAObject({
                                 ...optionsColors[currentSettingOption].rgb,
                                 a: 0.24,
@@ -181,29 +261,36 @@ export default function Index({
                                 a: 0.1,
                               }),
                           flex: 1,
-                          border: `solid 2px ${
-                            isActive
-                              ? getHexFromRGBAObject({
-                                  ...optionsColors[currentSettingOption].rgb,
-                                  a: 0.5,
-                                })
-                              : LIGHT_RED
-                          }`,
+                          border: isSaving
+                            ? `solid 2px ${getHexFromRGBAObject({
+                                ...getRgbaObjectFromHexString(IS_SAVING_HEX),
+                                a: 0.5,
+                              })}`
+                            : `solid 2px ${
+                                isActive
+                                  ? getHexFromRGBAObject({
+                                      ...optionsColors[currentSettingOption]
+                                        .rgb,
+                                      a: 0.5,
+                                    })
+                                  : LIGHT_RED
+                              }`,
                           borderLeft: 0,
                           borderRadius: '12px',
                           borderTopLeftRadius: 0,
                           borderBottomLeftRadius: 0,
-                          cursor: 'pointer',
-                          '&:hover': !disableHover && {
-                            border: isActive
-                              ? `solid 2px ${RED}`
-                              : `solid 2px ${getHexFromRGBAObject({
-                                  ...optionsColors[currentSettingOption].rgb,
-                                  a: 0.5,
-                                })}`,
-                            borderStyle: isActive ? 'solid' : 'dashed',
-                            borderLeft: 0,
-                          },
+                          cursor: !isSaving && 'pointer',
+                          '&:hover': !disableHover &&
+                            !isSaving && {
+                              border: isActive
+                                ? `solid 2px ${RED}`
+                                : `solid 2px ${getHexFromRGBAObject({
+                                    ...optionsColors[currentSettingOption].rgb,
+                                    a: 0.5,
+                                  })}`,
+                              borderStyle: isActive ? 'solid' : 'dashed',
+                              borderLeft: 0,
+                            },
                         }}
                       >
                         <Stack
@@ -219,49 +306,6 @@ export default function Index({
                         </Stack>
                       </Box>
                     </Box>
-
-                    {isActive && (
-                      <>
-                        {openedSettingOption === SettingOption.SET_NAME && (
-                          <EditName
-                            controlValue={controlValue}
-                            setControlValue={setControlValue}
-                            disableHover={disableHover}
-                            user={user}
-                            setUser={setUser}
-                            isSaving={isSaving}
-                            setIsSaving={setIsSaving}
-                            color={optionsColors[currentSettingOption]}
-                            setOpenedSettingOption={setOpenedSettingOption}
-                          />
-                        )}
-                        {openedSettingOption ===
-                          SettingOption.CHANGE_TIMEZONE && (
-                          <ChangeTimezone
-                            controlValue={controlValue}
-                            setControlValue={setControlValue}
-                            disableHover={disableHover}
-                            user={user}
-                            setUser={setUser}
-                            isSaving={isSaving}
-                            setIsSaving={setIsSaving}
-                            color={optionsColors[currentSettingOption]}
-                            setOpenedSettingOption={setOpenedSettingOption}
-                          />
-                        )}
-                        {openedSettingOption ===
-                          SettingOption.CHANGE_PASSWORD && (
-                          <ChangePassword
-                            disableHover={disableHover}
-                            user={user}
-                            isSaving={isSaving}
-                            setIsSaving={setIsSaving}
-                            color={optionsColors[currentSettingOption]}
-                            setOpenedSettingOption={setOpenedSettingOption}
-                          />
-                        )}
-                      </>
-                    )}
                   </Box>
                 );
               })}

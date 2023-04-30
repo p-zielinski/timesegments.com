@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -33,13 +33,16 @@ export default function ChangeTimezone({
   setUser,
   setOpenedSettingOption,
 }) {
+  const mainBoxRef = useRef(null);
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
-    darkHexColor = getHexFromRGBObject(
-      getColorShadeBasedOnSliderPickerSchema(
-        getRgbaObjectFromHexString(hexColor)
-      )
-    );
+    darkHexColor = isSaving
+      ? 'rgb(144, 156, 168)'
+      : getHexFromRGBObject(
+          getColorShadeBasedOnSliderPickerSchema(
+            getRgbaObjectFromHexString(hexColor)
+          )
+        );
     StyledTextField = styled(TextField)({
       '& input': {
         color: darkHexColor,
@@ -73,6 +76,9 @@ export default function ChangeTimezone({
   });
 
   const saveTimezone = async (timezone: string, resetForm: () => void) => {
+    setInitialValues({
+      timezone,
+    });
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/change-timezone',
@@ -80,15 +86,15 @@ export default function ChangeTimezone({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
-      setInitialValues({
-        timezone,
-      });
       resetForm();
       setUser({ ...user, timezone });
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setInitialValues({
+        timezone: Timezones[user.timezone],
+      });
       setControlValue(undefined);
       return; //skip setting isSaving(false)
     }
@@ -103,7 +109,7 @@ export default function ChangeTimezone({
   });
 
   return (
-    <Box key={initialValues.timezone}>
+    <Box key={initialValues.timezone + isSaving} ref={mainBoxRef}>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
@@ -116,7 +122,7 @@ export default function ChangeTimezone({
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
-            <Box sx={{ mt: 2, boxSizing: 'content-box' }}>
+            <Box sx={{ boxSizing: 'content-box' }}>
               <Box>
                 <Box
                   sx={{
@@ -146,27 +152,21 @@ export default function ChangeTimezone({
                     borderBottom: '0px',
                   }}
                 >
-                  <Box sx={{ p: 2 }}>
-                    <Stack spacing={2}>
+                  <Box sx={{ p: 2, pt: 3.5 }}>
+                    {isSaving && (
                       <Box
                         sx={{
-                          filter: isSaving ? 'grayscale(100%)' : 'none',
-                          cursor: isSaving ? 'default' : 'pointer',
+                          width: mainBoxRef.current?.clientWidth || '100%',
+                          height: mainBoxRef.current?.clientHeight || '100%',
+                          background: 'transparent',
+                          zIndex: 1,
+                          position: 'absolute',
+                          transform: 'translate(-18px, -26px)',
                         }}
-                      >
-                        {isSaving && (
-                          <Box
-                            sx={{
-                              width: 'calc(100% + 20px)',
-                              height: 'calc(100% + 20px)',
-                              background: 'transparent',
-                              position: 'absolute',
-                              zIndex: 1,
-                              transform: 'translate(-10px, -10px)',
-                            }}
-                          />
-                        )}
-                      </Box>
+                      />
+                    )}
+
+                    <Stack spacing={2}>
                       <Box>
                         <SelectWithSearch
                           name="timezone"
@@ -197,6 +197,7 @@ export default function ChangeTimezone({
                           )
                         : LIGHT_GREEN,
                     minHeight: 58,
+                    maxHeight: 58,
                     borderBottomLeftRadius: 12,
                     borderBottomRightRadius: 12,
                     border: isSaving
@@ -260,11 +261,11 @@ export default function ChangeTimezone({
                       sx={{
                         m: -2,
                         position: 'relative',
-                        bottom: -12,
+                        bottom: -6,
                         left: 8,
                       }}
                     />
-                    <Stack spacing={2} sx={{ ml: 5 }}>
+                    <Stack spacing={2} sx={{ ml: 5, mt: -3 }}>
                       <Typography variant="subtitle2" noWrap>
                         SAVE NAME
                       </Typography>

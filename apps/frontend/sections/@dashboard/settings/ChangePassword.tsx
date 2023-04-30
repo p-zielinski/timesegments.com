@@ -17,8 +17,19 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/ge
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
-import { Timezones } from '@test1/shared';
 import InputText from '../../../components/form/Text';
+import { StatusCodes } from 'http-status-codes';
+import YupPassword from 'yup-password';
+import { equalTo, notEqualTo } from '../../../utils/yupCustomMethods';
+import ShowCompletedInfo from './ShowCompletedInfo';
+
+YupPassword(yup); // extend yup
+yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
+  equalTo(ref, msg, 'new password')
+);
+yup.addMethod(yup.string, 'notEqualTo', (ref, msg) =>
+  notEqualTo(ref, msg, 'current password')
+);
 
 export default function ChangePassword({
   disableHover,
@@ -28,6 +39,8 @@ export default function ChangePassword({
   color,
   setOpenedSettingOption,
 }) {
+  const [completed, setCompleted] = useState(true);
+
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -63,16 +76,15 @@ export default function ChangePassword({
   };
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
-  const [initialValues, setInitialValues] = useState({
+  const initialValues = {
     currentPassword: '',
     newPassword: '',
     newPassword2: '',
-  });
+  };
 
   const changePassword = async (
     currentPassword: string,
-    newPassword: string,
-    resetForm: () => void
+    newPassword: string
   ) => {
     setIsSaving(true);
     const response = await handleFetch({
@@ -80,39 +92,62 @@ export default function ChangePassword({
       body: { currentPassword, newPassword },
       method: 'POST',
     });
-    // if (response.statusCode === StatusCodes.CREATED) {
-    //   setInitialValues({
-    //     timezone,
-    //   });
-    //   resetForm();
-    //   setUser({ ...user, timezone });
-    //   if (response.controlValue) {
-    //     setControlValue(response.controlValue);
-    //   }
-    // } else if (response.statusCode === StatusCodes.CONFLICT) {
-    //   setControlValue(undefined);
-    //   return; //skip setting isSaving(false)
-    // }
+    if (response.statusCode === StatusCodes.CREATED) {
+      setCompleted(true);
+    }
     setIsSaving(false);
     return;
   };
 
   const validationSchema = yup.object().shape({
-    timezone: yup.string().test((value) => {
-      return value !== (Timezones[user.timezone] || '');
-    }),
+    currentPassword: yup
+      .string()
+      .password()
+      .minLowercase(1)
+      .minUppercase(1)
+      .minNumbers(1)
+      .minSymbols(1)
+      .min(5)
+      .required()
+      .label('Current password'),
+    newPassword: yup
+      .string()
+      .password()
+      .minLowercase(1)
+      .minUppercase(1)
+      .minNumbers(1)
+      .minSymbols(1)
+      .min(5)
+      .required()
+      // @ts-ignore - We added this method
+      .notEqualTo(yup.ref('currentPassword'))
+      .label('New password'),
+    newPasswordCheck: yup
+      .string()
+      // @ts-ignore - We added this method
+      .equalTo(yup.ref('newPassword'))
+      .label('New password check'),
   });
+
+  if (completed) {
+    return (
+      <ShowCompletedInfo
+        key={'passwordChanged'}
+        isSaving={isSaving}
+        setOpenedSettingOption={setOpenedSettingOption}
+        color={color}
+        disableHover={disableHover}
+        completedInfo={'Password has been changed'}
+      />
+    );
+  }
 
   return (
     <Card>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await changePassword(
-            values.currentPassword,
-            values.newPassword,
-            resetForm
-          );
+          await changePassword(values.currentPassword, values.newPassword);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
@@ -121,7 +156,7 @@ export default function ChangePassword({
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
-            <Box sx={{ mt: 2, boxSizing: 'content-box' }}>
+            <Box sx={{ boxSizing: 'content-box' }}>
               <Box>
                 <Box
                   sx={{
@@ -151,28 +186,21 @@ export default function ChangePassword({
                     borderBottom: '0px',
                   }}
                 >
-                  <Box sx={{ p: 2 }}>
+                  {isSaving && (
+                    <Box
+                      sx={{
+                        width: 'calc(100% + 20px)',
+                        height: 'calc(100% + 20px)',
+                        background: 'transparent',
+                        position: 'absolute',
+                        zIndex: 1,
+                        transform: 'translate(-10px, -10px)',
+                      }}
+                    />
+                  )}
+                  <Box sx={{ p: 2, pt: 3.5, pb: 3 }}>
                     <Stack spacing={2}>
-                      <Box
-                        sx={{
-                          filter: isSaving ? 'grayscale(100%)' : 'none',
-                          cursor: isSaving ? 'default' : 'pointer',
-                        }}
-                      >
-                        {isSaving && (
-                          <Box
-                            sx={{
-                              width: 'calc(100% + 20px)',
-                              height: 'calc(100% + 20px)',
-                              background: 'transparent',
-                              position: 'absolute',
-                              zIndex: 1,
-                              transform: 'translate(-10px, -10px)',
-                            }}
-                          />
-                        )}
-                      </Box>
-                      <Box>
+                      <Box sx={{ mb: -1 }}>
                         <InputText
                           type="password"
                           name={'currentPassword'}
@@ -183,27 +211,27 @@ export default function ChangePassword({
                           }
                           disabled={isSaving}
                         />
-                        <InputText
-                          type="password"
-                          name={'newPassword'}
-                          label={`New password`}
-                          TextField={StyledTextField}
-                          helperTextColor={
-                            isSaving ? IS_SAVING_HEX : darkHexColor
-                          }
-                          disabled={isSaving}
-                        />
-                        <InputText
-                          type="password"
-                          name={'newPassword2'}
-                          label={`Repeat new password`}
-                          TextField={StyledTextField}
-                          helperTextColor={
-                            isSaving ? IS_SAVING_HEX : darkHexColor
-                          }
-                          disabled={isSaving}
-                        />
                       </Box>
+                      <InputText
+                        type="password"
+                        name={'newPassword'}
+                        label={`New password`}
+                        TextField={StyledTextField}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving}
+                      />
+                      <InputText
+                        type="password"
+                        name={'newPasswordCheck'}
+                        label={`New password check`}
+                        TextField={StyledTextField}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving}
+                      />
                     </Stack>
                   </Box>
                 </Box>

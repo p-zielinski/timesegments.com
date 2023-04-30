@@ -49,7 +49,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
             value={options.find((o) => o.value === field.value) || null}
             renderInput={(params) => (
               <TextField
-                disabled={disabled}
+                disabled={true}
                 {...params}
                 size="small"
                 autoComplete="nope"

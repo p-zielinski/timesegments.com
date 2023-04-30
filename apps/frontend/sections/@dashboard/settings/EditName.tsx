@@ -74,7 +74,7 @@ export default function EditName({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/set-name',
-      body: { name },
+      body: { name, controlValue },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
@@ -101,7 +101,7 @@ export default function EditName({
   });
 
   return (
-    <Box key={initialValues.name}>
+    <Card key={initialValues.name}>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
@@ -114,7 +114,7 @@ export default function EditName({
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
-            <Card sx={{ mt: 2 }}>
+            <Card>
               <Box>
                 <Box
                   sx={{
@@ -143,38 +143,27 @@ export default function EditName({
                     borderBottom: '0px',
                   }}
                 >
-                  <Box sx={{ p: 2 }}>
-                    <Stack spacing={2}>
+                  <Box sx={{ p: 2, pt: 3.5, pb: 1.5 }}>
+                    {isSaving && (
                       <Box
                         sx={{
-                          filter: isSaving ? 'grayscale(100%)' : 'none',
-                          cursor: isSaving ? 'default' : 'pointer',
+                          width: 'calc(100% + 20px)',
+                          height: 'calc(100% + 20px)',
+                          background: 'transparent',
+                          position: 'absolute',
+                          zIndex: 1,
+                          transform: 'translate(-20px, -20px)',
                         }}
-                      >
-                        {isSaving && (
-                          <Box
-                            sx={{
-                              width: 'calc(100% + 20px)',
-                              height: 'calc(100% + 20px)',
-                              background: 'transparent',
-                              position: 'absolute',
-                              zIndex: 1,
-                              transform: 'translate(-10px, -10px)',
-                            }}
-                          />
-                        )}
-                      </Box>
-                      <InputText
-                        type="text"
-                        name={'name'}
-                        label={`Your name`}
-                        TextField={StyledTextField}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
                       />
-                    </Stack>
+                    )}
+                    <InputText
+                      type="text"
+                      name={'name'}
+                      label={`Your name`}
+                      TextField={StyledTextField}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
+                    />
                   </Box>
                 </Box>
                 <Box
@@ -333,6 +322,6 @@ export default function EditName({
           );
         }}
       </Formik>
-    </Box>
+    </Card>
   );
 }
