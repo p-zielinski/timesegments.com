@@ -19,19 +19,10 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
 import InputText from '../../../components/form/Text';
 import { StatusCodes } from 'http-status-codes';
-import YupPassword from 'yup-password';
-import { equalTo, notEqualTo } from '../../../utils/yupCustomMethods';
 import ShowCompletedInfo from './ShowCompletedInfo';
+import emailRegexp from '../../../regex/email';
 
-YupPassword(yup); // extend yup
-yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
-  equalTo(ref, msg, 'new password')
-);
-yup.addMethod(yup.string, 'notEqualTo', (ref, msg) =>
-  notEqualTo(ref, msg, 'current password')
-);
-
-export default function ChangePassword({
+export default function ChangeEmail({
   disableHover,
   isSaving,
   setIsSaving,
@@ -76,19 +67,14 @@ export default function ChangePassword({
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
   const initialValues = {
-    currentPassword: '',
-    newPassword: '',
-    newPassword2: '',
+    currentEmail: '',
   };
 
-  const changePassword = async (
-    currentPassword: string,
-    newPassword: string
-  ) => {
+  const initializeEmailChange = async (currentEmailToLowerCase: string) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'user/change-password',
-      body: { currentPassword, newPassword },
+      pathOrUrl: 'user/initialize-email-change',
+      body: { currentEmail: currentEmailToLowerCase },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
@@ -99,44 +85,22 @@ export default function ChangePassword({
   };
 
   const validationSchema = yup.object().shape({
-    currentPassword: yup
+    currentEmail: yup
       .string()
-      .password()
-      .minLowercase(1)
-      .minUppercase(1)
-      .minNumbers(1)
-      .minSymbols(1)
-      .min(5)
+      .matches(emailRegexp, 'Please enter a valid email')
       .required()
-      .label('Current password'),
-    newPassword: yup
-      .string()
-      .password()
-      .minLowercase(1)
-      .minUppercase(1)
-      .minNumbers(1)
-      .minSymbols(1)
-      .min(5)
-      .required()
-      // @ts-ignore - We added this method
-      .notEqualTo(yup.ref('currentPassword'))
-      .label('New password'),
-    newPasswordCheck: yup
-      .string()
-      // @ts-ignore - We added this method
-      .equalTo(yup.ref('newPassword'))
-      .label('New password check'),
+      .label('Current email'),
   });
 
   if (completed) {
     return (
       <ShowCompletedInfo
-        key={'passwordChanged'}
+        key={'emailSent'}
         isSaving={isSaving}
         setOpenedSettingOption={setOpenedSettingOption}
         color={color}
         disableHover={disableHover}
-        completedInfo={'Password has been changed!'}
+        completedInfo={'We sent you an email!'}
       />
     );
   }
@@ -146,7 +110,7 @@ export default function ChangePassword({
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await changePassword(values.currentPassword, values.newPassword);
+          await initializeEmailChange(values.currentEmail.toLowerCase());
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
@@ -201,9 +165,9 @@ export default function ChangePassword({
                     <Stack spacing={2}>
                       <Box sx={{ mb: -1 }}>
                         <InputText
-                          type="password"
-                          name={'currentPassword'}
-                          label={`Current password`}
+                          type="text"
+                          name={'currentEmail'}
+                          label={`Current email`}
                           TextField={StyledTextField}
                           helperTextColor={
                             isSaving ? IS_SAVING_HEX : darkHexColor
@@ -211,26 +175,6 @@ export default function ChangePassword({
                           disabled={isSaving}
                         />
                       </Box>
-                      <InputText
-                        type="password"
-                        name={'newPassword'}
-                        label={`New password`}
-                        TextField={StyledTextField}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
-                      />
-                      <InputText
-                        type="password"
-                        name={'newPasswordCheck'}
-                        label={`New password check`}
-                        TextField={StyledTextField}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
-                      />
                     </Stack>
                   </Box>
                 </Box>
@@ -306,7 +250,7 @@ export default function ChangePassword({
                     }}
                   >
                     <Iconify
-                      icon={'material-symbols:save-outline'}
+                      icon={'bx:mail-send'}
                       width={42}
                       sx={{
                         m: -2,
@@ -317,7 +261,7 @@ export default function ChangePassword({
                     />
                     <Stack spacing={2} sx={{ ml: 5 }}>
                       <Typography variant="subtitle2" noWrap>
-                        SAVE NEW PASSWORD
+                        SEND EMAIL WITH INSTRUCTION
                       </Typography>
                     </Stack>
                   </Box>

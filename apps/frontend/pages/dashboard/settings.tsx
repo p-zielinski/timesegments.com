@@ -16,7 +16,8 @@ import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';
 import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
 import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject'; // ----------------------------------------------------------------------
+import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
+import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -58,7 +59,7 @@ export default function Index({
       pathOrUrl: 'user/me',
       method: 'GET',
     });
-    if (response.statusCode === StatusCodes.CREATED && response?.user) {
+    if (response.statusCode === StatusCodes.OK && response?.user) {
       setUser(response.user);
       setControlValue(response.user?.controlValue);
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
@@ -107,7 +108,7 @@ export default function Index({
       }
       const intervalId = setInterval(() => {
         checkControlValue();
-      }, 2 * 60 * 1000);
+      }, 3 * 60 * 1000);
       setRefreshIntervalId(intervalId);
     }
   }, [controlValue]);
@@ -144,7 +145,7 @@ export default function Index({
                 ) {
                   return (
                     <EditName
-                      key={`${currentSettingOption}-active`}
+                      key={`${controlValue}-${currentSettingOption}-active`}
                       controlValue={controlValue}
                       setControlValue={setControlValue}
                       disableHover={disableHover}
@@ -164,7 +165,7 @@ export default function Index({
                 ) {
                   return (
                     <ChangeTimezone
-                      key={`${currentSettingOption}-active`}
+                      key={`${controlValue}-${currentSettingOption}-active`}
                       controlValue={controlValue}
                       setControlValue={setControlValue}
                       disableHover={disableHover}
@@ -186,7 +187,22 @@ export default function Index({
                     <ChangePassword
                       key={`${currentSettingOption}-active`}
                       disableHover={disableHover}
-                      user={user}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      color={optionsColors[currentSettingOption]}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                    />
+                  );
+                }
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.CHANGE_EMAIL
+                ) {
+                  return (
+                    <ChangeEmail
+                      key={`${currentSettingOption}-active`}
+                      disableHover={disableHover}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
                       color={optionsColors[currentSettingOption]}

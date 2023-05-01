@@ -19,6 +19,7 @@ import { RegisterDto } from './dto/register.dto';
 import { SetNameDto } from './dto/setName.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { ChangeTimezoneDto } from './dto/changeTimezone.dto';
+import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 
 @Controller('user')
 export class UserController {
@@ -109,7 +110,7 @@ export class UserController {
     return updateNameStatus;
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('change-password')
   async handleRequestChangePassword(
     @UserDecorator() user: User,
@@ -120,6 +121,25 @@ export class UserController {
       user,
       currentPassword,
       newPassword
+    );
+    if (!changePasswordStatus.success) {
+      throw new BadRequestException({
+        error: changePasswordStatus.error,
+      });
+    }
+    return changePasswordStatus;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('initialize-email-change')
+  async handleRequestInitializeEmailChange(
+    @UserDecorator() user: User,
+    @Body() initializeEmailChangeDto: InitializeEmailChangeDto
+  ) {
+    const { currentEmail } = initializeEmailChangeDto;
+    const changePasswordStatus = await this.userService.initializeEmailChange(
+      user,
+      currentEmail
     );
     if (!changePasswordStatus.success) {
       throw new BadRequestException({

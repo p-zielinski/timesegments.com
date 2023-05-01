@@ -276,6 +276,17 @@ export class UserService {
     };
   }
 
+  async initializeEmailChange(user: User, currentEmail: string) {
+    if (currentEmail !== user.email) {
+      return {
+        success: false,
+        error: `Invalid email address, please try again`,
+      };
+    }
+    //send email
+    return { success: true };
+  }
+
   async changeTimezone(user: User, _timezone: Timezones) {
     const timezone = findKeyOfValueInObject(Timezones, _timezone) as Timezone;
     if (user.timezone === timezone) {
