@@ -119,11 +119,19 @@ export default function ChangePassword({
       .minSymbols(1)
       .min(5)
       .required()
+      .notOneOf(
+        [yup.ref('currentPassword')],
+        'New password cannot be the same as the current one'
+      )
       .label('New password'),
     newPasswordCheck: yup
       .string()
       // @ts-ignore - We added this method
       .equalTo(yup.ref('newPassword'))
+      .notOneOf(
+        [yup.ref('currentPassword')],
+        'New password check cannot be the same as the current one'
+      )
       .label('New password check'),
   });
 
