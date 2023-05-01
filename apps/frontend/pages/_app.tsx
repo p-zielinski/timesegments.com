@@ -25,6 +25,30 @@ function CustomApp({ Component, pageProps }: AppProps) {
     };
   });
 
+  if (loading) {
+    return (
+      <Box
+        style={{
+          position: 'absolute',
+          height: '100%',
+          width: '100%',
+          justifyContent: 'center',
+          alignContent: 'center',
+        }}
+      >
+        <CircularProgress
+          size={200}
+          sx={{
+            color: getRandomRgbObjectForSliderPicker().hex,
+            position: 'absolute',
+            top: 'calc(50% - 100px)',
+            left: 'calc(50% - 100px)',
+          }}
+        />
+      </Box>
+    );
+  }
+
   return (
     <HelmetProvider>
       <ThemeProvider>
@@ -32,29 +56,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
         <Head>
           <title>Timesegs.com</title>
         </Head>
-        {loading ? (
-          <Box
-            style={{
-              position: 'absolute',
-              height: '100%',
-              width: '100%',
-              justifyContent: 'center',
-              alignContent: 'center',
-            }}
-          >
-            <CircularProgress
-              size={200}
-              sx={{
-                color: getRandomRgbObjectForSliderPicker().hex,
-                position: 'absolute',
-                top: 'calc(50% - 100px)',
-                left: 'calc(50% - 100px)',
-              }}
-            />
-          </Box>
-        ) : (
-          <Component {...pageProps} />
-        )}
+        <Component {...pageProps} />
       </ThemeProvider>
     </HelmetProvider>
   );
