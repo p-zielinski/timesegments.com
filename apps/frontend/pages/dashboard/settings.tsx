@@ -22,8 +22,9 @@ import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail'; // ---
 // ----------------------------------------------------------------------
 
 enum SettingOption {
-  CHANGE_TIMEZONE = 'Change timezone',
   SET_NAME = 'Set name',
+  CHANGE_TIMEZONE = 'Change timezone',
+
   CHANGE_PASSWORD = 'Change password',
   CHANGE_EMAIL = 'Change email',
 }
