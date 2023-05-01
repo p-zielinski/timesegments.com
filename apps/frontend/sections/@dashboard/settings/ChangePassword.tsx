@@ -20,15 +20,12 @@ import { handleFetch } from '../../../utils/handleFetch';
 import InputText from '../../../components/form/Text';
 import { StatusCodes } from 'http-status-codes';
 import YupPassword from 'yup-password';
-import { equalTo, notEqualTo } from '../../../utils/yupCustomMethods';
+import { equalTo } from '../../../utils/yupCustomMethods';
 import ShowCompletedInfo from './ShowCompletedInfo';
 
 YupPassword(yup); // extend yup
 yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
   equalTo(ref, msg, 'new password')
-);
-yup.addMethod(yup.string, 'notEqualTo', (ref, msg) =>
-  notEqualTo(ref, msg, 'current password')
 );
 
 export default function ChangePassword({
@@ -83,7 +80,8 @@ export default function ChangePassword({
 
   const changePassword = async (
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
+    setFieldError: (field: string, message: string) => void
   ) => {
     setIsSaving(true);
     const response = await handleFetch({
@@ -93,6 +91,9 @@ export default function ChangePassword({
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
+    }
+    if (response.error) {
+      setFieldError('currentPassword', response.error);
     }
     setIsSaving(false);
     return;
@@ -118,8 +119,6 @@ export default function ChangePassword({
       .minSymbols(1)
       .min(5)
       .required()
-      // @ts-ignore - We added this method
-      .notEqualTo(yup.ref('currentPassword'))
       .label('New password'),
     newPasswordCheck: yup
       .string()
@@ -145,14 +144,19 @@ export default function ChangePassword({
     <Card>
       <Formik
         initialValues={initialValues}
-        onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await changePassword(values.currentPassword, values.newPassword);
+        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+          await changePassword(
+            values.currentPassword,
+            values.newPassword,
+            setFieldError
+          );
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ handleSubmit, values }) => {
-          const isFormValid = validationSchema.isValidSync(values);
+        {({ handleSubmit, values, errors }) => {
+          const isFormValid =
+            !Object.keys(errors).length && validationSchema.isValidSync(values);
 
           return (
             <Box sx={{ boxSizing: 'content-box' }}>
@@ -302,7 +306,7 @@ export default function ChangePassword({
                         },
                     }}
                     onClick={() => {
-                      !isSaving && handleSubmit();
+                      !isSaving && isFormValid && handleSubmit();
                     }}
                   >
                     <Iconify

@@ -70,7 +70,10 @@ export default function ChangeEmail({
     currentEmail: '',
   };
 
-  const initializeEmailChange = async (currentEmailToLowerCase: string) => {
+  const initializeEmailChange = async (
+    currentEmailToLowerCase: string,
+    setFieldError: (field: string, message: string) => void
+  ) => {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/initialize-email-change',
@@ -79,6 +82,9 @@ export default function ChangeEmail({
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
+    }
+    if (response.error) {
+      setFieldError('currentEmail', response.error);
     }
     setIsSaving(false);
     return;
@@ -109,14 +115,18 @@ export default function ChangeEmail({
     <Card>
       <Formik
         initialValues={initialValues}
-        onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await initializeEmailChange(values.currentEmail.toLowerCase());
+        onSubmit={async (values, { setSubmitting, setFieldError }) => {
+          await initializeEmailChange(
+            values.currentEmail.toLowerCase(),
+            setFieldError
+          );
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ handleSubmit, values }) => {
-          const isFormValid = validationSchema.isValidSync(values);
+        {({ handleSubmit, values, errors }) => {
+          const isFormValid =
+            !errors.currentEmail && validationSchema.isValidSync(values);
 
           return (
             <Box sx={{ boxSizing: 'content-box' }}>
@@ -246,7 +256,7 @@ export default function ChangeEmail({
                         },
                     }}
                     onClick={() => {
-                      !isSaving && handleSubmit();
+                      !isSaving && isFormValid && handleSubmit();
                     }}
                   >
                     <Iconify

@@ -111,6 +111,9 @@ export default function Index({
       }, 3 * 60 * 1000);
       setRefreshIntervalId(intervalId);
     }
+    return () => {
+      clearInterval(refreshIntervalId);
+    };
   }, [controlValue]);
 
   useEffect(() => {

@@ -81,6 +81,9 @@ export default function Index({
       }, 2 * 60 * 1000);
       setRefreshIntervalId(intervalId);
     }
+    return () => {
+      clearInterval(refreshIntervalId);
+    };
   }, [controlValue]);
 
   const checkControlValue = async () => {
