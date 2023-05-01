@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 function CustomApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const handleStart = (url) => url !== router.asPath && setLoading(true);
     const handleComplete = (url) => url === router.asPath && setLoading(false);
