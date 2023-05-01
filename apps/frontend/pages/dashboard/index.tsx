@@ -283,7 +283,7 @@ export default function Index({
   return (
     <DashboardLayout user={user} setUser={setUser} title={'Dashboard'}>
       <Helmet>
-        <title>Dashboard</title>
+        <title>Settings</title>
       </Helmet>
 
       <Container maxWidth="xl">
