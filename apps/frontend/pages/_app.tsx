@@ -6,12 +6,10 @@ import { HelmetProvider } from 'react-helmet-async';
 import './styles.css';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { Box, CircularProgress } from '@mui/material';
-import { getRandomRgbObjectForSliderPicker } from '../utils/colors/getRandomRgbObjectForSliderPicker';
 
 function CustomApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const handleStart = (url) => url !== router.asPath && setLoading(true);
     const handleComplete = (url) => url === router.asPath && setLoading(false);
@@ -27,25 +25,15 @@ function CustomApp({ Component, pageProps }: AppProps) {
 
   if (loading) {
     return (
-      <Box
+      <div
         style={{
           position: 'absolute',
-          height: '100%',
           width: '100%',
-          justifyContent: 'center',
-          alignContent: 'center',
+          height: '100%',
         }}
       >
-        <CircularProgress
-          size={200}
-          sx={{
-            color: getRandomRgbObjectForSliderPicker().hex,
-            position: 'absolute',
-            top: 'calc(50% - 100px)',
-            left: 'calc(50% - 100px)',
-          }}
-        />
-      </Box>
+        <div className="custom-loader"></div>
+      </div>
     );
   }
 
