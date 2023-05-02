@@ -2,7 +2,7 @@ import {Helmet} from 'react-helmet-async'; // @mui
 import {Box, Container, Grid, Stack, Typography} from '@mui/material'; // components
 import DashboardLayout from '../../layouts/dashboard';
 import React, {useEffect, useState} from 'react';
-import {User} from '@prisma/client';
+import {Token, User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRepeatingLinearGradient} from '../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
@@ -17,7 +17,9 @@ import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
 import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
-import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail'; // ----------------------------------------------------------------------
+import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail';
+import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
+// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -26,6 +28,7 @@ enum SettingOption {
   CHANGE_TIMEZONE = 'Change timezone',
   CHANGE_PASSWORD = 'Change password',
   CHANGE_EMAIL = 'Change email',
+  MANAGE_LOGIN_SESSIONS = 'Manage login sessions',
 }
 
 type OptionsColors = {
@@ -33,16 +36,19 @@ type OptionsColors = {
   CHANGE_PASSWORD: string;
   CHANGE_EMAIL: string;
   CHANGE_TIMEZONE: string;
+  MANAGE_LOGIN_SESSIONS: string;
 };
 
 type Props = {
   user: User;
   optionsColors: OptionsColors;
+  currentTokenId: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
   optionsColors,
+  currentTokenId,
 }: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [openedSettingOption, setOpenedSettingOption] =
@@ -52,6 +58,8 @@ export default function Index({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [controlValue, setControlValue] = useState(user?.controlValue);
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
+  const [userTokens, setUserTokens] = useState<Token[]>([]);
+  const [userTokensFetched, setUserTokensFetched] = useState(false);
 
   const fetchMe = async () => {
     setIsSaving(true);
@@ -214,6 +222,31 @@ export default function Index({
                   );
                 }
 
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.MANAGE_LOGIN_SESSIONS
+                ) {
+                  return (
+                    <ManageLoginSessions
+                      userTokens={userTokens}
+                      setUserTokens={setUserTokens}
+                      userTokensFetched={userTokensFetched}
+                      setUserTokensFetched={setUserTokensFetched}
+                      currentTokenId={currentTokenId}
+                      key={`${controlValue}-${currentSettingOption}-active`}
+                      controlValue={controlValue}
+                      setControlValue={setControlValue}
+                      disableHover={disableHover}
+                      user={user}
+                      setUser={setUser}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      color={optionsColors[currentSettingOption]}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                    />
+                  );
+                }
+
                 return (
                   <Box key={currentSettingOption}>
                     <Box
@@ -340,10 +373,10 @@ export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
 
-  let user;
+  let user, currentTokenId;
   try {
     const responseUser = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + 'user/me',
+      process.env.NEXT_PUBLIC_API_URL + 'user/me-with-current-token',
       {
         method: 'GET',
         headers: {
@@ -352,7 +385,9 @@ export const getServerSideProps = async ({ req, res }) => {
         },
       }
     );
-    user = (await responseUser.json()).user;
+    const jsonResponse = await responseUser.json();
+    user = jsonResponse.user;
+    currentTokenId = jsonResponse.currentToken?.id;
   } catch (e) {
     console.log(e);
     cookies.set('jwt_token');
@@ -377,6 +412,7 @@ export const getServerSideProps = async ({ req, res }) => {
   return {
     props: {
       user: user,
+      currentTokenId,
       optionsColors: Object.fromEntries(
         Object.entries(SettingOption).map((keyAndValue) => [
           keyAndValue[0],

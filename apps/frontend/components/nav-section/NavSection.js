@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 // @mui
-import {Box, List, ListItemText} from '@mui/material';
-//
+import {Box, List, ListItemText} from '@mui/material'; //
 import {StyledNavItem} from './styles';
 import Iconify from '../iconify';
 import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
+import {handleFetch} from '../../utils/handleFetch'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -36,12 +36,20 @@ function NavItem({ item, setUser }) {
   const pathname = router.pathname;
   const { title, path, icon } = item;
 
+  const revokeCurrentToken = async () => {
+    await handleFetch({
+      pathOrUrl: 'token/revoke-current',
+      method: 'POST',
+    });
+  };
+
   return (
     <StyledNavItem
-      onClick={() => {
+      onClick={async () => {
         if (path !== '*logout') {
           return;
         }
+        revokeCurrentToken();
         Cookies.remove('jwt_token');
         if (pathname === '/') {
           setUser(undefined);

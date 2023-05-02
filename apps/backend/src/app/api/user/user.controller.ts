@@ -11,7 +11,7 @@ import { LoginOrRegisterDto } from './dto/login.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
-import { User } from '@prisma/client';
+import { Token, User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories';
@@ -21,6 +21,7 @@ import { SetNameDto } from './dto/setName.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { ChangeTimezoneDto } from './dto/changeTimezone.dto';
 import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
+import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
 
 @Controller('user')
 export class UserController {
@@ -90,6 +91,15 @@ export class UserController {
   @Get('me')
   async handleRequestGetMe(@UserDecorator() user: User) {
     return { user };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me-with-current-token')
+  async handleRequestGetMeWithCurrentToken(
+    @UserDecorator() user: User,
+    @CurrentTokenDecorator() currentToken: Token
+  ) {
+    return { user, currentToken };
   }
 
   @UseGuards(JwtAuthGuard)

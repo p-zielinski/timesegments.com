@@ -76,14 +76,7 @@ export class TokenService {
   }
 
   async findUsersTokens(userId: string) {
-    return (
-      (
-        (await this.prisma.user.findFirst({
-          where: { id: userId },
-          include: { tokens: true },
-        })) || {}
-      )?.tokens || []
-    );
+    return await this.prisma.token.findMany({ where: { userId } });
   }
 
   async findOne(tokenId: string, include: Prisma.TokenInclude = null) {

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,28 @@ import { CurrentTokenDecorator } from '../../common/param-decorators/currentToke
 @Controller('token')
 export class TokenController {
   constructor(private tokenService: TokenService) {}
+
+  @Get('all')
+  async handleRequestGetAllUserTokens(@UserDecorator() user: User) {
+    return { tokens: await this.tokenService.findUsersTokens(user.id) };
+  }
+
+  @Post('revoke-current')
+  async handleRequestRevokeCurrentToken(
+    @UserDecorator() user: User,
+    @CurrentTokenDecorator() currentToken: Token
+  ) {
+    const revokeSingleTokenStatus = await this.tokenService.deleteSingleToken(
+      currentToken.id,
+      user
+    );
+    if (!revokeSingleTokenStatus.success) {
+      throw new BadRequestException({
+        error: revokeSingleTokenStatus.error,
+      });
+    }
+    return { message: revokeSingleTokenStatus.message };
+  }
 
   @Post('revoke')
   async handleRequestRevokeToken(
