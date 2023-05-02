@@ -162,7 +162,7 @@ export class UserService {
       const token = await this.tokenService.generateToken(
         newUser.id,
         new Date(Date.now() + 3600 * 1000 * 24 * 60),
-        userAgent
+        data.userAgent
       );
       return {
         success: true,
