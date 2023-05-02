@@ -18,12 +18,12 @@ import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSel
 // ----------------------------------------------------------------------
 
 export default function AuthForm({
-                                   authPageState,
-                                   setAuthPageState,
-                                   setUser,
-                                   setCategories,
-                                   setLimits,
-                                 }) {
+  authPageState,
+  setAuthPageState,
+  setUser,
+  setCategories,
+  setLimits,
+}) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
 
@@ -35,7 +35,8 @@ export default function AuthForm({
       password: string;
       timezone?: string;
     },
-    endpoint: 'login' | 'register'
+    endpoint: 'login' | 'register',
+    setFieldError: (field: string, message: string) => void
   ): Promise<boolean> => {
     const response = await handleFetch({
       pathOrUrl: 'user/' + endpoint,
@@ -51,7 +52,7 @@ export default function AuthForm({
       }
       await handleFetch({
         pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
-        body: {name: 'jwt_token', value: response.token},
+        body: { name: 'jwt_token', value: response.token },
         method: 'POST',
       });
       setUser(response.user);
@@ -59,24 +60,41 @@ export default function AuthForm({
       setLimits(response.limits);
       return true;
     }
+    if (response.statusCode === StatusCodes.BAD_REQUEST) {
+      const error = response.error || '';
+      if (error.match(/password/i)) {
+        setFieldError('password', error);
+      }
+      if (error.match(/email/i)) {
+        setFieldError('email', error);
+      }
+    }
     setError(new Error(response.error));
     return;
   };
 
   return (
     <Formik
-      initialValues={{email: '', password: '', timezone: ''}}
-      onSubmit={async (values, {setSubmitting}) => {
+      initialValues={{ email: '', password: '', timezone: '' }}
+      onSubmit={async (values, { setSubmitting, setFieldError }) => {
         setError(undefined);
         const valuesAndEmailToLowerCase = {
           ...values,
           email: values.email?.toLowerCase() || '',
         };
         if (authPageState === AuthPageState.LOGIN) {
-          await onLoginOrRegister(valuesAndEmailToLowerCase, 'login');
+          await onLoginOrRegister(
+            valuesAndEmailToLowerCase,
+            'login',
+            setFieldError
+          );
         }
         if (authPageState === AuthPageState.REGISTER) {
-          await onLoginOrRegister(valuesAndEmailToLowerCase, 'register');
+          await onLoginOrRegister(
+            valuesAndEmailToLowerCase,
+            'register',
+            setFieldError
+          );
         }
         setSubmitting(false);
       }}
@@ -84,20 +102,20 @@ export default function AuthForm({
         AuthPageState.LOGIN === authPageState
           ? loginSchema
           : AuthPageState.RECOVER_ACCOUNT === authPageState
-            ? recoverSchema
-            : registerSchema
+          ? recoverSchema
+          : registerSchema
       }
     >
       {({
-          handleSubmit,
-          isSubmitting,
-          values,
-          errors,
-          isValid,
-          setFieldValue,
-          touched,
-          setErrors,
-        }) => {
+        handleSubmit,
+        isSubmitting,
+        values,
+        errors,
+        isValid,
+        setFieldValue,
+        touched,
+        setErrors,
+      }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         useEffect(() => {
           setErrors({});
@@ -106,7 +124,7 @@ export default function AuthForm({
         return (
           <>
             <Stack spacing={1}>
-              <InputText type="text" name="email" label="Email address"/>
+              <InputText type="text" name="email" label="Email address" />
               {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
                 authPageState
               ) && (
@@ -148,13 +166,13 @@ export default function AuthForm({
               direction="row"
               alignItems="center"
               justifyContent="end"
-              sx={{my: 2, mt: 1}}
+              sx={{ my: 2, mt: 1 }}
             >
               {authPageState !== AuthPageState.RECOVER_ACCOUNT && (
                 <Link
                   variant="subtitle2"
                   underline="hover"
-                  sx={{cursor: 'pointer'}}
+                  sx={{ cursor: 'pointer' }}
                   onClick={() =>
                     setAuthPageState(AuthPageState.RECOVER_ACCOUNT)
                   }
