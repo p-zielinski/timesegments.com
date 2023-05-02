@@ -131,7 +131,12 @@ export class UserService {
   }
 
   public async createNewUser(
-    data: { email: string; plainPassword: string; timezone: Timezones },
+    data: {
+      email: string;
+      plainPassword: string;
+      timezone: Timezones;
+      userAgent: string;
+    },
     options?: { generateToken: boolean }
   ): Promise<
     | { success: false; error: string }
@@ -156,7 +161,8 @@ export class UserService {
       }
       const token = await this.tokenService.generateToken(
         newUser.id,
-        new Date(Date.now() + 3600 * 1000 * 24 * 60)
+        new Date(Date.now() + 3600 * 1000 * 24 * 60),
+        userAgent
       );
       return {
         success: true,
@@ -184,6 +190,7 @@ export class UserService {
   public async validateUser(data: {
     password: string;
     email: string;
+    userAgent: string;
   }): Promise<
     | { success: false; error: string }
     | { success: true; token: string; user: User }
@@ -203,7 +210,8 @@ export class UserService {
     }
     const token = await this.tokenService.generateToken(
       requestedUser.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60)
+      new Date(Date.now() + 3600 * 1000 * 24 * 60),
+      data.userAgent
     );
     return {
       success: true,

@@ -27,7 +27,7 @@ model Token {
   id            String      @id @default(cuid())
   user          User        @relation(fields: [userId], references: [id])
   userId        String
-  deviceName    String?
+  userAgent     String?
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   expiresAt     DateTime?   @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)

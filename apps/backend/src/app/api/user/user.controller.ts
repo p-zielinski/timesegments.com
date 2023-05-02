@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -32,10 +33,13 @@ export class UserController {
   }
 
   @Post('register')
-  async handleRequestCreateNewUser(@Body() registerDto: RegisterDto) {
+  async handleRequestCreateNewUser(
+    @Body() registerDto: RegisterDto,
+    @Headers('User-Agent') userAgent: string
+  ) {
     const { email, password, timezone } = registerDto;
     const registeringResult = await this.userService.createNewUser(
-      { email, plainPassword: password, timezone },
+      { email, plainPassword: password, timezone, userAgent },
       { generateToken: true }
     );
     if (registeringResult.success === false) {
@@ -55,11 +59,15 @@ export class UserController {
   }
 
   @Post('login')
-  async handleRequestLogin(@Body() loginOrRegisterDto: LoginOrRegisterDto) {
+  async handleRequestLogin(
+    @Body() loginOrRegisterDto: LoginOrRegisterDto,
+    @Headers('User-Agent') userAgent: string
+  ) {
     const { email, password } = loginOrRegisterDto;
     const validatingResult = await this.userService.validateUser({
       email,
       password,
+      userAgent,
     });
     if (validatingResult.success === false) {
       throw new BadRequestException({

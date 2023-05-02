@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { Token, Prisma, User } from '@prisma/client';
+import { Prisma, Token, User } from '@prisma/client';
 import { LoggerService } from '../../common/logger/loger.service';
 
 const isDate = (date: object) => {
@@ -51,7 +51,8 @@ export class TokenService {
 
   async generateToken(
     userId: string,
-    expiresAt: string | Date
+    expiresAt: string | Date,
+    userAgent: string
   ): Promise<Token> {
     if (!!expiresAt && typeof expiresAt !== 'string' && !isDate(expiresAt)) {
       throw new HttpException({}, HttpStatus.BAD_REQUEST);
@@ -61,6 +62,7 @@ export class TokenService {
         data: {
           userId: userId,
           expiresAt: expiresAt,
+          userAgent,
         },
       });
       if (!token?.id) {

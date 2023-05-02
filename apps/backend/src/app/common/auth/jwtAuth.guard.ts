@@ -37,7 +37,7 @@ export class JwtAuthGuard implements CanActivate {
         user: true,
       });
       if (!token?.id || !token?.user?.id) {
-        console.log('missing token lub user in database');
+        console.log('missing token or user in database');
         return false;
       }
       if (

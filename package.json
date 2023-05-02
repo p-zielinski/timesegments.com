@@ -5,10 +5,10 @@
   "scripts": {
     "start": "nx serve",
     "start:frontend": "nx serve frontend --prod --port=$PORT --hostname 0.0.0.0",
-    "start:backend": "prisma migrate dev; nx serve backend --prod",
-    "build:frontend": "prisma generate;nx build frontend --prod --skip-nx-cache",
-    "build:backend": "prisma generate;nx build backend --prod",
-    "build:all": "prisma generate;nx build frontend --prod;nx build backend --prod",
+    "start:backend": "nx serve backend --prod",
+    "build:frontend": "prisma migrate dev;prisma generate;nx build frontend --prod",
+    "build:backend": "prisma migrate dev;prisma generate;nx build backend --prod",
+    "build:all": "prisma migrate dev;prisma generate;nx build frontend --prod;nx build backend --prod",
     "test": "nx test",
     "dev": "prisma migrate dev && nx run-many --target serve --projects=backend,frontend --parallel=2"
   },
@@ -39,6 +39,7 @@
     "cookies-next": "^2.1.1",
     "core-js": "^3.6.5",
     "date-fns": "^2.29.3",
+    "device-detector-js": "^3.0.3",
     "formik": "^2.2.9",
     "hex-rgb": "^5.0.0",
     "html-react-parser": "^3.0.4",
