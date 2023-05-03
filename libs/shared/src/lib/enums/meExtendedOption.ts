@@ -3,4 +3,5 @@ export enum MeExtendedOption {
   SUBCATEGORIES = 'subcategories',
   CATEGORIES_LIMIT = 'categories limit',
   SUBCATEGORIES_LIMIT = 'subcategories limit',
+  NOTES = 'notes',
 }

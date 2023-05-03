@@ -1,13 +1,21 @@
 import { Box, Stack, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../../utils/colors/getRepeatingLinearGradient';
-import { IS_SAVING_HEX, SUPER_LIGHT_SILVER } from '../../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
-import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
-import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRepeatingLinearGradient } from '../../../../../utils/colors/getRepeatingLinearGradient';
+import {
+  IS_SAVING_HEX,
+  SUPER_LIGHT_SILVER,
+} from '../../../../../consts/colors';
+import { getHexFromRGBAObject } from '../../../../../utils/colors/getHexFromRGBAObject';
+import { getRgbaObjectFromHexString } from '../../../../../utils/colors/getRgbaObjectFromHexString';
+import { getHexFromRGBObject } from '../../../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import React from 'react';
 
-export const IsNotOpened = ({ color, setIsOpen, isSaving, disableHover }) => {
+export const AddIsNotOpened = ({
+  color,
+  setIsOpen,
+  isSaving,
+  disableHover,
+}) => {
   return (
     <Box
       sx={{ display: 'flex', width: '100%' }}

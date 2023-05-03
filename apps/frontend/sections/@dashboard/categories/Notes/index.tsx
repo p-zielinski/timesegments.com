@@ -1,30 +1,39 @@
 import { Grid } from '@mui/material';
 import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
 import React, { useState } from 'react';
-import { IsNotOpened } from './IsNotOpened';
-import IsOpened from './IsOpened';
+import { AddIsNotOpened } from './Add/IsNotOpened';
+import AddIsOpened from './Add/IsOpened';
 
-export const AddNoteForLater = ({ isSaving, disableHover, setIsSaving }) => {
+export const NotesSection = ({
+  userNotes,
+  setUserNotes,
+  isSaving,
+  disableHover,
+  setIsSaving,
+}) => {
+  console.log(userNotes);
+
   const [isOpen, setIsOpen] = useState(false);
-  //   hex: '#c800d9',
-  const [color] = useState({
+  const color = {
     hex: '#c4b900',
     rgb: getRgbaObjectFromHexString('#c4b900'),
-  });
+  };
 
   return (
     <Grid container spacing={2} columns={1}>
       <Grid key={'edit_categories'} item xs={1} sm={1} md={1} sx={{ mb: 2 }}>
         {isOpen ? (
-          <IsOpened
+          <AddIsOpened
             color={color}
             setIsOpen={setIsOpen}
             setIsSaving={setIsSaving}
             isSaving={isSaving}
             disableHover={disableHover}
+            userNotes={userNotes}
+            setUserNotes={setUserNotes}
           />
         ) : (
-          <IsNotOpened
+          <AddIsNotOpened
             color={color}
             setIsOpen={setIsOpen}
             isSaving={isSaving}

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
@@ -15,6 +15,11 @@ export class NoteController {
     @UserDecorator() user: User,
     @Body() createNoteDto: CreateNoteDto
   ) {
-    return { note: await this.noteService.create(createNoteDto.note, user) };
+    return { note: await this.noteService.create(createNoteDto.note, user.id) };
+  }
+
+  @Get('find-all')
+  async handleRequestFindAllNotes(@UserDecorator() user: User) {
+    return { notes: await this.noteService.getUsersAll(user.id) };
   }
 }

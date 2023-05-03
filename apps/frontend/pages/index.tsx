@@ -4,7 +4,14 @@ import {Box, Container, Stack, Typography} from '@mui/material'; // hooks
 import useResponsive from '../hooks/useResponsive'; // sections
 import {AuthForm} from '../sections/auth';
 import React, {useEffect, useState} from 'react';
-import {AuthPageState, CategoryWithSubcategories, Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
+import {
+  AuthPageState,
+  CategoryWithSubcategories,
+  Limits,
+  MeExtendedOption,
+  UserWithCategoriesAndSubcategories,
+  UserWithCategoriesAndSubcategoriesAndNotes,
+} from '@test1/shared';
 import {CategoriesPageMode} from '../enum/categoriesPageMode';
 import {RenderAuthLink} from '../components/renderAuthLink';
 import DashboardLayout from '../layouts/dashboard';
@@ -17,7 +24,8 @@ import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObj
 import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
-import {AddNoteForLater} from '../sections/@dashboard/categories/AddNoteForLater';
+import {NotesSection} from '../sections/@dashboard/categories/Notes';
+import {Note} from '@prisma/client';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -39,13 +47,14 @@ const StyledSection = styled('div')(({ theme }) => ({
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
   limits: Limits;
-
+  notes: Note[];
   randomSliderColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
   limits: serverSideFetchedLimits,
+  notes: serverSideFetchedNotes,
   randomSliderColor: randomSliderColor,
 }: Props) {
   const StyledContent = styled('div')(({ theme }) => ({
@@ -122,6 +131,7 @@ export default function Index({
           MeExtendedOption.SUBCATEGORIES,
           MeExtendedOption.CATEGORIES_LIMIT,
           MeExtendedOption.SUBCATEGORIES_LIMIT,
+          MeExtendedOption.NOTES,
         ],
       },
       method: 'POST',
@@ -141,7 +151,7 @@ export default function Index({
     return;
   };
 
-  const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits);
+  const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits || {});
 
   //Auth page states
   const mdUp = useResponsive('up', 'md');
@@ -150,6 +160,9 @@ export default function Index({
   //Categories page states
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>(
     user?.categories || []
+  );
+  const [userNotes, setUserNotes] = useState<Note[]>(
+    serverSideFetchedNotes || []
   );
   const [viewMode, setViewMode] = useState<CategoriesPageMode>(
     CategoriesPageMode.VIEW
@@ -265,12 +278,13 @@ export default function Index({
       </Helmet>
 
       <Container>
-        <AddNoteForLater
+        <NotesSection
+          userNotes={userNotes}
+          setUserNotes={setUserNotes}
           isSaving={isSaving}
           setIsSaving={setIsSaving}
           disableHover={disableHover}
         />
-
         <CategoryList
           controlValue={controlValue}
           setControlValue={setControlValue}
@@ -312,7 +326,9 @@ export default function Index({
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-  let user: UserWithCategoriesAndSubcategories, limits: Limits;
+  let user: UserWithCategoriesAndSubcategoriesAndNotes,
+    limits: Limits,
+    notes: Note[];
   if (jwt_token) {
     try {
       const responseUser = await fetch(
@@ -329,6 +345,7 @@ export const getServerSideProps = async ({ req, res }) => {
               MeExtendedOption.SUBCATEGORIES,
               MeExtendedOption.CATEGORIES_LIMIT,
               MeExtendedOption.SUBCATEGORIES_LIMIT,
+              MeExtendedOption.NOTES,
             ],
           }),
         }
@@ -336,6 +353,7 @@ export const getServerSideProps = async ({ req, res }) => {
       const response = await responseUser.json();
       user = response.user;
       limits = response.limits;
+      notes = response.user.notes;
     } catch (e) {
       console.log(e);
       cookies.set('jwt_token');
@@ -352,6 +370,7 @@ export const getServerSideProps = async ({ req, res }) => {
     props: {
       user: user ?? null,
       limits: limits ?? null,
+      notes: notes ?? null,
       randomSliderColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,

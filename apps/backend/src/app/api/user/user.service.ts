@@ -60,6 +60,10 @@ export class UserService {
       include.categories = { where: { deleted: false } };
     }
 
+    if (extend.includes(MeExtendedOption.NOTES)) {
+      include.notes = true;
+    }
+
     const limits: { categoriesLimit?: number; subcategoriesLimit?: number } =
       {};
     if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
