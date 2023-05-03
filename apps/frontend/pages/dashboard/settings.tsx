@@ -143,7 +143,6 @@ export default function Index({
                 gap: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: '1--%',
               }}
             >
               {allSettingOptions.map((currentSettingOption) => {
@@ -234,11 +233,8 @@ export default function Index({
                       setUserTokensFetched={setUserTokensFetched}
                       currentTokenId={currentTokenId}
                       key={`${controlValue}-${currentSettingOption}-active`}
-                      controlValue={controlValue}
-                      setControlValue={setControlValue}
                       disableHover={disableHover}
                       user={user}
-                      setUser={setUser}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
                       color={optionsColors[currentSettingOption]}

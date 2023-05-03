@@ -25,19 +25,19 @@ CategoryList.propTypes = {
 };
 
 export default function CategoryList({
-  controlValue,
-  setControlValue,
-  disableHover,
-  categories,
-  setCategories,
-  viewMode,
-  setViewMode,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  limits,
-}) {
+                                       controlValue,
+                                       setControlValue,
+                                       disableHover,
+                                       categories,
+                                       setCategories,
+                                       viewMode,
+                                       setViewMode,
+                                       isEditing,
+                                       setIsEditing,
+                                       isSaving,
+                                       setIsSaving,
+                                       limits,
+                                     }) {
   const [
     numberOfCategoriesAndSubcategoriesCombined,
     setNumberOfCategoriesAndSubcategoriesCombined,
@@ -58,113 +58,112 @@ export default function CategoryList({
   };
 
   return (
-    <>
-      <Grid container spacing={2} columns={1}>
-        {viewMode === CategoriesPageMode.EDIT && (
-          <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {categories.length !== 0 && (
-                <Card
-                  sx={{
-                    backgroundColor: isSaving
-                      ? IS_SAVING_HEX
-                      : 'rgba(0,0,0,0.11)',
-                    cursor: !isSaving && 'pointer',
-                    color: isSaving && IS_SAVING_HEX,
-                    border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_RED}`,
-                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
-                    '&:hover': !disableHover &&
-                      !isSaving && {
-                        border: `solid 2px ${RED}`,
-                      },
-                  }}
-                  onClick={() =>
-                    !isSaving && setViewMode(CategoriesPageMode.VIEW)
-                  }
-                >
-                  <Iconify
-                    icon={'mdi:cancel-bold'}
-                    width={42}
-                    sx={{ m: -2, position: 'absolute', bottom: 22, left: 22 }}
-                  />
-                  <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
-                    <Typography variant="subtitle2" noWrap>
-                      STOP EDITING CATEGORIES
-                    </Typography>
-                  </Stack>
-                </Card>
-              )}
-              {categories.length < limits.categoriesLimit ? (
-                <AddNew
-                  controlValue={controlValue}
-                  setControlValue={setControlValue}
-                  disableHover={disableHover}
-                  type={CreateNewType.CATEGORY}
-                  isEditing={isEditing}
-                  setIsEditing={setIsEditing}
-                  isSaving={isSaving}
-                  setIsSaving={setIsSaving}
-                  categories={categories}
-                  setCategories={setCategories}
-                />
-              ) : (
-                <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />
-              )}
-            </Box>
-          </Grid>
-        )}
-        {viewMode === CategoriesPageMode.VIEW && (
-          <CancelCard
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            disableHover={disableHover}
-            categories={categories}
-            setCategories={setCategories}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-          />
-        )}
-        {viewMode === CategoriesPageMode.VIEW &&
-          numberOfCategoriesAndSubcategoriesCombined > 10 && (
-            <EditCategoriesButtonComponent
-              disableHover={disableHover}
-              isSaving={isSaving}
-              setViewMode={setViewMode}
-            />
-          )}
 
-        {getCategories(categories).length
-          ? getCategories(categories).map((category) => (
-              <Grid key={category.id} item xs={1} sm={1} md={1}>
-                <CategoryCard
-                  controlValue={controlValue}
-                  setControlValue={setControlValue}
-                  disableHover={disableHover}
-                  viewMode={viewMode}
-                  isEditing={isEditing}
-                  setIsEditing={setIsEditing}
-                  category={category}
-                  categories={categories}
-                  setCategories={setCategories}
-                  isSaving={isSaving}
-                  setIsSaving={setIsSaving}
-                  limits={limits}
+    <Grid container spacing={2} columns={1}>
+      {viewMode === CategoriesPageMode.EDIT && (
+        <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
+          <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+            {categories.length !== 0 && (
+              <Card
+                sx={{
+                  backgroundColor: isSaving
+                    ? IS_SAVING_HEX
+                    : 'rgba(0,0,0,0.11)',
+                  cursor: !isSaving && 'pointer',
+                  color: isSaving && IS_SAVING_HEX,
+                  border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_RED}`,
+                  background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                  '&:hover': !disableHover &&
+                    !isSaving && {
+                      border: `solid 2px ${RED}`,
+                    },
+                }}
+                onClick={() =>
+                  !isSaving && setViewMode(CategoriesPageMode.VIEW)
+                }
+              >
+                <Iconify
+                  icon={'mdi:cancel-bold'}
+                  width={42}
+                  sx={{m: -2, position: 'absolute', bottom: 22, left: 22}}
                 />
-              </Grid>
-            ))
-          : !isEditing && (
-              <ShowNoShow
-                type={ShowNoShowType.CATEGORIES}
-                isSaving={isSaving}
-              />
+                <Stack spacing={2} sx={{p: 2, ml: 5}}>
+                  <Typography variant="subtitle2" noWrap>
+                    STOP EDITING CATEGORIES
+                  </Typography>
+                </Stack>
+              </Card>
             )}
-        {viewMode === CategoriesPageMode.VIEW && (
+            {categories.length < limits.categoriesLimit ? (
+              <AddNew
+                controlValue={controlValue}
+                setControlValue={setControlValue}
+                disableHover={disableHover}
+                type={CreateNewType.CATEGORY}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
+                categories={categories}
+                setCategories={setCategories}
+              />
+            ) : (
+              <ShowLimitReached type={ShowLimitReachedType.CATEGORIES}/>
+            )}
+          </Box>
+        </Grid>
+      )}
+      {viewMode === CategoriesPageMode.VIEW && (
+        <CancelCard
+          controlValue={controlValue}
+          setControlValue={setControlValue}
+          disableHover={disableHover}
+          categories={categories}
+          setCategories={setCategories}
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
+        />
+      )}
+      {viewMode === CategoriesPageMode.VIEW &&
+        numberOfCategoriesAndSubcategoriesCombined > 10 && (
           <EditCategoriesButtonComponent
+            disableHover={disableHover}
             isSaving={isSaving}
             setViewMode={setViewMode}
           />
         )}
-      </Grid>
-    </>
+
+      {getCategories(categories).length
+        ? getCategories(categories).map((category) => (
+          <Grid key={category.id} item xs={1} sm={1} md={1}>
+            <CategoryCard
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              disableHover={disableHover}
+              viewMode={viewMode}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              category={category}
+              categories={categories}
+              setCategories={setCategories}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              limits={limits}
+            />
+          </Grid>
+        ))
+        : !isEditing && (
+        <ShowNoShow
+          type={ShowNoShowType.CATEGORIES}
+          isSaving={isSaving}
+        />
+      )}
+      {viewMode === CategoriesPageMode.VIEW && (
+        <EditCategoriesButtonComponent
+          isSaving={isSaving}
+          setViewMode={setViewMode}
+        />
+      )}
+    </Grid>
   );
 }

@@ -1,98 +1,37 @@
-import { Box, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
+import { Box, Card, Stack, TextField, Typography } from '@mui/material';
+import { getRepeatingLinearGradient } from '../../../../utils/colors/getRepeatingLinearGradient';
 import {
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
-} from '../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import Iconify from '../../../components/iconify';
-import React, { useEffect, useRef, useState } from 'react';
+} from '../../../../consts/colors';
+import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
+import Iconify from '../../../../components/iconify';
+import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
+import { InputText } from '../../../../components/form/Text';
+import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
-import { handleFetch } from '../../../utils/handleFetch';
-import { StatusCodes } from 'http-status-codes';
-import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
-import { Timezones } from '@test1/shared';
-import { Token } from '@prisma/client';
-import { DateTime } from 'luxon';
-import { useRouter } from 'next/router';
-import Cookies from 'js-cookie';
-import ShowCompletedInfo from './ShowCompletedInfo';
 
-export default function ManageLoginSessions({
-  userTokens,
-  setUserTokens,
-  userTokensFetched,
-  setUserTokensFetched,
-  currentTokenId,
+export default function IsOpened({
   disableHover,
-  user,
   isSaving,
   setIsSaving,
   color,
-  setOpenedSettingOption,
+  setIsOpen,
 }) {
-  const [completed, setCompleted] = useState(false);
-
-  const router = useRouter();
-  const getUserTokens = async () => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'token/all',
-      method: 'GET',
-    });
-    if (response.statusCode === StatusCodes.OK && response.tokens) {
-      setUserTokens(response.tokens);
-      setUserTokensFetched(true);
-      setIsSaving(false);
-    }
-    return;
-  };
-
-  useEffect(() => {
-    if (!userTokensFetched) {
-      getUserTokens();
-    }
-  }, [userTokensFetched]);
-
-  const getLoginSessionOptions = (tokens: Token[]) => {
-    return tokens.map((token) => {
-      const createdAtString = DateTime.fromISO(token.createdAt, {
-        zone: Timezones[user.timezone],
-      }).toLocaleString({
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      });
-      return {
-        value: token.id,
-        label:
-          token.id === currentTokenId
-            ? `Current session, created at: ${createdAtString}`
-            : `${token.userAgent}, created at: ${createdAtString}`,
-      };
-    });
-  };
-
-  const mainBoxRef = useRef(null);
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
-    darkHexColor = isSaving
-      ? 'rgb(144, 156, 168)'
-      : getHexFromRGBObject(
-          getColorShadeBasedOnSliderPickerSchema(
-            getRgbaObjectFromHexString(hexColor)
-          )
-        );
+    darkHexColor = getHexFromRGBObject(
+      getColorShadeBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(hexColor)
+      )
+    );
     StyledTextField = styled(TextField)({
       '& input': {
         color: darkHexColor,
@@ -122,72 +61,52 @@ export default function ManageLoginSessions({
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
   const initialValues = {
-    loginSession: '',
+    note: '',
   };
 
-  const revokeSession = async (
-    tokenId: string,
-    resetForm: () => void,
-    setFieldError: (field: string, message: string) => void
-  ) => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'token/revoke',
-      body: { tokenId },
-      method: 'POST',
-    });
-    if (tokenId === currentTokenId) {
-      Cookies.remove('jwt_token');
-      router.push('/');
-      return;
-    }
-    setUserTokens(userTokens.filter((userToken) => userToken.id !== tokenId));
-    if (response.statusCode === StatusCodes.CREATED) {
-      setCompleted(true);
-    } else {
-      await getUserTokens();
-      setFieldError('loginSession', response.error || 'Unknown error');
-    }
-    setIsSaving(false);
-    return;
-  };
+  // const saveName = async (name: string, resetForm: () => void) => {
+  //   setIsSaving(true);
+  //   const response = await handleFetch({
+  //     pathOrUrl: 'user/set-name',
+  //     body: { name, controlValue },
+  //     method: 'POST',
+  //   });
+  //   if (response.statusCode === StatusCodes.CREATED) {
+  //     setInitialValues({
+  //       name,
+  //     });
+  //     resetForm();
+  //     setUser({ ...user, name });
+  //     if (response.controlValue) {
+  //       setControlValue(response.controlValue);
+  //     }
+  //   } else if (response.statusCode === StatusCodes.CONFLICT) {
+  //     setControlValue(undefined);
+  //     return; //skip setting isSaving(false)
+  //   }
+  //   setIsSaving(false);
+  //   return;
+  // };
 
   const validationSchema = yup.object().shape({
-    loginSession: yup.string().required(),
+    note: yup.string().required(),
   });
 
-  if (completed) {
-    return (
-      <ShowCompletedInfo
-        key={'accessRevoked'}
-        isSaving={isSaving}
-        setOpenedSettingOption={setOpenedSettingOption}
-        color={color}
-        disableHover={disableHover}
-        completedInfo={'Access has been revoked!'}
-      />
-    );
-  }
-
   return (
-    <Box ref={mainBoxRef}>
+    <Card key={initialValues.name}>
       <Formik
         initialValues={initialValues}
-        onSubmit={async (
-          values,
-          { setSubmitting, resetForm, setFieldError }
-        ) => {
-          await revokeSession(values.loginSession, resetForm, setFieldError);
+        onSubmit={async (values, { setSubmitting, resetForm }) => {
+          // await saveName(values.name, resetForm);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ handleSubmit, values, errors }) => {
-          const isFormValid =
-            !Object.keys(errors).length && validationSchema.isValidSync(values);
+        {({ handleSubmit, values }) => {
+          const isFormValid = validationSchema.isValidSync(values);
 
           return (
-            <Box sx={{ boxSizing: 'content-box' }}>
+            <Card>
               <Box>
                 <Box
                   sx={{
@@ -213,38 +132,30 @@ export default function ManageLoginSessions({
                             a: 0.3,
                           })
                     }`,
-                    mb: '-3px',
                     borderBottom: '0px',
                   }}
                 >
-                  <Box sx={{ p: 2, pt: 3.5 }}>
+                  <Box sx={{ p: 2, pt: 3.5, pb: 1.5 }}>
                     {isSaving && (
                       <Box
                         sx={{
-                          width: mainBoxRef.current?.clientWidth || '100%',
-                          height: mainBoxRef.current?.clientHeight || '100%',
+                          width: 'calc(100% + 20px)',
+                          height: 'calc(100% + 20px)',
                           background: 'transparent',
-                          zIndex: 1,
                           position: 'absolute',
-                          transform: 'translate(-18px, -26px)',
+                          zIndex: 1,
+                          transform: 'translate(-20px, -20px)',
                         }}
                       />
                     )}
-
-                    <Stack spacing={2}>
-                      <Box key={userTokensFetched}>
-                        <SelectWithSearch
-                          name="loginSession"
-                          label="Login session"
-                          options={getLoginSessionOptions(userTokens)}
-                          TextField={StyledTextField}
-                          helperTextColor={
-                            isSaving ? IS_SAVING_HEX : darkHexColor
-                          }
-                          disabled={isSaving}
-                        />
-                      </Box>
-                    </Stack>
+                    <InputText
+                      type="text"
+                      name={'note'}
+                      label={`Note`}
+                      TextField={StyledTextField}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
+                    />
                   </Box>
                 </Box>
                 <Box
@@ -261,7 +172,6 @@ export default function ManageLoginSessions({
                           )
                         : LIGHT_GREEN,
                     minHeight: 58,
-                    maxHeight: 58,
                     borderBottomLeftRadius: 12,
                     borderBottomRightRadius: 12,
                     border: isSaving
@@ -316,24 +226,22 @@ export default function ManageLoginSessions({
                         },
                     }}
                     onClick={() => {
-                      !isSaving &&
-                        !Object.keys(errors).length &&
-                        handleSubmit();
+                      !isSaving && handleSubmit();
                     }}
                   >
                     <Iconify
-                      icon={'material-symbols:delete-forever'}
+                      icon={'material-symbols:save-outline'}
                       width={42}
                       sx={{
                         m: -2,
-                        position: 'relative',
-                        bottom: -6,
-                        left: 8,
+                        position: 'absolute',
+                        bottom: 25,
+                        left: 25,
                       }}
                     />
-                    <Stack spacing={2} sx={{ ml: 5, mt: -3 }}>
+                    <Stack spacing={2} sx={{ ml: 5 }}>
                       <Typography variant="subtitle2" noWrap>
-                        REVOKE ACCESS
+                        SAVE NAME
                       </Typography>
                     </Stack>
                   </Box>
@@ -385,27 +293,25 @@ export default function ManageLoginSessions({
                           border: `solid 2px ${RED}`,
                         },
                     }}
-                    onClick={() =>
-                      !isSaving && setOpenedSettingOption(undefined)
-                    }
+                    onClick={() => !isSaving && setIsOpen(false)}
                   >
                     <Iconify
                       icon={'mdi:cancel-bold'}
                       width={42}
                       sx={{
                         m: -2,
-                        position: 'relative',
-                        bottom: -22,
-                        right: -24,
+                        position: 'absolute',
+                        bottom: 26,
+                        right: 24,
                       }}
                     />
                   </Box>
                 </Box>
               </Box>
-            </Box>
+            </Card>
           );
         }}
       </Formik>
-    </Box>
+    </Card>
   );
 }

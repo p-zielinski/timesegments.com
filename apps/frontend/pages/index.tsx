@@ -3,7 +3,7 @@ import {styled} from '@mui/material/styles';
 import {Box, Container, Stack, Typography} from '@mui/material'; // hooks
 import useResponsive from '../hooks/useResponsive'; // sections
 import {AuthForm} from '../sections/auth';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {AuthPageState, CategoryWithSubcategories, Limits, MeExtendedOption, UserWithCategoriesAndSubcategories,} from '@test1/shared';
 import {CategoriesPageMode} from '../enum/categoriesPageMode';
 import {RenderAuthLink} from '../components/renderAuthLink';
@@ -17,6 +17,7 @@ import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObj
 import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
+import {AddNoteForLater} from '../sections/@dashboard/categories/AddNoteForLater';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -264,25 +265,11 @@ export default function Index({
       </Helmet>
 
       <Container>
-        <Stack
-          direction="row"
-          flexWrap="wrap-reverse"
-          alignItems="center"
-          justifyContent="flex-end"
-        >
-          <Stack
-            direction="row"
-            spacing={1}
-            flexShrink={0}
-            sx={{ mt: -3, mb: 3 }}
-          >
-            <Sort
-              user={user}
-              categories={categories}
-              setCategories={setCategories}
-            />
-          </Stack>
-        </Stack>
+        <AddNoteForLater
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
+          disableHover={disableHover}
+        />
 
         <CategoryList
           controlValue={controlValue}
@@ -298,6 +285,25 @@ export default function Index({
           setIsEditing={setIsEditing}
           limits={limits}
         />
+        <Stack
+          direction="row"
+          flexWrap="wrap-reverse"
+          alignItems="center"
+          justifyContent="flex-end"
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            flexShrink={0}
+            sx={{ mt: 1, mb: 1 }}
+          >
+            <Sort
+              user={user}
+              categories={categories}
+              setCategories={setCategories}
+            />
+          </Stack>
+        </Stack>
       </Container>
     </DashboardLayout>
   );
