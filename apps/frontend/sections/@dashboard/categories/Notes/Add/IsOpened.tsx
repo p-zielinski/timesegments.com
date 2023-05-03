@@ -17,9 +17,9 @@ import { getHexFromRGBObject } from '../../../../../utils/colors/getHexFromRGBOb
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
-import ShowCompletedInfo from '../../../settings/ShowCompletedInfo';
 import { handleFetch } from '../../../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import ShowCompletedInfoNotes from './ShowCompletedInfo';
 
 export default function AddIsOpened({
   userNotes,
@@ -91,7 +91,7 @@ export default function AddIsOpened({
 
   if (completed) {
     return (
-      <ShowCompletedInfo
+      <ShowCompletedInfoNotes
         key={'noteSaved'}
         isSaving={isSaving}
         setIsOpen={setIsOpen}

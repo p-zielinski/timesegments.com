@@ -14,6 +14,7 @@ model User {
   name              String?
   tokens            Token[]
   notes             Note[]
+  expandNotes       Boolean     @default(true)
   categories        Category[]
   subcategories     Subcategory[]
   sortingCategories ColumnSortOption  @default(NEWEST)

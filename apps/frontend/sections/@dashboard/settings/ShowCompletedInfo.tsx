@@ -8,20 +8,18 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/ge
 import React from 'react';
 import { SettingOption } from '../../../enum/settingOption';
 
-export default function ShowCompletedInfo({
+export default function ShowCompletedInfoSettings({
   isSaving,
   setOpenedSettingOption,
   color,
   disableHover,
   completedInfo,
-  setIsOpen,
 }: {
   isSaving: boolean;
-  setOpenedSettingOption?: (settingOption: SettingOption) => void;
+  setOpenedSettingOption: (settingOption: SettingOption) => void;
   color: { rgb: { r: number; g: number; b: number; a: number }; hex: string };
   disableHover: boolean;
   completedInfo: string;
-  setIsOpen?: (isOpen: boolean) => void;
 }) {
   return (
     <Box key={'passwordChanged'}>
@@ -31,12 +29,7 @@ export default function ShowCompletedInfo({
           if (isSaving) {
             return;
           }
-          if (typeof setOpenedSettingOption === 'function') {
-            setOpenedSettingOption(undefined);
-          }
-          if (typeof setIsOpen === 'function') {
-            setIsOpen(false);
-          }
+          setOpenedSettingOption(undefined);
         }}
       >
         <Box

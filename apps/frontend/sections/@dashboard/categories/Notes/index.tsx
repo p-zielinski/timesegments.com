@@ -5,14 +5,16 @@ import { AddIsNotOpened } from './Add/IsNotOpened';
 import AddIsOpened from './Add/IsOpened';
 
 export const NotesSection = ({
+  controlValue,
+  setControlValue,
+  user,
+  setUser,
   userNotes,
   setUserNotes,
   isSaving,
-  disableHover,
   setIsSaving,
+  disableHover,
 }) => {
-  console.log(userNotes);
-
   const [isOpen, setIsOpen] = useState(false);
   const color = {
     hex: '#c4b900',
@@ -34,9 +36,15 @@ export const NotesSection = ({
           />
         ) : (
           <AddIsNotOpened
+            controlValue={controlValue}
+            setControlValue={setControlValue}
+            user={user}
+            setUser={setUser}
+            userNotes={userNotes}
             color={color}
             setIsOpen={setIsOpen}
             isSaving={isSaving}
+            setIsSaving={setIsSaving}
             disableHover={disableHover}
           />
         )}

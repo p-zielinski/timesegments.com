@@ -22,6 +22,7 @@ import { ChangePasswordDto } from './dto/changePassword.dto';
 import { ChangeTimezoneDto } from './dto/changeTimezone.dto';
 import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
+import { SetExpandNotesDto } from './dto/setExpandNotes.dto';
 
 @Controller('user')
 export class UserController {
@@ -213,5 +214,21 @@ export class UserController {
       });
     }
     return cancelAllActiveStatus;
+  }
+
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @Post('set-expand-notes')
+  async handleRequestSetExpandNotes(
+    @UserDecorator() user: User,
+    @Body() setExpandNotesDto: SetExpandNotesDto
+  ) {
+    const updateExpandNotes = await this.userService.updateSetExpandNotes(
+      user.id,
+      setExpandNotesDto.expandNotes
+    );
+    return {
+      user: updateExpandNotes,
+      controlValue: this.userService.getNewControlValue(user),
+    };
   }
 }

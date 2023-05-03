@@ -24,7 +24,7 @@ import { Token } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
-import ShowCompletedInfo from './ShowCompletedInfo';
+import ShowCompletedInfoSettings from './ShowCompletedInfo';
 
 export default function ManageLoginSessions({
   userTokens,
@@ -158,7 +158,7 @@ export default function ManageLoginSessions({
 
   if (completed) {
     return (
-      <ShowCompletedInfo
+      <ShowCompletedInfoSettings
         key={'accessRevoked'}
         isSaving={isSaving}
         setOpenedSettingOption={setOpenedSettingOption}

@@ -19,7 +19,7 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/handleFetch';
 import InputText from '../../../components/form/Text';
 import { StatusCodes } from 'http-status-codes';
-import ShowCompletedInfo from './ShowCompletedInfo';
+import ShowCompletedInfoSettings from './ShowCompletedInfo';
 import emailRegexp from '../../../regex/email';
 
 export default function ChangeEmail({
@@ -100,7 +100,7 @@ export default function ChangeEmail({
 
   if (completed) {
     return (
-      <ShowCompletedInfo
+      <ShowCompletedInfoSettings
         key={'emailSent'}
         isSaving={isSaving}
         setOpenedSettingOption={setOpenedSettingOption}

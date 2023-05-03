@@ -355,6 +355,13 @@ export class UserService {
     };
   }
 
+  public async updateSetExpandNotes(userId: string, expandNotes: boolean) {
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: { expandNotes },
+    });
+  }
+
   private async updateControlValue(userId: string, controlValue: string) {
     await this.prisma.user.update({
       where: { id: userId },

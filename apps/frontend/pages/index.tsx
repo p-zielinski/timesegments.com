@@ -279,6 +279,10 @@ export default function Index({
 
       <Container>
         <NotesSection
+          controlValue={controlValue}
+          setControlValue={setControlValue}
+          user={user}
+          setUser={setUser}
           userNotes={userNotes}
           setUserNotes={setUserNotes}
           isSaving={isSaving}

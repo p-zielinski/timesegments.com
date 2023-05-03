@@ -21,7 +21,7 @@ import InputText from '../../../components/form/Text';
 import { StatusCodes } from 'http-status-codes';
 import YupPassword from 'yup-password';
 import { equalTo } from '../../../utils/yupCustomMethods';
-import ShowCompletedInfo from './ShowCompletedInfo';
+import ShowCompletedInfoSettings from './ShowCompletedInfo';
 
 YupPassword(yup); // extend yup
 yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
@@ -137,7 +137,7 @@ export default function ChangePassword({
 
   if (completed) {
     return (
-      <ShowCompletedInfo
+      <ShowCompletedInfoSettings
         key={'passwordChanged'}
         isSaving={isSaving}
         setOpenedSettingOption={setOpenedSettingOption}
