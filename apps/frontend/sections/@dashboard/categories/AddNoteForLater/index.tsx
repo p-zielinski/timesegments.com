@@ -6,9 +6,10 @@ import IsOpened from './IsOpened';
 
 export const AddNoteForLater = ({ isSaving, disableHover, setIsSaving }) => {
   const [isOpen, setIsOpen] = useState(false);
+  //   hex: '#c800d9',
   const [color] = useState({
-    hex: '#c800d9',
-    rgb: getRgbaObjectFromHexString('#c800d9'),
+    hex: '#c4b900',
+    rgb: getRgbaObjectFromHexString('#c4b900'),
   });
 
   return (

@@ -14,6 +14,9 @@ type InputTextProps = {
   disabled?: boolean;
   TextField?: StyledComponent<any>;
   helperTextColor?: string;
+  multiline?: boolean;
+  rows?: number;
+  inputBackground?: string;
 };
 
 export const InputText: React.FC<InputTextProps> = ({
@@ -26,59 +29,58 @@ export const InputText: React.FC<InputTextProps> = ({
   disabled = false,
   TextField = DefaultTextField,
   helperTextColor = '#888888',
+  multiline = false,
+  rows = 1,
+  inputBackground = 'white',
 }) => {
   return (
     <Field autoComplete="nope" name={name}>
       {({ field, meta }: { field: any; meta: any }) => {
         return (
-          <>
-            <TextField
-              disabled={disabled}
-              {...field}
-              focused={
-                !!(
-                  meta.initialValue !== meta.value &&
-                  meta.value &&
-                  !meta.error
-                )
-              }
-              label={label}
-              type={type}
-              variant="outlined"
-              size="small"
-              autoComplete="nope"
-              value={field.value || ''}
-              InputLabelProps={{
-                sx: {
-                  background: 'rgba(255,255,255,.5)',
-                  borderRadius: '7px',
-                },
-              }}
-              error={!!(meta.touched && meta.error)}
-              helperText={helperTextHandler(meta, helperText)}
-              FormHelperTextProps={{
-                sx: {
-                  mt:
-                    helperText?.match(/optional/i) || helperText?.match(/dd\//i)
-                      ? 0
-                      : '-3px',
-                  ml: '4px',
-                  mb: helperText?.match(/optional/i) ? -0.3 : -1,
-                  color: helperTextColor,
-                },
-              }}
-              fullWidth
-              InputProps={{
-                sx: {
-                  background: 'white',
-                },
-                startAdornment: startAdornment,
-                endAdornment: endAdornment,
-              }}
-              className={'notchedOutline'}
-              sx={{ mb: 1 }}
-            />
-          </>
+          <TextField
+            multiline={multiline}
+            rows={rows}
+            disabled={disabled}
+            {...field}
+            focused={
+              !!(meta.initialValue !== meta.value && meta.value && !meta.error)
+            }
+            label={label}
+            type={type}
+            variant="outlined"
+            size="small"
+            autoComplete="nope"
+            value={field.value || ''}
+            InputLabelProps={{
+              sx: {
+                background: 'rgba(255,255,255,.5)',
+                borderRadius: '7px',
+              },
+            }}
+            error={!!(meta.touched && meta.error)}
+            helperText={helperTextHandler(meta, helperText)}
+            FormHelperTextProps={{
+              sx: {
+                mt:
+                  helperText?.match(/optional/i) || helperText?.match(/dd\//i)
+                    ? 0
+                    : '-3px',
+                ml: '4px',
+                mb: helperText?.match(/optional/i) ? -0.3 : -1,
+                color: helperTextColor,
+              },
+            }}
+            fullWidth
+            InputProps={{
+              sx: {
+                background: inputBackground,
+              },
+              startAdornment: startAdornment,
+              endAdornment: endAdornment,
+            }}
+            className={'notchedOutline'}
+            sx={{ mb: 1 }}
+          />
         );
       }}
     </Field>

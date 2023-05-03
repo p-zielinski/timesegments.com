@@ -18,6 +18,8 @@ import { CategoryService } from './api/category/category.service';
 import { TimeLogService } from './api/time-log/time-log.service';
 import { TokenController } from './api/token/token.controller';
 import { TimeLogController } from './api/time-log/time-log.controller';
+import { NoteController } from './api/note/note.controller';
+import { NoteService } from './api/note/note.service';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { TimeLogController } from './api/time-log/time-log.controller';
     SubcategoryController,
     TokenController,
     TimeLogController,
+    NoteController,
   ],
   providers: [
     LoggerService,
@@ -49,6 +52,7 @@ import { TimeLogController } from './api/time-log/time-log.controller';
     SubcategoryService,
     CategoryService,
     TimeLogService,
+    NoteService,
   ],
 })
 export class AppModule {}

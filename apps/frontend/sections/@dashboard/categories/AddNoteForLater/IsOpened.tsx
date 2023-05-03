@@ -9,7 +9,7 @@ import {
 } from '../../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../../components/iconify';
-import React from 'react';
+import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../../components/form/Text';
@@ -17,6 +17,9 @@ import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObjec
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
+import ShowCompletedInfo from '../../settings/ShowCompletedInfo';
+import { handleFetch } from '../../../../utils/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function IsOpened({
   disableHover,
@@ -25,6 +28,8 @@ export default function IsOpened({
   color,
   setIsOpen,
 }) {
+  const [completed, setCompleted] = useState(false);
+
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -64,40 +69,43 @@ export default function IsOpened({
     note: '',
   };
 
-  // const saveName = async (name: string, resetForm: () => void) => {
-  //   setIsSaving(true);
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/set-name',
-  //     body: { name, controlValue },
-  //     method: 'POST',
-  //   });
-  //   if (response.statusCode === StatusCodes.CREATED) {
-  //     setInitialValues({
-  //       name,
-  //     });
-  //     resetForm();
-  //     setUser({ ...user, name });
-  //     if (response.controlValue) {
-  //       setControlValue(response.controlValue);
-  //     }
-  //   } else if (response.statusCode === StatusCodes.CONFLICT) {
-  //     setControlValue(undefined);
-  //     return; //skip setting isSaving(false)
-  //   }
-  //   setIsSaving(false);
-  //   return;
-  // };
+  const saveNote = async (note: string) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'note/create',
+      body: { note },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setCompleted(true);
+    }
+    setIsSaving(false);
+    return;
+  };
 
   const validationSchema = yup.object().shape({
     note: yup.string().required(),
   });
 
+  if (completed) {
+    return (
+      <ShowCompletedInfo
+        key={'noteSaved'}
+        isSaving={isSaving}
+        setIsOpen={setIsOpen}
+        color={color}
+        disableHover={disableHover}
+        completedInfo={'Note has been saved!'}
+      />
+    );
+  }
+
   return (
-    <Card key={initialValues.name}>
+    <Card>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          // await saveName(values.name, resetForm);
+          await saveNote(values.note);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
@@ -116,7 +124,7 @@ export default function IsOpened({
                     minHeight: 54,
                     background: getRepeatingLinearGradient(
                       isSaving ? IS_SAVING_HEX : color.hex,
-                      0.3,
+                      0.2,
                       45,
                       false
                     ),
@@ -150,11 +158,19 @@ export default function IsOpened({
                     )}
                     <InputText
                       type="text"
+                      rows={3}
+                      multiline={true}
                       name={'note'}
                       label={`Note`}
                       TextField={StyledTextField}
                       helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
                       disabled={isSaving}
+                      inputBackground={getHexFromRGBAObject({
+                        ...getRgbaObjectFromHexString(
+                          isSaving ? IS_SAVING_HEX : color.hex
+                        ),
+                        a: 0.03,
+                      })}
                     />
                   </Box>
                 </Box>
@@ -241,7 +257,7 @@ export default function IsOpened({
                     />
                     <Stack spacing={2} sx={{ ml: 5 }}>
                       <Typography variant="subtitle2" noWrap>
-                        SAVE NAME
+                        SAVE NOTE FOR LATER
                       </Typography>
                     </Stack>
                   </Box>

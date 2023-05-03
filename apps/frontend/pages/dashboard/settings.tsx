@@ -19,17 +19,10 @@ import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColo
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail';
 import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
+import {SettingOption} from 'apps/frontend/enum/settingOption';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
-
-enum SettingOption {
-  SET_NAME = 'Set name',
-  CHANGE_TIMEZONE = 'Change timezone',
-  CHANGE_PASSWORD = 'Change password',
-  CHANGE_EMAIL = 'Change email',
-  MANAGE_LOGIN_SESSIONS = 'Manage login sessions',
-}
 
 type OptionsColors = {
   SET_NAME: string;
