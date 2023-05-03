@@ -46,8 +46,8 @@ export default function CategoryCard({
   const doesAnySubcategoryWithinCurrentCategoryActive =
     !!category.subcategories.find((subcategory) => subcategory.active);
 
-  const reverseExpandSubcategories = () => {
-    setCategoryExpandSubcategoriesInDB(!category.expandSubcategories); //don't wait
+  const reverseExpandSubcategories = async () => {
+    await setCategoryExpandSubcategoriesInDB(!category.expandSubcategories);
     setCategories(
       [...categories].map((_category) => {
         if (_category.id === category.id) {
@@ -139,6 +139,7 @@ export default function CategoryCard({
   };
 
   const setCategoryExpandSubcategoriesInDB = async (value) => {
+    setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-expand-subcategories',
       body: {
@@ -153,7 +154,9 @@ export default function CategoryCard({
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
       setIsSaving(true);
+      return;
     }
+    setIsSaving(false);
     return;
   };
 

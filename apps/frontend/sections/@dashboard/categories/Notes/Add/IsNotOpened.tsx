@@ -32,6 +32,7 @@ export const AddIsNotOpened = ({
 
   const reverseExpandNotes = async () => {
     setIsSaving(true);
+    setUser({ ...user, expandNotes: !expandNotes });
     const response = await handleFetch({
       pathOrUrl: 'user/set-expand-notes',
       body: {
@@ -40,13 +41,11 @@ export const AddIsNotOpened = ({
       },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED && response?.user) {
-      setUser(response.user);
-      if (response?.controlValue) {
-        setControlValue(response.controlValue);
-      }
+    if (response.statusCode === StatusCodes.CREATED && response?.controlValue) {
+      setControlValue(response.controlValue);
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
+      setIsSaving(true);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
