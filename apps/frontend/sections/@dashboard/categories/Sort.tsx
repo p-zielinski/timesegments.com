@@ -99,7 +99,7 @@ export default function Sort({
           />
         }
       >
-        Sort By:&nbsp;
+        Sort categories by:&nbsp;
         <Typography
           component="span"
           variant="subtitle2"
