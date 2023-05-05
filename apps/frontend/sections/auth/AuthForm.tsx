@@ -17,13 +17,7 @@ import {StatusCodes} from 'http-status-codes';
 import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSelect';
 // ----------------------------------------------------------------------
 
-export default function AuthForm({
-  authPageState,
-  setAuthPageState,
-  setUser,
-  setCategories,
-  setLimits,
-}) {
+export default function AuthForm({ authPageState, setAuthPageState }) {
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
 
@@ -55,10 +49,7 @@ export default function AuthForm({
         body: { name: 'jwt_token', value: response.token },
         method: 'POST',
       });
-      setUser(response.user);
-      setCategories(response.user?.categories ?? []);
-      setLimits(response.limits);
-      return true;
+      return await router.push('/dashboard');
     }
     if (response.statusCode === StatusCodes.BAD_REQUEST) {
       const error = response.error || '';

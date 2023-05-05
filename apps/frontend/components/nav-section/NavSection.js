@@ -5,7 +5,9 @@ import {StyledNavItem} from './styles';
 import Iconify from '../iconify';
 import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
-import {handleFetch} from '../../utils/handleFetch'; // ----------------------------------------------------------------------
+import {handleFetch} from '../../utils/handleFetch';
+import {useEffect, useState} from 'react';
+import {getIsPageState} from '../../utils/getIsPageState'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -13,12 +15,24 @@ NavSection.propTypes = {
   data: PropTypes.array,
 };
 
-export default function NavSection({ data = [], setUser, ...other }) {
+export default function NavSection({
+  data = [],
+  setUser,
+  pageState,
+  setPageState,
+  ...other
+}) {
   return (
     <Box {...other}>
       <List disablePadding sx={{ p: 1 }}>
         {data.map((item) => (
-          <NavItem key={item.title} item={item} setUser={setUser} />
+          <NavItem
+            key={item.title}
+            item={item}
+            setUser={setUser}
+            pageState={pageState}
+            setPageState={setPageState}
+          />
         ))}
       </List>
     </Box>
@@ -31,10 +45,16 @@ NavItem.propTypes = {
   item: PropTypes.object,
 };
 
-function NavItem({ item, setUser }) {
+function NavItem({ item, pageState, setPageState }) {
   const router = useRouter();
-  const pathname = router.pathname;
-  const { title, path, icon } = item;
+  const { title, path, icon, query } = item;
+
+  const [isSelected, setIsSelected] = useState(false);
+
+  useEffect(() => {
+    const urlObject = new URL(window.location.href);
+    setIsSelected(getIsPageState({ urlObject, configItem: item }));
+  }, [pageState]);
 
   const revokeCurrentToken = async () => {
     await handleFetch({
@@ -46,28 +66,48 @@ function NavItem({ item, setUser }) {
   return (
     <StyledNavItem
       onClick={async () => {
-        if (path !== '*logout') {
-          return;
+        if (typeof setPageState === 'function') {
+          setPageState(item.state);
         }
-        revokeCurrentToken();
-        Cookies.remove('jwt_token');
-        if (pathname === '/') {
-          setUser(undefined);
-        } else {
-          router.push('/');
+        switch (path) {
+          case '*logout':
+            revokeCurrentToken();
+            Cookies.remove('jwt_token');
+            router.push('/');
+            return;
+          default:
+            if (router.pathname === path) {
+              const currentUrl = new URL(window.location.href);
+              const origin = currentUrl.origin;
+              const pathname = currentUrl.pathname;
+              if (query) {
+                const desiredQuery = new URLSearchParams(query).toString();
+                return window.history.replaceState(
+                  null,
+                  '',
+                  origin + pathname + '?' + desiredQuery
+                );
+              }
+              window.history.replaceState(null, '', origin + pathname);
+            }
+            if (query) {
+              return router.push(
+                path + '?' + new URLSearchParams(query).toString()
+              );
+            }
+            return router.push(path);
         }
       }}
-      to={!['*logout', pathname].includes(path) ? path : undefined}
       sx={{
-        color: pathname !== path ? 'rgb(59,122,179)' : 'rgb(64,182,132)',
+        color: isSelected ? 'rgb(59,122,179)' : 'rgb(64,182,132)',
         fontWeight: 800,
-        bgcolor: pathname === path ? 'rgb(234,237,239)' : undefined,
-        '&:active': pathname !== path && {
+        bgcolor: isSelected ? 'rgb(234,237,239)' : undefined,
+        '&:active': isSelected && {
           color: 'rgb(59,122,179)',
           bgcolor: 'action.selected',
           fontWeight: 'fontWeightBold',
         },
-        '&:hover': pathname === path && {
+        '&:hover': isSelected && {
           cursor: 'default',
           background: 'rgb(234,237,239)',
         },

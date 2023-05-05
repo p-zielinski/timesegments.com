@@ -36,7 +36,7 @@ export const NotesSection = ({
     hex: '#006cc4',
     rgb: getRgbaObjectFromHexString('#006cc4'),
   };
-  const note = userNotes.at(-1);
+  const note = userNotes.at(-1) || {};
   const updated = note.updatedAt !== note.createdAt;
   const createdAt = DateTime.fromISO(note.createdAt, {
     zone: Timezones[user.timezone],

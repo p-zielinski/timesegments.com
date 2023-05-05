@@ -31,7 +31,14 @@ const Main = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function DashboardLayout({ children, user, setUser, title }) {
+export default function DashboardLayout({
+  children,
+  user,
+  setUser,
+  title,
+  pageState,
+  setPageState,
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -43,6 +50,8 @@ export default function DashboardLayout({ children, user, setUser, title }) {
         onCloseNav={() => setOpen(false)}
         user={user}
         setUser={setUser}
+        pageState={pageState}
+        setPageState={setPageState}
       />
 
       <Main>{children}</Main>
