@@ -4,7 +4,6 @@ import {Container, Stack} from '@mui/material'; // hooks
 import useResponsive from '../../hooks/useResponsive'; // sections
 import React, {useEffect, useState} from 'react';
 import {
-  AuthPageState,
   CategoryWithSubcategories,
   Limits,
   MeExtendedOption,
@@ -27,7 +26,8 @@ import navConfig from '../../layouts/dashboard/nav/config';
 import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
-import {DashboardPageState} from '../../enum/DashboardPageState'; // ---------------------------------------------------------------------
+import {DashboardPageState} from '../../enum/DashboardPageState';
+import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -163,7 +163,6 @@ export default function Index({
 
   //Auth page states
   const mdUp = useResponsive('up', 'md');
-  const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
 
   //Categories page states
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>(
@@ -204,40 +203,17 @@ export default function Index({
     setDisableHover(isMobile);
   }, [isMobile]);
 
-  const changeUrlAndPageStateToProvidedValue = (state: DashboardPageState) => {
-    setPageState(state);
-    const desiredNavConfigItem = navConfig.find(
-      (configItem) => configItem.state === state
-    );
-    const { path, query } = desiredNavConfigItem;
-    if (router.pathname === path) {
-      const currentUrl = new URL(window.location.href);
-      const origin = currentUrl.origin;
-      const pathname = currentUrl.pathname;
-      if (query) {
-        const desiredQuery = new URLSearchParams(query).toString();
-        return window.history.replaceState(
-          null,
-          '',
-          origin + pathname + '?' + desiredQuery
-        );
-      }
-      window.history.replaceState(null, '', origin + pathname);
-      return;
-    }
-    if (query) {
-      router.push(path + '?' + new URLSearchParams(query).toString());
-      return;
-    }
-    router.push(path);
-    return;
-  };
-
   return (
     <DashboardLayout
       user={user}
       setUser={setUser}
-      title={'Categories & subcategories'}
+      title={
+        pageState === DashboardPageState.CATEGORIES
+          ? 'Categories & subcategories'
+          : pageState === DashboardPageState.NOTES
+          ? 'Recent notes'
+          : undefined
+      }
       pageState={pageState}
       setPageState={setPageState}
     >
@@ -246,66 +222,82 @@ export default function Index({
       </Helmet>
 
       <Container>
-        <span
-          onClick={() =>
-            changeUrlAndPageStateToProvidedValue(DashboardPageState.CATEGORIES)
-          }
-        >
-          categories
-        </span>
-        <br /> <br /> <br /> <br />
-        <span
-          onClick={() =>
-            changeUrlAndPageStateToProvidedValue(DashboardPageState.NOTES)
-          }
-        >
-          notes
-        </span>
-        <br /> <br /> <br /> <br />
-        <NotesSection
-          controlValue={controlValue}
-          setControlValue={setControlValue}
-          user={user}
-          setUser={setUser}
-          userNotes={userNotes}
-          setUserNotes={setUserNotes}
+        <GoToCategoriesOrNotes
+          pageState={pageState}
+          setPageState={setPageState}
           isSaving={isSaving}
-          setIsSaving={setIsSaving}
           disableHover={disableHover}
         />
-        <CategoryList
-          controlValue={controlValue}
-          setControlValue={setControlValue}
-          disableHover={disableHover}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
-          categories={categories}
-          setCategories={setCategories}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          limits={limits}
-        />
-        <Stack
-          direction="row"
-          flexWrap="wrap-reverse"
-          alignItems="center"
-          justifyContent="flex-end"
-        >
-          <Stack
-            direction="row"
-            spacing={1}
-            flexShrink={0}
-            sx={{ mt: 1, mb: 1 }}
-          >
-            <Sort
-              user={user}
+        {pageState === DashboardPageState.CATEGORIES ? (
+          <>
+            <Stack
+              direction="row"
+              flexWrap="wrap-reverse"
+              alignItems="center"
+              justifyContent="flex-end"
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                flexShrink={0}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                <Sort
+                  user={user}
+                  categories={categories}
+                  setCategories={setCategories}
+                />
+              </Stack>
+            </Stack>
+            <CategoryList
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              disableHover={disableHover}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
               categories={categories}
               setCategories={setCategories}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              limits={limits}
             />
-          </Stack>
-        </Stack>
+          </>
+        ) : pageState === DashboardPageState.NOTES ? (
+          <>
+            <Stack
+              direction="row"
+              flexWrap="wrap-reverse"
+              alignItems="center"
+              justifyContent="flex-end"
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                flexShrink={0}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                <Sort
+                  user={user}
+                  categories={categories}
+                  setCategories={setCategories}
+                />
+              </Stack>
+            </Stack>
+            <NotesSection
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              user={user}
+              setUser={setUser}
+              userNotes={userNotes}
+              setUserNotes={setUserNotes}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              disableHover={disableHover}
+            />
+          </>
+        ) : undefined}
       </Container>
     </DashboardLayout>
   );

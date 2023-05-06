@@ -27,15 +27,16 @@ export const NotesSection = ({
   disableHover,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   const color = {
     hex: '#c4b900',
     rgb: getRgbaObjectFromHexString('#c4b900'),
   };
-
   const color2 = {
     hex: '#006cc4',
     rgb: getRgbaObjectFromHexString('#006cc4'),
   };
+
   const note = userNotes.at(-1) || {};
   const updated = note.updatedAt !== note.createdAt;
   const createdAt = DateTime.fromISO(note.createdAt, {
@@ -79,7 +80,6 @@ export const NotesSection = ({
               setControlValue={setControlValue}
               user={user}
               setUser={setUser}
-              userNotes={userNotes}
               color={color}
               setIsOpen={setIsOpen}
               isSaving={isSaving}
