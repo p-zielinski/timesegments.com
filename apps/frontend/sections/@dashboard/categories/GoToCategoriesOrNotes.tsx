@@ -13,15 +13,15 @@ import navConfig from '../../../layouts/dashboard/nav/config';
 import { useRouter } from 'next/router';
 
 export const GoToCategoriesOrNotes = ({
-  pageState,
-  setPageState,
+  currentPageState,
+  setCurrentPageState,
   isSaving,
   disableHover,
 }) => {
   const router = useRouter();
 
   const changeUrlAndPageStateToProvidedValue = (state: DashboardPageState) => {
-    setPageState(state);
+    setCurrentPageState(state);
     const desiredNavConfigItem = navConfig.find(
       (configItem) => configItem.state === state
     );
@@ -59,9 +59,9 @@ export const GoToCategoriesOrNotes = ({
   };
 
   const getCurrentColor = () => {
-    return pageState === DashboardPageState.CATEGORIES
+    return currentPageState === DashboardPageState.CATEGORIES
       ? notesColor
-      : pageState === DashboardPageState.NOTES
+      : currentPageState === DashboardPageState.NOTES
       ? categoriesColor
       : getRandomRgbObjectForSliderPicker();
   };
@@ -70,7 +70,7 @@ export const GoToCategoriesOrNotes = ({
 
   useEffect(() => {
     setColor(getCurrentColor());
-  }, [pageState]);
+  }, [currentPageState]);
 
   return (
     <Grid container spacing={2} columns={1}>
@@ -82,12 +82,12 @@ export const GoToCategoriesOrNotes = ({
         >
           <Box
             onClick={() => {
-              if (pageState === DashboardPageState.CATEGORIES) {
+              if (currentPageState === DashboardPageState.CATEGORIES) {
                 return changeUrlAndPageStateToProvidedValue(
                   DashboardPageState.NOTES
                 );
               }
-              if (pageState === DashboardPageState.NOTES) {
+              if (currentPageState === DashboardPageState.NOTES) {
                 changeUrlAndPageStateToProvidedValue(
                   DashboardPageState.CATEGORIES
                 );
@@ -145,7 +145,7 @@ export const GoToCategoriesOrNotes = ({
                 noWrap
                 sx={{ display: 'flex', pl: 5 }}
               >
-                {pageState === DashboardPageState.CATEGORIES ? (
+                {currentPageState === DashboardPageState.CATEGORIES ? (
                   <>
                     <Iconify
                       icon={'material-symbols:note-alt-outline'}
@@ -158,7 +158,7 @@ export const GoToCategoriesOrNotes = ({
                     />
                     RECENT NOTES
                   </>
-                ) : pageState === DashboardPageState.NOTES ? (
+                ) : currentPageState === DashboardPageState.NOTES ? (
                   <>
                     <Iconify
                       icon={'fluent:shifts-activity-24-filled'}

@@ -42,8 +42,8 @@ export default function Nav({
   onCloseNav,
   user,
   setUser,
-  pageState,
-  setPageState,
+  currentPageState,
+  setCurrentPageState,
 }) {
   const [color] = useState(
     getHexFromRGBObject(
@@ -111,8 +111,8 @@ export default function Nav({
       <NavSection
         data={navConfig}
         setUser={setUser}
-        pageState={pageState}
-        setPageState={setPageState}
+        currentPageState={currentPageState}
+        setCurrentPageState={setCurrentPageState}
       />
 
       <Box sx={{ flexGrow: 1 }} />

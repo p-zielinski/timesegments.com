@@ -27,7 +27,7 @@ import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
-import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
+import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes'; // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -60,7 +60,7 @@ export default function Index({
   randomSliderColor: randomSliderColor,
 }: Props) {
   const router = useRouter();
-  const [pageState, setPageState] = useState<DashboardPageState>(
+  const [currentPageState, setCurrentPageState] = useState<DashboardPageState>(
     navConfig.find((configItem) => getIsPageState({ router, configItem }))
       ?.state
   );
@@ -208,14 +208,14 @@ export default function Index({
       user={user}
       setUser={setUser}
       title={
-        pageState === DashboardPageState.CATEGORIES
+        currentPageState === DashboardPageState.CATEGORIES
           ? 'Categories & subcategories'
-          : pageState === DashboardPageState.NOTES
+          : currentPageState === DashboardPageState.NOTES
           ? 'Recent notes'
           : undefined
       }
-      pageState={pageState}
-      setPageState={setPageState}
+      currentPageState={currentPageState}
+      setCurrentPageState={setCurrentPageState}
     >
       <Helmet>
         <title>Categories</title>
@@ -223,12 +223,12 @@ export default function Index({
 
       <Container>
         <GoToCategoriesOrNotes
-          pageState={pageState}
-          setPageState={setPageState}
+          currentPageState={currentPageState}
+          setCurrentPageState={setCurrentPageState}
           isSaving={isSaving}
           disableHover={disableHover}
         />
-        {pageState === DashboardPageState.CATEGORIES ? (
+        {currentPageState === DashboardPageState.CATEGORIES ? (
           <>
             <Stack
               direction="row"
@@ -264,7 +264,7 @@ export default function Index({
               limits={limits}
             />
           </>
-        ) : pageState === DashboardPageState.NOTES ? (
+        ) : currentPageState === DashboardPageState.NOTES ? (
           <>
             <Stack
               direction="row"

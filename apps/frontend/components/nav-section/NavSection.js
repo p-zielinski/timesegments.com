@@ -18,8 +18,8 @@ NavSection.propTypes = {
 export default function NavSection({
   data = [],
   setUser,
-  pageState,
-  setPageState,
+  currentPageState,
+  setCurrentPageState,
   ...other
 }) {
   return (
@@ -30,8 +30,8 @@ export default function NavSection({
             key={item.title}
             item={item}
             setUser={setUser}
-            pageState={pageState}
-            setPageState={setPageState}
+            currentPageState={currentPageState}
+            setCurrentPageState={setCurrentPageState}
           />
         ))}
       </List>
@@ -45,7 +45,7 @@ NavItem.propTypes = {
   item: PropTypes.object,
 };
 
-function NavItem({ item, pageState, setPageState }) {
+function NavItem({ item, currentPageState, setCurrentPageState }) {
   const router = useRouter();
   const { title, path, icon, query } = item;
 
@@ -54,7 +54,7 @@ function NavItem({ item, pageState, setPageState }) {
   useEffect(() => {
     const urlObject = new URL(window.location.href);
     setIsSelected(getIsPageState({ urlObject, configItem: item }));
-  }, [pageState]);
+  }, [currentPageState]);
 
   const revokeCurrentToken = async () => {
     await handleFetch({
@@ -66,8 +66,8 @@ function NavItem({ item, pageState, setPageState }) {
   return (
     <StyledNavItem
       onClick={async () => {
-        if (typeof setPageState === 'function') {
-          setPageState(item.state);
+        if (typeof setCurrentPageState === 'function') {
+          setCurrentPageState(item.state);
         }
         switch (path) {
           case '*logout':
