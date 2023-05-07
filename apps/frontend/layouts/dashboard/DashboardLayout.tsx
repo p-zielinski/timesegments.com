@@ -16,7 +16,7 @@ const StyledRoot = styled('div')({
   overflow: 'hidden',
 });
 
-const Main = styled('div')(({theme}) => ({
+const Main = styled('div')(({ theme }) => ({
   flexGrow: 1,
   overflow: 'auto',
   minHeight: '100%',
@@ -32,13 +32,14 @@ const Main = styled('div')(({theme}) => ({
 // ----------------------------------------------------------------------
 
 export default function DashboardLayout({
-                                          children,
-                                          user,
-                                          setUser,
-                                          title,
-                                          currentPageState,
-                                          setCurrentPageState,
-                                        }: {
+  children,
+  user,
+  setUser,
+  title,
+  currentPageState,
+  setCurrentPageState,
+  randomSliderHexColor,
+}: {
   children: any;
   user: User;
   setUser?: Dispatch<
@@ -49,12 +50,13 @@ export default function DashboardLayout({
   title?: string;
   currentPageState?: DashboardPageState;
   setCurrentPageState?: (dashboardPageState: DashboardPageState) => void;
+  randomSliderHexColor: string;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <StyledRoot>
-      <Header onOpenNav={() => setOpen(true)} title={title}/>
+      <Header onOpenNav={() => setOpen(true)} title={title} />
 
       <Nav
         openNav={open}
@@ -63,6 +65,7 @@ export default function DashboardLayout({
         setUser={setUser}
         currentPageState={currentPageState}
         setCurrentPageState={setCurrentPageState}
+        randomSliderHexColor={randomSliderHexColor}
       />
 
       <Main>{children}</Main>

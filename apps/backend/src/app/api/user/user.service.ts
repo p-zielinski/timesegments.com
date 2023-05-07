@@ -10,7 +10,7 @@ import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, Timezone, User } from '@prisma/client';
 import {
-  ColumnSortOption,
+  CategoriesSortOption,
   Limits,
   MeExtendedOption,
   Timezones,
@@ -332,7 +332,10 @@ export class UserService {
     };
   }
 
-  async setSortingCategories(user: User, sortingCategories: ColumnSortOption) {
+  async setSortingCategories(
+    user: User,
+    sortingCategories: CategoriesSortOption
+  ) {
     if (user.sortingCategories === sortingCategories) {
       return { success: true, sortingCategories };
     }
@@ -351,7 +354,7 @@ export class UserService {
 
     return {
       success: false,
-      error: `Could not update sortingCategories to: ${ColumnSortOption}`,
+      error: `Could not update sortingCategories to: ${CategoriesSortOption}`,
     };
   }
 

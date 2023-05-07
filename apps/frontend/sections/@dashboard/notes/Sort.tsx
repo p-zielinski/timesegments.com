@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import {CategoriesSortOption, CategoryWithSubcategories} from '@test1/shared';
+import {CategoryWithSubcategories} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
 import {User} from '@prisma/client';
@@ -12,17 +12,6 @@ import {handleFetch} from '../../../utils/handleFetch';
 // ----------------------------------------------------------------------
 
 const SORT_BY_OPTIONS = [
-  {
-    value: CategoriesSortOption.ALPHABETICAL,
-    label: capitalize(CategoriesSortOption.ALPHABETICAL),
-  },
-  {
-    value: CategoriesSortOption.REVERSED_ALPHABETICAL,
-    label: capitalize(CategoriesSortOption.REVERSED_ALPHABETICAL).replaceAll(
-      '_',
-      ' '
-    ),
-  },
   {
     value: CategoriesSortOption.NEWEST,
     label: capitalize(CategoriesSortOption.NEWEST),

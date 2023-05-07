@@ -1,15 +1,12 @@
 import { Box, Stack, Typography } from '@mui/material';
-import {
-  IS_SAVING_HEX,
-  SUPER_LIGHT_SILVER,
-} from '../../../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../../../utils/colors/getHexFromRGBAObject';
-import { getRgbaObjectFromHexString } from '../../../../../utils/colors/getRgbaObjectFromHexString';
-import { getHexFromRGBObject } from '../../../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { IS_SAVING_HEX, SUPER_LIGHT_SILVER } from '../../../../consts/colors';
+import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
+import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
+import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import React from 'react';
-import { getRepeatingLinearGradient } from '../../../../../utils/colors/getRepeatingLinearGradient';
-import { handleFetch } from '../../../../../utils/handleFetch';
+import { getRepeatingLinearGradient } from '../../../../utils/colors/getRepeatingLinearGradient';
+import { handleFetch } from '../../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export const AddIsNotOpened = ({

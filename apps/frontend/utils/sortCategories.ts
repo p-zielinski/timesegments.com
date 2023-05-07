@@ -1,11 +1,11 @@
-import { CategoryWithSubcategories, ColumnSortOption } from '@test1/shared';
+import { CategoriesSortOption, CategoryWithSubcategories } from '@test1/shared';
 
 export const sortCategories = (
   categories: CategoryWithSubcategories[],
-  sortOption: ColumnSortOption
+  sortOption: CategoriesSortOption
 ) => {
   switch (sortOption) {
-    case ColumnSortOption.ALPHABETICAL:
+    case CategoriesSortOption.ALPHABETICAL:
       return categories
         .map((category) => {
           return {
@@ -21,7 +21,7 @@ export const sortCategories = (
         .sort((category1, category2) =>
           (category1?.name ?? '').localeCompare(category2?.name ?? '')
         );
-    case ColumnSortOption.REVERSED_ALPHABETICAL:
+    case CategoriesSortOption.REVERSED_ALPHABETICAL:
       return categories
         .map((category) => {
           return {
@@ -38,7 +38,7 @@ export const sortCategories = (
           (category1?.name ?? '').localeCompare(category2?.name ?? '')
         );
 
-    case ColumnSortOption.OLDEST:
+    case CategoriesSortOption.OLDEST:
       return categories
         .map((category) => {
           return {
@@ -55,7 +55,7 @@ export const sortCategories = (
             new Date(category1?.createdAt).getTime() -
             new Date(category2?.createdAt).getTime()
         );
-    case ColumnSortOption.NEWEST:
+    case CategoriesSortOption.NEWEST:
       return categories
         .map((category) => {
           return {

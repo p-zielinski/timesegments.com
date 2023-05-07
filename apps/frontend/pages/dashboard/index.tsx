@@ -1,7 +1,5 @@
 import {Helmet} from 'react-helmet-async'; // @mui
-import {styled} from '@mui/material/styles';
-import {Container, Stack} from '@mui/material'; // hooks
-import useResponsive from '../../hooks/useResponsive'; // sections
+import {Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {
   CategoryWithSubcategories,
@@ -12,7 +10,6 @@ import {
 } from '@test1/shared';
 import {CategoriesPageMode} from '../../enum/categoriesPageMode';
 import DashboardLayout from '../../layouts/dashboard';
-import {CategoryList, Sort} from '../../sections/@dashboard/categories';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/handleFetch';
 import {StatusCodes} from 'http-status-codes';
@@ -20,63 +17,42 @@ import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
-import {NotesSection} from '../../sections/@dashboard/categories/Notes';
+import {NotesSection} from '../../sections/@dashboard/notes';
 import {Note} from '@prisma/client';
 import navConfig from '../../layouts/dashboard/nav/config';
 import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
-import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes'; // ---------------------------------------------------------------------
+import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
+import {CategoriesSection} from '../../sections/@dashboard/categories'; // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
-
-const StyledRoot = styled('div')(({ theme }) => ({
-  [theme.breakpoints.up('md')]: {
-    display: 'flex',
-  },
-}));
-
-const StyledSection = styled('div')(({ theme }) => ({
-  width: '100%',
-  maxWidth: 480,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  boxShadow: (theme as any).customShadows.card,
-  backgroundColor: theme.palette.background.default,
-}));
 
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
   limits: Limits;
   notes: Note[];
-  randomSliderColor: string;
+  randomSliderHexColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
   limits: serverSideFetchedLimits,
   notes: serverSideFetchedNotes,
-  randomSliderColor: randomSliderColor,
+  randomSliderHexColor: randomSliderHexColor,
 }: Props) {
+  const [disableHover, setDisableHover] = useState<boolean>(true);
+  useEffect(() => {
+    setDisableHover(isMobile);
+  }, [isMobile]);
+
   const router = useRouter();
   const [currentPageState, setCurrentPageState] = useState<DashboardPageState>(
     navConfig.find((configItem) => getIsPageState({ router, configItem }))
       ?.state
   );
 
-  const StyledContent = styled('div')(({ theme }) => ({
-    maxWidth: 480,
-    margin: 'auto',
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: isMobile ? 'start' : 'center',
-    flexDirection: 'column',
-    padding: theme.spacing(isMobile ? 6 : 12, 0),
-  }));
-
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
-
   const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
     serverSideFetchedUser
   );
@@ -159,10 +135,7 @@ export default function Index({
     return;
   };
 
-  const [limits, setLimits] = useState<Limits>(serverSideFetchedLimits || {});
-
-  //Auth page states
-  const mdUp = useResponsive('up', 'md');
+  const limits: Limits = serverSideFetchedLimits;
 
   //Categories page states
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>(
@@ -186,22 +159,7 @@ export default function Index({
     }
   }, [categories.length]);
 
-  const [isEditing, setIsEditing] = useState<{
-    categoryId: string;
-    subcategoryId: string;
-    createNew: string;
-  }>({
-    categoryId: undefined,
-    subcategoryId: undefined,
-    createNew: undefined,
-  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-
-  const [disableHover, setDisableHover] = useState<boolean>(true);
-
-  useEffect(() => {
-    setDisableHover(isMobile);
-  }, [isMobile]);
 
   return (
     <DashboardLayout
@@ -216,6 +174,7 @@ export default function Index({
       }
       currentPageState={currentPageState}
       setCurrentPageState={setCurrentPageState}
+      randomSliderHexColor={randomSliderHexColor}
     >
       <Helmet>
         <title>Categories</title>
@@ -229,74 +188,31 @@ export default function Index({
           disableHover={disableHover}
         />
         {currentPageState === DashboardPageState.CATEGORIES ? (
-          <>
-            <Stack
-              direction="row"
-              flexWrap="wrap-reverse"
-              alignItems="center"
-              justifyContent="flex-end"
-            >
-              <Stack
-                direction="row"
-                spacing={1}
-                flexShrink={0}
-                sx={{ mt: 1, mb: 1 }}
-              >
-                <Sort
-                  user={user}
-                  categories={categories}
-                  setCategories={setCategories}
-                />
-              </Stack>
-            </Stack>
-            <CategoryList
-              controlValue={controlValue}
-              setControlValue={setControlValue}
-              disableHover={disableHover}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              categories={categories}
-              setCategories={setCategories}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              limits={limits}
-            />
-          </>
+          <CategoriesSection
+            categories={categories}
+            setCategories={setCategories}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            limits={limits}
+            controlValue={controlValue}
+            setControlValue={setControlValue}
+            user={user}
+            isSaving={isSaving}
+            setIsSaving={setIsSaving}
+            disableHover={disableHover}
+          />
         ) : currentPageState === DashboardPageState.NOTES ? (
-          <>
-            <Stack
-              direction="row"
-              flexWrap="wrap-reverse"
-              alignItems="center"
-              justifyContent="flex-end"
-            >
-              <Stack
-                direction="row"
-                spacing={1}
-                flexShrink={0}
-                sx={{ mt: 1, mb: 1 }}
-              >
-                <Sort
-                  user={user}
-                  categories={categories}
-                  setCategories={setCategories}
-                />
-              </Stack>
-            </Stack>
-            <NotesSection
-              controlValue={controlValue}
-              setControlValue={setControlValue}
-              user={user}
-              setUser={setUser}
-              userNotes={userNotes}
-              setUserNotes={setUserNotes}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              disableHover={disableHover}
-            />
-          </>
+          <NotesSection
+            controlValue={controlValue}
+            setControlValue={setControlValue}
+            user={user}
+            setUser={setUser}
+            userNotes={userNotes}
+            setUserNotes={setUserNotes}
+            isSaving={isSaving}
+            setIsSaving={setIsSaving}
+            disableHover={disableHover}
+          />
         ) : undefined}
       </Container>
     </DashboardLayout>
@@ -378,7 +294,7 @@ export const getServerSideProps = async ({ req, res }) => {
       user: user ?? null,
       limits: limits ?? null,
       notes: notes ?? null,
-      randomSliderColor: getHexFromRGBObject(
+      randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,
           'very bright'

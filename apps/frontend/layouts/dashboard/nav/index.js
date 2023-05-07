@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 // @mui
 import {alpha, styled} from '@mui/material/styles';
 import {Box, Drawer, Link, Typography} from '@mui/material';
@@ -12,17 +12,14 @@ import NavSection from '../../../components/nav-section';
 //
 import navConfig from './config';
 import {useRouter} from 'next/router';
-import {getRandomRgbObjectForSliderPicker} from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
-import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
-import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 
 // ----------------------------------------------------------------------
 
 const NAV_WIDTH = 280;
 
-const StyledAccount = styled('div')(({ theme }) => ({
+const StyledAccount = styled('div')(({theme}) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(2, 2.5),
@@ -38,21 +35,14 @@ Nav.propTypes = {
 };
 
 export default function Nav({
-  openNav,
-  onCloseNav,
-  user,
-  setUser,
-  currentPageState,
-  setCurrentPageState,
-}) {
-  const [color] = useState(
-    getHexFromRGBObject(
-      getColorShadeBasedOnSliderPickerSchema(
-        getRandomRgbObjectForSliderPicker().rgb,
-        'very bright'
-      )
-    )
-  );
+                              openNav,
+                              onCloseNav,
+                              user,
+                              setUser,
+                              currentPageState,
+                              setCurrentPageState,
+                              randomSliderHexColor,
+                            }) {
   const router = useRouter();
 
   const isDesktop = useResponsive('up', 'lg');
@@ -77,7 +67,7 @@ export default function Nav({
       <Typography
         variant="subtitle2"
         sx={{
-          color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
+          color: getHexFromRGBAObject({r: 0, g: 0, b: 0, a: 0.7}),
           px: 2.5,
           py: 3,
           display: 'inline-flex',
@@ -87,7 +77,7 @@ export default function Nav({
         TimeSeg
         <span
           style={{
-            color: color,
+            color: randomSliderHexColor,
           }}
         >
           ment
@@ -95,11 +85,11 @@ export default function Nav({
         s.com
       </Typography>
 
-      <Box sx={{ mb: 3, mx: 2.5 }}>
+      <Box sx={{mb: 3, mx: 2.5}}>
         <Link underline="none">
           <StyledAccount>
-            <Box sx={{ ml: 0 }}>
-              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+            <Box sx={{ml: 0}}>
+              <Typography variant="subtitle2" sx={{color: 'text.primary'}}>
                 {user.name ||
                   capitalizeFirstLetter(user.email.split('@')[0] ?? '')}
               </Typography>
@@ -115,7 +105,7 @@ export default function Nav({
         setCurrentPageState={setCurrentPageState}
       />
 
-      <Box sx={{ flexGrow: 1 }} />
+      <Box sx={{flexGrow: 1}}/>
     </Scrollbar>
   );
 
@@ -123,8 +113,8 @@ export default function Nav({
     <Box
       component="nav"
       sx={{
-        flexShrink: { lg: 0 },
-        width: { lg: NAV_WIDTH },
+        flexShrink: {lg: 0},
+        width: {lg: NAV_WIDTH},
       }}
     >
       {isDesktop ? (
@@ -149,7 +139,7 @@ export default function Nav({
             keepMounted: true,
           }}
           PaperProps={{
-            sx: { width: NAV_WIDTH },
+            sx: {width: NAV_WIDTH},
           }}
         >
           {renderContent}

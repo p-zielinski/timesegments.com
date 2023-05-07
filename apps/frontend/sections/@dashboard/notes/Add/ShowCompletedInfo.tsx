@@ -1,14 +1,14 @@
 import { Box, Stack, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../../../utils/colors/getRepeatingLinearGradient';
+import { getRepeatingLinearGradient } from '../../../../utils/colors/getRepeatingLinearGradient';
 import {
   IS_SAVING_HEX,
   RED,
   SUPER_LIGHT_SILVER,
-} from '../../../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../../../utils/colors/getHexFromRGBAObject';
-import { getRgbaObjectFromHexString } from '../../../../../utils/colors/getRgbaObjectFromHexString';
-import { getHexFromRGBObject } from '../../../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+} from '../../../../consts/colors';
+import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
+import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
+import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import React from 'react';
 
 export default function ShowCompletedInfoNotes({

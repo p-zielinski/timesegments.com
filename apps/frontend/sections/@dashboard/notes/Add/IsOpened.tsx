@@ -1,23 +1,23 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../../../utils/colors/getRepeatingLinearGradient';
+import { getRepeatingLinearGradient } from '../../../../utils/colors/getRepeatingLinearGradient';
 import {
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
-} from '../../../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../../../utils/colors/getHexFromRGBAObject';
-import Iconify from '../../../../../components/iconify';
+} from '../../../../consts/colors';
+import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
+import Iconify from '../../../../components/iconify';
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../../../../../components/form/Text';
-import { getHexFromRGBObject } from '../../../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getRgbaObjectFromHexString } from '../../../../../utils/colors/getRgbaObjectFromHexString';
+import { InputText } from '../../../../components/form/Text';
+import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
-import { handleFetch } from '../../../../../utils/handleFetch';
+import { handleFetch } from '../../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import ShowCompletedInfoNotes from './ShowCompletedInfo';
 

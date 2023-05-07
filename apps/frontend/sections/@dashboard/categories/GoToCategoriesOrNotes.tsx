@@ -67,6 +67,12 @@ export const GoToCategoriesOrNotes = ({
   };
 
   const [color, setColor] = useState(getCurrentColor());
+  useEffect(() => {
+    const desiredColor = getCurrentColor();
+    if (desiredColor !== color) {
+      setColor(desiredColor);
+    }
+  }, [currentPageState]);
 
   useEffect(() => {
     setColor(getCurrentColor());

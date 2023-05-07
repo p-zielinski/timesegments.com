@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id                String            @id @default(cuid())
-  email             String            @unique
+  id                String                @id @default(cuid())
+  email             String                @unique
   password          String
   name              String?
   tokens            Token[]
   notes             Note[]
-  expandNotes       Boolean     @default(true)
+  expandNotes       Boolean               @default(true)
+  sortingNotes      NotesSortOption       @default(BY_DATE)
   categories        Category[]
   subcategories     Subcategory[]
-  sortingCategories ColumnSortOption  @default(NEWEST)
+  sortingCategories CategoriesSortOption  @default(NEWEST)
   timezone          Timezone
   timeLogs          TimeLog[]
-  createdAt         DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt         DateTime          @updatedAt @db.Timestamptz(3)
-  controlValue      String            @default("new user")
+  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
+  controlValue      String                @default("new user")
 }
 
 model Token {
@@ -100,11 +101,16 @@ model Comment {
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }
 
-enum ColumnSortOption {
+enum CategoriesSortOption {
   NEWEST
   OLDEST
   ALPHABETICAL
   REVERSED_ALPHABETICAL
+}
+
+enum NotesSortOption {
+  BY_DATE
+  FAVORITES_FIRST
 }
 
 enum Timezone {
