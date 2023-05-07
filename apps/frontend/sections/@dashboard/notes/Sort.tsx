@@ -1,59 +1,46 @@
-import {useEffect, useState} from 'react';
-// @mui
-import {Button, Menu, MenuItem, Typography} from '@mui/material';
-// component
+import {useState} from 'react'; // @mui
+import {Button, Menu, MenuItem, Typography} from '@mui/material'; // component
 import Iconify from '../../../components/iconify';
-import {CategoryWithSubcategories} from '@test1/shared';
+import {NotesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
-import {sortCategories} from '../../../utils/sortCategories';
-import {User} from '@prisma/client';
-import {handleFetch} from '../../../utils/handleFetch';
+import {User} from '@prisma/client'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
 const SORT_BY_OPTIONS = [
   {
-    value: CategoriesSortOption.NEWEST,
-    label: capitalize(CategoriesSortOption.NEWEST),
+    value: NotesSortOption.BY_DATE,
+    label: capitalize(NotesSortOption.BY_DATE).replaceAll('_', ' '),
   },
   {
-    value: CategoriesSortOption.OLDEST,
-    label: capitalize(CategoriesSortOption.OLDEST),
+    value: NotesSortOption.FAVORITES_FIRST,
+    label: capitalize(NotesSortOption.FAVORITES_FIRST).replaceAll('_', ' '),
   },
 ];
 
-export default function Sort({
-  user,
-  categories,
-  setCategories,
-}: {
-  user: User;
-  categories: CategoryWithSubcategories[];
-  setCategories: (categories: CategoryWithSubcategories[]) => unknown;
-}) {
+export default function SortNotes({ user }: { user: User }) {
   const [sortOrder, setSortOrder] = useState(
-    (user.sortingCategories as CategoriesSortOption) ??
-      CategoriesSortOption.NEWEST
+    (user.sortingNotes as NotesSortOption) ?? NotesSortOption.BY_DATE
   );
   const [open, setOpen] = useState(null);
 
-  useEffect(() => {
-    setCategories(sortCategories(categories, sortOrder));
-  }, [
-    sortOrder,
-    //this gets current state of categories and subcategories names
-    categories
-      .map((category) => {
-        return [
-          category.name,
-          ...(category.subcategories ?? []).map(
-            (subcategory) => subcategory.name
-          ),
-        ].join(',');
-      })
-      .join(','),
-    user?.id,
-  ]);
+  // useEffect(() => {
+  //   setCategories(sortCategories(categories, sortOrder));
+  // }, [
+  //   sortOrder,
+  //   //this gets current state of categories and subcategories names
+  //   categories
+  //     .map((category) => {
+  //       return [
+  //         category.name,
+  //         ...(category.subcategories ?? []).map(
+  //           (subcategory) => subcategory.name
+  //         ),
+  //       ].join(',');
+  //     })
+  //     .join(','),
+  //   user?.id,
+  // ]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -69,12 +56,12 @@ export default function Sort({
     setUsersSortingCategories(option.value); //don't wait
   };
 
-  const setUsersSortingCategories = async (option: CategoriesSortOption) => {
-    await handleFetch({
-      pathOrUrl: 'user/set-sorting-categories',
-      body: { sortingCategories: option },
-      method: 'POST',
-    });
+  const setUsersSortingCategories = async (option: NotesSortOption) => {
+    // await handleFetch({
+    //   pathOrUrl: 'user/set-sorting-categories',
+    //   body: { sortingCategories: option },
+    //   method: 'POST',
+    // });
   };
 
   return (
@@ -89,7 +76,7 @@ export default function Sort({
           />
         }
       >
-        Sort categories by:&nbsp;
+        Sort categories:&nbsp;
         <Typography
           component="span"
           variant="subtitle2"

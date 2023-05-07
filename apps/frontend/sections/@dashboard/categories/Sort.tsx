@@ -33,18 +33,18 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function Sort({
-  user,
-  categories,
-  setCategories,
-}: {
+export default function SortCategories({
+                                         user,
+                                         categories,
+                                         setCategories,
+                                       }: {
   user: User;
   categories: CategoryWithSubcategories[];
   setCategories: (categories: CategoryWithSubcategories[]) => unknown;
 }) {
   const [sortOrder, setSortOrder] = useState(
     (user.sortingCategories as CategoriesSortOption) ??
-      CategoriesSortOption.NEWEST
+    CategoriesSortOption.NEWEST
   );
   const [open, setOpen] = useState(null);
 
@@ -83,7 +83,7 @@ export default function Sort({
   const setUsersSortingCategories = async (option: CategoriesSortOption) => {
     await handleFetch({
       pathOrUrl: 'user/set-sorting-categories',
-      body: { sortingCategories: option },
+      body: {sortingCategories: option},
       method: 'POST',
     });
   };
@@ -104,7 +104,7 @@ export default function Sort({
         <Typography
           component="span"
           variant="subtitle2"
-          sx={{ color: 'text.secondary' }}
+          sx={{color: 'text.secondary'}}
         >
           {SORT_BY_OPTIONS.find((option) => option.value === sortOrder).label}
         </Typography>
@@ -114,15 +114,15 @@ export default function Sort({
         anchorEl={open}
         open={Boolean(open)}
         onClose={() => handleClose()}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+        transformOrigin={{vertical: 'top', horizontal: 'right'}}
       >
         {SORT_BY_OPTIONS.map((option) => (
           <MenuItem
             key={option.value}
             selected={option.value === sortOrder}
             onClick={() => handleClose(option)}
-            sx={{ typography: 'body2' }}
+            sx={{typography: 'body2'}}
           >
             {option.label}
           </MenuItem>

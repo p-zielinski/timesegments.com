@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { AddIsNotOpened } from './Add/IsNotOpened';
 import AddIsOpened from './Add/IsOpened';
 import {
+  GRAY,
   GREEN,
   IS_SAVING_HEX,
   LIGHT_SILVER,
@@ -21,6 +22,7 @@ import Iconify from '../../../components/iconify';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
+import SortNotes from './Sort';
 
 export const NotesSection = ({
   controlValue,
@@ -76,7 +78,7 @@ export const NotesSection = ({
         justifyContent="flex-end"
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ mt: 1, mb: 1 }}>
-          {/*<Sort user={user} categories={[]} setCategories={() => null} />*/}
+          <SortNotes user={user} />
         </Stack>
       </Stack>
       <Grid container spacing={2} columns={1}>
@@ -223,13 +225,13 @@ export const NotesSection = ({
               sx={{
                 backgroundColor: SUPER_LIGHT_SILVER,
                 border: `solid 2px ${isSaving ? IS_SAVING_HEX : LIGHT_SILVER}`,
-                color: isSaving ? IS_SAVING_HEX : 'black',
+                color: isSaving ? IS_SAVING_HEX : GRAY,
                 minHeight: 58,
               }}
             >
               <Stack spacing={2} sx={{ p: 2 }}>
                 <Typography variant="body2" noWrap>
-                  You can only see notes up to 3 days old on this page.
+                  You can see notes only up to 3 days old on this page.
                 </Typography>
               </Stack>
             </CardBlock>

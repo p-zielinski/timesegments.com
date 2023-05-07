@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 import React, { useState } from 'react';
-import Sort from './Sort';
+import SortCategories from './Sort';
 import CategoryList from './CategoryList';
 
 export const CategoriesSection = ({
@@ -35,7 +35,7 @@ export const CategoriesSection = ({
         justifyContent="flex-end"
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ mt: 1, mb: 1 }}>
-          <Sort
+          <SortCategories
             user={user}
             categories={categories}
             setCategories={setCategories}
