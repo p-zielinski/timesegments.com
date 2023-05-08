@@ -16,13 +16,13 @@ export default function ShowCompletedInfoNotes({
   color,
   disableHover,
   completedInfo,
-  setIsOpen,
+  setEditing,
 }: {
   isSaving: boolean;
   color: { rgb: { r: number; g: number; b: number; a: number }; hex: string };
   disableHover: boolean;
   completedInfo: string;
-  setIsOpen: (isOpen: boolean) => void;
+  setEditing: (isOpen: { isEditing: string; isDeleting: boolean }) => void;
 }) {
   return (
     <Box key={'passwordChanged'}>
@@ -66,7 +66,10 @@ export default function ShowCompletedInfoNotes({
             if (isSaving) {
               return;
             }
-            setIsOpen(false);
+            setEditing({
+              isEditing: undefined,
+              isDeleting: false,
+            });
           }}
         >
           <Stack

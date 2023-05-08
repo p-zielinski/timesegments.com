@@ -15,7 +15,7 @@ export const AddIsNotOpened = ({
   user,
   setUser,
   color,
-  setIsOpen,
+  setEditing,
   isSaving,
   setIsSaving,
   disableHover,
@@ -47,7 +47,14 @@ export const AddIsNotOpened = ({
   return (
     <Box sx={{ display: 'flex', width: '100%' }}>
       <Box
-        onClick={() => (isSaving ? null : setIsOpen(true))}
+        onClick={() =>
+          isSaving
+            ? null
+            : setEditing({
+                isEditing: 'new',
+                isDeleting: false,
+              })
+        }
         sx={{
           color: isSaving
             ? IS_SAVING_HEX

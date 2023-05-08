@@ -1,37 +1,35 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../../utils/colors/getRepeatingLinearGradient';
+import React from 'react';
+import * as yup from 'yup';
+import { Formik } from 'formik';
+import { styled } from '@mui/material/styles';
+import { StatusCodes } from 'http-status-codes';
+import { handleFetch } from '../../../utils/handleFetch';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import {
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
-} from '../../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
-import Iconify from '../../../../components/iconify';
-import React, { useState } from 'react';
-import * as yup from 'yup';
-import { Formik } from 'formik';
-import { InputText } from '../../../../components/form/Text';
-import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
-import { styled } from '@mui/material/styles';
-import { handleFetch } from '../../../../utils/handleFetch';
-import { StatusCodes } from 'http-status-codes';
-import ShowCompletedInfoNotes from './ShowCompletedInfo';
+} from '../../../consts/colors';
+import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
+import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
+import Iconify from '../../../components/iconify';
+import InputText from '../../../components/form/Text';
 
-export default function AddIsOpened({
+export default function EditNote({
+  note,
   userNotes,
   setUserNotes,
   disableHover,
   isSaving,
   setIsSaving,
-  color,
   setEditing,
+  color,
 }) {
-  const [completed, setCompleted] = useState(false);
-
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -68,18 +66,18 @@ export default function AddIsOpened({
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
   const initialValues = {
-    note: '',
+    note: note.note,
   };
 
   const saveNote = async (note: string) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'note/create',
+      pathOrUrl: 'note/save',
       body: { note },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
-      setCompleted(true);
+      //good
     }
     setIsSaving(false);
     return;
@@ -88,19 +86,6 @@ export default function AddIsOpened({
   const validationSchema = yup.object().shape({
     note: yup.string().required(),
   });
-
-  if (completed) {
-    return (
-      <ShowCompletedInfoNotes
-        key={'noteSaved'}
-        isSaving={isSaving}
-        setEditing={setEditing}
-        color={color}
-        disableHover={disableHover}
-        completedInfo={'Note has been saved!'}
-      />
-    );
-  }
 
   return (
     <Card>
@@ -311,13 +296,7 @@ export default function AddIsOpened({
                           border: `solid 2px ${RED}`,
                         },
                     }}
-                    onClick={() =>
-                      !isSaving &&
-                      setEditing({
-                        isEditing: undefined,
-                        isDeleting: false,
-                      })
-                    }
+                    onClick={() => !isSaving && setEditing('')}
                   >
                     <Iconify
                       icon={'mdi:cancel-bold'}

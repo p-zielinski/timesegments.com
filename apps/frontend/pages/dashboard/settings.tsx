@@ -36,12 +36,14 @@ type Props = {
   user: User;
   optionsColors: OptionsColors;
   currentTokenId: string;
+  randomSliderHexColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
   optionsColors,
   currentTokenId,
+  randomSliderHexColor,
 }: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [openedSettingOption, setOpenedSettingOption] =
@@ -124,7 +126,12 @@ export default function Index({
   const allSettingOptions = Object.keys(SettingOption);
 
   return (
-    <DashboardLayout user={user} setUser={setUser} title={'Settings'}>
+    <DashboardLayout
+      user={user}
+      setUser={setUser}
+      title={'Settings'}
+      randomSliderHexColor={randomSliderHexColor}
+    >
       <Helmet>
         <title>Dashboard</title>
       </Helmet>
@@ -407,6 +414,12 @@ export const getServerSideProps = async ({ req, res }) => {
           keyAndValue[0],
           getRandomRgbObjectForSliderPicker(),
         ])
+      ),
+      randomSliderHexColor: getHexFromRGBObject(
+        getColorShadeBasedOnSliderPickerSchema(
+          getRandomRgbObjectForSliderPicker().rgb,
+          'very bright'
+        )
       ),
     },
   };

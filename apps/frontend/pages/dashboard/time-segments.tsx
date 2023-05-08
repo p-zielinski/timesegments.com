@@ -39,6 +39,9 @@ import {
   ULTRA_LIGHT_RED,
 } from '../../consts/colors';
 import Cookies from 'cookies';
+import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -83,11 +86,13 @@ const AppOrderTimeline = dynamic(
 type Props = {
   user: User;
   timeLogsWithDatesISO: TimeLogsWithinDateISO[];
+  randomSliderHexColor: string;
 };
 
 export default function TimeSegments({
   user: serverSideFetchedUser,
   timeLogsWithDatesISO,
+  randomSliderHexColor,
 }: Props) {
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
@@ -281,7 +286,12 @@ export default function TimeSegments({
   };
 
   return (
-    <DashboardLayout user={user} setUser={setUser} title={'Dashboard'}>
+    <DashboardLayout
+      user={user}
+      setUser={setUser}
+      title={'Dashboard'}
+      randomSliderHexColor={randomSliderHexColor}
+    >
       <Helmet>
         <title>Settings</title>
       </Helmet>
@@ -609,6 +619,12 @@ export const getServerSideProps = async ({ req, res }) => {
     props: {
       user: user,
       timeLogsWithDatesISO: deleteUndefinedFromObject(timeLogsWithDates),
+      randomSliderHexColor: getHexFromRGBObject(
+        getColorShadeBasedOnSliderPickerSchema(
+          getRandomRgbObjectForSliderPicker().rgb,
+          'very bright'
+        )
+      ),
     },
   };
 };
