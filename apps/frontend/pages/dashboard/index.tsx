@@ -1,5 +1,5 @@
 import {Helmet} from 'react-helmet-async'; // @mui
-import {Container} from '@mui/material'; // hooks
+import {Box, Container, useMediaQuery} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {
   CategoryWithSubcategories,
@@ -25,7 +25,7 @@ import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
 import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
-import {CategoriesSection} from '../../sections/@dashboard/categories'; // ---------------------------------------------------------------------
+import {CategoriesSection} from '../../sections/@dashboard/categories';
 // ---------------------------------------------------------------------
 
 type Props = {
@@ -41,6 +41,8 @@ export default function Index({
   notes: serverSideFetchedNotes,
   randomSliderHexColor: randomSliderHexColor,
 }: Props) {
+  const width1200px = useMediaQuery('(min-width:1200px)');
+
   const [disableHover, setDisableHover] = useState<boolean>(true);
   useEffect(() => {
     setDisableHover(isMobile);
@@ -181,12 +183,16 @@ export default function Index({
       </Helmet>
 
       <Container>
-        <GoToCategoriesOrNotes
-          currentPageState={currentPageState}
-          setCurrentPageState={setCurrentPageState}
-          isSaving={isSaving}
-          disableHover={disableHover}
-        />
+        {!width1200px ? (
+          <GoToCategoriesOrNotes
+            currentPageState={currentPageState}
+            setCurrentPageState={setCurrentPageState}
+            isSaving={isSaving}
+            disableHover={disableHover}
+          />
+        ) : (
+          <Box sx={{ mt: -5 }} />
+        )}
         {currentPageState === DashboardPageState.CATEGORIES ? (
           <CategoriesSection
             categories={categories}
