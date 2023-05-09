@@ -9,7 +9,7 @@ import {
 } from '../../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../../components/iconify';
-import React, { useState } from 'react';
+import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../../components/form/Text';
@@ -19,9 +19,12 @@ import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObje
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
-import ShowCompletedInfoNotes from './ShowCompletedInfo';
+import { useRouter } from 'next/router';
+import { Checkbox } from '../../Form/Checkbox';
 
 export default function AddIsOpened({
+  controlValue,
+  setControlValue,
   userNotes,
   setUserNotes,
   disableHover,
@@ -30,7 +33,7 @@ export default function AddIsOpened({
   color,
   setEditing,
 }) {
-  const [completed, setCompleted] = useState(false);
+  const router = useRouter();
 
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
@@ -69,17 +72,30 @@ export default function AddIsOpened({
 
   const initialValues = {
     note: '',
+    favorite: false,
   };
 
-  const saveNote = async (note: string) => {
+  const saveNote = async (note: string, favorite: boolean) => {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'note/create',
-      body: { note },
+      body: { note, favorite },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED) {
-      setCompleted(true);
+    if (response.statusCode === StatusCodes.CREATED && response.note) {
+      setUserNotes([response.note, ...userNotes]);
+      setEditing({
+        isEditing: undefined,
+        isDeleting: false,
+      });
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      return router.push('/');
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined); //skip setting isSaving(false)
+      return;
     }
     setIsSaving(false);
     return;
@@ -89,30 +105,17 @@ export default function AddIsOpened({
     note: yup.string().required(),
   });
 
-  if (completed) {
-    return (
-      <ShowCompletedInfoNotes
-        key={'noteSaved'}
-        isSaving={isSaving}
-        setEditing={setEditing}
-        color={color}
-        disableHover={disableHover}
-        completedInfo={'Note has been saved!'}
-      />
-    );
-  }
-
   return (
     <Card>
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await saveNote(values.note);
+          await saveNote(values.note, values.favorite);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ handleSubmit, values }) => {
+        {({ handleSubmit, values, setFieldValue }) => {
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
@@ -174,6 +177,17 @@ export default function AddIsOpened({
                         a: 0.03,
                       })}
                     />
+                    <Box sx={{ ml: 1, mb: 0.5 }}>
+                      <Checkbox
+                        label={'Favorite'}
+                        name={'favorite'}
+                        hideHelpText={true}
+                        color={darkHexColor}
+                        onChange={(e) => {
+                          setFieldValue('favorite', e.target.checked);
+                        }}
+                      />
+                    </Box>
                   </Box>
                 </Box>
                 <Box

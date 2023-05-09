@@ -49,6 +49,8 @@ export const NotesSection = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {editing?.isEditing === 'new' ? (
               <AddIsOpened
+                controlValue={controlValue}
+                setControlValue={setControlValue}
                 color={color}
                 setEditing={setEditing}
                 setIsSaving={setIsSaving}
@@ -59,19 +61,17 @@ export const NotesSection = ({
               />
             ) : (
               <AddIsNotOpened
-                controlValue={controlValue}
-                setControlValue={setControlValue}
-                user={user}
-                setUser={setUser}
                 color={color}
                 setEditing={setEditing}
                 isSaving={isSaving}
-                setIsSaving={setIsSaving}
                 disableHover={disableHover}
               />
             )}
             {userNotes.map((note) => (
               <Note
+                key={note.id}
+                controlValue={controlValue}
+                setControlValue={setControlValue}
                 userNotes={userNotes}
                 setUserNotes={setUserNotes}
                 isSaving={isSaving}

@@ -1,5 +1,5 @@
 import { Box, Grid, Stack, Typography } from '@mui/material';
-import { IS_SAVING_HEX, SUPER_LIGHT_SILVER } from '../../../consts/colors';
+import { IS_SAVING_HEX } from '../../../consts/colors';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
@@ -54,8 +54,8 @@ export const GoToCategoriesOrNotes = ({
     rgb: getRgbaObjectFromHexString('#c400aa'),
   };
   const notesColor = {
-    hex: '#c4b900',
-    rgb: getRgbaObjectFromHexString('#c4b900'),
+    hex: '#c400aa',
+    rgb: getRgbaObjectFromHexString('#c400aa'),
   };
 
   const getCurrentColor = () => {
@@ -106,12 +106,12 @@ export const GoToCategoriesOrNotes = ({
                 : getHexFromRGBObject(
                     getColorShadeBasedOnSliderPickerSchema(color.rgb, 'normal')
                   ),
-              background: isSaving
-                ? SUPER_LIGHT_SILVER
-                : getHexFromRGBAObject({
-                    ...color.rgb,
-                    a: 0.1,
-                  }),
+              background: getRepeatingLinearGradient(
+                isSaving ? IS_SAVING_HEX : color.hex,
+                0.1,
+                135,
+                false
+              ),
               flex: 1,
               maxWidth: 'calc(100% - 60px)',
               border: isSaving
@@ -162,7 +162,7 @@ export const GoToCategoriesOrNotes = ({
                         mt: -1,
                       }}
                     />
-                    RECENT NOTES
+                    GO TO RECENT NOTES
                   </>
                 ) : currentPageState === DashboardPageState.NOTES ? (
                   <>
@@ -175,7 +175,7 @@ export const GoToCategoriesOrNotes = ({
                         mt: -1,
                       }}
                     />
-                    CATEGORIES
+                    GO TO CATEGORIES
                   </>
                 ) : (
                   'ERROR'

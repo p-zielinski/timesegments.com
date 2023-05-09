@@ -16,8 +16,13 @@ import { Timezones } from '@test1/shared';
 import EditNote from './EditNote';
 import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import { getHexFromRGBAString } from '../../../utils/colors/getHexFromRGBString';
+import { handleFetch } from '../../../utils/handleFetch';
+import { StatusCodes } from 'http-status-codes';
+import { useRouter } from 'next/router';
 
 export const Note = ({
+  controlValue,
+  setControlValue,
   userNotes,
   setUserNotes,
   isSaving,
@@ -28,6 +33,7 @@ export const Note = ({
   note,
   user,
 }) => {
+  const router = useRouter();
   const updated = note.updatedAt !== note.createdAt;
   const createdAt = DateTime.fromISO(note.createdAt, {
     zone: Timezones[user.timezone],
@@ -54,14 +60,45 @@ export const Note = ({
     hex: '#006cc4',
     rgb: getRgbaObjectFromHexString('#006cc4'),
   };
+  const { favorite } = note;
 
-  const deleteNote = () => {
-    console.log(123);
+  const deleteNote = async (noteId) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'note/delete',
+      body: {
+        noteId,
+        controlValue,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setUserNotes(
+        userNotes.filter((currentNote) => currentNote.id !== noteId)
+      );
+      setEditing({
+        isEditing: undefined,
+        isDeleting: false,
+      });
+      if (response.cotrolValue) {
+        setControlValue(response.cotrolValue);
+      }
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      return router.push('/');
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined); //skip setting isSaving(false)
+      return;
+    }
+    setIsSaving(false);
+    return;
   };
 
   if (editing.isEditing === note.id && editing.isDeleting === false) {
     return (
       <EditNote
+        key={note.id}
+        controlValue={controlValue}
+        setControlValue={setControlValue}
         note={note}
         userNotes={userNotes}
         setUserNotes={setUserNotes}
@@ -164,10 +201,14 @@ export const Note = ({
                     fontSize: updated ? 12 : undefined,
                   }}
                 >
+                  {updated ? '' : favorite ? '❤️ ' : ''}
                   {createdAt}
                 </Typography>
                 {updated && (
-                  <Typography variant="subtitle2">{updatedAt}</Typography>
+                  <Typography variant="subtitle2">
+                    {favorite ? '❤️ ' : ''}
+                    {updatedAt}
+                  </Typography>
                 )}
               </Box>
               <Typography sx={{ whiteSpace: 'normal' }}>{note.note}</Typography>
@@ -191,7 +232,7 @@ export const Note = ({
                   borderColor: RED,
                 },
             }}
-            onClick={() => !isSaving && deleteNote()}
+            onClick={() => !isSaving && deleteNote(note.id)}
           >
             <Iconify
               icon={'material-symbols:delete-forever-rounded'}
@@ -321,10 +362,14 @@ export const Note = ({
                   fontSize: updated ? 12 : undefined,
                 }}
               >
+                {updated ? '' : favorite ? '💙 ' : ''}
                 {createdAt}
               </Typography>
               {updated && (
-                <Typography variant="subtitle2">{updatedAt}</Typography>
+                <Typography variant="subtitle2">
+                  {favorite ? '💙 ' : ''}
+                  {updatedAt}
+                </Typography>
               )}
             </Box>
             <Typography sx={{ whiteSpace: 'normal' }}>{note.note}</Typography>

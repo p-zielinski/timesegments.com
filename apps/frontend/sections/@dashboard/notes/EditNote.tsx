@@ -19,8 +19,12 @@ import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject
 import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
 import InputText from '../../../components/form/Text';
+import { Checkbox } from '../Form/Checkbox';
+import { useRouter } from 'next/router';
 
 export default function EditNote({
+  controlValue,
+  setControlValue,
   note,
   userNotes,
   setUserNotes,
@@ -30,6 +34,7 @@ export default function EditNote({
   setEditing,
   color,
 }) {
+  const router = useRouter();
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -67,17 +72,46 @@ export default function EditNote({
 
   const initialValues = {
     note: note.note,
+    favorite: note.favorite,
   };
 
-  const saveNote = async (note: string) => {
+  const updateNote = async (
+    noteId: string,
+    note: string,
+    favorite: boolean
+  ) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'note/save',
-      body: { note },
+      pathOrUrl: 'note/update',
+      body: {
+        noteId,
+        note,
+        favorite,
+        controlValue,
+      },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED) {
-      //good
+    if (response.statusCode === StatusCodes.CREATED && response.note) {
+      setUserNotes(
+        userNotes.map((currentNote) => {
+          if (currentNote.id === noteId) {
+            return response.note;
+          }
+          return currentNote;
+        })
+      );
+      setEditing({
+        isEditing: undefined,
+        isDeleting: false,
+      });
+      if (response.cotrolValue) {
+        setControlValue(response.cotrolValue);
+      }
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      return router.push('/');
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined); //skip setting isSaving(false)
+      return;
     }
     setIsSaving(false);
     return;
@@ -91,13 +125,13 @@ export default function EditNote({
     <Card>
       <Formik
         initialValues={initialValues}
-        onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await saveNote(values.note);
+        onSubmit={async (values, { setSubmitting }) => {
+          await updateNote(note.id, values.note, values.favorite);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ handleSubmit, values }) => {
+        {({ handleSubmit, values, setFieldValue }) => {
           const isFormValid = validationSchema.isValidSync(values);
 
           return (
@@ -159,6 +193,17 @@ export default function EditNote({
                         a: 0.03,
                       })}
                     />
+                    <Box sx={{ ml: 1, mb: 0.5 }}>
+                      <Checkbox
+                        label={'Favorite'}
+                        name={'favorite'}
+                        hideHelpText={true}
+                        color={darkHexColor}
+                        onChange={(e) => {
+                          setFieldValue('favorite', e.target.checked);
+                        }}
+                      />
+                    </Box>
                   </Box>
                 </Box>
                 <Box

@@ -76,7 +76,7 @@ export default function SortNotes({ user }: { user: User }) {
           />
         }
       >
-        Sort categories:&nbsp;
+        Sort notes:&nbsp;
         <Typography
           component="span"
           variant="subtitle2"
