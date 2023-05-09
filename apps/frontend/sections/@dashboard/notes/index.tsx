@@ -92,7 +92,7 @@ export const NotesSection = ({
               }}
             >
               <Stack spacing={2} sx={{ p: 2 }}>
-                <Typography variant="body2" noWrap>
+                <Typography variant="body2">
                   You can see notes only up to 3 days old on this page.
                 </Typography>
               </Stack>
