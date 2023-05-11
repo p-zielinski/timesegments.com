@@ -14,7 +14,6 @@ model User {
   name              String?
   tokens            Token[]
   notes             Note[]
-  expandNotes       Boolean               @default(true)
   sortingNotes      NotesSortOption       @default(BY_DATE)
   categories        Category[]
   subcategories     Subcategory[]

@@ -26,8 +26,8 @@ export default function EditNote({
   controlValue,
   setControlValue,
   note,
-  userNotes,
-  setUserNotes,
+  notes,
+  setNotes,
   disableHover,
   isSaving,
   setIsSaving,
@@ -92,8 +92,8 @@ export default function EditNote({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setUserNotes(
-        userNotes.map((currentNote) => {
+      setNotes(
+        notes.map((currentNote) => {
           if (currentNote.id === noteId) {
             return response.note;
           }

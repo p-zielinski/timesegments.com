@@ -143,9 +143,7 @@ export default function Index({
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>(
     user?.categories || []
   );
-  const [userNotes, setUserNotes] = useState<Note[]>(
-    serverSideFetchedNotes || []
-  );
+  const [notes, setNotes] = useState<Note[]>(serverSideFetchedNotes || []);
   const [viewMode, setViewMode] = useState<CategoriesPageMode>(
     CategoriesPageMode.VIEW
   );
@@ -213,8 +211,8 @@ export default function Index({
             setControlValue={setControlValue}
             user={user}
             setUser={setUser}
-            userNotes={userNotes}
-            setUserNotes={setUserNotes}
+            notes={notes}
+            setNotes={setNotes}
             isSaving={isSaving}
             setIsSaving={setIsSaving}
             disableHover={disableHover}

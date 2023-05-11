@@ -25,8 +25,8 @@ import { Checkbox } from '../../Form/Checkbox';
 export default function AddIsOpened({
   controlValue,
   setControlValue,
-  userNotes,
-  setUserNotes,
+  notes,
+  setNotes,
   disableHover,
   isSaving,
   setIsSaving,
@@ -83,7 +83,7 @@ export default function AddIsOpened({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setUserNotes([response.note, ...userNotes]);
+      setNotes([response.note, ...notes]);
       setEditing({
         isEditing: undefined,
         isDeleting: false,

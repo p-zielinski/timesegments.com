@@ -19,12 +19,13 @@ import { getHexFromRGBAString } from '../../../utils/colors/getHexFromRGBString'
 import { handleFetch } from '../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
+import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 
 export const Note = ({
   controlValue,
   setControlValue,
-  userNotes,
-  setUserNotes,
+  notes,
+  setNotes,
   isSaving,
   setIsSaving,
   editing,
@@ -33,18 +34,39 @@ export const Note = ({
   note,
   user,
 }) => {
+  const tomorrow = DateTime.now()
+    .setZone(Timezones[user.timezone])
+    .plus({ days: 1 });
+  const endOfDate = DateTime.fromObject(
+    {
+      month: tomorrow.month,
+      year: tomorrow.year,
+      day: tomorrow.day,
+      hour: 0,
+      minute: 0,
+      second: 0,
+    },
+    { zone: Timezones[user.timezone] }
+  );
   const router = useRouter();
   const updated = note.updatedAt !== note.createdAt;
   const createdAt = DateTime.fromISO(note.createdAt, {
     zone: Timezones[user.timezone],
-  }).toLocaleString({
+  });
+  const createdAtLocale = createdAt.toLocaleString({
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
   });
-  const updatedAt = updated
+  const dayInMs = 1000 * 60 * 60 * 24;
+  const daysAgo =
+    endOfDate?.ts && createdAt?.ts
+      ? (endOfDate.ts - createdAt.ts) / dayInMs
+      : 0;
+
+  const updatedAtLocale = updated
     ? DateTime.fromISO(note.updatedAt, {
         zone: Timezones[user.timezone],
       }).toLocaleString({
@@ -56,10 +78,27 @@ export const Note = ({
       })
     : undefined;
 
-  const color2 = {
-    hex: '#006cc4',
-    rgb: getRgbaObjectFromHexString('#006cc4'),
+  const getColor = (daysAgo) => {
+    if (daysAgo < 1) {
+      return '#008dff';
+    }
+    if (daysAgo < 2) {
+      return '#a26300';
+    }
+    return '#046200';
   };
+
+  const getHeart = (daysAgo) => {
+    if (daysAgo < 1) {
+      return '💙';
+    }
+    if (daysAgo < 2) {
+      return '🧡';
+    }
+    return '💚';
+  };
+
+  const color = getRandomRgbObjectForSliderPicker();
   const { favorite } = note;
 
   const deleteNote = async (noteId) => {
@@ -73,9 +112,7 @@ export const Note = ({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
-      setUserNotes(
-        userNotes.filter((currentNote) => currentNote.id !== noteId)
-      );
+      setNotes(notes.filter((currentNote) => currentNote.id !== noteId));
       setEditing({
         isEditing: undefined,
         isDeleting: false,
@@ -100,13 +137,13 @@ export const Note = ({
         controlValue={controlValue}
         setControlValue={setControlValue}
         note={note}
-        userNotes={userNotes}
-        setUserNotes={setUserNotes}
+        notes={notes}
+        setNotes={setNotes}
         disableHover={disableHover}
         isSaving={isSaving}
         setIsSaving={setIsSaving}
         setEditing={setEditing}
-        color={color2}
+        color={color}
       />
     );
   }
@@ -202,12 +239,12 @@ export const Note = ({
                   }}
                 >
                   {updated ? '' : favorite ? '❤️ ' : ''}
-                  {createdAt}
+                  {createdAtLocale}
                 </Typography>
                 {updated && (
                   <Typography variant="subtitle2">
                     {favorite ? '❤️ ' : ''}
-                    {updatedAt}
+                    {updatedAtLocale}
                   </Typography>
                 )}
               </Box>
@@ -265,7 +302,6 @@ export const Note = ({
             borderTopLeftRadius: 12,
             borderBottomLeftRadius: 12,
             cursor: !isSaving && 'pointer',
-            '&:hover': !disableHover && !isSaving && {},
           }}
           onClick={() =>
             !isSaving &&
@@ -298,8 +334,8 @@ export const Note = ({
             cursor: !isSaving && 'pointer',
             '&:hover': !disableHover &&
               !isSaving && {
-                borderTop: `solid 2px ${LIGHT_SILVER}`,
-                borderBottom: `solid 2px ${LIGHT_SILVER}`,
+                borderTop: `solid 2px ${RED}`,
+                borderBottom: `solid 2px ${RED}`,
               },
           }}
           onClick={() =>
@@ -327,8 +363,8 @@ export const Note = ({
             background: isSaving
               ? SUPER_LIGHT_SILVER
               : getHexFromRGBAObject({
-                  ...color2.rgb,
-                  a: 0.1,
+                  ...color.rgb,
+                  a: 0.15,
                 }),
             flex: 1,
             height: 'auto',
@@ -338,7 +374,7 @@ export const Note = ({
                   a: 0.5,
                 })}`
               : `solid 2px ${getHexFromRGBAObject({
-                  ...color2.rgb,
+                  ...color.rgb,
                   a: 0.3,
                 })}`,
             borderLeft: 0,
@@ -362,13 +398,13 @@ export const Note = ({
                   fontSize: updated ? 12 : undefined,
                 }}
               >
-                {updated ? '' : favorite ? '💙 ' : ''}
-                {createdAt}
+                {updated ? '' : favorite ? `${getHeart(daysAgo)} ` : ''}
+                {createdAtLocale}
               </Typography>
               {updated && (
                 <Typography variant="subtitle2">
-                  {favorite ? '💙 ' : ''}
-                  {updatedAt}
+                  {favorite ? `${getHeart(daysAgo)} ` : ''}
+                  {updatedAtLocale}
                 </Typography>
               )}
             </Box>

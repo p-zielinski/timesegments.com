@@ -14,6 +14,7 @@ import ShowLimitReached from './ShowLimitReached';
 import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import EditCategoriesButtonComponent from './EditCategoriesButtonComponent';
 import CancelCard from './CancelCard';
+import SortCategories from './Sort';
 
 // ----------------------------------------------------------------------
 
@@ -25,19 +26,20 @@ CategoryList.propTypes = {
 };
 
 export default function CategoryList({
-                                       controlValue,
-                                       setControlValue,
-                                       disableHover,
-                                       categories,
-                                       setCategories,
-                                       viewMode,
-                                       setViewMode,
-                                       isEditing,
-                                       setIsEditing,
-                                       isSaving,
-                                       setIsSaving,
-                                       limits,
-                                     }) {
+  user,
+  controlValue,
+  setControlValue,
+  disableHover,
+  categories,
+  setCategories,
+  viewMode,
+  setViewMode,
+  isEditing,
+  setIsEditing,
+  isSaving,
+  setIsSaving,
+  limits,
+}) {
   const [
     numberOfCategoriesAndSubcategoriesCombined,
     setNumberOfCategoriesAndSubcategoriesCombined,
@@ -58,11 +60,10 @@ export default function CategoryList({
   };
 
   return (
-
-    <Grid container spacing={2} columns={1}>
+    <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
       {viewMode === CategoriesPageMode.EDIT && (
         <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
-          <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {categories.length !== 0 && (
               <Card
                 sx={{
@@ -85,9 +86,9 @@ export default function CategoryList({
                 <Iconify
                   icon={'mdi:cancel-bold'}
                   width={42}
-                  sx={{m: -2, position: 'absolute', bottom: 22, left: 22}}
+                  sx={{ m: -2, position: 'absolute', bottom: 22, left: 22 }}
                 />
-                <Stack spacing={2} sx={{p: 2, ml: 5}}>
+                <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
                   <Typography variant="subtitle2" noWrap>
                     STOP EDITING CATEGORIES
                   </Typography>
@@ -108,7 +109,7 @@ export default function CategoryList({
                 setCategories={setCategories}
               />
             ) : (
-              <ShowLimitReached type={ShowLimitReachedType.CATEGORIES}/>
+              <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />
             )}
           </Box>
         </Grid>
@@ -132,32 +133,50 @@ export default function CategoryList({
             setViewMode={setViewMode}
           />
         )}
+      <Grid key={'sort-categories'} item xs={1} sm={1} md={1}>
+        <Stack
+          direction="row"
+          flexWrap="wrap-reverse"
+          alignItems="center"
+          justifyContent="flex-end"
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            flexShrink={0}
+            sx={{ mt: -1, mb: -1 }}
+          >
+            <SortCategories
+              user={user}
+              categories={categories}
+              setCategories={setCategories}
+            />
+          </Stack>
+        </Stack>
+      </Grid>
 
       {getCategories(categories).length
         ? getCategories(categories).map((category) => (
-          <Grid key={category.id} item xs={1} sm={1} md={1}>
-            <CategoryCard
-              controlValue={controlValue}
-              setControlValue={setControlValue}
-              disableHover={disableHover}
-              viewMode={viewMode}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              category={category}
-              categories={categories}
-              setCategories={setCategories}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              limits={limits}
-            />
-          </Grid>
-        ))
+            <Grid key={category.id} item xs={1} sm={1} md={1}>
+              <CategoryCard
+                controlValue={controlValue}
+                setControlValue={setControlValue}
+                disableHover={disableHover}
+                viewMode={viewMode}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                category={category}
+                categories={categories}
+                setCategories={setCategories}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
+                limits={limits}
+              />
+            </Grid>
+          ))
         : !isEditing && (
-        <ShowNoShow
-          type={ShowNoShowType.CATEGORIES}
-          isSaving={isSaving}
-        />
-      )}
+            <ShowNoShow type={ShowNoShowType.CATEGORIES} isSaving={isSaving} />
+          )}
       {viewMode === CategoriesPageMode.VIEW && (
         <EditCategoriesButtonComponent
           isSaving={isSaving}

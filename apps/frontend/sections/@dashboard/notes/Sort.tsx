@@ -1,9 +1,10 @@
-import {useState} from 'react'; // @mui
+import {useEffect, useState} from 'react'; // @mui
 import {Button, Menu, MenuItem, Typography} from '@mui/material'; // component
 import Iconify from '../../../components/iconify';
 import {NotesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
-import {User} from '@prisma/client'; // ----------------------------------------------------------------------
+import {sortNotes} from '../../../utils/sortNotes';
+import {handleFetch} from '../../../utils/handleFetch'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -18,29 +19,19 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function SortNotes({ user }: { user: User }) {
+export default function SortNotes({ user, notes, setNotes }) {
   const [sortOrder, setSortOrder] = useState(
     (user.sortingNotes as NotesSortOption) ?? NotesSortOption.BY_DATE
   );
   const [open, setOpen] = useState(null);
 
-  // useEffect(() => {
-  //   setCategories(sortCategories(categories, sortOrder));
-  // }, [
-  //   sortOrder,
-  //   //this gets current state of categories and subcategories names
-  //   categories
-  //     .map((category) => {
-  //       return [
-  //         category.name,
-  //         ...(category.subcategories ?? []).map(
-  //           (subcategory) => subcategory.name
-  //         ),
-  //       ].join(',');
-  //     })
-  //     .join(','),
-  //   user?.id,
-  // ]);
+  useEffect(() => {
+    setNotes(() => sortNotes(notes, sortOrder));
+  }, [
+    sortOrder,
+    //this gets current state of categories and subcategories names
+    notes?.map((note) => note?.id).join(','),
+  ]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -57,11 +48,11 @@ export default function SortNotes({ user }: { user: User }) {
   };
 
   const setUsersSortingCategories = async (option: NotesSortOption) => {
-    // await handleFetch({
-    //   pathOrUrl: 'user/set-sorting-categories',
-    //   body: { sortingCategories: option },
-    //   method: 'POST',
-    // });
+    await handleFetch({
+      pathOrUrl: 'user/set-sorting-notes',
+      body: { sortingCategories: option },
+      method: 'POST',
+    });
   };
 
   return (

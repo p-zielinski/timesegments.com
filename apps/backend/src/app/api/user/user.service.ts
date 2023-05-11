@@ -13,6 +13,7 @@ import {
   CategoriesSortOption,
   Limits,
   MeExtendedOption,
+  NotesSortOption,
   Timezones,
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
@@ -358,11 +359,27 @@ export class UserService {
     };
   }
 
-  public async updateSetExpandNotes(userId: string, expandNotes: boolean) {
-    return await this.prisma.user.update({
-      where: { id: userId },
-      data: { expandNotes },
-    });
+  async setSortingNotes(user: User, sortingNotes: NotesSortOption) {
+    if (user.sortingNotes === sortingNotes) {
+      return { success: true, sortingNotes };
+    }
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { sortingNotes },
+        select: { sortingNotes: true },
+      });
+      if (updatedUser.sortingNotes === sortingNotes) {
+        return { success: true, sortingNotes };
+      }
+    } catch (error) {
+      this.loggerService.error(error);
+    }
+
+    return {
+      success: false,
+      error: `Could not update sortingCategories to: ${CategoriesSortOption}`,
+    };
   }
 
   private async updateControlValue(userId: string, controlValue: string) {

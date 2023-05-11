@@ -79,8 +79,8 @@ export const GoToCategoriesOrNotes = ({
   }, [currentPageState]);
 
   return (
-    <Grid container spacing={2} columns={1}>
-      <Grid key={color.hex} item xs={1} sm={1} md={1} sx={{ mb: 0 }}>
+    <Grid container spacing={2} columns={1} sx={{ mb: 0 }}>
+      <Grid key={color.hex} item xs={1} sm={1} md={1}>
         <Box
           sx={{
             display: 'flex',

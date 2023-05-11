@@ -14,7 +14,6 @@ import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
-import { SetSortingCategoriesDto } from './dto/setSortingCategories';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 import { RegisterDto } from './dto/register.dto';
 import { SetNameDto } from './dto/setName.dto';
@@ -22,7 +21,8 @@ import { ChangePasswordDto } from './dto/changePassword.dto';
 import { ChangeTimezoneDto } from './dto/changeTimezone.dto';
 import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
-import { SetExpandNotesDto } from './dto/setExpandNotes.dto';
+import { SetSortingNotesDto } from './dto/setSortingNotes.dto';
+import { SetSortingCategoriesDto } from './dto/setSortingCategories.dto';
 
 @Controller('user')
 export class UserController {
@@ -204,6 +204,23 @@ export class UserController {
     return updateSortingCategoriesStatus;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('set-sorting-notes')
+  async handleRequestSetSortingNotes(
+    @UserDecorator() user: User,
+    @Body() setSortingNotesDto: SetSortingNotesDto
+  ) {
+    const { sortingNotes } = setSortingNotesDto;
+    const updateSortingCategoriesStatus =
+      await this.userService.setSortingNotes(user, sortingNotes);
+    if (!updateSortingCategoriesStatus.success) {
+      throw new BadRequestException({
+        error: updateSortingCategoriesStatus.error,
+      });
+    }
+    return updateSortingCategoriesStatus;
+  }
+
   @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('cancel-all-active')
   async handleRequestCancelAllActive(@UserDecorator() user: User) {
@@ -214,21 +231,5 @@ export class UserController {
       });
     }
     return cancelAllActiveStatus;
-  }
-
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
-  @Post('set-expand-notes')
-  async handleRequestSetExpandNotes(
-    @UserDecorator() user: User,
-    @Body() setExpandNotesDto: SetExpandNotesDto
-  ) {
-    const updateExpandNotes = await this.userService.updateSetExpandNotes(
-      user.id,
-      setExpandNotesDto.expandNotes
-    );
-    return {
-      user: updateExpandNotes,
-      controlValue: this.userService.getNewControlValue(user),
-    };
   }
 }

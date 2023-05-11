@@ -54,7 +54,6 @@ export const AddIsNotOpened = ({
                 a: 0.5,
               })}`,
               borderStyle: 'dashed',
-              borderRight: 0,
             },
         }}
       >
