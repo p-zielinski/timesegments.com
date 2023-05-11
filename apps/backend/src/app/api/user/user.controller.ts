@@ -187,7 +187,7 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('set-sorting-categories')
   async handleRequestSetSortingCategories(
     @UserDecorator() user: User,
@@ -204,7 +204,7 @@ export class UserController {
     return updateSortingCategoriesStatus;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('set-sorting-notes')
   async handleRequestSetSortingNotes(
     @UserDecorator() user: User,

@@ -250,13 +250,14 @@ export default function TimeSegments({
         .join(' ')} ago)`;
     };
 
-    return `${activeDate.toLocaleString({
-      day: 'numeric',
-    })} ${activeDate.toLocaleString({
-      month: 'long',
-    })}, ${activeDate.toLocaleString({
-      year: 'numeric',
-    })} ${mapDaysDifferenceToText(daysDifference)}`;
+    return `${activeDate.toLocaleString(
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      },
+      { locale: 'en' }
+    )} ${mapDaysDifferenceToText(daysDifference)}`;
   };
 
   const [title, setTitle] = useState(undefined);

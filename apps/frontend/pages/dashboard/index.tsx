@@ -25,7 +25,7 @@ import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
 import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
-import {CategoriesSection} from '../../sections/@dashboard/categories';
+import CategoriesSection from 'apps/frontend/sections/@dashboard/categories';
 // ---------------------------------------------------------------------
 
 type Props = {

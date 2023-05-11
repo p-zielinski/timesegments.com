@@ -8,6 +8,7 @@ import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
 import {User} from '@prisma/client';
 import {handleFetch} from '../../../utils/handleFetch';
+import {StatusCodes} from 'http-status-codes';
 
 // ----------------------------------------------------------------------
 
@@ -34,17 +35,25 @@ const SORT_BY_OPTIONS = [
 ];
 
 export default function SortCategories({
-                                         user,
-                                         categories,
-                                         setCategories,
-                                       }: {
+  user,
+  categories,
+  setCategories,
+  controlValue,
+  setControlValue,
+  isSaving,
+  setIsSaving,
+}: {
   user: User;
   categories: CategoryWithSubcategories[];
   setCategories: (categories: CategoryWithSubcategories[]) => unknown;
+  controlValue: string;
+  setControlValue: (controlValue?: string) => void;
+  isSaving: boolean;
+  setIsSaving: (isSaving?: boolean) => void;
 }) {
   const [sortOrder, setSortOrder] = useState(
     (user.sortingCategories as CategoriesSortOption) ??
-    CategoriesSortOption.NEWEST
+      CategoriesSortOption.NEWEST
   );
   const [open, setOpen] = useState(null);
 
@@ -70,22 +79,31 @@ export default function SortCategories({
     setOpen(event.currentTarget);
   };
 
-  const handleClose = (option?: any) => {
+  const handleClose = async (option?: any) => {
     setOpen(null);
-    if (!option) {
+    if (!option || isSaving) {
       return;
     }
-
-    setSortOrder(option.value);
-    setUsersSortingCategories(option.value); //don't wait
+    await setUsersSortingCategories(option.value); //don't wait
   };
 
   const setUsersSortingCategories = async (option: CategoriesSortOption) => {
-    await handleFetch({
+    setIsSaving(true);
+    const response = await handleFetch({
       pathOrUrl: 'user/set-sorting-categories',
-      body: {sortingCategories: option},
+      body: { sortingCategories: option, controlValue },
       method: 'POST',
     });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setSortOrder(option);
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
+    }
+    setIsSaving(false);
   };
 
   return (
@@ -104,7 +122,7 @@ export default function SortCategories({
         <Typography
           component="span"
           variant="subtitle2"
-          sx={{color: 'text.secondary'}}
+          sx={{ color: 'text.secondary' }}
         >
           {SORT_BY_OPTIONS.find((option) => option.value === sortOrder).label}
         </Typography>
@@ -114,15 +132,15 @@ export default function SortCategories({
         anchorEl={open}
         open={Boolean(open)}
         onClose={() => handleClose()}
-        anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-        transformOrigin={{vertical: 'top', horizontal: 'right'}}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         {SORT_BY_OPTIONS.map((option) => (
           <MenuItem
             key={option.value}
             selected={option.value === sortOrder}
             onClick={() => handleClose(option)}
-            sx={{typography: 'body2'}}
+            sx={{ typography: 'body2' }}
           >
             {option.label}
           </MenuItem>

@@ -34,10 +34,10 @@ const getDuration = (totalPeriodInMs) => {
 };
 
 export default function AppOrderTimeline({
-                                           user,
-                                           timeLogsWithinActiveDate,
-                                           showDetails,
-                                         }) {
+  user,
+  timeLogsWithinActiveDate,
+  showDetails,
+}) {
   const getGroupedTimeLogsWithDateSorted = (timeLogsWithinActiveDate) => {
     const grouped = [];
     timeLogsWithinActiveDate.forEach((x) => {
@@ -112,26 +112,26 @@ export default function AppOrderTimeline({
         }}
       >
         {timeLogsWithinActiveDate?.length ? (
-          <Timeline sx={{gap: 1.5, m: -2}}>
+          <Timeline sx={{ gap: 1.5, m: -2 }}>
             {showDetails
               ? timeLogsWithinActiveDate
-                .sort((a, b) => b.startedAt - a.startedAt)
-                .map((timeLogExtended) => (
-                  <DetailPeriod
-                    timeLogExtended={timeLogExtended}
-                    user={user}
-                    key={nanoid()}
-                  />
-                ))
+                  .sort((a, b) => b.startedAt - a.startedAt)
+                  .map((timeLogExtended) => (
+                    <DetailPeriod
+                      timeLogExtended={timeLogExtended}
+                      user={user}
+                      key={nanoid()}
+                    />
+                  ))
               : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
-                (group) => (
-                  <GroupedPeriod
-                    group={group}
-                    user={user}
-                    key={group.subcategory?.id || group.category?.id}
-                  ></GroupedPeriod>
-                )
-              )}
+                  (group) => (
+                    <GroupedPeriod
+                      group={group}
+                      user={user}
+                      key={group.subcategory?.id || group.category?.id}
+                    ></GroupedPeriod>
+                  )
+                )}
           </Timeline>
         ) : (
           'no data'
@@ -143,7 +143,7 @@ export default function AppOrderTimeline({
 
 // ----------------------------------------------------------------------
 
-function GroupedPeriod({group, user}) {
+function GroupedPeriod({ group, user }) {
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
     group.totalPeriodInMsWithoutUnfinishedTimeLog
   );
@@ -186,7 +186,7 @@ function GroupedPeriod({group, user}) {
       }}
     >
       <TimelineSeparator>
-        <TimelineDot sx={{background: color, mb: 0}}/>
+        <TimelineDot sx={{ background: color, mb: 0 }} />
       </TimelineSeparator>
       <TimelineContent>
         <Typography variant="subtitle2">
@@ -205,8 +205,8 @@ function GroupedPeriod({group, user}) {
             {group.notFinishedPeriod && '*active*'}
           </span>
         </Typography>
-        <Box sx={{display: 'flex', direction: 'column', mb: 0}}>
-          <Typography variant="caption" sx={{color: 'text.secondary', mb: 0}}>
+        <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0 }}>
             Duration: <b>{getDuration(totalPeriodInMs)}</b>
           </Typography>
         </Box>
@@ -217,7 +217,7 @@ function GroupedPeriod({group, user}) {
 
 // ----------------------------------------------------------------------
 
-function DetailPeriod({timeLogExtended, user}) {
+function DetailPeriod({ timeLogExtended, user }) {
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
     timeLogExtended.periodTotalMs
   );
@@ -260,7 +260,7 @@ function DetailPeriod({timeLogExtended, user}) {
       }}
     >
       <TimelineSeparator>
-        <TimelineDot sx={{background: color}}/>
+        <TimelineDot sx={{ background: color }} />
       </TimelineSeparator>
 
       <TimelineContent>
@@ -282,39 +282,45 @@ function DetailPeriod({timeLogExtended, user}) {
             {!timeLogExtended.ended && '*active*'}
           </span>
         </Typography>
-        <Box sx={{display: 'flex', direction: 'column'}}>
-          <Typography variant="caption" sx={{color: 'text.secondary'}}>
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             From:{' '}
             <b>
-              {timeLogExtended.startedAt.toLocaleString({
-                hour: 'numeric',
-                minute: '2-digit',
-              })}
+              {timeLogExtended.startedAt.toLocaleString(
+                {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                },
+                { locale: 'en' }
+              )}
             </b>
           </Typography>
         </Box>
-        <Box sx={{display: 'flex', direction: 'column'}}>
-          <Typography variant="caption" sx={{color: 'text.secondary'}}>
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             To:{' '}
             <b>
               {timeLogExtended.endedAt
-                ? timeLogExtended.endedAt.toLocaleString({
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })
+                ? timeLogExtended.endedAt.toLocaleString(
+                    {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    },
+                    { locale: 'en' }
+                  )
                 : 'now'}
             </b>
           </Typography>
         </Box>
-        <Box sx={{display: 'flex', direction: 'column'}}>
-          <Typography variant="caption" sx={{color: 'text.secondary'}}>
+        <Box sx={{ display: 'flex', direction: 'column' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Duration:{' '}
             <b>
               {totalPeriodInMs
                 ? getDuration(totalPeriodInMs)
                 : calculating
-                  ? 'calculating'
-                  : 'error'}
+                ? 'calculating'
+                : 'error'}
             </b>
           </Typography>
         </Box>

@@ -4,7 +4,8 @@ import Iconify from '../../../components/iconify';
 import {NotesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortNotes} from '../../../utils/sortNotes';
-import {handleFetch} from '../../../utils/handleFetch'; // ----------------------------------------------------------------------
+import {handleFetch} from '../../../utils/handleFetch';
+import {StatusCodes} from 'http-status-codes'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -19,14 +20,23 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function SortNotes({ user, notes, setNotes }) {
+export default function SortNotes({
+  user,
+  setUser,
+  notes,
+  setNotes,
+  isSaving,
+  setIsSaving,
+  controlValue,
+  setControlValue,
+}) {
   const [sortOrder, setSortOrder] = useState(
     (user.sortingNotes as NotesSortOption) ?? NotesSortOption.BY_DATE
   );
   const [open, setOpen] = useState(null);
 
   useEffect(() => {
-    setNotes(() => sortNotes(notes, sortOrder));
+    setNotes(sortNotes(notes, sortOrder));
   }, [
     sortOrder,
     //this gets current state of categories and subcategories names
@@ -37,22 +47,32 @@ export default function SortNotes({ user, notes, setNotes }) {
     setOpen(event.currentTarget);
   };
 
-  const handleClose = (option?: any) => {
+  const handleClose = async (option?: any) => {
     setOpen(null);
-    if (!option) {
+    if (!option || isSaving) {
       return;
     }
-
-    setSortOrder(option.value);
-    setUsersSortingCategories(option.value); //don't wait
+    await setUsersSortingCategories(option.value); //don't wait
   };
 
   const setUsersSortingCategories = async (option: NotesSortOption) => {
-    await handleFetch({
+    setIsSaving(true);
+    const response = await handleFetch({
       pathOrUrl: 'user/set-sorting-notes',
-      body: { sortingCategories: option },
+      body: { sortingNotes: option, controlValue },
       method: 'POST',
     });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setSortOrder(option);
+      setUser({ ...user, sortingNotes: option });
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
+    }
+    setIsSaving(false);
   };
 
   return (

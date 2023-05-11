@@ -19,7 +19,6 @@ import { getHexFromRGBAString } from '../../../utils/colors/getHexFromRGBString'
 import { handleFetch } from '../../../utils/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
-import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 
 export const Note = ({
   controlValue,
@@ -53,13 +52,18 @@ export const Note = ({
   const createdAt = DateTime.fromISO(note.createdAt, {
     zone: Timezones[user.timezone],
   });
-  const createdAtLocale = createdAt.toLocaleString({
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  const createdAtLocale = DateTime.fromISO(note.createdAt, {
+    zone: Timezones[user.timezone],
+  }).toLocaleString(
+    {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    },
+    { locale: 'en' }
+  );
   const dayInMs = 1000 * 60 * 60 * 24;
   const daysAgo =
     endOfDate?.ts && createdAt?.ts
@@ -69,13 +73,16 @@ export const Note = ({
   const updatedAtLocale = updated
     ? DateTime.fromISO(note.updatedAt, {
         zone: Timezones[user.timezone],
-      }).toLocaleString({
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      })
+      }).toLocaleString(
+        {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        },
+        { locale: 'en' }
+      )
     : undefined;
 
   const getColor = (daysAgo) => {
@@ -98,7 +105,10 @@ export const Note = ({
     return '💚';
   };
 
-  const color = getRandomRgbObjectForSliderPicker();
+  const color = {
+    hex: getColor(daysAgo),
+    rgb: getRgbaObjectFromHexString(getColor(daysAgo)),
+  };
   const { favorite } = note;
 
   const deleteNote = async (noteId) => {

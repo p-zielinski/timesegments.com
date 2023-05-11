@@ -18,14 +18,12 @@ import SortCategories from './Sort';
 
 // ----------------------------------------------------------------------
 
-CategoryList.propTypes = {
+CategoriesSection.propTypes = {
   categories: PropTypes.array.isRequired,
   setCategories: PropTypes.func.isRequired,
-  isEditing: PropTypes.object.isRequired,
-  setIsEditing: PropTypes.func.isRequired,
 };
 
-export default function CategoryList({
+export default function CategoriesSection({
   user,
   controlValue,
   setControlValue,
@@ -34,12 +32,16 @@ export default function CategoryList({
   setCategories,
   viewMode,
   setViewMode,
-  isEditing,
-  setIsEditing,
   isSaving,
   setIsSaving,
   limits,
 }) {
+  const [isEditing, setIsEditing] = useState({
+    categoryId: undefined,
+    subcategoryId: undefined,
+    createNew: undefined,
+  });
+
   const [
     numberOfCategoriesAndSubcategoriesCombined,
     setNumberOfCategoriesAndSubcategoriesCombined,
@@ -133,6 +135,7 @@ export default function CategoryList({
             setViewMode={setViewMode}
           />
         )}
+
       <Grid key={'sort-categories'} item xs={1} sm={1} md={1}>
         <Stack
           direction="row"
@@ -150,6 +153,10 @@ export default function CategoryList({
               user={user}
               categories={categories}
               setCategories={setCategories}
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
             />
           </Stack>
         </Stack>
