@@ -42,6 +42,13 @@ export default function AddNew({
   categories,
   setCategories,
 }) {
+  const startingColor = category?.color
+    ? {
+        hex: category.color,
+        rgb: getRgbaObjectFromHexString(category.color),
+      }
+    : getRandomRgbObjectForSliderPicker();
+
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -75,6 +82,7 @@ export default function AddNew({
       },
     });
   };
+  setStyledTextField(isSaving ? IS_SAVING_HEX : startingColor.hex);
 
   const createCategory = async (name: string, color: string) => {
     setIsSaving(true);
@@ -236,12 +244,7 @@ export default function AddNew({
         ...data,
         [type + 'Name']: '',
         inheritColor: category?.id ? true : undefined,
-        color: category
-          ? {
-              hex: category.color,
-              rgb: getRgbaObjectFromHexString(category.color),
-            }
-          : getRandomRgbObjectForSliderPicker(),
+        color: startingColor,
       }}
       onSubmit={async (values, { setSubmitting }) => {
         if (type === CreateNewType.CATEGORY) {
@@ -258,7 +261,6 @@ export default function AddNew({
       validationSchema={validationSchema}
     >
       {({ handleSubmit, values, setFieldValue }) => {
-        setStyledTextField(isSaving ? IS_SAVING_HEX : values.color.hex);
         const isFormValid = validationSchema.isValidSync(values);
 
         return (
