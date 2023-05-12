@@ -8,7 +8,7 @@ import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
-import { Prisma, Timezone, User } from '@prisma/client';
+import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
   CategoriesSortOption,
   Limits,
@@ -19,6 +19,7 @@ import {
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
 import { findKeyOfValueInObject } from '../../common/findKeyOfValueInObject';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class UserService {
@@ -40,12 +41,14 @@ export class UserService {
   }
 
   public async getMeExtended(
-    id: string,
+    user: User,
     extend: MeExtendedOption[]
   ): Promise<{
     user: User;
     limits: Limits;
+    timeLogs?: TimeLog[];
   }> {
+    let timeLogs;
     const include: Prisma.UserInclude = {};
     if (
       extend.includes(MeExtendedOption.CATEGORIES) &&
@@ -65,6 +68,20 @@ export class UserService {
       include.notes = true;
     }
 
+    if (extend.includes(MeExtendedOption.TODAYS_TIMELOGS)) {
+      const now = DateTime.now().setZone(Timezones[user.timezone]);
+      const today = { month: now.month, year: now.year, day: now.day };
+      const findFromToTimeLogsResult =
+        await this.timeLogService.findFromToTimeLogs(user, today, today);
+      if (findFromToTimeLogsResult.success === false) {
+        this.loggerService.error(
+          `Could not find todays timelogs for user: ${user.id}`
+        );
+      } else {
+        timeLogs = findFromToTimeLogsResult?.timeLogs;
+      }
+    }
+
     const limits: { categoriesLimit?: number; subcategoriesLimit?: number } =
       {};
     if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
@@ -82,11 +99,12 @@ export class UserService {
         extend.includes(MeExtendedOption.CATEGORIES) ||
         extend.includes(MeExtendedOption.SUBCATEGORIES)
           ? await this.prisma.user.findFirst({
-              where: { id },
+              where: { id: user.id },
               include,
             })
           : undefined,
       limits: Object.keys(limits).length ? limits : undefined,
+      timeLogs,
     };
   }
 

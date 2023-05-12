@@ -5,6 +5,7 @@ import {
   CategoryWithSubcategories,
   Limits,
   MeExtendedOption,
+  Timezones,
   UserWithCategoriesAndSubcategories,
   UserWithCategoriesAndSubcategoriesAndNotes,
 } from '@test1/shared';
@@ -18,20 +19,28 @@ import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgb
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {NotesSection} from '../../sections/@dashboard/notes';
-import {Note} from '@prisma/client';
+import {Note, TimeLog} from '@prisma/client';
 import navConfig from '../../layouts/dashboard/nav/config';
 import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
 import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
-import CategoriesSection from 'apps/frontend/sections/@dashboard/categories';
+import {
+  findTimeLogsWithinCurrentPeriod,
+  TimeLogWithinCurrentPeriod,
+  TimeLogWithinCurrentPeriodISO,
+} from '../../utils/findTimeLogsWithinCurrentPeriod';
+import {DateTime} from 'luxon';
+import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
+import CategoriesSection from '../../sections/@dashboard/categories'; // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
 
 type Props = {
   user?: UserWithCategoriesAndSubcategories;
   limits: Limits;
   notes: Note[];
+  timeLogsExtendedISO?: TimeLogWithinCurrentPeriodISO[];
   randomSliderHexColor: string;
 };
 
@@ -40,7 +49,22 @@ export default function Index({
   limits: serverSideFetchedLimits,
   notes: serverSideFetchedNotes,
   randomSliderHexColor: randomSliderHexColor,
+  timeLogsExtendedISO,
 }: Props) {
+  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
+    TimeLogWithinCurrentPeriod[]
+  >(
+    timeLogsExtendedISO.map((timeLogExtended) => {
+      return {
+        ...timeLogExtended,
+        startedAt: DateTime.fromISO(timeLogExtended.startedAt),
+        endedAt: timeLogExtended.ended
+          ? DateTime.fromISO(timeLogExtended.endedAt)
+          : undefined,
+      };
+    }) as unknown as any
+  );
+
   const width1200px = useMediaQuery('(min-width:1200px)');
 
   const [disableHover, setDisableHover] = useState<boolean>(true);
@@ -246,7 +270,9 @@ export const getServerSideProps = async ({ req, res }) => {
   const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndSubcategoriesAndNotes,
     limits: Limits,
-    notes: Note[];
+    notes: Note[],
+    timeLogs: TimeLog[];
+
   if (jwt_token) {
     try {
       const responseUser = await fetch(
@@ -264,14 +290,17 @@ export const getServerSideProps = async ({ req, res }) => {
               MeExtendedOption.CATEGORIES_LIMIT,
               MeExtendedOption.SUBCATEGORIES_LIMIT,
               MeExtendedOption.NOTES,
+              MeExtendedOption.TODAYS_TIMELOGS,
             ],
           }),
         }
       );
       const response = await responseUser.json();
+      console.log(response);
       user = response.user;
       limits = response.limits;
       notes = response.user.notes;
+      timeLogs = response.timeLogs;
     } catch (e) {
       console.log(e);
       cookies.set('jwt_token');
@@ -292,6 +321,34 @@ export const getServerSideProps = async ({ req, res }) => {
       },
     };
   }
+  let timeLogsExtendedISO;
+  if (timeLogs) {
+    const allSubcategories = [].concat(
+      ...(user?.categories?.map?.(
+        (category) => category?.subcategories || []
+      ) || [])
+    );
+    const allCategories =
+      user?.categories?.map((category) => {
+        const categoryCopy = { ...category };
+        if (categoryCopy?.subcategories) {
+          delete categoryCopy.subcategories;
+        }
+        return categoryCopy;
+      }) || [];
+    const now = DateTime.now().setZone(Timezones[user.timezone]);
+    const today = { month: now.month, year: now.year, day: now.day };
+    timeLogsExtendedISO = deleteUndefinedFromObject(
+      findTimeLogsWithinCurrentPeriod({
+        allTimeLogs: timeLogs,
+        userTimezone: Timezones[user.timezone],
+        fromDate: today,
+        categories: allCategories,
+        subcategories: allSubcategories,
+        options: { asIso: true },
+      }) as TimeLogWithinCurrentPeriodISO[]
+    );
+  }
 
   return {
     props: {
@@ -304,6 +361,7 @@ export const getServerSideProps = async ({ req, res }) => {
           'very bright'
         )
       ),
+      timeLogsExtendedISO: timeLogsExtendedISO || null,
     },
   };
 };

@@ -50,8 +50,15 @@ export class UserController {
       });
     }
     const { limits } = await this.userService.getMeExtended(
-      registeringResult.user.id,
-      [MeExtendedOption.CATEGORIES_LIMIT, MeExtendedOption.SUBCATEGORIES_LIMIT]
+      registeringResult.user,
+      [
+        MeExtendedOption.CATEGORIES,
+        MeExtendedOption.SUBCATEGORIES,
+        MeExtendedOption.CATEGORIES_LIMIT,
+        MeExtendedOption.SUBCATEGORIES_LIMIT,
+        MeExtendedOption.NOTES,
+        MeExtendedOption.TODAYS_TIMELOGS,
+      ]
     );
     return {
       ...registeringResult,
@@ -77,12 +84,14 @@ export class UserController {
       });
     }
     const { user, limits } = await this.userService.getMeExtended(
-      validatingResult.user.id,
+      validatingResult.user,
       [
         MeExtendedOption.CATEGORIES,
         MeExtendedOption.SUBCATEGORIES,
         MeExtendedOption.CATEGORIES_LIMIT,
         MeExtendedOption.SUBCATEGORIES_LIMIT,
+        MeExtendedOption.NOTES,
+        MeExtendedOption.TODAYS_TIMELOGS,
       ]
     );
     return { ...validatingResult, user, limits };
@@ -110,7 +119,7 @@ export class UserController {
     @Body() meExtendedDto: MeExtendedDto
   ) {
     const { extend } = meExtendedDto;
-    return await this.userService.getMeExtended(user.id, extend);
+    return await this.userService.getMeExtended(user, extend);
   }
 
   @UseGuards(JwtAuthGuard, CheckControlValueGuard)

@@ -74,7 +74,7 @@ export class TimeLogService {
     });
   }
 
-  private async findFromToTimeLogs(
+  public async findFromToTimeLogs(
     user: User,
     fromRaw: FromToDate,
     toRaw: FromToDate
