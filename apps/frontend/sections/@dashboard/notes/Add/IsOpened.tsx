@@ -17,7 +17,7 @@ import { getHexFromRGBObject } from '../../../../utils/colors/getHexFromRGBObjec
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
-import { handleFetch } from '../../../../utils/handleFetch';
+import { handleFetch } from '../../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 import { Checkbox } from '../../Form/Checkbox';

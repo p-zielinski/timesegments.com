@@ -9,7 +9,7 @@ import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
 import {IS_SAVING_HEX, LIGHT_RED, RED, SUPER_LIGHT_SILVER,} from '../../consts/colors';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
-import {handleFetch} from '../../utils/handleFetch';
+import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 import EditName from '../../sections/@dashboard/settings/EditName';
 import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';

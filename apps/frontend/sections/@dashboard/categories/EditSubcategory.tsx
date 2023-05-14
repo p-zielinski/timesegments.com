@@ -19,7 +19,7 @@ import { Checkbox } from '../Form/Checkbox';
 import { styled } from '@mui/material/styles';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
-import { handleFetch } from '../../../utils/handleFetch';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export default function EditSubcategory({

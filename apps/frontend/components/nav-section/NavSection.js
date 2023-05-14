@@ -5,7 +5,7 @@ import {StyledNavItem} from './styles';
 import Iconify from '../iconify';
 import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
-import {handleFetch} from '../../utils/handleFetch';
+import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {useEffect, useState} from 'react';
 import {getIsPageState} from '../../utils/getIsPageState'; // ----------------------------------------------------------------------
 

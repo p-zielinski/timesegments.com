@@ -4,7 +4,7 @@ import Iconify from '../../../components/iconify';
 import {NotesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortNotes} from '../../../utils/sortNotes';
-import {handleFetch} from '../../../utils/handleFetch';
+import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------

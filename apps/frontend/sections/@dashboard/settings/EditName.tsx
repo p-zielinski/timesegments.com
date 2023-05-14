@@ -17,7 +17,7 @@ import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
-import { handleFetch } from '../../../utils/handleFetch';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export default function EditName({

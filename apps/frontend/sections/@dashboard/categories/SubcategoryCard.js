@@ -9,10 +9,14 @@ import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import EditSubcategory from './EditSubcategory';
-import {handleFetch} from '../../../utils/handleFetch';
-import React from 'react';
+import {handleFetch} from '../../../utils/fetchingData/handleFetch';
+import React, {useEffect, useState} from 'react';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
 import {StatusCodes} from 'http-status-codes';
+import {mapTimeLogsToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
+import {Timezones} from '@test1/shared';
+import {DateTime} from 'luxon';
+import {getDuration} from '../../../utils/mapper/getDuration';
 
 // ----------------------------------------------------------------------
 
@@ -24,19 +28,63 @@ SubcategoryCard.propTypes = {
 };
 
 export default function SubcategoryCard({
-                                          controlValue,
-                                          setControlValue,
-                                          disableHover,
-                                          subcategory,
-                                          categories,
-                                          setCategories,
-                                          isEditing,
-                                          setIsEditing,
-                                          viewMode,
-                                          isSaving,
-                                          setIsSaving,
-                                        }) {
-  const {name, active: isActive} = subcategory;
+  groupedTimeLogsWithDateSorted,
+  user,
+  checkActiveDateCorrectness,
+  timeLogsWithinActiveDate,
+  setTimeLogsWithinActiveDate,
+  controlValue,
+  setControlValue,
+  disableHover,
+  subcategory,
+  categories,
+  setCategories,
+  isEditing,
+  setIsEditing,
+  viewMode,
+  isSaving,
+  setIsSaving,
+}) {
+  const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
+    (groupedTimeLogWithDateSorted) =>
+      groupedTimeLogWithDateSorted?.subcategory?.id === subcategory?.id
+  );
+
+  const [totalPeriodInMs, setTotalPeriodInMs] = useState(
+    groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
+  );
+
+  useEffect(() => {
+    if (!currentGroupedTimeLog) {
+      return;
+    }
+    if (!currentGroupedTimeLog.notFinishedPeriod) {
+      return setTotalPeriodInMs(
+        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
+      );
+    }
+    const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+      const now = DateTime.now().setZone(Timezones[user.timezone]);
+      const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
+        ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
+        : 0;
+      if (isNaN(unfinishedPeriodDuration)) {
+        return console.log(`unfinishedPeriodDuration is NaN`);
+      }
+      setTotalPeriodInMs(
+        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
+          unfinishedPeriodDuration
+      );
+    };
+    setTotalPeriodInMsWithUnfinishedTimeLog();
+    const intervalIdLocal = setInterval(
+      () => setTotalPeriodInMsWithUnfinishedTimeLog(),
+      1000
+    );
+    return () => clearInterval(intervalIdLocal);
+  }, [groupedTimeLogsWithDateSorted, subcategory]);
+
+  const { name, active: isActive } = subcategory;
   const category = categories.find((category) =>
     category.subcategories.find(
       (_subcategory) => _subcategory.id === subcategory.id
@@ -63,11 +111,29 @@ export default function SubcategoryCard({
             }
             return subcategory;
           });
-          return {...category, subcategories};
+          return { ...category, subcategories };
         })
       );
       if (response.controlValue) {
         setControlValue(response.controlValue);
+      }
+      if (!checkActiveDateCorrectness()) {
+        return; //skip setting isSaving(false)
+      }
+      if (response.timeLogs) {
+        const timeLogsIds = response.timeLogs.map((timeLog) => timeLog.id);
+        const timeLogsExtended = mapTimeLogsToDateTimeLogs(
+          response.timeLogs,
+          Timezones[user.timezone],
+          categories
+        );
+        setTimeLogsWithinActiveDate([
+          ...timeLogsWithinActiveDate.filter(
+            (timeLogsExtended) =>
+              !timeLogsIds.includes(timeLogsExtended.timeLogId)
+          ),
+          ...timeLogsExtended,
+        ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
@@ -81,7 +147,7 @@ export default function SubcategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'subcategory/set-active',
-      body: {subcategoryId: subcategory.id, controlValue},
+      body: { subcategoryId: subcategory.id, controlValue },
       method: 'POST',
     });
     if (
@@ -99,9 +165,9 @@ export default function SubcategoryCard({
             return subcategory;
           });
           if (category.id === response.category?.id) {
-            return {...response.category, subcategories};
+            return { ...response.category, subcategories };
           }
-          return {...category, active: false, subcategories};
+          return { ...category, active: false, subcategories };
         })
       );
       if (response.controlValue) {
@@ -119,7 +185,7 @@ export default function SubcategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'subcategory/set-as-deleted',
-      body: {subcategoryId: subcategory.id, controlValue},
+      body: { subcategoryId: subcategory.id, controlValue },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
@@ -171,7 +237,7 @@ export default function SubcategoryCard({
   return (
     <Card>
       {isEditing.deleteSubcategory === subcategory.id ? (
-        <Box sx={{display: 'flex'}}>
+        <Box sx={{ display: 'flex' }}>
           <Box
             sx={{
               width: `60px`,
@@ -181,8 +247,8 @@ export default function SubcategoryCard({
               background: isSaving
                 ? `white`
                 : category.active
-                  ? SUPER_LIGHT_SILVER
-                  : 'white',
+                ? SUPER_LIGHT_SILVER
+                : 'white',
               border: `solid 2px ${LIGHT_SILVER}`,
               borderRight: `0px`,
               borderTopLeftRadius: 12,
@@ -216,15 +282,15 @@ export default function SubcategoryCard({
               background: isSaving
                 ? SUPER_LIGHT_SILVER
                 : viewMode === CategoriesPageMode.EDIT
-                  ? getRepeatingLinearGradient(
+                ? getRepeatingLinearGradient(
                     isSaving ? IS_SAVING_HEX : getHexFromRGBAString(RED),
                     0.3,
                     45,
                     false
                   )
-                  : isActive
-                    ? LIGHT_GREEN
-                    : LIGHT_RED,
+                : isActive
+                ? LIGHT_GREEN
+                : LIGHT_RED,
               flex: 1,
               border: isSaving
                 ? `solid 2px ${IS_SAVING_HEX}`
@@ -248,7 +314,7 @@ export default function SubcategoryCard({
           >
             <Stack
               spacing={1}
-              sx={{p: 3}}
+              sx={{ p: 3 }}
               direction="row"
               alignItems="center"
               justifyContent="left"
@@ -256,7 +322,7 @@ export default function SubcategoryCard({
               <Typography variant="subtitle3" noWrap>
                 DELETE:{' '}
                 <span
-                  style={{fontWeight: 'bold', textDecoration: 'underline'}}
+                  style={{ fontWeight: 'bold', textDecoration: 'underline' }}
                 >
                   {subcategory.name.toUpperCase()}
                 </span>{' '}
@@ -297,7 +363,7 @@ export default function SubcategoryCard({
         </Box>
       ) : (
         <>
-          <Box sx={{display: 'flex'}}>
+          <Box sx={{ display: 'flex' }}>
             {viewMode === CategoriesPageMode.EDIT && (
               <>
                 <Box
@@ -309,13 +375,13 @@ export default function SubcategoryCard({
                       isSaving || subcategory.active
                         ? IS_SAVING_HEX
                         : subcategory.visible
-                          ? GREEN
-                          : RED,
+                        ? GREEN
+                        : RED,
                     background: isSaving
                       ? `white`
                       : subcategory.active
-                        ? SUPER_LIGHT_SILVER
-                        : 'white',
+                      ? SUPER_LIGHT_SILVER
+                      : 'white',
                     border: `solid 2px ${LIGHT_SILVER}`,
                     borderRight: `0px`,
                     borderTopLeftRadius: 12,
@@ -340,7 +406,7 @@ export default function SubcategoryCard({
                         : 'gridicons:not-visible'
                     }
                     width={40}
-                    sx={{m: -2, position: 'absolute', bottom: 34, left: 27}}
+                    sx={{ m: -2, position: 'absolute', bottom: 34, left: 27 }}
                   />
                 </Box>
                 <Box
@@ -351,8 +417,8 @@ export default function SubcategoryCard({
                     color: isSaving
                       ? IS_SAVING_HEX
                       : subcategory.visible
-                        ? GREEN
-                        : RED,
+                      ? GREEN
+                      : RED,
                     background: `white`,
                     borderTop: `solid 2px ${LIGHT_SILVER}`,
                     borderBottom: `solid 2px ${LIGHT_SILVER}`,
@@ -388,7 +454,7 @@ export default function SubcategoryCard({
                         : 'material-symbols:delete-forever-rounded'
                     }
                     width={40}
-                    sx={{m: -2, position: 'absolute', bottom: 34, left: 88}}
+                    sx={{ m: -2, position: 'absolute', bottom: 34, left: 88 }}
                   />
                 </Box>
               </>
@@ -402,19 +468,19 @@ export default function SubcategoryCard({
                   background: isSaving
                     ? IS_SAVING_HEX
                     : getRepeatingLinearGradient(
-                      subcategory?.color || category?.color,
-                      0.3
-                    ),
+                        subcategory?.color || category?.color,
+                        0.3
+                      ),
                   border: isSaving
                     ? `solid 2px ${IS_SAVING_HEX}`
                     : isActive
-                      ? `solid 2px ${getHexFromRGBAObject({
+                    ? `solid 2px ${getHexFromRGBAObject({
                         ...getRgbaObjectFromHexString(
                           subcategory?.color || category?.color
                         ),
                         a: 0.3,
                       })}`
-                      : `solid 2px ${getHexFromRGBAObject({
+                    : `solid 2px ${getHexFromRGBAObject({
                         ...getRgbaObjectFromHexString(
                           subcategory?.color || category?.color
                         ),
@@ -432,7 +498,7 @@ export default function SubcategoryCard({
                 background: isSaving
                   ? SUPER_LIGHT_SILVER
                   : viewMode === CategoriesPageMode.EDIT
-                    ? getRepeatingLinearGradient(
+                  ? getRepeatingLinearGradient(
                       isSaving
                         ? IS_SAVING_HEX
                         : subcategory?.color || category?.color,
@@ -440,26 +506,26 @@ export default function SubcategoryCard({
                       45,
                       false
                     )
-                    : isActive
-                      ? LIGHT_GREEN
-                      : LIGHT_RED,
+                  : isActive
+                  ? LIGHT_GREEN
+                  : LIGHT_RED,
                 flex: 1,
                 border: isSaving
                   ? `solid 2px ${IS_SAVING_HEX}`
                   : viewMode === CategoriesPageMode.EDIT
-                    ? `solid 2px ${
+                  ? `solid 2px ${
                       isSaving
                         ? IS_SAVING_HEX
                         : getHexFromRGBAObject({
-                          ...getRgbaObjectFromHexString(
-                            subcategory?.color || category?.color
-                          ),
-                          a: 0.3,
-                        })
+                            ...getRgbaObjectFromHexString(
+                              subcategory?.color || category?.color
+                            ),
+                            a: 0.3,
+                          })
                     }`
-                    : isActive
-                      ? `solid 2px ${LIGHT_GREEN}`
-                      : `solid 2px ${LIGHT_RED}`,
+                  : isActive
+                  ? `solid 2px ${LIGHT_GREEN}`
+                  : `solid 2px ${LIGHT_RED}`,
                 borderLeft: 0,
                 borderTopRightRadius: 12,
                 borderBottomRightRadius: 12,
@@ -487,13 +553,19 @@ export default function SubcategoryCard({
             >
               <Stack
                 spacing={1}
-                sx={{p: 3, pl: viewMode === CategoriesPageMode.EDIT ? 2 : 3}}
+                sx={{ p: 3, pl: viewMode === CategoriesPageMode.EDIT ? 2 : 3 }}
                 direction="row"
                 alignItems="center"
                 justifyContent="left"
               >
-                <Typography variant="subtitle2" noWrap>
+                <Typography variant="subtitle2">
                   {name}
+                  {totalPeriodInMs && (
+                    <>
+                      <br />
+                      {getDuration(totalPeriodInMs)}
+                    </>
+                  )}
                 </Typography>
               </Stack>
             </Box>

@@ -17,7 +17,7 @@ import DashboardLayout from '../../layouts/dashboard';
 import React, { useEffect, useState } from 'react';
 import { User } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { FromToDate, Timezones } from '@test1/shared';
+import { Timezones } from '@test1/shared';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
@@ -29,7 +29,6 @@ import {
 } from '../../types/timeLogsWithinDate';
 import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
 import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalseFromObject';
-import { handleFetch } from '../../utils/handleFetch';
 import {
   GREEN,
   LIGHT_GREEN,
@@ -42,6 +41,7 @@ import Cookies from 'cookies';
 import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
+import { findOrFetchTimeLogsWithinActiveDate } from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -109,6 +109,7 @@ export default function TimeSegments({
               endedAt: timeLogExtended.ended
                 ? DateTime.fromISO(timeLogExtended.endedAt)
                 : undefined,
+              isIsoString: false,
             };
           }
         ),
@@ -152,61 +153,19 @@ export default function TimeSegments({
   >([]);
 
   useEffect(() => {
-    const findOrFetchTimeLogsWithinActiveDate = async (
-      date: FromToDate,
-      timeLogsWithinDates: TimeLogsWithinDate[]
-    ): Promise<TimeLogWithinCurrentPeriod[]> => {
-      const timeLogsWithinActiveDate = timeLogsWithinDates.find(
-        (timeLogsWithinDate) => {
-          return (
-            timeLogsWithinDate.date.year === date.year &&
-            timeLogsWithinDate.date.month === date.month &&
-            timeLogsWithinDate.date.day === date.day
-          );
-        }
-      )?.timeLogsExtended;
-      if (timeLogsWithinActiveDate) {
-        return timeLogsWithinActiveDate;
-      }
-      setIsFetching(true);
-      //update setTimeLogsWithinDates while fetching data
-      const response = await handleFetch({
-        pathOrUrl: 'time-log/find-extended',
-        body: { from: { ...activeDate.c }, to: { ...activeDate.c } },
-        method: 'POST',
-      });
-      if (response.statusCode === 201) {
-        const timeLogsExtendedForActiveDate = findTimeLogsWithinCurrentPeriod({
-          allTimeLogs: response.timeLogs,
-          userTimezone: Timezones[user.timezone],
-          fromDate: activeDate.c,
-          toDate: activeDate.c,
-          categories: response.categories,
-          subcategories: response.subcategories,
-        });
-        setTimeLogsWithinDates([
-          ...timeLogsWithinDates,
-          {
-            date: activeDate.c,
-            timeLogsExtended: timeLogsExtendedForActiveDate,
-          },
-        ] as TimeLogsWithinDate[]);
-        setIsFetching(false);
-        return timeLogsExtendedForActiveDate as TimeLogWithinCurrentPeriod[];
-      }
-      //handle error, error while fetching
-      return [] as TimeLogWithinCurrentPeriod[];
-    };
-
-    setTitle(getTitle(activeDate));
-
     (async () => {
-      setTimeLogsWithinActiveDate(
+      setIsFetching(true);
+      setTitle(getTitle(activeDate));
+      await setTimeLogsWithinActiveDate(
         await findOrFetchTimeLogsWithinActiveDate(
           activeDate.c,
-          timeLogsWithinDates
+          timeLogsWithinDates,
+          activeDate,
+          setTimeLogsWithinDates,
+          user
         )
       );
+      setIsFetching(false);
     })();
   }, [activeDate]);
 

@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 
 export type TimeLogWithinCurrentPeriodISO =
   | {
+      timeLogId: string;
       isIsoString: true;
       ended: true;
       startedAt: string;
@@ -16,6 +17,7 @@ export type TimeLogWithinCurrentPeriodISO =
       periodInSeconds: number;
     }
   | {
+      timeLogId: string;
       isIsoString: true;
       ended: false;
       startedAt: string;
@@ -30,6 +32,7 @@ export type TimeLogWithinCurrentPeriodISO =
 
 export type TimeLogWithinCurrentPeriod =
   | {
+      timeLogId: string;
       isIsoString: false;
       ended: true;
       startedAt: DateTime;
@@ -42,6 +45,7 @@ export type TimeLogWithinCurrentPeriod =
       periodInSeconds: number;
     }
   | {
+      timeLogId: string;
       isIsoString: false;
       ended: false;
       startedAt: DateTime;
@@ -145,6 +149,7 @@ export const findTimeLogsWithinCurrentPeriod = ({
       periodInSeconds = periodInSecondsTotal % 60;
     }
     return {
+      timeLogId: timeLog.id,
       isIsoString: !!options?.asIso,
       ended,
       startedAt: options?.asIso ? startedAt.toISOTime() : startedAt,

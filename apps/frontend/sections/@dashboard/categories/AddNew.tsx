@@ -25,7 +25,7 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/ge
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { Checkbox } from '../Form/Checkbox';
-import { handleFetch } from '../../../utils/handleFetch';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export default function AddNew({

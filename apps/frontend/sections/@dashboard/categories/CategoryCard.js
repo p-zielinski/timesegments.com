@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
-import {Box, Card, Grid, Stack, Typography} from '@mui/material';
-// utils
+import {Box, Card, Grid, Stack, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
 import SubcategoryCard from './SubcategoryCard';
 import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
@@ -12,14 +11,16 @@ import EditCategory from './EditCategory';
 import AddNew from './AddNew';
 import {CreateNewType} from '../../../enum/createNewType';
 import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
-import ShowNoShow from './ShowNoShow';
-import {ShowNoShowType} from '../../../enum/showNoShowType';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ShowLimitReached from './ShowLimitReached';
 import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
-import {handleFetch} from '../../../utils/handleFetch';
+import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
 import {StatusCodes} from 'http-status-codes';
+import {mapTimeLogsToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
+import {Timezones} from '@test1/shared';
+import {DateTime} from 'luxon';
+import {getDuration} from '../../../utils/mapper/getDuration'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -28,6 +29,11 @@ CategoryCard.propTypes = {
 };
 
 export default function CategoryCard({
+  groupedTimeLogsWithDateSorted,
+  user,
+  checkActiveDateCorrectness,
+  timeLogsWithinActiveDate,
+  setTimeLogsWithinActiveDate,
   controlValue,
   setControlValue,
   category,
@@ -41,6 +47,50 @@ export default function CategoryCard({
   limits,
   disableHover,
 }) {
+  const currentGroupedTimeLog = groupedTimeLogsWithDateSorted
+    .filter(
+      (groupedTimeLogWithDateSorted) =>
+        !groupedTimeLogWithDateSorted.subcategory
+    )
+    .find(
+      (groupedTimeLogWithDateSorted) =>
+        groupedTimeLogWithDateSorted.category?.id === category?.id
+    );
+
+  const [totalPeriodInMs, setTotalPeriodInMs] = useState(
+    groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
+  );
+
+  useEffect(() => {
+    if (!currentGroupedTimeLog) {
+      return;
+    }
+    if (!currentGroupedTimeLog.notFinishedPeriod) {
+      return setTotalPeriodInMs(
+        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
+      );
+    }
+    const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+      const now = DateTime.now().setZone(Timezones[user.timezone]);
+      const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
+        ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
+        : 0;
+      if (isNaN(unfinishedPeriodDuration)) {
+        return console.log(`unfinishedPeriodDuration is NaN`);
+      }
+      setTotalPeriodInMs(
+        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
+          unfinishedPeriodDuration
+      );
+    };
+    setTotalPeriodInMsWithUnfinishedTimeLog();
+    const intervalIdLocal = setInterval(
+      () => setTotalPeriodInMsWithUnfinishedTimeLog(),
+      1000
+    );
+    return () => clearInterval(intervalIdLocal);
+  }, [groupedTimeLogsWithDateSorted]);
+
   const { active: isActive } = category;
 
   const doesAnySubcategoryWithinCurrentCategoryActive =
@@ -129,6 +179,24 @@ export default function CategoryCard({
       );
       if (response.controlValue) {
         setControlValue(response.controlValue);
+      }
+      if (!checkActiveDateCorrectness()) {
+        return; //skip setting isSaving(false)
+      }
+      if (response.timeLogs) {
+        const timeLogsIds = response.timeLogs.map((timeLog) => timeLog.id);
+        const timeLogsExtended = mapTimeLogsToDateTimeLogs(
+          response.timeLogs,
+          Timezones[user.timezone],
+          categories
+        );
+        setTimeLogsWithinActiveDate([
+          ...timeLogsWithinActiveDate.filter(
+            (timeLogsExtended) =>
+              !timeLogsIds.includes(timeLogsExtended.timeLogId)
+          ),
+          ...timeLogsExtended,
+        ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
@@ -542,8 +610,14 @@ export default function CategoryCard({
                 alignItems="center"
                 justifyContent="left"
               >
-                <Typography variant="subtitle2" noWrap>
+                <Typography variant="subtitle2">
                   {getCategory(category, categories)?.name}
+                  {totalPeriodInMs && (
+                    <>
+                      <br />
+                      {getDuration(totalPeriodInMs)}
+                    </>
+                  )}
                 </Typography>
               </Stack>
             </Box>
@@ -615,6 +689,19 @@ export default function CategoryCard({
                         ? getVisibleSubcategories(category, categories).map(
                             (subcategory) => (
                               <SubcategoryCard
+                                groupedTimeLogsWithDateSorted={
+                                  groupedTimeLogsWithDateSorted
+                                }
+                                user={user}
+                                checkActiveDateCorrectness={
+                                  checkActiveDateCorrectness
+                                }
+                                timeLogsWithinActiveDate={
+                                  timeLogsWithinActiveDate
+                                }
+                                setTimeLogsWithinActiveDate={
+                                  setTimeLogsWithinActiveDate
+                                }
                                 controlValue={controlValue}
                                 setControlValue={setControlValue}
                                 key={subcategory.id}
@@ -659,33 +746,7 @@ export default function CategoryCard({
                     </Box>
                   ) : undefined}
                 </>
-              ) : viewMode === CategoriesPageMode.EDIT ||
-                getVisibleSubcategories(category, categories).filter(
-                  (subcategory) => subcategory.active
-                ).length ? (
-                getVisibleSubcategories(category, categories)
-                  .filter((subcategory) => subcategory.active)
-                  .map((subcategory) => (
-                    <>
-                      <SubcategoryCard
-                        key={subcategory.id}
-                        subcategory={subcategory}
-                        categories={categories}
-                        setCategories={setCategories}
-                        isEditing={isEditing}
-                        setIsEditing={setIsEditing}
-                        viewMode={viewMode}
-                        isSaving={isSaving}
-                        setIsSaving={setIsSaving}
-                      />
-                    </>
-                  ))
-              ) : (
-                <ShowNoShow
-                  isSaving={isSaving}
-                  type={ShowNoShowType.SUBCATEGORIES}
-                />
-              )}
+              ) : undefined}
             </Box>
           </Grid>
         </Grid>

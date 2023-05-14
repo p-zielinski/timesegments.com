@@ -7,7 +7,7 @@ import {CategoriesSortOption, CategoryWithSubcategories} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
 import {User} from '@prisma/client';
-import {handleFetch} from '../../../utils/handleFetch';
+import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 
 // ----------------------------------------------------------------------

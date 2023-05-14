@@ -4,7 +4,7 @@ import * as yup from 'yup';
 import { Formik } from 'formik';
 import { styled } from '@mui/material/styles';
 import { StatusCodes } from 'http-status-codes';
-import { handleFetch } from '../../../utils/handleFetch';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';

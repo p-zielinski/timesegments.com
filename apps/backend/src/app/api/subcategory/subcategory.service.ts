@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { Category, Prisma, Subcategory, User } from '@prisma/client';
+import { Category, Prisma, Subcategory, TimeLog, User } from '@prisma/client';
 import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { CategoryService } from '../category/category.service';
@@ -106,6 +106,7 @@ export class SubcategoryService {
         success: true;
         subcategory: Subcategory;
         category: Category;
+        timeLogs: TimeLog[];
       }
     | { success: false; error: string }
   > {
@@ -128,7 +129,7 @@ export class SubcategoryService {
     const timeLogNotEnded =
       await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
     if (!timeLogNotEnded) {
-      await this.timeLogService.createNew(
+      const newTimeLog = await this.timeLogService.createNew(
         user.id,
         subcategoryWithUserAndCategory.category.id,
         subcategoryWithUserAndCategory.id
@@ -144,12 +145,15 @@ export class SubcategoryService {
           subcategoryWithUserAndCategory.id,
           true
         ),
+        timeLogs: [newTimeLog],
       };
     }
     if (
       timeLogNotEnded.categoryId === subcategoryWithUserAndCategory.category.id
     ) {
-      await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+      const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
+        timeLogNotEnded.id
+      );
       if (timeLogNotEnded.subcategoryId === subcategoryWithUserAndCategory.id) {
         const category = await this.categoryService.setCategoryActiveState(
           subcategoryWithUserAndCategory.category.id,
@@ -162,6 +166,7 @@ export class SubcategoryService {
             subcategoryWithUserAndCategory.id,
             false
           ),
+          timeLogs: [timeLogJustEnded],
         };
       }
       if (timeLogNotEnded.subcategoryId) {
@@ -170,7 +175,7 @@ export class SubcategoryService {
           false
         );
       }
-      await this.timeLogService.createNew(
+      const newTimeLog = await this.timeLogService.createNew(
         user.id,
         subcategoryWithUserAndCategory.category.id,
         subcategoryWithUserAndCategory.id
@@ -182,9 +187,12 @@ export class SubcategoryService {
           subcategoryWithUserAndCategory.id,
           true
         ),
+        timeLogs: [timeLogJustEnded, newTimeLog],
       };
     }
-    await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+    const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
+      timeLogNotEnded.id
+    );
     await this.categoryService.setCategoryActiveState(
       timeLogNotEnded.categoryId,
       false
@@ -195,7 +203,7 @@ export class SubcategoryService {
         false
       );
     }
-    await this.timeLogService.createNew(
+    const newTimeLog = await this.timeLogService.createNew(
       user.id,
       subcategoryWithUserAndCategory.category.id,
       subcategoryWithUserAndCategory.id
@@ -210,6 +218,7 @@ export class SubcategoryService {
         subcategoryWithUserAndCategory.id,
         true
       ),
+      timeLogs: [timeLogJustEnded, newTimeLog],
     };
   }
 

@@ -16,7 +16,7 @@ import { Timezones } from '@test1/shared';
 import EditNote from './EditNote';
 import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import { getHexFromRGBAString } from '../../../utils/colors/getHexFromRGBString';
-import { handleFetch } from '../../../utils/handleFetch';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 

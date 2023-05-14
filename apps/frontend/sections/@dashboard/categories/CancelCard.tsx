@@ -7,7 +7,7 @@ import {
 } from '../../../consts/colors';
 import Iconify from '../../../components/iconify';
 import React, { useEffect, useState } from 'react';
-import { handleFetch } from '../../../utils/handleFetch';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export default function CancelCard({

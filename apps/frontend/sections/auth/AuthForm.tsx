@@ -11,7 +11,7 @@ import {AuthPageState} from '@test1/shared';
 import recoverSchema from '../../yupSchemas/recover';
 import registerSchema from '../../yupSchemas/register';
 import {InputText} from '../../components/form/Text';
-import {handleFetch} from '../../utils/handleFetch';
+import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {SelectWithSearch} from '../../components/form/SelectWithSearch';
 import {StatusCodes} from 'http-status-codes';
 import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSelect';

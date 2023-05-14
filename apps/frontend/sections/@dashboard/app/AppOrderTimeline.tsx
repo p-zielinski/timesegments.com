@@ -9,99 +9,16 @@ import {DateTime} from 'luxon';
 import {Timezones} from '@test1/shared';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
+import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGroupedTimeLogsWithDateSorted';
+import {getDuration} from '../../../utils/mapper/getDuration';
 // utils
 // ----------------------------------------------------------------------
-
-const getDuration = (totalPeriodInMs) => {
-  const periodInSecondsTotal = Math.floor(totalPeriodInMs / 1000);
-  const periodInMinutesTotal = Math.floor(periodInSecondsTotal / 60);
-  const durationHours = Math.floor(periodInMinutesTotal / 60);
-  const durationMinutes = periodInMinutesTotal % 60;
-  const durationSeconds = periodInSecondsTotal % 60;
-
-  const hours = durationHours
-    ? `${durationHours} hour${durationHours !== 1 ? 's' : ''}`
-    : undefined;
-  const minutes = durationMinutes
-    ? `${durationMinutes} minute${durationMinutes !== 1 ? 's' : ''}`
-    : undefined;
-  const seconds =
-    durationSeconds || (!hours && !minutes)
-      ? `${durationSeconds} second${durationSeconds !== 1 ? 's' : ''}`
-      : undefined;
-
-  return [hours, minutes, seconds].filter((text) => text).join(' ');
-};
 
 export default function AppOrderTimeline({
   user,
   timeLogsWithinActiveDate,
   showDetails,
 }) {
-  const getGroupedTimeLogsWithDateSorted = (timeLogsWithinActiveDate) => {
-    const grouped = [];
-    timeLogsWithinActiveDate.forEach((x) => {
-      let index;
-      for (const i in grouped) {
-        if (grouped[i][0]?.category?.id === x?.category?.id) {
-          if (
-            grouped[i][0]?.subcategory === undefined &&
-            x?.subcategory === undefined
-          ) {
-            index = i;
-            break;
-          }
-          if (grouped[i][0]?.subcategory?.id === x?.subcategory?.id) {
-            index = i;
-            break;
-          }
-        }
-      }
-      if (index) {
-        grouped[index] = [...grouped[index], x];
-      } else {
-        grouped.push([x]);
-      }
-    });
-    return grouped
-      .map((group) => {
-        const category = group[0]?.category;
-        const subcategory = group[0]?.subcategory;
-        const notFinishedPeriod = group.find(
-          (timeLogsWithinDate) => timeLogsWithinDate.ended === false
-        );
-        const ended = !notFinishedPeriod;
-        const totalPeriodInMsWithoutUnfinishedTimeLog = group.reduce(
-          (accumulator, currentValue) => {
-            if (currentValue.ended) {
-              return accumulator + currentValue.periodTotalMs;
-            }
-            return accumulator;
-          },
-          0
-        );
-        return {
-          category,
-          subcategory,
-          notFinishedPeriod,
-          ended,
-          totalPeriodInMsWithoutUnfinishedTimeLog,
-        };
-      })
-      .sort((a, b) => {
-        if (a.ended === false) {
-          return -1;
-        }
-        if (b.ended === false) {
-          return 1;
-        }
-        return (
-          b.totalPeriodInMsWithoutUnfinishedTimeLog -
-          a.totalPeriodInMsWithoutUnfinishedTimeLog
-        );
-      });
-  };
-
   return (
     <Card>
       <CardContent

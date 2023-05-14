@@ -129,12 +129,7 @@ export class TimeLogService {
 
     return {
       success: true,
-      timeLogs:
-        !result ||
-        !result.endedAt ||
-        DateTime.fromJSDate(result.endedAt).ts < fromDateTime.ts
-          ? []
-          : [result],
+      timeLogs: [result],
     };
   }
 }

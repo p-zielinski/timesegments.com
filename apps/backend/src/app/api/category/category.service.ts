@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
-import { Category, Prisma, User } from '@prisma/client';
+import { Category, Prisma, TimeLog, User } from '@prisma/client';
 import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
 
@@ -114,7 +114,8 @@ export class CategoryService {
     categoryId: string,
     user: User
   ): Promise<
-    { success: true; category?: Category } | { success: false; error: string }
+    | { success: true; category?: Category; timeLogs: TimeLog[] }
+    | { success: false; error: string }
   > {
     const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
@@ -128,16 +129,25 @@ export class CategoryService {
     const timeLogNotEnded =
       await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
     if (!timeLogNotEnded) {
-      await this.timeLogService.createNew(user.id, categoryWithUser.id);
+      const newTimeLog = await this.timeLogService.createNew(
+        user.id,
+        categoryWithUser.id
+      );
       return {
         success: true,
         category: await this.setCategoryActiveState(categoryWithUser.id, true),
+        timeLogs: [newTimeLog],
       };
     }
     if (timeLogNotEnded.categoryId === categoryWithUser.id) {
-      await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
+      const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
+        timeLogNotEnded.id
+      );
       if (timeLogNotEnded.subcategoryId) {
-        await this.timeLogService.createNew(user.id, categoryWithUser.id);
+        const newTimeLog = await this.timeLogService.createNew(
+          user.id,
+          categoryWithUser.id
+        );
         await this.subcategoryService.setSubcategoryActiveState(
           timeLogNotEnded.subcategoryId,
           false
@@ -145,6 +155,7 @@ export class CategoryService {
         return {
           success: true,
           category: { ...categoryWithUser, user: undefined } as Category,
+          timeLogs: [timeLogJustEnded, newTimeLog],
         };
       }
       await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
@@ -155,6 +166,7 @@ export class CategoryService {
           active: false,
           user: undefined,
         } as Category,
+        timeLogs: [timeLogJustEnded],
       };
     }
     await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
@@ -164,14 +176,20 @@ export class CategoryService {
         false
       );
     }
-    await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
-    await this.timeLogService.createNew(user.id, categoryWithUser.id);
+    const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
+      timeLogNotEnded.id
+    );
+    const newTimeLog = await this.timeLogService.createNew(
+      user.id,
+      categoryWithUser.id
+    );
     return {
       success: true,
       category: await this.setCategoryActiveState(
         categoryWithUser.id,
         timeLogNotEnded.categoryId !== categoryWithUser.id
       ),
+      timeLogs: [timeLogJustEnded, newTimeLog],
     };
   }
 

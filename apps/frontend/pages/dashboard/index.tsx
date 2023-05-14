@@ -12,7 +12,7 @@ import {
 import {CategoriesPageMode} from '../../enum/categoriesPageMode';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
-import {handleFetch} from '../../utils/handleFetch';
+import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -26,21 +26,18 @@ import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
 import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
-import {
-  findTimeLogsWithinCurrentPeriod,
-  TimeLogWithinCurrentPeriod,
-  TimeLogWithinCurrentPeriodISO,
-} from '../../utils/findTimeLogsWithinCurrentPeriod';
+import {findTimeLogsWithinCurrentPeriod, TimeLogWithinCurrentPeriodISO,} from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {DateTime} from 'luxon';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
-import CategoriesSection from '../../sections/@dashboard/categories'; // ---------------------------------------------------------------------
+import CategoriesSection from '../../sections/@dashboard/categories';
+import {TimeLogsWithinDateISO} from '../../types/timeLogsWithinDate';
 // ---------------------------------------------------------------------
 
 type Props = {
-  user?: UserWithCategoriesAndSubcategories;
+  user: UserWithCategoriesAndSubcategories;
   limits: Limits;
   notes: Note[];
-  timeLogsExtendedISO?: TimeLogWithinCurrentPeriodISO[];
+  timeLogsWithDatesISO?: TimeLogsWithinDateISO[];
   randomSliderHexColor: string;
 };
 
@@ -49,20 +46,10 @@ export default function Index({
   limits: serverSideFetchedLimits,
   notes: serverSideFetchedNotes,
   randomSliderHexColor: randomSliderHexColor,
-  timeLogsExtendedISO,
+  timeLogsWithDatesISO,
 }: Props) {
-  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
-    TimeLogWithinCurrentPeriod[]
-  >(
-    timeLogsExtendedISO.map((timeLogExtended) => {
-      return {
-        ...timeLogExtended,
-        startedAt: DateTime.fromISO(timeLogExtended.startedAt),
-        endedAt: timeLogExtended.ended
-          ? DateTime.fromISO(timeLogExtended.endedAt)
-          : undefined,
-      };
-    }) as unknown as any
+  const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
+    serverSideFetchedUser
   );
 
   const width1200px = useMediaQuery('(min-width:1200px)');
@@ -79,9 +66,6 @@ export default function Index({
   );
 
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
-  const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
-    serverSideFetchedUser
-  );
   const [controlValue, setControlValue] = useState(user?.controlValue);
 
   useEffect(() => {
@@ -217,6 +201,7 @@ export default function Index({
         )}
         {currentPageState === DashboardPageState.CATEGORIES ? (
           <CategoriesSection
+            timeLogsWithDatesISO={timeLogsWithDatesISO}
             categories={categories}
             setCategories={setCategories}
             viewMode={viewMode}
@@ -321,7 +306,7 @@ export const getServerSideProps = async ({ req, res }) => {
       },
     };
   }
-  let timeLogsExtendedISO;
+  let timeLogsWithDatesISO;
   if (timeLogs) {
     const allSubcategories = [].concat(
       ...(user?.categories?.map?.(
@@ -338,16 +323,21 @@ export const getServerSideProps = async ({ req, res }) => {
       }) || [];
     const now = DateTime.now().setZone(Timezones[user.timezone]);
     const today = { month: now.month, year: now.year, day: now.day };
-    timeLogsExtendedISO = deleteUndefinedFromObject(
-      findTimeLogsWithinCurrentPeriod({
-        allTimeLogs: timeLogs,
-        userTimezone: Timezones[user.timezone],
-        fromDate: today,
-        categories: allCategories,
-        subcategories: allSubcategories,
-        options: { asIso: true },
-      }) as TimeLogWithinCurrentPeriodISO[]
-    );
+    timeLogsWithDatesISO = [
+      {
+        date: today,
+        timeLogsExtended: deleteUndefinedFromObject(
+          findTimeLogsWithinCurrentPeriod({
+            allTimeLogs: timeLogs,
+            userTimezone: Timezones[user.timezone],
+            fromDate: today,
+            categories: allCategories,
+            subcategories: allSubcategories,
+            options: { asIso: true },
+          }) as TimeLogWithinCurrentPeriodISO[]
+        ),
+      },
+    ] as TimeLogsWithinDateISO[];
   }
 
   return {
@@ -361,7 +351,7 @@ export const getServerSideProps = async ({ req, res }) => {
           'very bright'
         )
       ),
-      timeLogsExtendedISO: timeLogsExtendedISO || null,
+      timeLogsWithDatesISO: timeLogsWithDatesISO || null,
     },
   };
 };

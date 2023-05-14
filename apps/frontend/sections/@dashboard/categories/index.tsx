@@ -15,6 +15,13 @@ import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import EditCategoriesButtonComponent from './EditCategoriesButtonComponent';
 import CancelCard from './CancelCard';
 import SortCategories from './Sort';
+import {TimeLogsWithinDate} from '../../../types/timeLogsWithinDate';
+import {Timezones} from '@test1/shared';
+import {TimeLogWithinCurrentPeriod} from '../../../utils/findTimeLogsWithinCurrentPeriod';
+import {findOrFetchTimeLogsWithinActiveDate} from '../../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
+import {DateTime} from 'luxon';
+import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGroupedTimeLogsWithDateSorted';
+import {nanoid} from 'nanoid';
 
 // ----------------------------------------------------------------------
 
@@ -24,6 +31,7 @@ CategoriesSection.propTypes = {
 };
 
 export default function CategoriesSection({
+  timeLogsWithDatesISO,
   user,
   controlValue,
   setControlValue,
@@ -36,6 +44,83 @@ export default function CategoriesSection({
   setIsSaving,
   limits,
 }) {
+  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
+    TimeLogsWithinDate[]
+  >(
+    timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
+      return {
+        date: DateTime.fromObject(timeLogWithDatesISO.date),
+        timeLogsExtended: timeLogWithDatesISO.timeLogsExtended.map(
+          (timeLogExtended) => {
+            return {
+              ...timeLogExtended,
+              startedAt: DateTime.fromISO(timeLogExtended.startedAt),
+              endedAt: timeLogExtended.ended
+                ? DateTime.fromISO(timeLogExtended.endedAt)
+                : undefined,
+              isIsoString: false,
+            };
+          }
+        ),
+      };
+    }) as unknown as any
+  );
+  const [activeDate, setActiveDate] = useState(
+    DateTime.now().setZone(Timezones[user.timezone]).set({
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    })
+  );
+
+  const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
+    TimeLogWithinCurrentPeriod[]
+  >([]);
+
+  useEffect(() => {
+    (async () => {
+      setIsSaving(true);
+      await setTimeLogsWithinActiveDate(
+        await findOrFetchTimeLogsWithinActiveDate(
+          activeDate.c,
+          timeLogsWithinDates,
+          activeDate,
+          setTimeLogsWithinDates,
+          user
+        )
+      );
+      setIsSaving(false);
+    })();
+  }, [activeDate?.ts]);
+
+  const [groupedTimeLogsWithDateSorted, setGroupedTimeLogsWithDateSorted] =
+    useState([]);
+
+  useEffect(() => {
+    setGroupedTimeLogsWithDateSorted(
+      getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
+    );
+  }, [
+    timeLogsWithinActiveDate
+      .map((timeLogWithinActiveDate) => timeLogWithinActiveDate?.timeLogId)
+      .join(''),
+  ]);
+
+  const checkActiveDateCorrectness = () => {
+    const today = DateTime.now().setZone(Timezones[user.timezone]).set({
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    });
+    if (today.ts === activeDate.ts) {
+      return true;
+    }
+    setActiveDate(today);
+    return false;
+  };
+
   const [isEditing, setIsEditing] = useState({
     categoryId: undefined,
     subcategoryId: undefined,
@@ -60,6 +145,22 @@ export default function CategoriesSection({
       viewMode === CategoriesPageMode.VIEW ? category.visible : true
     );
   };
+
+  const [categoriesKey, setCategoriesKey] = useState<string>('categoriesKey');
+
+  useEffect(() => {
+    console.log('teraz');
+    setCategoriesKey(nanoid());
+  }, [
+    categories
+      .map(
+        (category) =>
+          category.active.toString() +
+            category.subcategories?.map((subcategory) => subcategory.active) ||
+          [''].join(',')
+      )
+      .join(','),
+  ]);
 
   return (
     <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
@@ -103,12 +204,14 @@ export default function CategoriesSection({
                 setControlValue={setControlValue}
                 disableHover={disableHover}
                 type={CreateNewType.CATEGORY}
+                data={undefined}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
                 isSaving={isSaving}
                 setIsSaving={setIsSaving}
                 categories={categories}
                 setCategories={setCategories}
+                category={undefined}
               />
             ) : (
               <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />
@@ -162,10 +265,24 @@ export default function CategoriesSection({
         </Stack>
       </Grid>
 
-      {getCategories(categories).length
-        ? getCategories(categories).map((category) => (
-            <Grid key={category.id} item xs={1} sm={1} md={1}>
+      {getCategories(categories).length ? (
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+          key={categoriesKey}
+        >
+          {getCategories(categories).map((category) => (
+            <Grid key={categoriesKey + category.id} item xs={1} sm={1} md={1}>
               <CategoryCard
+                groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
+                user={user}
+                checkActiveDateCorrectness={checkActiveDateCorrectness}
+                timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+                setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
                 controlValue={controlValue}
                 setControlValue={setControlValue}
                 disableHover={disableHover}
@@ -180,14 +297,18 @@ export default function CategoriesSection({
                 limits={limits}
               />
             </Grid>
-          ))
-        : !isEditing && (
-            <ShowNoShow type={ShowNoShowType.CATEGORIES} isSaving={isSaving} />
-          )}
+          ))}
+        </Box>
+      ) : (
+        !isEditing && (
+          <ShowNoShow type={ShowNoShowType.CATEGORIES} isSaving={isSaving} />
+        )
+      )}
       {viewMode === CategoriesPageMode.VIEW && (
         <EditCategoriesButtonComponent
           isSaving={isSaving}
           setViewMode={setViewMode}
+          disableHover={disableHover}
         />
       )}
     </Grid>
