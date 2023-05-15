@@ -21,7 +21,6 @@ import {TimeLogWithinCurrentPeriod} from '../../../utils/findTimeLogsWithinCurre
 import {findOrFetchTimeLogsWithinActiveDate} from '../../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import {DateTime} from 'luxon';
 import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGroupedTimeLogsWithDateSorted';
-import {nanoid} from 'nanoid';
 
 // ----------------------------------------------------------------------
 
@@ -145,22 +144,6 @@ export default function CategoriesSection({
       viewMode === CategoriesPageMode.VIEW ? category.visible : true
     );
   };
-
-  const [categoriesKey, setCategoriesKey] = useState<string>('categoriesKey');
-
-  useEffect(() => {
-    console.log('teraz');
-    setCategoriesKey(nanoid());
-  }, [
-    categories
-      .map(
-        (category) =>
-          category.active.toString() +
-          category.subcategories?.map((subcategory) => subcategory.active) ||
-          [''].join(',')
-      )
-      .join(','),
-  ]);
 
   return (
     <Grid container spacing={2} columns={1} sx={{mt: 1}}>
