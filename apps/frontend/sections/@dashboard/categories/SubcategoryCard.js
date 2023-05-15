@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
-import {Box, Card, Stack, Typography} from '@mui/material';
-// utils
+import {Box, Card, Stack, Typography} from '@mui/material'; // utils
 import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
 import {getRepeatingLinearGradient} from '../../../utils/colors/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
@@ -16,7 +15,7 @@ import {StatusCodes} from 'http-status-codes';
 import {mapTimeLogsToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
 import {Timezones} from '@test1/shared';
 import {DateTime} from 'luxon';
-import {getDuration} from '../../../utils/mapper/getDuration';
+import {getDuration} from '../../../utils/mapper/getDuration'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -82,7 +81,7 @@ export default function SubcategoryCard({
       1000
     );
     return () => clearInterval(intervalIdLocal);
-  }, [groupedTimeLogsWithDateSorted, subcategory]);
+  }, [groupedTimeLogsWithDateSorted]);
 
   const { name, active: isActive } = subcategory;
   const category = categories.find((category) =>
@@ -119,21 +118,6 @@ export default function SubcategoryCard({
       }
       if (!checkActiveDateCorrectness()) {
         return; //skip setting isSaving(false)
-      }
-      if (response.timeLogs) {
-        const timeLogsIds = response.timeLogs.map((timeLog) => timeLog.id);
-        const timeLogsExtended = mapTimeLogsToDateTimeLogs(
-          response.timeLogs,
-          Timezones[user.timezone],
-          categories
-        );
-        setTimeLogsWithinActiveDate([
-          ...timeLogsWithinActiveDate.filter(
-            (timeLogsExtended) =>
-              !timeLogsIds.includes(timeLogsExtended.timeLogId)
-          ),
-          ...timeLogsExtended,
-        ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
@@ -172,6 +156,21 @@ export default function SubcategoryCard({
       );
       if (response.controlValue) {
         setControlValue(response.controlValue);
+      }
+      if (response.timeLogs) {
+        const timeLogsIds = response.timeLogs.map((timeLog) => timeLog.id);
+        const timeLogsExtended = mapTimeLogsToDateTimeLogs(
+          response.timeLogs,
+          Timezones[user.timezone],
+          categories
+        );
+        setTimeLogsWithinActiveDate([
+          ...timeLogsWithinActiveDate.filter(
+            (timeLogsExtended) =>
+              !timeLogsIds.includes(timeLogsExtended.timeLogId)
+          ),
+          ...timeLogsExtended,
+        ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);

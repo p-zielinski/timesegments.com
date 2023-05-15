@@ -31,19 +31,19 @@ CategoriesSection.propTypes = {
 };
 
 export default function CategoriesSection({
-  timeLogsWithDatesISO,
-  user,
-  controlValue,
-  setControlValue,
-  disableHover,
-  categories,
-  setCategories,
-  viewMode,
-  setViewMode,
-  isSaving,
-  setIsSaving,
-  limits,
-}) {
+                                            timeLogsWithDatesISO,
+                                            user,
+                                            controlValue,
+                                            setControlValue,
+                                            disableHover,
+                                            categories,
+                                            setCategories,
+                                            viewMode,
+                                            setViewMode,
+                                            isSaving,
+                                            setIsSaving,
+                                            limits,
+                                          }) {
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
     TimeLogsWithinDate[]
   >(
@@ -156,17 +156,17 @@ export default function CategoriesSection({
       .map(
         (category) =>
           category.active.toString() +
-            category.subcategories?.map((subcategory) => subcategory.active) ||
+          category.subcategories?.map((subcategory) => subcategory.active) ||
           [''].join(',')
       )
       .join(','),
   ]);
 
   return (
-    <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
+    <Grid container spacing={2} columns={1} sx={{mt: 1}}>
       {viewMode === CategoriesPageMode.EDIT && (
         <Grid key={'edit_categories'} item xs={1} sm={1} md={1}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
             {categories.length !== 0 && (
               <Card
                 sx={{
@@ -189,9 +189,9 @@ export default function CategoriesSection({
                 <Iconify
                   icon={'mdi:cancel-bold'}
                   width={42}
-                  sx={{ m: -2, position: 'absolute', bottom: 22, left: 22 }}
+                  sx={{m: -2, position: 'absolute', bottom: 22, left: 22}}
                 />
-                <Stack spacing={2} sx={{ p: 2, ml: 5 }}>
+                <Stack spacing={2} sx={{p: 2, ml: 5}}>
                   <Typography variant="subtitle2" noWrap>
                     STOP EDITING CATEGORIES
                   </Typography>
@@ -214,7 +214,7 @@ export default function CategoriesSection({
                 category={undefined}
               />
             ) : (
-              <ShowLimitReached type={ShowLimitReachedType.CATEGORIES} />
+              <ShowLimitReached type={ShowLimitReachedType.CATEGORIES}/>
             )}
           </Box>
         </Grid>
@@ -250,7 +250,7 @@ export default function CategoriesSection({
             direction="row"
             spacing={1}
             flexShrink={0}
-            sx={{ mt: -1, mb: -1 }}
+            sx={{mt: -1, mb: -1}}
           >
             <SortCategories
               user={user}
@@ -266,17 +266,9 @@ export default function CategoriesSection({
       </Grid>
 
       {getCategories(categories).length ? (
-        <Box
-          sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
-          key={categoriesKey}
-        >
+        <>
           {getCategories(categories).map((category) => (
-            <Grid key={categoriesKey + category.id} item xs={1} sm={1} md={1}>
+            <Grid key={category.id} item xs={1} sm={1} md={1}>
               <CategoryCard
                 groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
                 user={user}
@@ -298,10 +290,10 @@ export default function CategoriesSection({
               />
             </Grid>
           ))}
-        </Box>
+        </>
       ) : (
         !isEditing && (
-          <ShowNoShow type={ShowNoShowType.CATEGORIES} isSaving={isSaving} />
+          <ShowNoShow type={ShowNoShowType.CATEGORIES} isSaving={isSaving}/>
         )
       )}
       {viewMode === CategoriesPageMode.VIEW && (
