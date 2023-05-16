@@ -272,12 +272,12 @@ export default function AddNew({
                   borderTopRightRadius: '12px',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: isSaving
-                    ? IS_SAVING_HEX
-                    : getHexFromRGBAObject({
-                        ...getRgbaObjectFromHexString(values.color?.hex),
-                        a: 0.18,
-                      }),
+                  background: getRepeatingLinearGradient(
+                    isSaving ? IS_SAVING_HEX : values.color?.hex,
+                    0.3,
+                    45,
+                    false
+                  ),
                   border: `solid 2px ${
                     isSaving
                       ? IS_SAVING_HEX
