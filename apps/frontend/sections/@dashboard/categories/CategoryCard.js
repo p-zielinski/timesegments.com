@@ -1,19 +1,14 @@
 import PropTypes from 'prop-types';
 // @mui
-import {Box, Card, Grid, Stack, Typography} from '@mui/material'; // utils
+import {Box, Card, Stack, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
-import SubcategoryCard from './SubcategoryCard';
 import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
 import {getRepeatingLinearGradient} from '../../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import AddNew from './AddNew';
-import {CreateNewType} from '../../../enum/createNewType';
 import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import React, {useEffect, useState} from 'react';
-import ShowLimitReached from './ShowLimitReached';
-import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
 import {StatusCodes} from 'http-status-codes';
@@ -44,24 +39,23 @@ export default function CategoryCard({
   setIsEditing,
   isSaving,
   setIsSaving,
-  limits,
   disableHover,
 }) {
-  const currentGroupedTimeLog = groupedTimeLogsWithDateSorted
-    .filter(
-      (groupedTimeLogWithDateSorted) =>
-        !groupedTimeLogWithDateSorted.subcategory
-    )
-    .find(
-      (groupedTimeLogWithDateSorted) =>
-        groupedTimeLogWithDateSorted.category?.id === category?.id
-    );
-
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
     groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
   );
 
   useEffect(() => {
+    const currentGroupedTimeLog = groupedTimeLogsWithDateSorted
+      .filter(
+        (groupedTimeLogWithDateSorted) =>
+          !groupedTimeLogWithDateSorted.subcategory
+      )
+      .find(
+        (groupedTimeLogWithDateSorted) =>
+          groupedTimeLogWithDateSorted.category?.id === category?.id
+      );
+
     if (!currentGroupedTimeLog) {
       return;
     }
@@ -71,6 +65,12 @@ export default function CategoryCard({
       );
     }
     const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+      if (
+        isEditing.categoryId === category.id &&
+        viewMode === CategoriesPageMode.EDIT
+      ) {
+        return;
+      }
       const now = DateTime.now().setZone(Timezones[user.timezone]);
       const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
         ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
@@ -89,7 +89,7 @@ export default function CategoryCard({
       1000
     );
     return () => clearInterval(intervalIdLocal);
-  }, [groupedTimeLogsWithDateSorted]);
+  }, [groupedTimeLogsWithDateSorted, isEditing, viewMode]);
 
   const { active: isActive } = category;
 
@@ -561,13 +561,6 @@ export default function CategoryCard({
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,
                 borderLeft: 0,
-                borderRight:
-                  getVisibleSubcategories(category, categories).length ||
-                  viewMode !== CategoriesPageMode.VIEW
-                    ? 0
-                    : isActive
-                    ? `solid 2px ${LIGHT_GREEN}`
-                    : `solid 2px ${LIGHT_RED}`,
                 borderRadius:
                   getVisibleSubcategories(category, categories).length ||
                   viewMode !== CategoriesPageMode.VIEW
@@ -587,13 +580,6 @@ export default function CategoryCard({
                         ? `solid 2px ${RED}`
                         : `solid 2px ${GREEN}`,
                     borderLeft: 0,
-                    borderRight:
-                      getVisibleSubcategories(category, categories).length ||
-                      viewMode !== CategoriesPageMode.VIEW
-                        ? 0
-                        : !isActive
-                        ? `solid 2px ${GREEN}`
-                        : `solid 2px ${RED}`,
                     borderStyle: 'dashed',
                   },
               }}
@@ -661,96 +647,6 @@ export default function CategoryCard({
           </Box>
         </Card>
       )}
-
-      {viewMode === CategoriesPageMode.VIEW &&
-      !getVisibleSubcategories(category, categories)
-        .length ? undefined : getCategory(category, categories)
-          ?.expandSubcategories ||
-        getVisibleSubcategories(category, categories).filter(
-          (subcategory) => subcategory.active
-        ).length ? (
-        <Grid container spacing={2} columns={12}>
-          <Grid key={'edit_categories'} item xs={1} sm={1} md={1}></Grid>
-          <Grid item xs={11} sm={11} md={11}>
-            <Box
-              sx={{
-                flex: 1,
-              }}
-            >
-              {getCategory(category, categories)?.expandSubcategories ? (
-                <>
-                  {getVisibleSubcategories(category, categories) ||
-                  viewMode === CategoriesPageMode.EDIT ? (
-                    <Box
-                      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-                    >
-                      {getVisibleSubcategories(category, categories).length ||
-                      viewMode === CategoriesPageMode.EDIT
-                        ? getVisibleSubcategories(category, categories).map(
-                            (subcategory) => (
-                              <SubcategoryCard
-                                groupedTimeLogsWithDateSorted={
-                                  groupedTimeLogsWithDateSorted
-                                }
-                                user={user}
-                                checkActiveDateCorrectness={
-                                  checkActiveDateCorrectness
-                                }
-                                timeLogsWithinActiveDate={
-                                  timeLogsWithinActiveDate
-                                }
-                                setTimeLogsWithinActiveDate={
-                                  setTimeLogsWithinActiveDate
-                                }
-                                controlValue={controlValue}
-                                setControlValue={setControlValue}
-                                key={subcategory.id}
-                                disableHover={disableHover}
-                                subcategory={subcategory}
-                                categories={categories}
-                                setCategories={setCategories}
-                                isEditing={isEditing}
-                                setIsEditing={setIsEditing}
-                                viewMode={viewMode}
-                                isSaving={isSaving}
-                                setIsSaving={setIsSaving}
-                              />
-                            )
-                          )
-                        : undefined}
-                      {viewMode === CategoriesPageMode.EDIT && (
-                        <>
-                          {category.subcategories.length <
-                          limits.subcategoriesLimit ? (
-                            <AddNew
-                              controlValue={controlValue}
-                              setControlValue={setControlValue}
-                              disableHover={disableHover}
-                              type={CreateNewType.SUBCATEGORY}
-                              data={{ categoryId: category.id }}
-                              isEditing={isEditing}
-                              setIsEditing={setIsEditing}
-                              category={category}
-                              isSaving={isSaving}
-                              setIsSaving={setIsSaving}
-                              categories={categories}
-                              setCategories={setCategories}
-                            />
-                          ) : (
-                            <ShowLimitReached
-                              type={ShowLimitReachedType.SUBCATEGORIES}
-                            />
-                          )}
-                        </>
-                      )}
-                    </Box>
-                  ) : undefined}
-                </>
-              ) : undefined}
-            </Box>
-          </Grid>
-        </Grid>
-      ) : undefined}
     </Box>
   );
 }

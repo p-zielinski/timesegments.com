@@ -1,4 +1,3 @@
-import {Helmet} from 'react-helmet-async'; // @mui
 import {Box, Container, useMediaQuery} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {
@@ -26,12 +25,39 @@ import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
 import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
-import {findTimeLogsWithinCurrentPeriod, TimeLogWithinCurrentPeriodISO,} from '../../utils/findTimeLogsWithinCurrentPeriod';
+import {
+  findTimeLogsWithinCurrentPeriod,
+  TimeLogWithinCurrentPeriod,
+  TimeLogWithinCurrentPeriodISO,
+} from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {DateTime} from 'luxon';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
 import CategoriesSection from '../../sections/@dashboard/categories';
-import {TimeLogsWithinDateISO} from '../../types/timeLogsWithinDate';
+import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
+import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
+import {getGroupedTimeLogsWithDateSorted} from '../../utils/mapper/getGroupedTimeLogsWithDateSorted';
+import {getCurrentDate} from '../../utils/getCurrentDate';
 // ---------------------------------------------------------------------
+
+const getTimeLogsWithinDatesFromIsoType = (timeLogsWithDatesISO) => {
+  return timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
+    return {
+      date: DateTime.fromObject(timeLogWithDatesISO.date),
+      timeLogsExtended: timeLogWithDatesISO.timeLogsExtended.map(
+        (timeLogExtended) => {
+          return {
+            ...timeLogExtended,
+            startedAt: DateTime.fromISO(timeLogExtended.startedAt),
+            endedAt: timeLogExtended.ended
+              ? DateTime.fromISO(timeLogExtended.endedAt)
+              : undefined,
+            isIsoString: false,
+          };
+        }
+      ),
+    };
+  }) as unknown as any;
+};
 
 type Props = {
   user: UserWithCategoriesAndSubcategories;
@@ -169,6 +195,41 @@ export default function Index({
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
+  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
+    TimeLogsWithinDate[]
+  >(getTimeLogsWithinDatesFromIsoType(timeLogsWithDatesISO));
+  const [activeDate, setActiveDate] = useState(
+    getCurrentDate(Timezones[user.timezone])
+  );
+  const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
+    TimeLogWithinCurrentPeriod[]
+  >([]);
+
+  useEffect(() => {
+    (async () => {
+      setIsSaving(true);
+      await setTimeLogsWithinActiveDate(
+        await findOrFetchTimeLogsWithinActiveDate(
+          activeDate.c,
+          timeLogsWithinDates,
+          activeDate,
+          setTimeLogsWithinDates,
+          user
+        )
+      );
+      setIsSaving(false);
+    })();
+  }, [activeDate?.ts]);
+
+  const [groupedTimeLogsWithDateSorted, setGroupedTimeLogsWithDateSorted] =
+    useState([]);
+
+  useEffect(() => {
+    setGroupedTimeLogsWithDateSorted(
+      getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
+    );
+  }, [timeLogsWithinActiveDate]);
+
   return (
     <DashboardLayout
       user={user}
@@ -184,10 +245,6 @@ export default function Index({
       setCurrentPageState={setCurrentPageState}
       randomSliderHexColor={randomSliderHexColor}
     >
-      <Helmet>
-        <title>Categories</title>
-      </Helmet>
-
       <Container>
         {!width1200px ? (
           <GoToCategoriesOrNotes
@@ -201,7 +258,11 @@ export default function Index({
         )}
         {currentPageState === DashboardPageState.CATEGORIES ? (
           <CategoriesSection
-            timeLogsWithDatesISO={timeLogsWithDatesISO}
+            activeDate={activeDate}
+            setActiveDate={setActiveDate}
+            groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
+            timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+            setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
             categories={categories}
             setCategories={setCategories}
             viewMode={viewMode}
