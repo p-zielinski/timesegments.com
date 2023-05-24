@@ -342,7 +342,6 @@ export const getServerSideProps = async ({ req, res }) => {
         }
       );
       const response = await responseUser.json();
-      console.log(response);
       user = response.user;
       limits = response.limits;
       notes = response.user.notes;
