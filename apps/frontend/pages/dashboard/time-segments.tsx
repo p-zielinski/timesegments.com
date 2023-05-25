@@ -522,7 +522,6 @@ export const getServerSideProps = async ({ req, res }) => {
 
   let allTimeLogs = [];
   let categories = [];
-  let subcategories = [];
 
   const now = DateTime.now().setZone(Timezones[user.timezone]);
   const to = { month: now.month, year: now.year, day: now.day };
@@ -548,7 +547,6 @@ export const getServerSideProps = async ({ req, res }) => {
     const response = await responseTimeLogs.json();
     allTimeLogs = response?.timeLogs ?? [];
     categories = response?.categories ?? [];
-    subcategories = response?.subcategories ?? [];
   } catch (e) {
     console.log(e);
   }
@@ -569,7 +567,6 @@ export const getServerSideProps = async ({ req, res }) => {
         userTimezone: Timezones[user.timezone],
         fromDate: date,
         categories,
-        subcategories,
         options: { asIso: true },
       }) as TimeLogWithinCurrentPeriodISO[],
     });

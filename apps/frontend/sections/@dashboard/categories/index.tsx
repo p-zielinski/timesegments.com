@@ -59,7 +59,6 @@ export default function CategoriesSection({
 
   const [isEditing, setIsEditing] = useState({
     categoryId: undefined,
-    subcategoryId: undefined,
     createNew: undefined,
   });
 

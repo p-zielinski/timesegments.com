@@ -4,7 +4,7 @@ import {Box, Container, Typography} from '@mui/material'; // hooks
 import useResponsive from '../hooks/useResponsive'; // sections
 import {AuthForm} from '../sections/auth';
 import React, {useState} from 'react';
-import {AuthPageState, UserWithCategoriesAndSubcategoriesAndNotes,} from '@test1/shared';
+import {AuthPageState, UserWithCategoriesAndNotes} from '@test1/shared';
 import {RenderAuthLink} from '../components/renderAuthLink';
 import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
@@ -119,7 +119,7 @@ export default function Index({ randomSliderColor }: Props) {
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-  let user: UserWithCategoriesAndSubcategoriesAndNotes;
+  let user: UserWithCategoriesAndNotes;
   if (jwt_token) {
     try {
       const responseUser = await fetch(

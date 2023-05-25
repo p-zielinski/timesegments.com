@@ -1,8 +1,7 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Category, Prisma, TimeLog, User } from '@prisma/client';
-import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
 
 @Injectable()
@@ -10,8 +9,6 @@ export class CategoryService {
   constructor(
     private prisma: PrismaService,
     private readonly configService: ConfigService,
-    @Inject(forwardRef(() => SubcategoryService))
-    private readonly subcategoryService: SubcategoryService,
     private readonly timeLogService: TimeLogService
   ) {}
 
@@ -77,39 +74,6 @@ export class CategoryService {
     return { success: true, category: updatedCategory };
   }
 
-  public async updateExpandSubcategoriesCategory(
-    categoryId: string,
-    expandSubcategories: boolean,
-    user: User
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
-    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
-      user: true,
-    });
-    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
-      return {
-        success: false,
-        error: `Category not found, bad request`,
-      };
-    }
-    if (categoryWithUser.expandSubcategories === expandSubcategories) {
-      return {
-        success: true,
-        category: { ...categoryWithUser, user: undefined } as Category,
-      };
-    }
-    const updatedCategory = await this.updateExpandSubcategories(
-      categoryId,
-      expandSubcategories
-    );
-    if (updatedCategory.expandSubcategories !== expandSubcategories) {
-      return {
-        success: false,
-        error: `Could not update expandSubcategories`,
-      };
-    }
-    return { success: true, category: updatedCategory };
-  }
-
   public async setCategoryActive(
     categoryId: string,
     user: User
@@ -143,21 +107,6 @@ export class CategoryService {
       const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
         timeLogNotEnded.id
       );
-      if (timeLogNotEnded.subcategoryId) {
-        const newTimeLog = await this.timeLogService.createNew(
-          user.id,
-          categoryWithUser.id
-        );
-        await this.subcategoryService.setSubcategoryActiveState(
-          timeLogNotEnded.subcategoryId,
-          false
-        );
-        return {
-          success: true,
-          category: { ...categoryWithUser, user: undefined } as Category,
-          timeLogs: [timeLogJustEnded, newTimeLog],
-        };
-      }
       await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
       return {
         success: true,
@@ -170,12 +119,6 @@ export class CategoryService {
       };
     }
     await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
-    if (timeLogNotEnded.subcategoryId) {
-      await this.subcategoryService.setSubcategoryActiveState(
-        timeLogNotEnded.subcategoryId,
-        false
-      );
-    }
     const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
       timeLogNotEnded.id
     );
@@ -280,16 +223,6 @@ export class CategoryService {
     return await this.prisma.category.update({
       where: { id: categoryId },
       data: { deleted },
-    });
-  }
-
-  private async updateExpandSubcategories(
-    categoryId: string,
-    expandSubcategories: boolean
-  ) {
-    return await this.prisma.category.update({
-      where: { id: categoryId },
-      data: { expandSubcategories },
     });
   }
 

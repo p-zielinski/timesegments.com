@@ -92,60 +92,9 @@ export default function AddNew({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
-      setCategories([
-        { ...response.category, subcategories: [] },
-        ...categories,
-      ]);
-      setIsEditing({
-        subcategoryId: undefined,
-        categoryId: undefined,
-        createNew: undefined,
-      });
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
-      }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
-      return; //skip setting isSaving(false)
-    }
-    setIsSaving(false);
-    return;
-  };
-
-  const createSubcategory = async (
-    name: string,
-    color: string,
-    inheritColor: boolean
-  ) => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'subcategory/create',
-      body: {
-        categoryId: category.id,
-        name,
-        color: inheritColor ? undefined : color,
-        controlValue,
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED && response?.subcategory) {
-      setCategories(
-        categories.map((_category) => {
-          if (_category.id === category.id) {
-            return {
-              ..._category,
-              subcategories: [
-                ..._category.subcategories,
-                response?.subcategory,
-              ],
-            };
-          }
-          return _category;
-        })
-      );
+      setCategories([{ ...response.category }, ...categories]);
       setIsEditing({
         categoryId: undefined,
-        subcategoryId: undefined,
         createNew: undefined,
       });
       if (response.controlValue) {
@@ -208,7 +157,6 @@ export default function AddNew({
           !isSaving &&
           setIsEditing({
             categoryId: undefined,
-            subcategoryId: undefined,
             createNew: `${type}${
               category?.id ? `4categoryId:${category.id}` : ''
             }`,
@@ -247,15 +195,7 @@ export default function AddNew({
         color: startingColor,
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        if (type === CreateNewType.CATEGORY) {
-          await createCategory(values?.[type + 'Name'], values.color.hex);
-        } else {
-          await createSubcategory(
-            values?.[type + 'Name'],
-            values.color.hex,
-            values.inheritColor
-          );
-        }
+        await createCategory(values?.[type + 'Name'], values.color.hex);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
@@ -497,7 +437,6 @@ export default function AddNew({
                     !isSaving &&
                     setIsEditing({
                       categoryId: undefined,
-                      subcategoryId: undefined,
                       createNew: undefined,
                     })
                   }

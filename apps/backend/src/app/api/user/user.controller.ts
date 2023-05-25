@@ -53,9 +53,7 @@ export class UserController {
       registeringResult.user,
       [
         MeExtendedOption.CATEGORIES,
-        MeExtendedOption.SUBCATEGORIES,
         MeExtendedOption.CATEGORIES_LIMIT,
-        MeExtendedOption.SUBCATEGORIES_LIMIT,
         MeExtendedOption.NOTES,
         MeExtendedOption.TODAYS_TIMELOGS,
       ]
@@ -87,9 +85,7 @@ export class UserController {
       validatingResult.user,
       [
         MeExtendedOption.CATEGORIES,
-        MeExtendedOption.SUBCATEGORIES,
         MeExtendedOption.CATEGORIES_LIMIT,
-        MeExtendedOption.SUBCATEGORIES_LIMIT,
         MeExtendedOption.NOTES,
         MeExtendedOption.TODAYS_TIMELOGS,
       ]

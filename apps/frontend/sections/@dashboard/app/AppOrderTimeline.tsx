@@ -45,7 +45,7 @@ export default function AppOrderTimeline({
                     <GroupedPeriod
                       group={group}
                       user={user}
-                      key={group.subcategory?.id || group.category?.id}
+                      key={group.category?.id}
                     ></GroupedPeriod>
                   )
                 )}
@@ -87,7 +87,7 @@ function GroupedPeriod({ group, user }) {
     return () => clearInterval(intervalId);
   }, []);
 
-  const color = group?.subcategory?.color ?? group?.category?.color;
+  const color = group?.category?.color;
 
   return (
     <TimelineItem
@@ -108,7 +108,6 @@ function GroupedPeriod({ group, user }) {
       <TimelineContent>
         <Typography variant="subtitle2">
           {group.category?.name}
-          {group.subcategory && <> - {group.subcategory?.name}</>}{' '}
           <span
             style={{
               color: getHexFromRGBObject(
@@ -161,8 +160,7 @@ function DetailPeriod({ timeLogExtended, user }) {
     return () => clearInterval(intervalId);
   }, []);
 
-  const color =
-    timeLogExtended?.subcategory?.color ?? timeLogExtended?.category?.color;
+  const color = timeLogExtended?.category?.color;
 
   return (
     <TimelineItem
@@ -183,9 +181,6 @@ function DetailPeriod({ timeLogExtended, user }) {
       <TimelineContent>
         <Typography variant="subtitle2">
           {timeLogExtended.category?.name}
-          {timeLogExtended.subcategory && (
-            <> - {timeLogExtended.subcategory?.name}</>
-          )}{' '}
           <span
             style={{
               color: getHexFromRGBObject(

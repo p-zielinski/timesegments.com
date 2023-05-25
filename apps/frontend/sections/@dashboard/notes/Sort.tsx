@@ -37,11 +37,7 @@ export default function SortNotes({
 
   useEffect(() => {
     setNotes(sortNotes(notes, sortOrder));
-  }, [
-    sortOrder,
-    //this gets current state of categories and subcategories names
-    notes?.map((note) => note?.id).join(','),
-  ]);
+  }, [sortOrder, notes]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);

@@ -88,20 +88,15 @@ export default function EditCategory({
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
-          const subcategories = category.subcategories.map((subcategory) => {
-            subcategory.active = false;
-            return subcategory;
-          });
           if (category.id === response.category?.id) {
-            const updatedCategory = { ...response.category, subcategories };
+            const updatedCategory = { ...response.category };
             setStaticCategory(updatedCategory);
             return updatedCategory;
           }
-          return { ...category, active: false, subcategories };
+          return { ...category, active: false };
         })
       );
       setIsEditing({
-        subcategoryId: undefined,
         categoryId: undefined,
         createNew: undefined,
       });
@@ -371,7 +366,6 @@ export default function EditCategory({
                       })
                     );
                     setIsEditing({
-                      subcategoryId: undefined,
                       categoryId: undefined,
                       createNew: undefined,
                     });

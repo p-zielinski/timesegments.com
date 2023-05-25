@@ -46,15 +46,10 @@ export default function CategoryCard({
   );
 
   useEffect(() => {
-    const currentGroupedTimeLog = groupedTimeLogsWithDateSorted
-      .filter(
-        (groupedTimeLogWithDateSorted) =>
-          !groupedTimeLogWithDateSorted.subcategory
-      )
-      .find(
-        (groupedTimeLogWithDateSorted) =>
-          groupedTimeLogWithDateSorted.category?.id === category?.id
-      );
+    const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
+      (groupedTimeLogWithDateSorted) =>
+        groupedTimeLogWithDateSorted.category?.id === category?.id
+    );
 
     if (!currentGroupedTimeLog) {
       return;
@@ -93,34 +88,6 @@ export default function CategoryCard({
 
   const { active: isActive } = category;
 
-  const doesAnySubcategoryWithinCurrentCategoryActive =
-    !!category.subcategories.find((subcategory) => subcategory.active);
-
-  const reverseExpandSubcategories = async () => {
-    await setCategoryExpandSubcategoriesInDB(!category.expandSubcategories);
-    setCategories(
-      [...categories].map((_category) => {
-        if (_category.id === category.id) {
-          return {
-            ..._category,
-            expandSubcategories: !_category.expandSubcategories,
-          };
-        }
-        return { ..._category };
-      })
-    );
-  };
-
-  const getVisibleSubcategories = (category, categories) => {
-    return (
-      categories
-        .find((_category) => _category.id === category.id)
-        ?.subcategories?.filter((subcategory) =>
-          viewMode === CategoriesPageMode.EDIT ? true : subcategory.visible
-        ) || []
-    );
-  };
-
   const getCategory = (category, categories) => {
     return categories.find((_category) => _category.id === category.id) || {};
   };
@@ -139,11 +106,10 @@ export default function CategoryCard({
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
-          const subcategories = category.subcategories;
           if (category.id === response.category?.id) {
-            return { ...response.category, subcategories };
+            return { ...response.category };
           }
-          return { ...category, subcategories };
+          return { ...category };
         })
       );
       if (response.controlValue) {
@@ -167,14 +133,10 @@ export default function CategoryCard({
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
-          const subcategories = category.subcategories.map((subcategory) => {
-            subcategory.active = false;
-            return subcategory;
-          });
           if (category.id === response.category?.id) {
-            return { ...response.category, subcategories };
+            return { ...response.category };
           }
-          return { ...category, active: false, subcategories };
+          return { ...category, active: false };
         })
       );
       if (response.controlValue) {
@@ -201,28 +163,6 @@ export default function CategoryCard({
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
       return; //skip setting isSaving(false)
-    }
-    setIsSaving(false);
-    return;
-  };
-
-  const setCategoryExpandSubcategoriesInDB = async (value) => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'category/set-expand-subcategories',
-      body: {
-        categoryId: category.id,
-        expandSubcategories: value,
-        controlValue,
-      },
-      method: 'POST',
-    });
-    if (response.controlValue) {
-      setControlValue(response.controlValue);
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
-      setIsSaving(true);
-      return;
     }
     setIsSaving(false);
     return;
@@ -289,7 +229,6 @@ export default function CategoryCard({
                 !isSaving &&
                 setIsEditing({
                   categoryId: undefined,
-                  subcategoryId: undefined,
                   createNew: undefined,
                   deleteCategory: undefined,
                 })
@@ -336,10 +275,9 @@ export default function CategoryCard({
                 '&:hover': !disableHover &&
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW && {
-                    border:
-                      isActive && !doesAnySubcategoryWithinCurrentCategoryActive
-                        ? `solid 2px ${RED}`
-                        : `solid 2px ${GREEN}`,
+                    border: isActive
+                      ? `solid 2px ${RED}`
+                      : `solid 2px ${GREEN}`,
                     borderStyle: 'dashed',
                     borderLeft: 0,
                     borderRight: 0,
@@ -388,10 +326,10 @@ export default function CategoryCard({
                 icon={'material-symbols:delete-forever-rounded'}
                 width={40}
                 sx={{
-                  m: -2,
-                  position: 'absolute',
-                  bottom: 34,
-                  right: 27,
+                  position: 'relative',
+                  top: '50%',
+                  left: '42%',
+                  transform: 'translate(-40%, -50%)',
                 }}
               />
             </Box>
@@ -441,10 +379,10 @@ export default function CategoryCard({
                     }
                     width={40}
                     sx={{
-                      m: -2,
-                      position: 'absolute',
-                      bottom: 34,
-                      left: 27,
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
                     }}
                   />
                 </Box>
@@ -478,14 +416,12 @@ export default function CategoryCard({
                     }
                     if (category.visible) {
                       return setIsEditing({
-                        subcategoryId: undefined,
                         categoryId: category.id,
                         createNew: undefined,
                       });
                     }
                     return setIsEditing({
                       categoryId: undefined,
-                      subcategoryId: undefined,
                       createNew: undefined,
                       deleteCategory: category.id,
                     });
@@ -499,10 +435,10 @@ export default function CategoryCard({
                     }
                     width={40}
                     sx={{
-                      m: -2,
-                      position: 'absolute',
-                      bottom: 34,
-                      left: 88,
+                      position: 'relative',
+                      top: '50%',
+                      left: '42%',
+                      transform: 'translate(-40%, -50%)',
                     }}
                   />
                 </Box>
@@ -561,11 +497,7 @@ export default function CategoryCard({
                   ? `solid 2px ${LIGHT_GREEN}`
                   : `solid 2px ${LIGHT_RED}`,
                 borderLeft: 0,
-                borderRadius:
-                  getVisibleSubcategories(category, categories).length ||
-                  viewMode !== CategoriesPageMode.VIEW
-                    ? 0
-                    : '12px',
+                borderRadius: '12px',
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,
                 cursor:
@@ -575,10 +507,9 @@ export default function CategoryCard({
                 '&:hover': !disableHover &&
                   !isSaving &&
                   viewMode === CategoriesPageMode.VIEW && {
-                    border:
-                      isActive && !doesAnySubcategoryWithinCurrentCategoryActive
-                        ? `solid 2px ${RED}`
-                        : `solid 2px ${GREEN}`,
+                    border: isActive
+                      ? `solid 2px ${RED}`
+                      : `solid 2px ${GREEN}`,
                     borderLeft: 0,
                     borderStyle: 'dashed',
                   },
@@ -607,43 +538,6 @@ export default function CategoryCard({
                 </Typography>
               </Stack>
             </Box>
-            {(getVisibleSubcategories(category, categories).length ||
-              viewMode !== CategoriesPageMode.VIEW) && (
-              <Box
-                sx={{
-                  width: `60px`,
-                  p: 2,
-                  color: isSaving
-                    ? IS_SAVING_HEX
-                    : !getCategory(category, categories)?.expandSubcategories
-                    ? GREEN
-                    : RED,
-                  background: `white`,
-                  border: `solid 2px ${LIGHT_SILVER}`,
-                  borderLeft: `0px`,
-                  borderTopRightRadius: 12,
-                  borderBottomRightRadius: 12,
-                  cursor: !isSaving && 'pointer',
-                  '&:hover': !disableHover &&
-                    !isSaving && {
-                      borderLeft: `0px`,
-                    },
-                }}
-                onClick={() =>
-                  !isSaving && reverseExpandSubcategories(category, categories)
-                }
-              >
-                <Iconify
-                  icon={
-                    getCategory(category, categories)?.expandSubcategories
-                      ? 'eva:chevron-up-fill'
-                      : 'eva:chevron-down-fill'
-                  }
-                  width={50}
-                  sx={{ m: -2, position: 'absolute', bottom: 27, right: 20 }}
-                />
-              </Box>
-            )}
           </Box>
         </Card>
       )}

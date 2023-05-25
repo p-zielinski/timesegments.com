@@ -42,9 +42,6 @@ export default function CancelCard({
         categories.map((category) => {
           return {
             ...category,
-            subcategories: (category.subcategories ?? []).map((subcategory) => {
-              return { ...subcategory, active: false };
-            }),
             active: false,
           };
         })

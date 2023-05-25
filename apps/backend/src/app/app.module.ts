@@ -12,8 +12,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { TokenService } from './api/token/token.service';
 import { LoggerService } from './common/logger/loger.service';
 import { CategoryController } from './api/category/category.controller';
-import { SubcategoryController } from './api/subcategory/subcategory.controller';
-import { SubcategoryService } from './api/subcategory/subcategory.service';
 import { CategoryService } from './api/category/category.service';
 import { TimeLogService } from './api/time-log/time-log.service';
 import { TokenController } from './api/token/token.controller';
@@ -37,7 +35,6 @@ import { NoteService } from './api/note/note.service';
   controllers: [
     UserController,
     CategoryController,
-    SubcategoryController,
     TokenController,
     TimeLogController,
     NoteController,
@@ -49,7 +46,6 @@ import { NoteService } from './api/note/note.service';
     UserService,
     PrismaClient,
     TokenService,
-    SubcategoryService,
     CategoryService,
     TimeLogService,
     NoteService,
