@@ -225,16 +225,4 @@ export class UserController {
     }
     return updateSortingCategoriesStatus;
   }
-
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
-  @Post('cancel-all-active')
-  async handleRequestCancelAllActive(@UserDecorator() user: User) {
-    const cancelAllActiveStatus = await this.userService.cancelAllActive(user);
-    if (cancelAllActiveStatus.success === false) {
-      throw new BadRequestException({
-        error: cancelAllActiveStatus.error,
-      });
-    }
-    return cancelAllActiveStatus;
-  }
 }

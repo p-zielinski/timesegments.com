@@ -13,7 +13,6 @@ import {ShowNoShowType} from '../../../enum/showNoShowType';
 import ShowLimitReached from './ShowLimitReached';
 import {ShowLimitReachedType} from '../../../enum/showLimitReachedType';
 import EditCategoriesButtonComponent from './EditCategoriesButtonComponent';
-import CancelCard from './CancelCard';
 import SortCategories from './Sort';
 import {Timezones} from '@test1/shared';
 import {getCurrentDate} from '../../../utils/getCurrentDate';
@@ -128,17 +127,6 @@ export default function CategoriesSection({
               )}
             </Box>
           </Grid>
-        )}
-        {viewMode === CategoriesPageMode.VIEW && (
-          <CancelCard
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            disableHover={disableHover}
-            categories={categories}
-            setCategories={setCategories}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-          />
         )}
         {viewMode === CategoriesPageMode.VIEW &&
           getNumberOfVisibleCategories(categories) > 10 && (
