@@ -73,14 +73,12 @@ export default function CategoryCard({
       if (isNaN(unfinishedPeriodDuration)) {
         return console.log(`unfinishedPeriodDuration is NaN`);
       }
-      const totalPeriodDuration = currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
-        unfinishedPeriodDuration
-      if(totalPeriodDuration>0){
-        setTotalPeriodInMs(
-          totalPeriodDuration
-        );
+      const totalPeriodDuration =
+        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
+        unfinishedPeriodDuration;
+      if (totalPeriodDuration > 0) {
+        setTotalPeriodInMs(totalPeriodDuration);
       }
-
     };
     setTotalPeriodInMsWithUnfinishedTimeLog();
     const intervalIdLocal = setInterval(
