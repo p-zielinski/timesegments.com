@@ -16,7 +16,6 @@ model User {
   notes             Note[]
   sortingNotes      NotesSortOption       @default(BY_DATE)
   categories        Category[]
-  subcategories     Subcategory[]
   sortingCategories CategoriesSortOption  @default(NEWEST)
   timezone          Timezone
   timeLogs          TimeLog[]
@@ -48,33 +47,15 @@ model Note {
 model Category {
   id                  String      @id @default(cuid())
   name                String
-  subcategories       Subcategory[]
   user                User        @relation(fields: [userId], references: [id])
   userId              String
   color               String
   active              Boolean     @default(false)
   visible             Boolean     @default(true)
-  expandSubcategories Boolean     @default(true)
   timeLogs            TimeLog[]
   deleted             Boolean     @default(false)
   createdAt           DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt           DateTime    @updatedAt @db.Timestamptz(3)
-}
-
-model Subcategory {
-  id            String      @id @default(cuid())
-  name          String
-  user          User        @relation(fields: [userId], references: [id])
-  userId        String
-  category      Category    @relation(fields: [categoryId], references: [id])
-  categoryId    String
-  color         String?
-  active        Boolean     @default(false)
-  visible       Boolean     @default(true)
-  timeLogs      TimeLog[]
-  deleted       Boolean     @default(false)
-  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }
 
 model TimeLog {
@@ -84,8 +65,6 @@ model TimeLog {
   comment       Comment?
   category      Category      @relation(fields: [categoryId], references: [id])
   categoryId    String
-  subcategory   Subcategory?  @relation(fields: [subcategoryId], references: [id])
-  subcategoryId String?
   createdAt     DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
   startedAt     DateTime      @default(now()) @db.Timestamptz(3)

@@ -3,7 +3,7 @@ import {styled} from '@mui/material/styles'; //
 import Header from './header';
 import Nav from './nav';
 import {DashboardPageState} from '../../enum/DashboardPageState';
-import {Category, Subcategory, User} from '@prisma/client'; // ----------------------------------------------------------------------
+import {Category, User} from '@prisma/client'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -42,11 +42,7 @@ export default function DashboardLayout({
 }: {
   children: any;
   user: User;
-  setUser?: Dispatch<
-    SetStateAction<
-      User & { categories: (Category & { subcategories: Subcategory[] })[] }
-    >
-  >;
+  setUser?: Dispatch<SetStateAction<User & { categories: Category[] }>>;
   title?: string;
   currentPageState?: DashboardPageState;
   setCurrentPageState?: (dashboardPageState: DashboardPageState) => void;

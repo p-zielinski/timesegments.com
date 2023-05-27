@@ -1,18 +1,17 @@
 import { Prisma } from '@prisma/client';
 
-const userWithCategoriesAndSubcategories = Prisma.validator<Prisma.UserArgs>()({
-  include: { categories: { include: { subcategories: true } } },
+const userWithCategories = Prisma.validator<Prisma.UserArgs>()({
+  include: { categories: true },
 });
 
-export type UserWithCategoriesAndSubcategories = Prisma.UserGetPayload<
-  typeof userWithCategoriesAndSubcategories
+export type UserWithCategories = Prisma.UserGetPayload<
+  typeof userWithCategories
 >;
 
-const userWithCategoriesAndSubcategoriesAndNotes =
-  Prisma.validator<Prisma.UserArgs>()({
-    include: { categories: { include: { subcategories: true } }, notes: true },
-  });
+const userWithCategoriesAndNotes = Prisma.validator<Prisma.UserArgs>()({
+  include: { categories: true, notes: true },
+});
 
-export type UserWithCategoriesAndSubcategoriesAndNotes = Prisma.UserGetPayload<
-  typeof userWithCategoriesAndSubcategoriesAndNotes
+export type UserWithCategoriesAndNotes = Prisma.UserGetPayload<
+  typeof userWithCategoriesAndNotes
 >;

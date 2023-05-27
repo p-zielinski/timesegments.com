@@ -53,9 +53,7 @@ export class UserController {
       registeringResult.user,
       [
         MeExtendedOption.CATEGORIES,
-        MeExtendedOption.SUBCATEGORIES,
         MeExtendedOption.CATEGORIES_LIMIT,
-        MeExtendedOption.SUBCATEGORIES_LIMIT,
         MeExtendedOption.NOTES,
         MeExtendedOption.TODAYS_TIMELOGS,
       ]
@@ -87,9 +85,7 @@ export class UserController {
       validatingResult.user,
       [
         MeExtendedOption.CATEGORIES,
-        MeExtendedOption.SUBCATEGORIES,
         MeExtendedOption.CATEGORIES_LIMIT,
-        MeExtendedOption.SUBCATEGORIES_LIMIT,
         MeExtendedOption.NOTES,
         MeExtendedOption.TODAYS_TIMELOGS,
       ]
@@ -228,17 +224,5 @@ export class UserController {
       });
     }
     return updateSortingCategoriesStatus;
-  }
-
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
-  @Post('cancel-all-active')
-  async handleRequestCancelAllActive(@UserDecorator() user: User) {
-    const cancelAllActiveStatus = await this.userService.cancelAllActive(user);
-    if (cancelAllActiveStatus.success === false) {
-      throw new BadRequestException({
-        error: cancelAllActiveStatus.error,
-      });
-    }
-    return cancelAllActiveStatus;
   }
 }

@@ -1,4 +1,4 @@
-import { Category, Subcategory, TimeLog } from '@prisma/client';
+import { Category, TimeLog } from '@prisma/client';
 import { FromToDate, Timezones } from '@test1/shared';
 import { DateTime } from 'luxon';
 
@@ -9,8 +9,7 @@ export type TimeLogWithinCurrentPeriodISO =
       ended: true;
       startedAt: string;
       endedAt: string;
-      categories: Category | undefined;
-      subcategories: Subcategory | undefined;
+      categories: Category[] | undefined;
       periodTotalMs: number;
       periodInHours: number;
       periodInMinutes: number;
@@ -22,8 +21,7 @@ export type TimeLogWithinCurrentPeriodISO =
       ended: false;
       startedAt: string;
       endedAt: undefined;
-      categories: Category | undefined;
-      subcategories: Subcategory | undefined;
+      categories: Category[] | undefined;
       periodTotalMs: undefined;
       periodInHours: undefined;
       periodInMinutes: undefined;
@@ -37,8 +35,7 @@ export type TimeLogWithinCurrentPeriod =
       ended: true;
       startedAt: DateTime;
       endedAt: DateTime;
-      categories: Category | undefined;
-      subcategories: Subcategory | undefined;
+      categories: Category[] | undefined;
       periodTotalMs: number;
       periodInHours: number;
       periodInMinutes: number;
@@ -50,8 +47,7 @@ export type TimeLogWithinCurrentPeriod =
       ended: false;
       startedAt: DateTime;
       endedAt: undefined;
-      categories: Category | undefined;
-      subcategories: Subcategory | undefined;
+      categories: Category[] | undefined;
       periodTotalMs: undefined;
       periodInHours: undefined;
       periodInMinutes: undefined;
@@ -64,7 +60,6 @@ export const findTimeLogsWithinCurrentPeriod = ({
   fromDate,
   toDate,
   categories,
-  subcategories,
   options,
 }: {
   allTimeLogs: TimeLog[];
@@ -72,7 +67,6 @@ export const findTimeLogsWithinCurrentPeriod = ({
   fromDate: FromToDate;
   toDate?: FromToDate;
   categories: Category[];
-  subcategories: Subcategory[];
   options?: { asIso: true };
 }): TimeLogWithinCurrentPeriod[] | TimeLogWithinCurrentPeriodISO[] => {
   const fromDateTime = DateTime.fromObject(
@@ -156,11 +150,6 @@ export const findTimeLogsWithinCurrentPeriod = ({
       endedAt: options?.asIso && ended ? endedAt.toISOTime() : endedAt,
       category: timeLog.categoryId
         ? categories.find((category) => category.id === timeLog.categoryId)
-        : undefined,
-      subcategory: timeLog.subcategoryId
-        ? subcategories.find(
-            (subcategory) => subcategory.id === timeLog.subcategoryId
-          )
         : undefined,
       periodTotalMs: ended ? endedAt.ts - startedAt.ts : undefined,
       periodInHours,

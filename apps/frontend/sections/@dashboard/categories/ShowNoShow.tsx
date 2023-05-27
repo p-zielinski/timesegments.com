@@ -30,10 +30,6 @@ export default function ShowNoShow({
     </CardBlock>
   );
 
-  if (type === ShowNoShowType.SUBCATEGORIES) {
-    return Card;
-  }
-
   return (
     <Grid key={`no_${type}_to_show`} item xs={1} sm={1} md={1}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

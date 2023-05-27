@@ -3,10 +3,10 @@ import {useEffect, useState} from 'react';
 import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import {CategoriesSortOption, CategoryWithSubcategories} from '@test1/shared';
+import {CategoriesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
-import {User} from '@prisma/client';
+import {Category, User} from '@prisma/client';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 
@@ -44,8 +44,8 @@ export default function SortCategories({
   setIsSaving,
 }: {
   user: User;
-  categories: CategoryWithSubcategories[];
-  setCategories: (categories: CategoryWithSubcategories[]) => unknown;
+  categories: Category[];
+  setCategories: (categories: Category[]) => unknown;
   controlValue: string;
   setControlValue: (controlValue?: string) => void;
   isSaving: boolean;
@@ -59,21 +59,7 @@ export default function SortCategories({
 
   useEffect(() => {
     setCategories(sortCategories(categories, sortOrder));
-  }, [
-    sortOrder,
-    //this gets current state of categories and subcategories names
-    categories
-      .map((category) => {
-        return [
-          category.name,
-          ...(category.subcategories ?? []).map(
-            (subcategory) => subcategory.name
-          ),
-        ].join(',');
-      })
-      .join(','),
-    user?.id,
-  ]);
+  }, [sortOrder, categories, user?.id]);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);

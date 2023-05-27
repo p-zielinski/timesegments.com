@@ -1,7 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
-import { SubcategoryService } from '../subcategory/subcategory.service';
 import { DateTime } from 'luxon';
 import { TimeLog, User } from '@prisma/client';
 import { FromToDate, Timezones } from '@test1/shared';
@@ -11,12 +10,10 @@ export class TimeLogService {
   constructor(
     private prisma: PrismaService,
     @Inject(forwardRef(() => CategoryService))
-    private categoryService: CategoryService,
-    @Inject(forwardRef(() => SubcategoryService))
-    private subcategoryService: SubcategoryService
+    private categoryService: CategoryService
   ) {}
 
-  public async findFromToTimeLogsEnrichedWithCategoriesAndSubcategories(
+  public async findFromToTimeLogsEnrichedWithCategories(
     user: User,
     fromRaw: FromToDate,
     toRaw: FromToDate
@@ -29,26 +26,19 @@ export class TimeLogService {
     );
     const { success } = findFromToTimeLogsResult;
     if (!success || !findFromToTimeLogsResult.timeLogs) {
-      return { ...findFromToTimeLogsResult, categories: [], subcategories: [] };
+      return { ...findFromToTimeLogsResult, categories: [] };
     }
     const { timeLogs } = findFromToTimeLogsResult;
     const allCategoriesIdsFoundInTimeLogs = new Set();
-    const allSubcategoriesIdsFoundInTimeLogs = new Set();
     timeLogs.forEach((timeLog) => {
       if (typeof timeLog.categoryId === 'string') {
         allCategoriesIdsFoundInTimeLogs.add(timeLog.categoryId);
-      }
-      if (timeLog.subcategoryId) {
-        allSubcategoriesIdsFoundInTimeLogs.add(timeLog.subcategoryId);
       }
     });
     const categories = await this.categoryService.findManyIfInIdList([
       ...allCategoriesIdsFoundInTimeLogs,
     ] as string[]);
-    const subcategories = await this.subcategoryService.findManyIfInIdList([
-      ...allSubcategoriesIdsFoundInTimeLogs,
-    ] as string[]);
-    return { ...findFromToTimeLogsResult, categories, subcategories };
+    return { ...findFromToTimeLogsResult, categories };
   }
 
   public async findFirstTimeLogWhereNotEnded(userId: string) {
@@ -64,13 +54,9 @@ export class TimeLogService {
     });
   }
 
-  public async createNew(
-    userId: string,
-    categoryId?: string,
-    subcategoryId?: string
-  ) {
+  public async createNew(userId: string, categoryId?: string) {
     return await this.prisma.timeLog.create({
-      data: { userId, categoryId, subcategoryId },
+      data: { userId, categoryId },
     });
   }
 

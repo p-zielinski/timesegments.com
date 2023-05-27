@@ -4,17 +4,8 @@ export const getGroupedTimeLogsWithDateSorted = (timeLogsWithinActiveDate) => {
     let index;
     for (const i in grouped) {
       if (grouped[i][0]?.category?.id === dateTimeLog?.category?.id) {
-        if (
-          grouped[i][0]?.subcategory === undefined &&
-          dateTimeLog?.subcategory === undefined
-        ) {
-          index = i;
-          break;
-        }
-        if (grouped[i][0]?.subcategory?.id === dateTimeLog?.subcategory?.id) {
-          index = i;
-          break;
-        }
+        index = i;
+        break;
       }
     }
     if (index) {
@@ -26,7 +17,6 @@ export const getGroupedTimeLogsWithDateSorted = (timeLogsWithinActiveDate) => {
   return grouped
     .map((group) => {
       const category = group[0]?.category;
-      const subcategory = group[0]?.subcategory;
       const notFinishedPeriod = group.find(
         (timeLogsWithinDate) => timeLogsWithinDate.ended === false
       );
@@ -42,7 +32,6 @@ export const getGroupedTimeLogsWithDateSorted = (timeLogsWithinActiveDate) => {
       );
       return {
         category,
-        subcategory,
         notFinishedPeriod,
         ended,
         totalPeriodInMsWithoutUnfinishedTimeLog,

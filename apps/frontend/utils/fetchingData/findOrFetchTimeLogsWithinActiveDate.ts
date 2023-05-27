@@ -45,7 +45,6 @@ export const findOrFetchTimeLogsWithinActiveDate = async (
       fromDate: activeDate.c,
       toDate: activeDate.c,
       categories: response.categories,
-      subcategories: response.subcategories,
     });
     setTimeLogsWithinDates([
       ...timeLogsWithinDates,

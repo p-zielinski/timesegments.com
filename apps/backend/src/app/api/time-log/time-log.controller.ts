@@ -23,7 +23,7 @@ export class TimeLogController {
   ) {
     const { from, to } = fromToDatesDto;
     const findFromToTimeLogsResult =
-      await this.timeLogService.findFromToTimeLogsEnrichedWithCategoriesAndSubcategories(
+      await this.timeLogService.findFromToTimeLogsEnrichedWithCategories(
         user,
         from,
         to

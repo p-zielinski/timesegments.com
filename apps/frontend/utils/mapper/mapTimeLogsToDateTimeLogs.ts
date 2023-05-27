@@ -35,12 +35,6 @@ export const mapTimeLogsToDateTimeLogs = (
       category: timeLog.categoryId
         ? categories.find((category) => category.id === timeLog.categoryId)
         : undefined,
-      subcategory: timeLog.subcategoryId
-        ? (
-            categories.find((category) => category.id === timeLog.categoryId)
-              .subcategories || []
-          ).find((subcategory) => subcategory.id === timeLog.subcategoryId)
-        : undefined,
       periodTotalMs: ended ? endedAt.ts - startedAt.ts : undefined,
       periodInHours,
       periodInMinutes,

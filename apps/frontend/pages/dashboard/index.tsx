@@ -1,13 +1,6 @@
 import {Box, Container, useMediaQuery} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {
-  CategoryWithSubcategories,
-  Limits,
-  MeExtendedOption,
-  Timezones,
-  UserWithCategoriesAndSubcategories,
-  UserWithCategoriesAndSubcategoriesAndNotes,
-} from '@test1/shared';
+import {Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
 import {CategoriesPageMode} from '../../enum/categoriesPageMode';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
@@ -18,7 +11,7 @@ import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgb
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {NotesSection} from '../../sections/@dashboard/notes';
-import {Note, TimeLog} from '@prisma/client';
+import {Category, Note, TimeLog} from '@prisma/client';
 import navConfig from '../../layouts/dashboard/nav/config';
 import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
@@ -60,7 +53,7 @@ const getTimeLogsWithinDatesFromIsoType = (timeLogsWithDatesISO) => {
 };
 
 type Props = {
-  user: UserWithCategoriesAndSubcategories;
+  user: UserWithCategories;
   limits: Limits;
   notes: Note[];
   timeLogsWithDatesISO?: TimeLogsWithinDateISO[];
@@ -74,9 +67,7 @@ export default function Index({
   randomSliderHexColor: randomSliderHexColor,
   timeLogsWithDatesISO,
 }: Props) {
-  const [user, setUser] = useState<UserWithCategoriesAndSubcategories>(
-    serverSideFetchedUser
-  );
+  const [user, setUser] = useState<UserWithCategories>(serverSideFetchedUser);
 
   const width1200px = useMediaQuery('(min-width:1200px)');
 
@@ -148,9 +139,7 @@ export default function Index({
       body: {
         extend: [
           MeExtendedOption.CATEGORIES,
-          MeExtendedOption.SUBCATEGORIES,
           MeExtendedOption.CATEGORIES_LIMIT,
-          MeExtendedOption.SUBCATEGORIES_LIMIT,
           MeExtendedOption.NOTES,
         ],
       },
@@ -174,7 +163,7 @@ export default function Index({
   const limits: Limits = serverSideFetchedLimits;
 
   //Categories page states
-  const [categories, setCategories] = useState<CategoryWithSubcategories[]>(
+  const [categories, setCategories] = useState<Category[]>(
     user?.categories || []
   );
   const [notes, setNotes] = useState<Note[]>(serverSideFetchedNotes || []);
@@ -236,7 +225,7 @@ export default function Index({
       setUser={setUser}
       title={
         currentPageState === DashboardPageState.CATEGORIES
-          ? 'Categories & subcategories'
+          ? 'Categories'
           : currentPageState === DashboardPageState.NOTES
           ? 'Recent notes'
           : undefined
@@ -314,7 +303,7 @@ export const getServerSideProps = async ({ req, res }) => {
 
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-  let user: UserWithCategoriesAndSubcategoriesAndNotes,
+  let user: UserWithCategoriesAndNotes,
     limits: Limits,
     notes: Note[],
     timeLogs: TimeLog[];
@@ -332,9 +321,7 @@ export const getServerSideProps = async ({ req, res }) => {
           body: JSON.stringify({
             extend: [
               MeExtendedOption.CATEGORIES,
-              MeExtendedOption.SUBCATEGORIES,
               MeExtendedOption.CATEGORIES_LIMIT,
-              MeExtendedOption.SUBCATEGORIES_LIMIT,
               MeExtendedOption.NOTES,
               MeExtendedOption.TODAYS_TIMELOGS,
             ],
@@ -368,19 +355,7 @@ export const getServerSideProps = async ({ req, res }) => {
   }
   let timeLogsWithDatesISO;
   if (timeLogs) {
-    const allSubcategories = [].concat(
-      ...(user?.categories?.map?.(
-        (category) => category?.subcategories || []
-      ) || [])
-    );
-    const allCategories =
-      user?.categories?.map((category) => {
-        const categoryCopy = { ...category };
-        if (categoryCopy?.subcategories) {
-          delete categoryCopy.subcategories;
-        }
-        return categoryCopy;
-      }) || [];
+    const allCategories = user?.categories || [];
     const now = DateTime.now().setZone(Timezones[user.timezone]);
     const today = { month: now.month, year: now.year, day: now.day };
     timeLogsWithDatesISO = [
@@ -392,7 +367,6 @@ export const getServerSideProps = async ({ req, res }) => {
             userTimezone: Timezones[user.timezone],
             fromDate: today,
             categories: allCategories,
-            subcategories: allSubcategories,
             options: { asIso: true },
           }) as TimeLogWithinCurrentPeriodISO[]
         ),

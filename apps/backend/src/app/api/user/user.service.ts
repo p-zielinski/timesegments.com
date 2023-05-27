@@ -6,7 +6,6 @@ import { JwtService } from '@nestjs/jwt';
 import { checkHashedString } from '../../common/checkHashedString';
 import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
-import { SubcategoryService } from '../subcategory/subcategory.service';
 import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
@@ -29,7 +28,6 @@ export class UserService {
     private jwtService: JwtService,
     private readonly tokenService: TokenService,
     private readonly categoryService: CategoryService,
-    private readonly subcategoryService: SubcategoryService,
     private readonly timeLogService: TimeLogService,
     private loggerService: LoggerService
   ) {}
@@ -50,17 +48,7 @@ export class UserService {
   }> {
     let timeLogs;
     const include: Prisma.UserInclude = {};
-    if (
-      extend.includes(MeExtendedOption.CATEGORIES) &&
-      extend.includes(MeExtendedOption.SUBCATEGORIES)
-    ) {
-      include.categories = {
-        where: { deleted: false },
-        include: {
-          subcategories: { where: { deleted: false } },
-        },
-      };
-    } else if (extend.includes(MeExtendedOption.CATEGORIES)) {
+    if (extend.includes(MeExtendedOption.CATEGORIES)) {
       include.categories = { where: { deleted: false } };
     }
 
@@ -75,34 +63,26 @@ export class UserService {
         await this.timeLogService.findFromToTimeLogs(user, today, today);
       if (findFromToTimeLogsResult.success === false) {
         this.loggerService.error(
-          `Could not find todays timelogs for user: ${user.id}`
+          `Could not find today's time logs for user: ${user.id}`
         );
       } else {
         timeLogs = findFromToTimeLogsResult?.timeLogs;
       }
     }
 
-    const limits: { categoriesLimit?: number; subcategoriesLimit?: number } =
-      {};
+    const limits: { categoriesLimit?: number } = {};
     if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
       limits.categoriesLimit = this.configService.get<number>(
         'MAX_NUMBER_OF_CATEGORIES_PER_USER'
       );
     }
-    if (extend.includes(MeExtendedOption.SUBCATEGORIES_LIMIT)) {
-      limits.subcategoriesLimit = this.configService.get<number>(
-        'MAX_NUMBER_OF_SUBCATEGORIES_PER_CATEGORY'
-      );
-    }
     return {
-      user:
-        extend.includes(MeExtendedOption.CATEGORIES) ||
-        extend.includes(MeExtendedOption.SUBCATEGORIES)
-          ? await this.prisma.user.findFirst({
-              where: { id: user.id },
-              include,
-            })
-          : undefined,
+      user: extend.includes(MeExtendedOption.CATEGORIES)
+        ? await this.prisma.user.findFirst({
+            where: { id: user.id },
+            include,
+          })
+        : undefined,
       limits: Object.keys(limits).length ? limits : undefined,
       timeLogs,
     };
@@ -128,19 +108,6 @@ export class UserService {
       timeLogNotEnded.categoryId,
       false
     );
-    if (timeLogNotEnded.subcategoryId) {
-      const subcategory =
-        await this.subcategoryService.setSubcategoryActiveState(
-          timeLogNotEnded.subcategoryId,
-          false
-        );
-      if (subcategory.active !== false) {
-        return {
-          success: false,
-          error: 'Could not set subcategory active state',
-        };
-      }
-    }
     if (category.active !== false) {
       return {
         success: false,
