@@ -12,7 +12,7 @@ import React, {useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
 import {StatusCodes} from 'http-status-codes';
-import {mapTimeLogsToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
+import {mapTimeLogToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
 import {Timezones} from '@test1/shared';
 import {DateTime} from 'luxon';
 import {getDuration} from '../../../utils/mapper/getDuration'; // ----------------------------------------------------------------------
@@ -138,7 +138,7 @@ export default function CategoryCard({
           if (category.id === response.category?.id) {
             return { ...response.category };
           }
-          return { ...category, active: false };
+          return { ...category };
         })
       );
       if (response.controlValue) {
@@ -147,19 +147,19 @@ export default function CategoryCard({
       if (!checkActiveDateCorrectness()) {
         return; //skip setting isSaving(false)
       }
-      if (response.timeLogs) {
-        const timeLogsIds = response.timeLogs.map((timeLog) => timeLog.id);
-        const timeLogsExtended = mapTimeLogsToDateTimeLogs(
-          response.timeLogs,
+      if (response.timeLog) {
+        const responseTimeLogId = response.timeLog.id;
+        const timeLogExtended = mapTimeLogToDateTimeLogs(
+          response.timeLog,
           Timezones[user.timezone],
           categories
         );
         setTimeLogsWithinActiveDate([
           ...timeLogsWithinActiveDate.filter(
             (timeLogsExtended) =>
-              !timeLogsIds.includes(timeLogsExtended.timeLogId)
+              responseTimeLogId !== timeLogsExtended.timeLogId
           ),
-          ...timeLogsExtended,
+          timeLogExtended,
         ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {

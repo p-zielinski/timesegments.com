@@ -41,10 +41,17 @@ export class TimeLogService {
     return { ...findFromToTimeLogsResult, categories };
   }
 
-  public async findFirstTimeLogWhereNotEnded(userId: string) {
-    return await this.prisma.timeLog.findFirst({
-      where: { userId, endedAt: null },
+  public async endFirstNotFinishedTimeLogsFor(
+    userId: string,
+    categoryId: string
+  ) {
+    const result = await this.prisma.timeLog.findFirst({
+      where: { userId, endedAt: null, categoryId },
+      select: { id: true },
     });
+    if (result.id) {
+      return this.setTimeLogAsEnded(result.id);
+    }
   }
 
   public async setTimeLogAsEnded(id: string) {
