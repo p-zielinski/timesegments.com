@@ -88,38 +88,6 @@ export class UserService {
     };
   }
 
-  public async cancelAllActive(user: User): Promise<
-    | {
-        success: true;
-        message: string;
-      }
-    | { success: false; error: string }
-  > {
-    const timeLogNotEnded =
-      await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
-    if (!timeLogNotEnded) {
-      return {
-        success: true,
-        message: 'All activities were cancelled successfully.',
-      };
-    }
-    await this.timeLogService.setTimeLogAsEnded(timeLogNotEnded.id);
-    const category = await this.categoryService.setCategoryActiveState(
-      timeLogNotEnded.categoryId,
-      false
-    );
-    if (category.active !== false) {
-      return {
-        success: false,
-        error: 'Could not set category active state',
-      };
-    }
-    return {
-      success: true,
-      message: 'All activities were cancelled successfully.',
-    };
-  }
-
   public async createNewUser(
     data: {
       email: string;

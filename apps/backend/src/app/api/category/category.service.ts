@@ -78,7 +78,7 @@ export class CategoryService {
     categoryId: string,
     user: User
   ): Promise<
-    | { success: true; category?: Category; timeLogs: TimeLog[] }
+    | { success: true; category?: Category; timeLog: TimeLog }
     | { success: false; error: string }
   > {
     const categoryWithUser = await this.findIfNotDeleted(categoryId, {
@@ -90,49 +90,23 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
-    const timeLogNotEnded =
-      await this.timeLogService.findFirstTimeLogWhereNotEnded(user.id);
-    if (!timeLogNotEnded) {
-      const newTimeLog = await this.timeLogService.createNew(
-        user.id,
-        categoryWithUser.id
-      );
+    if (categoryWithUser.active === true) {
       return {
         success: true,
-        category: await this.setCategoryActiveState(categoryWithUser.id, true),
-        timeLogs: [newTimeLog],
+        category: await this.setCategoryActiveState(categoryWithUser.id, false),
+        timeLog: await this.timeLogService.endFirstNotFinishedTimeLogsFor(
+          user.id,
+          categoryWithUser.id
+        ),
       };
     }
-    if (timeLogNotEnded.categoryId === categoryWithUser.id) {
-      const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
-        timeLogNotEnded.id
-      );
-      await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
-      return {
-        success: true,
-        category: {
-          ...categoryWithUser,
-          active: false,
-          user: undefined,
-        } as Category,
-        timeLogs: [timeLogJustEnded],
-      };
-    }
-    await this.setCategoryActiveState(timeLogNotEnded.categoryId, false);
-    const timeLogJustEnded = await this.timeLogService.setTimeLogAsEnded(
-      timeLogNotEnded.id
-    );
-    const newTimeLog = await this.timeLogService.createNew(
-      user.id,
-      categoryWithUser.id
-    );
     return {
       success: true,
-      category: await this.setCategoryActiveState(
-        categoryWithUser.id,
-        timeLogNotEnded.categoryId !== categoryWithUser.id
+      category: await this.setCategoryActiveState(categoryWithUser.id, true),
+      timeLog: await this.timeLogService.createNew(
+        user.id,
+        categoryWithUser.id
       ),
-      timeLogs: [timeLogJustEnded, newTimeLog],
     };
   }
 
