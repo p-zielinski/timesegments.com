@@ -1,16 +1,13 @@
 import PropTypes from 'prop-types';
 // @mui
-import {Box, Card, Stack, Typography} from '@mui/material'; // utils
+import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
-import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, LIGHT_SILVER, RED, SUPER_LIGHT_SILVER,} from '../../../consts/colors';
-import {getRepeatingLinearGradient} from '../../../utils/colors/getRepeatingLinearGradient';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
 import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import React, {useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
-import {getHexFromRGBAString} from '../../../utils/colors/getHexFromRGBString';
 import {StatusCodes} from 'http-status-codes';
 import {mapTimeLogToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
 import {Timezones} from '@test1/shared';
@@ -315,7 +312,7 @@ export default function CategoryCard({
         </Box>
       </Box>
       <Box sx={{ display: 'flex', mr: '-12px' }}>
-        {category.showRecentNotes && (
+        {category.showRecentNotes && viewMode === CategoriesPageMode.VIEW && (
           <Box
             sx={{
               borderRadius: '10px',
@@ -337,6 +334,43 @@ export default function CategoryCard({
           >
             <Iconify
               icon={'ic:outline-note-add'}
+              width={40}
+              sx={{
+                position: 'relative',
+                top: '50%',
+                left: '40%',
+                transform: 'translate(-40%, -50%)',
+              }}
+            />
+          </Box>
+        )}
+        {category.showRecentNotes && viewMode === CategoriesPageMode.EDIT && (
+          <Box
+            sx={{
+              borderRadius: '10px',
+              border: `solid 1px ${getHexFromRGBAObject(
+                getRgbaObjectFromHexString(category.color, 0.2)
+              )}`,
+
+              pl: '5px',
+              pr: '5px',
+              '&:hover': !disableHover &&
+                !isSaving && {
+                  cursor: 'pointer',
+                  border: `solid 1px ${getHexFromRGBAObject(
+                    getRgbaObjectFromHexString(category.color, 1)
+                  )}`,
+                },
+            }}
+            onClick={() =>
+              !isSaving &&
+              setIsEditing({
+                categoryId: category.id,
+              })
+            }
+          >
+            <Iconify
+              icon={'fluent:edit-32-regular'}
               width={40}
               sx={{
                 position: 'relative',
@@ -381,361 +415,6 @@ export default function CategoryCard({
           />
         </Box>
       </Box>
-    </Box>
-  );
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {isEditing.categoryId === category.id &&
-      viewMode === CategoriesPageMode.EDIT ? (
-        <EditCategory
-          controlValue={controlValue}
-          setControlValue={setControlValue}
-          categories={categories}
-          setCategories={setCategories}
-          category={category}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
-        />
-      ) : isEditing?.deleteCategory === category.id ? (
-        <Card>
-          <Box sx={{ display: 'flex' }}>
-            <Box
-              sx={{
-                width: `60px`,
-                minWidth: '60px',
-                p: 2,
-                color: isSaving ? IS_SAVING_HEX : GREEN,
-                background: isSaving
-                  ? `white`
-                  : category.active
-                  ? SUPER_LIGHT_SILVER
-                  : 'white',
-                border: `solid 2px ${LIGHT_SILVER}`,
-                borderRight: `0px`,
-                borderTopLeftRadius: 12,
-                borderBottomLeftRadius: 12,
-                cursor: !isSaving && !category.active && 'pointer',
-              }}
-              onClick={() =>
-                !isSaving &&
-                setIsEditing({
-                  categoryId: undefined,
-                  createNew: undefined,
-                  deleteCategory: undefined,
-                })
-              }
-            >
-              <Iconify
-                icon={'mdi:cancel-bold'}
-                width={38}
-                sx={{
-                  m: -2,
-                  position: 'absolute',
-                  bottom: 35,
-                  left: 28,
-                }}
-              />
-            </Box>
-            <Box
-              sx={{
-                color: isSaving && IS_SAVING_HEX,
-                background: isSaving
-                  ? SUPER_LIGHT_SILVER
-                  : viewMode === CategoriesPageMode.EDIT
-                  ? getRepeatingLinearGradient(
-                      isSaving ? IS_SAVING_HEX : getHexFromRGBAString(RED),
-                      0.3,
-                      45,
-                      false
-                    )
-                  : isActive
-                  ? LIGHT_GREEN
-                  : LIGHT_RED,
-                flex: 1,
-                border: isSaving
-                  ? `solid 2px ${IS_SAVING_HEX}`
-                  : `solid 2px ${LIGHT_RED}`,
-                borderLeft: 0,
-                borderRight: 0,
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0,
-                cursor:
-                  !isSaving &&
-                  viewMode === CategoriesPageMode.VIEW &&
-                  'pointer',
-                '&:hover': !disableHover &&
-                  !isSaving &&
-                  viewMode === CategoriesPageMode.VIEW && {
-                    border: isActive
-                      ? `solid 2px ${RED}`
-                      : `solid 2px ${GREEN}`,
-                    borderStyle: 'dashed',
-                    borderLeft: 0,
-                    borderRight: 0,
-                  },
-              }}
-              onClick={() => !isSaving && null}
-            >
-              <Stack
-                spacing={1}
-                sx={{ p: 3 }}
-                direction="row"
-                alignItems="center"
-                justifyContent="left"
-              >
-                <Typography variant="subtitle3" noWrap>
-                  DELETE:{' '}
-                  <span
-                    style={{ fontWeight: 'bold', textDecoration: 'underline' }}
-                  >
-                    {getCategory(category, categories)?.name?.toUpperCase()}
-                  </span>{' '}
-                  ?
-                </Typography>
-              </Stack>
-            </Box>
-            <Box
-              sx={{
-                width: `61px`,
-                p: 2,
-                color: isSaving ? IS_SAVING_HEX : RED,
-                background: `white`,
-                border: `solid 2px ${LIGHT_SILVER}`,
-                borderLeft: `0px`,
-                borderTopRightRadius: 12,
-                borderBottomRightRadius: 12,
-                cursor: !isSaving && 'pointer',
-                '&:hover': !disableHover &&
-                  !isSaving && {
-                    borderLeft: `0px`,
-                    borderColor: RED,
-                  },
-              }}
-              onClick={() => !isSaving && setCategoryAsDeleted()}
-            >
-              <Iconify
-                icon={'material-symbols:delete-forever-rounded'}
-                width={40}
-                sx={{
-                  position: 'relative',
-                  top: '50%',
-                  left: '42%',
-                  transform: 'translate(-40%, -50%)',
-                }}
-              />
-            </Box>
-          </Box>
-        </Card>
-      ) : (
-        <Card>
-          <Box sx={{ display: 'flex' }}>
-            {viewMode === CategoriesPageMode.EDIT && (
-              <>
-                <Box
-                  sx={{
-                    width: `60px`,
-                    minWidth: '60px',
-                    p: 2,
-                    color:
-                      isSaving || category.active
-                        ? IS_SAVING_HEX
-                        : category.visible
-                        ? GREEN
-                        : RED,
-                    background: isSaving
-                      ? `white`
-                      : category.active
-                      ? SUPER_LIGHT_SILVER
-                      : 'white',
-                    border: `solid 2px ${LIGHT_SILVER}`,
-                    borderRight: `0px`,
-                    borderTopLeftRadius: 12,
-                    borderBottomLeftRadius: 12,
-                    cursor: !isSaving && !category.active && 'pointer',
-                    '&:hover': !disableHover &&
-                      !isSaving &&
-                      !category.active && {
-                        color: !category.visible ? GREEN : RED,
-                      },
-                  }}
-                  onClick={() =>
-                    !isSaving && !category.active && changeCategoryVisibility()
-                  }
-                >
-                  <Iconify
-                    icon={
-                      category.visible
-                        ? 'gridicons:visible'
-                        : 'gridicons:not-visible'
-                    }
-                    width={40}
-                    sx={{
-                      position: 'relative',
-                      top: '50%',
-                      left: '40%',
-                      transform: 'translate(-40%, -50%)',
-                    }}
-                  />
-                </Box>
-                <Box
-                  sx={{
-                    width: `60px`,
-                    minWidth: '60px',
-                    p: 2,
-                    color: isSaving
-                      ? IS_SAVING_HEX
-                      : category.visible
-                      ? GREEN
-                      : RED,
-                    background: `white`,
-                    borderTop: `solid 2px ${LIGHT_SILVER}`,
-                    borderBottom: `solid 2px ${LIGHT_SILVER}`,
-                    cursor: !isSaving && 'pointer',
-                    '&:hover': !disableHover &&
-                      !isSaving && {
-                        borderTop: `solid 2px ${
-                          category.visible ? LIGHT_SILVER : RED
-                        }`,
-                        borderBottom: `solid 2px ${
-                          category.visible ? LIGHT_SILVER : RED
-                        }`,
-                      },
-                  }}
-                  onClick={() => {
-                    if (isSaving) {
-                      return;
-                    }
-                    if (category.visible) {
-                      return setIsEditing({
-                        categoryId: category.id,
-                        createNew: undefined,
-                      });
-                    }
-                    return setIsEditing({
-                      categoryId: undefined,
-                      createNew: undefined,
-                      deleteCategory: category.id,
-                    });
-                  }}
-                >
-                  <Iconify
-                    icon={
-                      category.visible
-                        ? 'material-symbols:edit'
-                        : 'material-symbols:delete-forever-rounded'
-                    }
-                    width={40}
-                    sx={{
-                      position: 'relative',
-                      top: '50%',
-                      left: '42%',
-                      transform: 'translate(-40%, -50%)',
-                    }}
-                  />
-                </Box>
-              </>
-            )}
-
-            {viewMode === CategoriesPageMode.VIEW && (
-              <Box
-                sx={{
-                  width: `60px`,
-                  minWidth: '60px',
-                  p: 2,
-                  background: isSaving
-                    ? IS_SAVING_HEX
-                    : getRepeatingLinearGradient(category?.color, 0.3),
-                  border: isSaving
-                    ? `solid 2px ${IS_SAVING_HEX}`
-                    : isActive
-                    ? `solid 2px ${getHexFromRGBAObject({
-                        ...getRgbaObjectFromHexString(category?.color),
-                        a: 0.3,
-                      })}`
-                    : `solid 2px ${getHexFromRGBAObject({
-                        ...getRgbaObjectFromHexString(category?.color),
-                        a: 0.3,
-                      })}`,
-                  borderRight: 0,
-                  borderTopLeftRadius: 12,
-                  borderBottomLeftRadius: 12,
-                }}
-              />
-            )}
-            <Box
-              sx={{
-                color: isSaving && IS_SAVING_HEX,
-                background: isSaving
-                  ? SUPER_LIGHT_SILVER
-                  : viewMode === CategoriesPageMode.EDIT
-                  ? getRepeatingLinearGradient(
-                      isSaving ? IS_SAVING_HEX : category?.color,
-                      0.3,
-                      45,
-                      false
-                    )
-                  : isActive
-                  ? LIGHT_GREEN
-                  : LIGHT_RED,
-                flex: 1,
-                border: isSaving
-                  ? `solid 2px ${IS_SAVING_HEX}`
-                  : viewMode === CategoriesPageMode.EDIT
-                  ? `solid 2px ${getHexFromRGBAObject({
-                      ...getRgbaObjectFromHexString(category?.color),
-                      a: 0.3,
-                    })}`
-                  : isActive
-                  ? `solid 2px ${LIGHT_GREEN}`
-                  : `solid 2px ${LIGHT_RED}`,
-                borderLeft: 0,
-                borderRadius: '12px',
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0,
-                cursor:
-                  !isSaving &&
-                  viewMode === CategoriesPageMode.VIEW &&
-                  'pointer',
-                '&:hover': !disableHover &&
-                  !isSaving &&
-                  viewMode === CategoriesPageMode.VIEW && {
-                    border: isActive
-                      ? `solid 2px ${RED}`
-                      : `solid 2px ${GREEN}`,
-                    borderLeft: 0,
-                    borderStyle: 'dashed',
-                  },
-              }}
-              onClick={() =>
-                !isSaving &&
-                viewMode !== CategoriesPageMode.EDIT &&
-                changeCategoryActiveState()
-              }
-            >
-              <Stack
-                spacing={1}
-                sx={{ p: 3 }}
-                direction="row"
-                alignItems="center"
-                justifyContent="left"
-              >
-                <Typography variant="subtitle2">
-                  {getCategory(category, categories)?.name}
-                  {totalPeriodInMs && (
-                    <>
-                      <br />
-                      {getDuration(totalPeriodInMs)}
-                    </>
-                  )}
-                </Typography>
-              </Stack>
-            </Box>
-          </Box>
-        </Card>
-      )}
     </Box>
   );
 }
