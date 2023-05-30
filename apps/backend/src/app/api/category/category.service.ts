@@ -12,6 +12,39 @@ export class CategoryService {
     private readonly timeLogService: TimeLogService
   ) {}
 
+  public async updateCategoryShowRecentNotes(
+    categoryId: string,
+    showRecentNotes: boolean,
+    user: User
+  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
+      user: true,
+    });
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Category not found, bad request`,
+      };
+    }
+    if (categoryWithUser.showRecentNotes === showRecentNotes) {
+      return {
+        success: true,
+        category: { ...categoryWithUser, user: undefined } as Category,
+      };
+    }
+    const updatedCategory = await this.updateShowRecentNotes(
+      categoryId,
+      showRecentNotes
+    );
+    if (updatedCategory.showRecentNotes !== showRecentNotes) {
+      return {
+        success: false,
+        error: `Could not update expandSubcategories`,
+      };
+    }
+    return { success: true, category: updatedCategory };
+  }
+
   public async createCategory(
     user: User,
     name: string,
@@ -208,6 +241,16 @@ export class CategoryService {
     return await this.prisma.category.update({
       where: { id: categoryId },
       data: { name, color },
+    });
+  }
+
+  private async updateShowRecentNotes(
+    categoryId: string,
+    showRecentNotes: boolean
+  ) {
+    return await this.prisma.category.update({
+      where: { id: categoryId },
+      data: { showRecentNotes },
     });
   }
 }

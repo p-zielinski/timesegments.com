@@ -1,10 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateNoteDto {
   @IsString()
   @IsNotEmpty()
-  note: string;
-
-  @IsBoolean()
-  favorite: boolean;
+  text: string;
+  @IsOptional()
+  @IsString()
+  categoryId: string;
 }

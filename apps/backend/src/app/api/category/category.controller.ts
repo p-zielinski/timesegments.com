@@ -16,6 +16,7 @@ import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 import { UserService } from '../user/user.service';
+import { SetExpandSubcategoriesDto } from './dto/changeShowRecentNotes.dto';
 
 @UseGuards(JwtAuthGuard, CheckControlValueGuard)
 @Controller('category')
@@ -24,6 +25,30 @@ export class CategoryController {
     private categoryService: CategoryService,
     private userService: UserService
   ) {}
+
+  @Post('set-show-recent-notes')
+  async handleRequestSetExpandSubcategories(
+    @UserDecorator() user: User,
+    @Body() setExpandSubcategoriesDto: SetExpandSubcategoriesDto
+  ) {
+    console.log(123);
+    const { categoryId, showRecentNotes } = setExpandSubcategoriesDto;
+    const updateCategoryStatus =
+      await this.categoryService.updateCategoryShowRecentNotes(
+        categoryId,
+        showRecentNotes,
+        user
+      );
+    if (!updateCategoryStatus.success) {
+      throw new BadRequestException({
+        error: updateCategoryStatus.error,
+      });
+    }
+    return {
+      ...updateCategoryStatus,
+      controlValue: this.userService.getNewControlValue(user),
+    };
+  }
 
   @Post('create')
   async handleRequestCreateCategory(
