@@ -31,7 +31,6 @@ export class CategoryController {
     @UserDecorator() user: User,
     @Body() setExpandSubcategoriesDto: SetExpandSubcategoriesDto
   ) {
-    console.log(123);
     const { categoryId, showRecentNotes } = setExpandSubcategoriesDto;
     const updateCategoryStatus =
       await this.categoryService.updateCategoryShowRecentNotes(
