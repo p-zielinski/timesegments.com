@@ -4,8 +4,11 @@ export const getHexFromRGBAObject = (rgba: {
   r: number;
   g: number;
   b: number;
-  a: number;
+  a?: number;
 }) => {
+  if (!rgba.a) {
+    rgba.a = 1;
+  }
   const calculate = (color) => {
     return Math.round(255 - (255 - color) * rgba?.a || 1);
   };

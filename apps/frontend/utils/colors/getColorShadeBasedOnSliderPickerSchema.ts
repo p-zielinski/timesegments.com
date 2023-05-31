@@ -1,7 +1,7 @@
 export const getColorShadeBasedOnSliderPickerSchema = (
   rgbaObject,
   darknessLevel: 'dark' | 'normal' | 'bright' | 'very bright' = 'normal'
-) => {
+): { r: number; g: number; b: number } => {
   const rgbObject = {
     r: rgbaObject.r,
     g: rgbaObject.g,
@@ -65,5 +65,5 @@ export const getColorShadeBasedOnSliderPickerSchema = (
       baseColor[key] = 255;
     }
   }
-  return newRgbObject;
+  return newRgbObject as { r: number; g: number; b: number };
 };

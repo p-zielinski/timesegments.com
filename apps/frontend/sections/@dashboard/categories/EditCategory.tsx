@@ -1,25 +1,25 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import {
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
+  SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import { SliderPicker } from 'react-color';
+import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React, { useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../components/form/Text';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
-import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { getHexFromRGBObject } from 'apps/frontend/utils/colors/getHexFromRGBObject';
 
 export default function EditCategory({
   controlValue,
@@ -39,10 +39,10 @@ export default function EditCategory({
   });
 
   let StyledTextField, darkHexColor;
-  const setStyledTextField = (hexColor) => {
+  const setStyledTextField = (isSaving, hexColor) => {
     darkHexColor = getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
-        getRgbaObjectFromHexString(hexColor)
+        getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
       )
     );
     StyledTextField = styled(TextField)({
@@ -60,7 +60,12 @@ export default function EditCategory({
       },
       '& .MuiOutlinedInput-root': {
         '& fieldset': {
-          borderColor: hexColor,
+          borderColor: isSaving
+            ? IS_SAVING_HEX
+            : getHexFromRGBAObject({
+                ...getRgbaObjectFromHexString(hexColor),
+                a: 0.3,
+              }),
         },
         '&:hover fieldset': {
           borderColor: hexColor,
@@ -71,7 +76,7 @@ export default function EditCategory({
       },
     });
   };
-  setStyledTextField(isSaving ? IS_SAVING_HEX : category.color);
+  setStyledTextField(isSaving, category.color);
 
   const updateCategory = async (categoryName: string, color: string) => {
     setIsSaving(true);
@@ -118,7 +123,7 @@ export default function EditCategory({
           width: '18px',
           height: '18px',
           borderRadius: '50%',
-          transform: 'translate(-8px, -3px)',
+          transform: 'translate(-8px, -5px)',
           backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
           boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
         }}
@@ -144,6 +149,20 @@ export default function EditCategory({
       {({ handleSubmit, values, setFieldValue }) => {
         const isFormValid = validationSchema.isValidSync(values);
 
+        const backgroundColor = getHexFromRGBAObject(
+          getRgbaObjectFromHexString(
+            isSaving
+              ? IS_SAVING_HEX
+              : getHexFromRGBAObject(
+                  getColorShadeBasedOnSliderPickerSchema(
+                    getRgbaObjectFromHexString(values.color?.hex),
+                    'bright'
+                  )
+                ),
+            0.2
+          )
+        );
+
         return (
           <Card>
             <Box>
@@ -153,24 +172,12 @@ export default function EditCategory({
                   borderTopRightRadius: '12px',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: getRepeatingLinearGradient(
-                    isSaving ? IS_SAVING_HEX : values.color?.hex,
-                    0.3,
-                    45,
-                    false
-                  ),
-                  border: `solid 2px ${
-                    isSaving
-                      ? IS_SAVING_HEX
-                      : getHexFromRGBAObject({
-                          ...values.color.rgb,
-                          a: 0.3,
-                        })
-                  }`,
+                  background: backgroundColor,
+                  border: `solid 1px ${backgroundColor}`,
                   borderBottom: '0px',
                 }}
               >
-                <Box sx={{ p: 2 }}>
+                <Box sx={{ p: 1.5 }}>
                   <Stack spacing={3}>
                     <Box
                       sx={{
@@ -190,12 +197,13 @@ export default function EditCategory({
                           }}
                         />
                       )}
-                      <SliderPicker
+                      <HuePicker
                         height={`8px`}
+                        width={'100%'}
                         onChange={(value) => {
                           setFieldValue('color', value);
                           setFieldValue('color', value);
-                          setStyledTextField(value.hex);
+                          setStyledTextField(isSaving, value.hex);
                           setCategories(
                             categories.map((_category) => {
                               if (_category.id !== category.id) {
@@ -224,133 +232,95 @@ export default function EditCategory({
                 sx={{
                   display: 'flex',
                   width: '100%',
-                  background:
-                    !isFormValid || isSaving
-                      ? getRepeatingLinearGradient(
-                          isSaving ? IS_SAVING_HEX : '000000',
-                          isSaving ? 0.2 : 0.05,
-                          135,
-                          false
-                        )
-                      : LIGHT_GREEN,
-                  minHeight: 58,
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                  border: isSaving
-                    ? `solid 2px ${IS_SAVING_HEX}`
-                    : !isFormValid
-                    ? `solid 2px ${getHexFromRGBAObject({
-                        r: 0,
-                        g: 0,
-                        b: 0,
-                        a: 0.05,
-                      })}`
-                    : `solid 2px ${LIGHT_GREEN}`,
-                  borderTop: 0,
-                  color: isSaving
-                    ? IS_SAVING_HEX
-                    : !isFormValid
-                    ? 'rgba(0,0,0,.2)'
-                    : 'black',
-                  cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                 }}
               >
                 <Box
                   sx={{
-                    flex: 1,
-                    p: 2,
-                    margin: `0 0 -2px -2px`,
-                    border: isSaving
-                      ? `solid 2px ${IS_SAVING_HEX}`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 0,
-                          g: 0,
-                          b: 0,
-                          a: 0.05,
-                        })}`
-                      : `solid 2px ${LIGHT_GREEN}`,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background:
+                      !isFormValid || isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN,
                     borderBottomLeftRadius: 12,
-                    borderRight: 0,
-                    borderTop: 0,
-                    '&:hover': !isSaving && {
-                      border: !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 0,
-                            g: 0,
-                            b: 0,
-                            a: 0.05,
-                          })}`
-                        : `solid 2px ${GREEN}`,
-                      borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
-                      pt: !isFormValid ? 2 : 1.8,
-                    },
+                    border: `solid 1px ${
+                      isSaving || !isFormValid
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN
+                    }`,
+                    color: isSaving
+                      ? IS_SAVING_HEX
+                      : !isFormValid
+                      ? 'rgba(0,0,0,.2)'
+                      : 'black',
+                    cursor: !isFormValid || isSaving ? 'default' : 'pointer',
+                    flex: 1,
+                    '&:hover': !isSaving &&
+                      isFormValid && {
+                        border: !isFormValid
+                          ? `solid 1px ${getHexFromRGBAObject({
+                              r: 0,
+                              g: 0,
+                              b: 0,
+                              a: 0.05,
+                            })}`
+                          : `solid 1px ${GREEN}`,
+                      },
                   }}
                   onClick={() => {
                     !isSaving && handleSubmit();
                   }}
                 >
-                  <Iconify
-                    icon={'material-symbols:save-outline'}
-                    width={42}
+                  <Box
                     sx={{
-                      m: -2,
-                      position: 'absolute',
-                      bottom: 25,
-                      left: 25,
+                      p: '5px',
                     }}
-                  />
-                  <Stack spacing={2} sx={{ ml: 5 }}>
-                    <Typography variant="subtitle2" noWrap>
-                      SAVE CATEGORY
-                    </Typography>
-                  </Stack>
+                  >
+                    <Iconify
+                      icon={'material-symbols:save-outline'}
+                      width={40}
+                      sx={{
+                        position: 'relative',
+                        top: '50%',
+                        left: '40%',
+                        transform: 'translate(-40%, -50%)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                    }}
+                  >
+                    <Stack
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        transform: 'translate(0, -50%)',
+                      }}
+                    >
+                      <Typography variant="subtitle2" noWrap>
+                        SAVE CATEGORY
+                      </Typography>
+                    </Stack>
+                  </Box>
                 </Box>
                 <Box
                   sx={{
-                    margin: `0 -2px -2px 0`,
-                    cursor: !isSaving && 'pointer',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                    borderBottomRightRadius: 14,
+                    pl: '5px',
+                    pr: '5px',
+                    border: `solid 1px ${
+                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
+                    }`,
                     color: isSaving ? IS_SAVING_HEX : 'black',
-                    border: isSaving
-                      ? `solid 2px ${IS_SAVING_HEX}`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 255,
-                          g: 0,
-                          b: 0,
-                          a: 0.2,
-                        })}`
-                      : `solid 2px ${LIGHT_RED}`,
-                    borderLeft: isSaving
-                      ? `solid 2px transparent`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 255,
-                          g: 0,
-                          b: 0,
-                          a: 0.2,
-                        })}`
-                      : `solid 2px ${LIGHT_RED}`,
-                    borderTop: isSaving
-                      ? `solid 2px transparent`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 255,
-                          g: 0,
-                          b: 0,
-                          a: 0.2,
-                        })}`
-                      : `solid 2px ${LIGHT_RED}`,
-                    width: '60px',
-                    borderBottomRightRadius: 12,
-                    background: isSaving
-                      ? 'transparent'
-                      : !isFormValid
-                      ? `rgba(255, 0, 0, 0.2)`
-                      : LIGHT_RED,
+                    cursor: isSaving ? 'default' : 'pointer',
                     '&:hover': !isSaving && {
                       background: LIGHT_RED,
-                      border: `solid 2px ${RED}`,
+                      border: `solid 1px ${RED}`,
                     },
                   }}
                   onClick={() => {
@@ -372,9 +342,14 @@ export default function EditCategory({
                   }}
                 >
                   <Iconify
-                    icon={'mdi:cancel-bold'}
-                    width={42}
-                    sx={{ m: -2, position: 'absolute', bottom: 26, right: 24 }}
+                    icon={'eva:close-outline'}
+                    width={40}
+                    sx={{
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
+                    }}
                   />
                 </Box>
               </Box>
