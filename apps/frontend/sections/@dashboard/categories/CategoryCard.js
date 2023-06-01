@@ -246,6 +246,8 @@ export default function CategoryCard({
       )
     );
 
+  const duration = getDuration(totalPeriodInMs);
+
   return (
     <Box
       sx={{
@@ -305,7 +307,8 @@ export default function CategoryCard({
               variant="caption"
               sx={{ color: 'text.secondary', mb: 0 }}
             >
-              Duration: <b>{getDuration(totalPeriodInMs)}</b>
+              Duration: {disableHover && duration.includes('hour') && <br />}
+              {duration}
             </Typography>
           </Box>
         </Box>
