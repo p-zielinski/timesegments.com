@@ -1,7 +1,6 @@
 import {Box, Container, useMediaQuery} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
-import {CategoriesPageMode} from '../../enum/categoriesPageMode';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
@@ -17,7 +16,6 @@ import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
-import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
@@ -167,21 +165,6 @@ export default function Index({
     user?.categories || []
   );
   const [notes, setNotes] = useState<Note[]>(serverSideFetchedNotes || []);
-  const [viewMode, setViewMode] = useState<CategoriesPageMode>(
-    CategoriesPageMode.VIEW
-  );
-
-  useEffect(() => {
-    if (viewMode === CategoriesPageMode.EDIT || !user) {
-      return;
-    }
-    if (!categories.length) {
-      setViewMode(CategoriesPageMode.EDIT);
-    } else {
-      setViewMode(CategoriesPageMode.VIEW);
-    }
-  }, [categories.length]);
-
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
@@ -235,16 +218,7 @@ export default function Index({
       randomSliderHexColor={randomSliderHexColor}
     >
       <Container>
-        {!width1200px ? (
-          <GoToCategoriesOrNotes
-            currentPageState={currentPageState}
-            setCurrentPageState={setCurrentPageState}
-            isSaving={isSaving}
-            disableHover={disableHover}
-          />
-        ) : (
-          <Box sx={{ mt: -5 }} />
-        )}
+        <Box sx={{ mt: -5 }} />
         {currentPageState === DashboardPageState.CATEGORIES ? (
           <CategoriesSection
             activeDate={activeDate}
@@ -254,8 +228,6 @@ export default function Index({
             setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
             categories={categories}
             setCategories={setCategories}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
             limits={limits}
             controlValue={controlValue}
             setControlValue={setControlValue}

@@ -5,7 +5,6 @@ import Iconify from '../../../components/iconify';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import {CategoriesPageMode} from '../../../enum/categoriesPageMode';
 import React, {useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
@@ -15,7 +14,8 @@ import {DateTime} from 'luxon';
 import {getDuration} from '../../../utils/mapper/getDuration';
 import {TimelineDot} from '@mui/lab';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
-import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema'; // ----------------------------------------------------------------------
+import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {IS_SAVING_HEX} from '../../../consts/colors'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -34,7 +34,6 @@ export default function CategoryCard({
   category,
   categories,
   setCategories,
-  viewMode,
   isEditing,
   setIsEditing,
   isSaving,
@@ -60,10 +59,7 @@ export default function CategoryCard({
       );
     }
     const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-      if (
-        isEditing.categoryId === category.id &&
-        viewMode === CategoriesPageMode.EDIT
-      ) {
+      if (isEditing.categoryId === category.id) {
         return;
       }
       const now = DateTime.now().setZone(Timezones[user.timezone]);
@@ -86,7 +82,7 @@ export default function CategoryCard({
       1000
     );
     return () => clearInterval(intervalIdLocal);
-  }, [groupedTimeLogsWithDateSorted, isEditing, viewMode]);
+  }, [groupedTimeLogsWithDateSorted, isEditing]);
 
   const { active: isActive } = category;
 
@@ -219,10 +215,7 @@ export default function CategoryCard({
     return;
   };
 
-  if (
-    isEditing.categoryId === category.id &&
-    viewMode === CategoriesPageMode.EDIT
-  ) {
+  if (isEditing.categoryId === category.id) {
     return (
       <EditCategory
         controlValue={controlValue}
@@ -238,14 +231,27 @@ export default function CategoryCard({
     );
   }
 
+  const getBackgroundColor = (alpha) =>
+    getHexFromRGBAObject(
+      getRgbaObjectFromHexString(
+        isSaving
+          ? IS_SAVING_HEX
+          : getHexFromRGBAObject(
+              getColorShadeBasedOnSliderPickerSchema(
+                getRgbaObjectFromHexString(category.color),
+                'bright'
+              )
+            ),
+        alpha
+      )
+    );
+
   return (
     <Box
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
-        background: getHexFromRGBAObject(
-          getRgbaObjectFromHexString(category.color, 0.2)
-        ),
+        background: getBackgroundColor(0.2),
         borderRadius: '10px',
         pl: 0,
         m: 0,
@@ -260,19 +266,12 @@ export default function CategoryCard({
           alignContent: 'flex-start',
           gap: '10px',
           borderRadius: '10px',
-          border: `solid 1px ${getHexFromRGBAObject(
-            getRgbaObjectFromHexString(
-              category.color,
-              !category.active || isSaving ? 0.2 : 1
-            )
-          )}`,
+          border: `solid 1px ${getBackgroundColor(category.active ? 1 : 0.2)}`,
           flex: 1,
           '&:hover': !disableHover &&
             !isSaving && {
               cursor: 'pointer',
-              border: `solid 1px ${getHexFromRGBAObject(
-                getRgbaObjectFromHexString(category.color, 1)
-              )}`,
+              border: `solid 1px ${getBackgroundColor(1)}`,
             },
         }}
         onClick={() => !isSaving && changeCategoryActiveState()}
@@ -312,89 +311,73 @@ export default function CategoryCard({
         </Box>
       </Box>
       <Box sx={{ display: 'flex', mr: '-12px' }}>
-        {category.showRecentNotes && viewMode === CategoriesPageMode.VIEW && (
-          <Box
-            sx={{
-              borderRadius: '10px',
-              border: `solid 1px ${getHexFromRGBAObject(
-                getRgbaObjectFromHexString(category.color, 0.2)
-              )}`,
-
-              pl: '5px',
-              pr: '5px',
-              '&:hover': !disableHover &&
-                !isSaving && {
-                  cursor: 'pointer',
-                  border: `solid 1px ${getHexFromRGBAObject(
-                    getRgbaObjectFromHexString(category.color, 1)
-                  )}`,
-                },
-            }}
-            onClick={() => !isSaving && changeShowRecentNotes()}
-          >
-            <Iconify
-              icon={'ic:outline-note-add'}
-              width={40}
-              sx={{
-                position: 'relative',
-                top: '50%',
-                left: '40%',
-                transform: 'translate(-40%, -50%)',
-              }}
-            />
-          </Box>
-        )}
-        {category.showRecentNotes && viewMode === CategoriesPageMode.EDIT && (
-          <Box
-            sx={{
-              borderRadius: '10px',
-              border: `solid 1px ${getHexFromRGBAObject(
-                getRgbaObjectFromHexString(category.color, 0.2)
-              )}`,
-
-              pl: '5px',
-              pr: '5px',
-              '&:hover': !disableHover &&
-                !isSaving && {
-                  cursor: 'pointer',
-                  border: `solid 1px ${getHexFromRGBAObject(
-                    getRgbaObjectFromHexString(category.color, 1)
-                  )}`,
-                },
-            }}
-            onClick={() =>
-              !isSaving &&
-              setIsEditing({
-                categoryId: category.id,
-              })
-            }
-          >
-            <Iconify
-              icon={'fluent:edit-32-regular'}
-              width={40}
-              sx={{
-                position: 'relative',
-                top: '50%',
-                left: '40%',
-                transform: 'translate(-40%, -50%)',
-              }}
-            />
-          </Box>
-        )}
         <Box
           sx={{
             borderRadius: '10px',
-            border: `solid 1px ${getHexFromRGBAObject(
-              getRgbaObjectFromHexString(category.color, 0.2)
-            )}`,
+            border: `solid 1px ${getBackgroundColor(0.2)}`,
+
             pl: '5px',
+            pr: disableHover ? 0 : '5px',
+            '&:hover': !disableHover &&
+              !isSaving && {
+                cursor: 'pointer',
+                border: `solid 1px ${getBackgroundColor(1)}`,
+              },
+          }}
+          onClick={() =>
+            !isSaving &&
+            setIsEditing({
+              categoryId: category.id,
+            })
+          }
+        >
+          <Iconify
+            icon={'fluent:edit-32-regular'}
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            borderRadius: '10px',
+            border: `solid 1px ${getBackgroundColor(0.2)}`,
+            pl: disableHover ? 0 : '5px',
+            pr: disableHover ? 0 : '5px',
+            '&:hover': !disableHover &&
+              !isSaving && {
+                cursor: 'pointer',
+                border: `solid 1px ${getBackgroundColor(1)}`,
+              },
+          }}
+          onClick={() => !isSaving && changeShowRecentNotes()}
+        >
+          <Iconify
+            icon={'ic:outline-note-add'}
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            borderRadius: '10px',
+            border: `solid 1px ${getBackgroundColor(0.2)}`,
+            pl: disableHover ? 0 : '5px',
+            ml: disableHover ? '-5px' : 0,
             pr: '5px',
             '&:hover': !disableHover &&
               !isSaving && {
                 cursor: 'pointer',
-                border: `solid 1px ${getHexFromRGBAObject(
-                  getRgbaObjectFromHexString(category.color, 1)
-                )}`,
+                border: `solid 1px ${getBackgroundColor(1)}`,
               },
           }}
           onClick={() => !isSaving && changeShowRecentNotes()}

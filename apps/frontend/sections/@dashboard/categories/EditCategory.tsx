@@ -19,7 +19,7 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/ge
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
-import { getHexFromRGBObject } from 'apps/frontend/utils/colors/getHexFromRGBObject';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 
 export default function EditCategory({
   controlValue,
@@ -101,10 +101,7 @@ export default function EditCategory({
           return { ...category, active: false };
         })
       );
-      setIsEditing({
-        categoryId: undefined,
-        createNew: undefined,
-      });
+      setIsEditing({});
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
@@ -116,7 +113,7 @@ export default function EditCategory({
     return;
   };
 
-  function Picker() {
+  const Pointer = () => {
     return (
       <div
         style={{
@@ -129,7 +126,7 @@ export default function EditCategory({
         }}
       />
     );
-  }
+  };
 
   return (
     <Formik
@@ -214,7 +211,7 @@ export default function EditCategory({
                           );
                         }}
                         color={values.color}
-                        pointer={Picker}
+                        pointer={Pointer}
                       />
                     </Box>
                     <InputText
