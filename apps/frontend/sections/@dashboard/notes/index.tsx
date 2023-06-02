@@ -2,7 +2,7 @@ import { Box, Card as CardBlock, Grid, Stack, Typography } from '@mui/material';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import React, { useState } from 'react';
 import { AddIsNotOpened } from './Add/IsNotOpened';
-import AddIsOpened from './Add/IsOpened';
+import AddIsOpened from './IsOpened';
 import {
   GRAY,
   IS_SAVING_HEX,

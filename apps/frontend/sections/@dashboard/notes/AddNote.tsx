@@ -8,7 +8,6 @@ import {
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -21,13 +20,13 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { useRouter } from 'next/router';
 
 export default function AddNew({
   controlValue,
   setControlValue,
   disableHover,
   data = {},
-  isEditing,
   setIsEditing,
   category,
   isSaving,
@@ -35,7 +34,9 @@ export default function AddNew({
   categories,
   setCategories,
 }) {
-  const startingColor = category?.color
+  const router = useRouter();
+
+  const color = category?.color
     ? {
         hex: category.color,
         rgb: getRgbaObjectFromHexString(category.color),
@@ -80,81 +81,32 @@ export default function AddNew({
       },
     });
   };
-  setStyledTextField(isSaving, startingColor.hex);
+  setStyledTextField(isSaving, color.hex);
 
-  const createCategory = async (name: string, color: string) => {
+  const saveNote = async (text: string, categoryId?: string) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'category/create',
-      body: { name, color, controlValue },
+      pathOrUrl: 'note/create',
+      body: { text, categoryId },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED && response?.category) {
-      setCategories([{ ...response.category }, ...categories]);
-      setIsEditing({});
+    if (response.statusCode === StatusCodes.CREATED && response.note) {
+      //...notes?
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      return router.push('/');
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
-      return; //skip setting isSaving(false)
+      setControlValue(undefined); //skip setting isSaving(false)
+      return;
     }
     setIsSaving(false);
     return;
   };
 
-  if (!isEditing.createNew) {
-    return (
-      <Card
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          cursor: !isSaving && 'pointer',
-          color: isSaving && IS_SAVING_HEX,
-          border: `solid 1px ${isSaving ? IS_SAVING_HEX : LIGHT_GREEN}`,
-          background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_GREEN,
-          '&:hover': !disableHover &&
-            !isSaving && {
-              border: `solid 1px ${GREEN}`,
-            },
-        }}
-        onClick={() => setIsEditing({ createNew: true })}
-      >
-        <Box>
-          <Iconify
-            icon={'material-symbols:add'}
-            width={40}
-            sx={{
-              position: 'relative',
-              top: '50%',
-              left: '40%',
-              transform: 'translate(-40%, -50%)',
-            }}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'relative',
-          }}
-        >
-          <Stack
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              transform: 'translate(0, -50%)',
-            }}
-          >
-            <Typography variant="subtitle2" noWrap>
-              ADD NEW CATEGORY
-            </Typography>
-          </Stack>
-        </Box>
-      </Card>
-    );
-  }
-
   const validationSchema = yup.object().shape({
-    categoryName: yup.string().required('Category name is required'),
+    text: yup.string().required('Text is required'),
   });
 
   const Pointer = () => {
@@ -176,11 +128,10 @@ export default function AddNew({
     <Formik
       initialValues={{
         ...data,
-        categoryName: '',
-        color: startingColor,
+        text: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        await createCategory(values.categoryName, values.color.hex);
+        await saveNote(values.text, category?.id);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
@@ -194,7 +145,7 @@ export default function AddNew({
               ? IS_SAVING_HEX
               : getHexFromRGBAObject(
                   getColorShadeBasedOnSliderPickerSchema(
-                    getRgbaObjectFromHexString(values.color?.hex),
+                    getRgbaObjectFromHexString(color?.hex),
                     'bright'
                   )
                 ),
@@ -236,17 +187,6 @@ export default function AddNew({
                           }}
                         />
                       )}
-                      <HuePicker
-                        height={`8px`}
-                        width={'100%'}
-                        onChange={(value) => {
-                          setFieldValue('color', value);
-                          setFieldValue('color', value);
-                          setStyledTextField(isSaving, value.hex);
-                        }}
-                        color={values.color}
-                        pointer={Pointer}
-                      />
                     </Box>
                     <InputText
                       type="text"

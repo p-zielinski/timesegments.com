@@ -9,7 +9,6 @@ import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
-import {NotesSection} from '../../sections/@dashboard/notes';
 import {Category, Note, TimeLog} from '@prisma/client';
 import navConfig from '../../layouts/dashboard/nav/config';
 import {isEqual} from 'lodash';
@@ -23,7 +22,7 @@ import {
 } from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {DateTime} from 'luxon';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
-import CategoriesSection from '../../sections/@dashboard/categories';
+import Categories from '../../sections/@dashboard/categories';
 import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
 import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import {getGroupedTimeLogsWithDateSorted} from '../../utils/mapper/getGroupedTimeLogsWithDateSorted';
@@ -219,36 +218,22 @@ export default function Index({
     >
       <Container>
         <Box sx={{ mt: -5 }} />
-        {currentPageState === DashboardPageState.CATEGORIES ? (
-          <CategoriesSection
-            activeDate={activeDate}
-            setActiveDate={setActiveDate}
-            groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
-            timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-            setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
-            categories={categories}
-            setCategories={setCategories}
-            limits={limits}
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            user={user}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            disableHover={disableHover}
-          />
-        ) : currentPageState === DashboardPageState.NOTES ? (
-          <NotesSection
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            user={user}
-            setUser={setUser}
-            notes={notes}
-            setNotes={setNotes}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            disableHover={disableHover}
-          />
-        ) : undefined}
+        <Categories
+          activeDate={activeDate}
+          setActiveDate={setActiveDate}
+          groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
+          timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+          setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
+          categories={categories}
+          setCategories={setCategories}
+          limits={limits}
+          controlValue={controlValue}
+          setControlValue={setControlValue}
+          user={user}
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
+          disableHover={disableHover}
+        />
       </Container>
     </DashboardLayout>
   );

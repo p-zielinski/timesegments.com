@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import {Grid, Stack} from '@mui/material';
 import CategoryCard from './CategoryCard';
@@ -11,31 +10,22 @@ import {Helmet} from 'react-helmet-async';
 
 // ----------------------------------------------------------------------
 
-CategoriesSection.propTypes = {
-  categories: PropTypes.array.isRequired,
-  setCategories: PropTypes.func.isRequired,
-};
-
-const getNumberOfVisibleCategories = (categories) => {
-  return (categories ?? []).filter((category) => category.visible).length;
-};
-
-export default function CategoriesSection({
-  activeDate,
-  setActiveDate,
-  groupedTimeLogsWithDateSorted,
-  timeLogsWithinActiveDate,
-  setTimeLogsWithinActiveDate,
-  user,
-  controlValue,
-  setControlValue,
-  disableHover,
-  categories,
-  setCategories,
-  isSaving,
-  setIsSaving,
-  limits,
-}) {
+export default function Categories({
+                                     activeDate,
+                                     setActiveDate,
+                                     groupedTimeLogsWithDateSorted,
+                                     timeLogsWithinActiveDate,
+                                     setTimeLogsWithinActiveDate,
+                                     user,
+                                     controlValue,
+                                     setControlValue,
+                                     disableHover,
+                                     categories,
+                                     setCategories,
+                                     isSaving,
+                                     setIsSaving,
+                                     limits,
+                                   }) {
   const checkActiveDateCorrectness = () => {
     const currentDate = getCurrentDate(Timezones[user.timezone]);
     if (currentDate.ts === activeDate.ts) {
@@ -55,7 +45,7 @@ export default function CategoriesSection({
       <Helmet>
         <title>Categories</title>
       </Helmet>
-      <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
+      <Grid container spacing={2} columns={1} sx={{mt: 1}}>
         <Grid key={'sort-categories'} item xs={1} sm={1} md={1}>
           <Stack
             direction="row"
@@ -67,7 +57,7 @@ export default function CategoriesSection({
               direction="row"
               spacing={1}
               flexShrink={0}
-              sx={{ mt: -1, mb: -1 }}
+              sx={{mt: -1, mb: -1}}
             >
               <SortCategories
                 user={user}

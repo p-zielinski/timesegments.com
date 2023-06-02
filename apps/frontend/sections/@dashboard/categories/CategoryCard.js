@@ -15,7 +15,8 @@ import {getDuration} from '../../../utils/mapper/getDuration';
 import {TimelineDot} from '@mui/lab';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {IS_SAVING_HEX} from '../../../consts/colors'; // ----------------------------------------------------------------------
+import {IS_SAVING_HEX} from '../../../consts/colors';
+import AddNote from '../notes/AddNote'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -24,22 +25,22 @@ CategoryCard.propTypes = {
 };
 
 export default function CategoryCard({
-  groupedTimeLogsWithDateSorted,
-  user,
-  checkActiveDateCorrectness,
-  timeLogsWithinActiveDate,
-  setTimeLogsWithinActiveDate,
-  controlValue,
-  setControlValue,
-  category,
-  categories,
-  setCategories,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  disableHover,
-}) {
+                                       groupedTimeLogsWithDateSorted,
+                                       user,
+                                       checkActiveDateCorrectness,
+                                       timeLogsWithinActiveDate,
+                                       setTimeLogsWithinActiveDate,
+                                       controlValue,
+                                       setControlValue,
+                                       category,
+                                       categories,
+                                       setCategories,
+                                       isEditing,
+                                       setIsEditing,
+                                       isSaving,
+                                       setIsSaving,
+                                       disableHover,
+                                     }) {
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
     groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
   );
@@ -84,7 +85,7 @@ export default function CategoryCard({
     return () => clearInterval(intervalIdLocal);
   }, [groupedTimeLogsWithDateSorted, isEditing]);
 
-  const { active: isActive } = category;
+  const {active: isActive} = category;
 
   const changeCategoryVisibility = async () => {
     setIsSaving(true);
@@ -101,9 +102,9 @@ export default function CategoryCard({
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category };
+            return {...response.category};
           }
-          return { ...category };
+          return {...category};
         })
       );
       if (response.controlValue) {
@@ -132,9 +133,9 @@ export default function CategoryCard({
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category };
+            return {...response.category};
           }
-          return { ...category };
+          return {...category};
         })
       );
       if (response.controlValue) {
@@ -152,16 +153,16 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: { categoryId: category.id, controlValue },
+      body: {categoryId: category.id, controlValue},
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category };
+            return {...response.category};
           }
-          return { ...category };
+          return {...category};
         })
       );
       if (response.controlValue) {
@@ -197,7 +198,7 @@ export default function CategoryCard({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-as-deleted',
-      body: { categoryId: category.id, controlValue },
+      body: {categoryId: category.id, controlValue},
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
@@ -237,11 +238,11 @@ export default function CategoryCard({
         isSaving
           ? IS_SAVING_HEX
           : getHexFromRGBAObject(
-              getColorShadeBasedOnSliderPickerSchema(
-                getRgbaObjectFromHexString(category.color),
-                'bright'
-              )
-            ),
+            getColorShadeBasedOnSliderPickerSchema(
+              getRgbaObjectFromHexString(category.color),
+              'bright'
+            )
+          ),
         alpha
       )
     );
@@ -249,7 +250,7 @@ export default function CategoryCard({
   const duration = getDuration(totalPeriodInMs);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <Box sx={{display: 'flex', flexDirection: 'column'}}>
       <Box
         sx={{
           display: 'flex',
@@ -281,13 +282,13 @@ export default function CategoryCard({
           }}
           onClick={() => !isSaving && changeCategoryActiveState()}
         >
-          <Box sx={{ marginLeft: '10px' }}>
-            <TimelineDot sx={{ background: category.color, mb: 0 }} />
+          <Box sx={{marginLeft: '10px'}}>
+            <TimelineDot sx={{background: category.color, mb: 0}}/>
           </Box>
-          <Box sx={{ margin: '6px', marginLeft: 0 }}>
+          <Box sx={{margin: '6px', marginLeft: 0}}>
             <Typography
               variant="subtitle2"
-              sx={{ color: isSaving ? '#637381' : undefined }}
+              sx={{color: isSaving ? '#637381' : undefined}}
             >
               {category?.name}
               <span
@@ -295,28 +296,28 @@ export default function CategoryCard({
                   color: isSaving
                     ? '#637381'
                     : getHexFromRGBObject(
-                        getColorShadeBasedOnSliderPickerSchema(
-                          getRgbaObjectFromHexString(category.color)
-                        )
-                      ),
+                      getColorShadeBasedOnSliderPickerSchema(
+                        getRgbaObjectFromHexString(category.color)
+                      )
+                    ),
                   fontWeight: 400,
                 }}
               >
                 {category.active && ' *active*'}
               </span>
             </Typography>
-            <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
+            <Box sx={{display: 'flex', direction: 'column', mb: 0}}>
               <Typography
                 variant="caption"
-                sx={{ color: 'text.secondary', mb: 0 }}
+                sx={{color: 'text.secondary', mb: 0}}
               >
-                Duration: {disableHover && duration.includes('hour') && <br />}
+                Duration: {disableHover && duration.includes('hour') && <br/>}
                 {duration}
               </Typography>
             </Box>
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', mr: '-12px' }}>
+        <Box sx={{display: 'flex', mr: '-12px'}}>
           <Box
             sx={{
               borderRadius: '10px',
@@ -363,7 +364,7 @@ export default function CategoryCard({
                 },
             }}
             onClick={() =>
-              !isSaving && setIsEditing({ createNewNote: category.id })
+              !isSaving && setIsEditing({createNewNote: category.id})
             }
           >
             <Iconify
@@ -409,9 +410,24 @@ export default function CategoryCard({
           </Box>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-        <Box sx={{ minWidth: '10%' }} />
-        <Box sx={{ flex: 1 }}>aa</Box>
+      <Box sx={{display: 'flex', flexDirection: 'row', m: 0}}>
+        <Box sx={{minWidth: '10%', m: 0}}/>
+        {(category.showRecentNotes || category.notes?.length > 0) && (
+          <Box sx={{flex: 1, m: 0, mt: '10px', gap: '10px'}}>
+            <AddNote
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              disableHover={disableHover}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              category={category}
+              setIsEditing={setIsEditing}
+            />
+            {(category.notes || []).map((note) => (
+              <Box>aaaa</Box>
+            ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );
