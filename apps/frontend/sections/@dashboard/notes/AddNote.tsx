@@ -81,7 +81,7 @@ export default function AddNew({
       },
     });
   };
-  setStyledTextField(isSaving, color.hex);
+  setStyledTextField(isSaving, category.color);
 
   const saveNote = async (text: string, categoryId?: string) => {
     setIsSaving(true);
@@ -128,10 +128,10 @@ export default function AddNew({
     <Formik
       initialValues={{
         ...data,
-        text: '',
+        note: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        await saveNote(values.text, category?.id);
+        await saveNote(values.note, category?.id);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
@@ -167,36 +167,17 @@ export default function AddNew({
                   borderBottom: '0px',
                 }}
               >
-                <Box sx={{ p: 1.5 }}>
-                  <Stack spacing={3}>
-                    <Box
-                      sx={{
-                        filter: isSaving ? 'grayscale(100%)' : 'none',
-                        cursor: isSaving ? 'default' : 'pointer',
-                      }}
-                    >
-                      {isSaving && (
-                        <Box
-                          sx={{
-                            width: 'calc(100% + 20px)',
-                            height: 'calc(100% + 20px)',
-                            background: 'transparent',
-                            position: 'absolute',
-                            zIndex: 1,
-                            transform: 'translate(-10px, -10px)',
-                          }}
-                        />
-                      )}
-                    </Box>
-                    <InputText
-                      type="text"
-                      name="categoryName"
-                      label="Category name"
-                      TextField={StyledTextField}
-                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
-                      disabled={isSaving}
-                    />
-                  </Stack>
+                <Box sx={{ p: 1.5, pb: 0 }}>
+                  <InputText
+                    type="text"
+                    rows={3}
+                    multiline={true}
+                    name={'note'}
+                    label={`Note`}
+                    TextField={StyledTextField}
+                    helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                    disabled={isSaving}
+                  />
                 </Box>
               </Box>
               <Box
@@ -248,7 +229,7 @@ export default function AddNew({
                     }}
                   >
                     <Iconify
-                      icon={'material-symbols:save-outline'}
+                      icon={'ic:outline-note-add'}
                       width={40}
                       sx={{
                         position: 'relative',
@@ -271,7 +252,7 @@ export default function AddNew({
                       }}
                     >
                       <Typography variant="subtitle2" noWrap>
-                        SAVE CATEGORY
+                        ADD NOTE
                       </Typography>
                     </Stack>
                   </Box>

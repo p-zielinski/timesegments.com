@@ -16,7 +16,6 @@ import {TimelineDot} from '@mui/lab';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {IS_SAVING_HEX} from '../../../consts/colors';
-import AddNote from '../notes/AddNote'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -45,6 +44,10 @@ export default function CategoryCard({
     groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
   );
 
+  const hideDuration =
+    category.active &&
+    isEditing.categoryId === category.id
+
   useEffect(() => {
     const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
       (groupedTimeLogWithDateSorted) =>
@@ -60,7 +63,7 @@ export default function CategoryCard({
       );
     }
     const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-      if (isEditing.categoryId === category.id) {
+      if (hideDuration) {
         return;
       }
       const now = DateTime.now().setZone(Timezones[user.timezone]);
@@ -250,184 +253,168 @@ export default function CategoryCard({
   const duration = getDuration(totalPeriodInMs);
 
   return (
-    <Box sx={{display: 'flex', flexDirection: 'column'}}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        background: getBackgroundColor(0.2),
+        borderRadius: '10px',
+        pl: 0,
+        m: 0,
+        pr: 1.5,
+        minHeight: '30px',
+      }}
+    >
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
-          background: getBackgroundColor(0.2),
+          justifyContent: 'flex-start',
+          alignContent: 'flex-start',
+          gap: '10px',
           borderRadius: '10px',
-          pl: 0,
-          m: 0,
-          pr: 1.5,
-          minHeight: '30px',
+          border: `solid 1px ${getBackgroundColor(category.active ? 1 : 0.2)}`,
+          flex: 1,
+          '&:hover': !disableHover &&
+            !isSaving && {
+              cursor: 'pointer',
+              border: `solid 1px ${getBackgroundColor(1)}`,
+            },
         }}
+        onClick={() => !isSaving && changeCategoryActiveState()}
       >
+        <Box sx={{marginLeft: '10px'}}>
+          <TimelineDot sx={{background: category.color, mb: 0}}/>
+        </Box>
+        <Box sx={{margin: '6px', marginLeft: 0}}>
+          <Typography
+            variant="subtitle2"
+            sx={{color: isSaving ? '#637381' : undefined}}
+          >
+            {category?.name}
+            <span
+              style={{
+                color: isSaving
+                  ? '#637381'
+                  : getHexFromRGBObject(
+                    getColorShadeBasedOnSliderPickerSchema(
+                      getRgbaObjectFromHexString(category.color)
+                    )
+                  ),
+                fontWeight: 400,
+              }}
+            >
+              {category.active && ' *active*'}
+            </span>
+          </Typography>
+          <Box sx={{display: 'flex', direction: 'column', mb: 0}}>
+            <Typography
+              variant="caption"
+              sx={{color: 'text.secondary', mb: 0}}
+            >
+              {hideDuration ? (
+                <>Duration temporarily hidden</>
+              ) : (
+                <>
+                  Duration:{' '}
+                  {disableHover && duration.includes('hour') && <br/>}
+                  {duration}
+                </>
+              )}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+      <Box sx={{display: 'flex', mr: '-12px'}}>
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'flex-start',
-            alignContent: 'flex-start',
-            gap: '10px',
             borderRadius: '10px',
-            border: `solid 1px ${getBackgroundColor(
-              category.active ? 1 : 0.2
-            )}`,
-            flex: 1,
+            border: `solid 1px ${getBackgroundColor(0.2)}`,
+
+            pl: '5px',
+            pr: disableHover ? 0 : '5px',
             '&:hover': !disableHover &&
               !isSaving && {
                 cursor: 'pointer',
                 border: `solid 1px ${getBackgroundColor(1)}`,
               },
           }}
-          onClick={() => !isSaving && changeCategoryActiveState()}
+          onClick={() =>
+            !isSaving &&
+            setIsEditing({
+              categoryId: category.id,
+            })
+          }
         >
-          <Box sx={{marginLeft: '10px'}}>
-            <TimelineDot sx={{background: category.color, mb: 0}}/>
-          </Box>
-          <Box sx={{margin: '6px', marginLeft: 0}}>
-            <Typography
-              variant="subtitle2"
-              sx={{color: isSaving ? '#637381' : undefined}}
-            >
-              {category?.name}
-              <span
-                style={{
-                  color: isSaving
-                    ? '#637381'
-                    : getHexFromRGBObject(
-                      getColorShadeBasedOnSliderPickerSchema(
-                        getRgbaObjectFromHexString(category.color)
-                      )
-                    ),
-                  fontWeight: 400,
-                }}
-              >
-                {category.active && ' *active*'}
-              </span>
-            </Typography>
-            <Box sx={{display: 'flex', direction: 'column', mb: 0}}>
-              <Typography
-                variant="caption"
-                sx={{color: 'text.secondary', mb: 0}}
-              >
-                Duration: {disableHover && duration.includes('hour') && <br/>}
-                {duration}
-              </Typography>
-            </Box>
-          </Box>
+          <Iconify
+            icon={'fluent:edit-32-regular'}
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
         </Box>
-        <Box sx={{display: 'flex', mr: '-12px'}}>
-          <Box
+        <Box
+          sx={{
+            borderRadius: '10px',
+            border: `solid 1px ${getBackgroundColor(
+              isEditing.createNewNote === category.id ? 1 : 0.2
+            )}`,
+            pl: disableHover ? 0 : '5px',
+            pr: disableHover ? 0 : '5px',
+            '&:hover': !disableHover &&
+              !isSaving && {
+                cursor: 'pointer',
+                border: `solid 1px ${getBackgroundColor(1)}`,
+              },
+          }}
+          onClick={() =>
+            !isSaving && setIsEditing({createNewNote: category.id})
+          }
+        >
+          <Iconify
+            icon={'ic:outline-note-add'}
+            width={40}
             sx={{
-              borderRadius: '10px',
-              border: `solid 1px ${getBackgroundColor(0.2)}`,
-
-              pl: '5px',
-              pr: disableHover ? 0 : '5px',
-              '&:hover': !disableHover &&
-                !isSaving && {
-                  cursor: 'pointer',
-                  border: `solid 1px ${getBackgroundColor(1)}`,
-                },
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
             }}
-            onClick={() =>
-              !isSaving &&
-              setIsEditing({
-                categoryId: category.id,
-              })
-            }
-          >
-            <Iconify
-              icon={'fluent:edit-32-regular'}
-              width={40}
-              sx={{
-                position: 'relative',
-                top: '50%',
-                left: '40%',
-                transform: 'translate(-40%, -50%)',
-              }}
-            />
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              border: `solid 1px ${getBackgroundColor(
-                isEditing.createNewNote === category.id ? 1 : 0.2
-              )}`,
-              pl: disableHover ? 0 : '5px',
-              pr: disableHover ? 0 : '5px',
-              '&:hover': !disableHover &&
-                !isSaving && {
-                  cursor: 'pointer',
-                  border: `solid 1px ${getBackgroundColor(1)}`,
-                },
-            }}
-            onClick={() =>
-              !isSaving && setIsEditing({createNewNote: category.id})
-            }
-          >
-            <Iconify
-              icon={'ic:outline-note-add'}
-              width={40}
-              sx={{
-                position: 'relative',
-                top: '50%',
-                left: '40%',
-                transform: 'translate(-40%, -50%)',
-              }}
-            />
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              border: `solid 1px ${getBackgroundColor(0.2)}`,
-              pl: disableHover ? 0 : '5px',
-              ml: disableHover ? '-5px' : 0,
-              pr: '5px',
-              '&:hover': !disableHover &&
-                !isSaving && {
-                  cursor: 'pointer',
-                  border: `solid 1px ${getBackgroundColor(1)}`,
-                },
-            }}
-            onClick={() => !isSaving && changeShowRecentNotes()}
-          >
-            <Iconify
-              icon={
-                category.showRecentNotes
-                  ? 'eva:chevron-up-fill'
-                  : 'eva:chevron-down-fill'
-              }
-              width={40}
-              sx={{
-                position: 'relative',
-                top: '50%',
-                left: '40%',
-                transform: 'translate(-40%, -50%)',
-              }}
-            />
-          </Box>
+          />
         </Box>
-      </Box>
-      <Box sx={{display: 'flex', flexDirection: 'row', m: 0}}>
-        <Box sx={{minWidth: '10%', m: 0}}/>
-        {(category.showRecentNotes || category.notes?.length > 0) && (
-          <Box sx={{flex: 1, m: 0, mt: '10px', gap: '10px'}}>
-            <AddNote
-              controlValue={controlValue}
-              setControlValue={setControlValue}
-              disableHover={disableHover}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              category={category}
-              setIsEditing={setIsEditing}
-            />
-            {(category.notes || []).map((note) => (
-              <Box>aaaa</Box>
-            ))}
-          </Box>
-        )}
+        <Box
+          sx={{
+            borderRadius: '10px',
+            border: `solid 1px ${getBackgroundColor(0.2)}`,
+            pl: disableHover ? 0 : '5px',
+            ml: disableHover ? '-5px' : 0,
+            pr: '5px',
+            '&:hover': !disableHover &&
+              !isSaving && {
+                cursor: 'pointer',
+                border: `solid 1px ${getBackgroundColor(1)}`,
+              },
+          }}
+          onClick={() => !isSaving && changeShowRecentNotes()}
+        >
+          <Iconify
+            icon={
+              category.showRecentNotes
+                ? 'eva:chevron-up-fill'
+                : 'eva:chevron-down-fill'
+            }
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
+        </Box>
       </Box>
     </Box>
   );
