@@ -1,7 +1,8 @@
 // @mui
 import {Box} from '@mui/material'; // utils
 import React from 'react';
-import AddNote from '../notes/AddNote'; // ----------------------------------------------------------------------
+import AddNote from '../notes/AddNote';
+import {Note} from '../notes/Note'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -16,12 +17,21 @@ export default function CategoryNotesCards({
   isSaving,
   setIsSaving,
   disableHover,
+  user,
 }) {
   return (isEditing?.createNewNote === category.id ||
     (category.showRecentNotes && category.notes?.length)) > 0 ? (
     <Box sx={{ display: 'flex', flexDirection: 'row', m: 0 }}>
       <Box sx={{ minWidth: '10%', m: 0 }} />
-      <Box sx={{ flex: 1, m: 0, gap: '10px' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          m: 0,
+          gap: 2,
+        }}
+      >
         {isEditing?.createNewNote === category.id && (
           <AddNote
             controlValue={controlValue}
@@ -34,7 +44,20 @@ export default function CategoryNotesCards({
           />
         )}
         {category.showRecentNotes &&
-          (category.notes || []).map((note) => <Box key={note.id}>aaaa</Box>)}
+          (category.notes || []).map((note) => (
+            <Note
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              disableHover={disableHover}
+              note={note}
+              user={user}
+              key={note.id}
+            />
+          ))}
       </Box>
     </Box>
   ) : undefined;

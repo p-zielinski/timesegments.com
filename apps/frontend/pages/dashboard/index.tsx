@@ -331,11 +331,16 @@ export const getServerSideProps = async ({ req, res }) => {
     ] as TimeLogsWithinDateISO[];
   }
 
+  user.categories.map((category) => {
+    category.notes = notes.filter((note) => note.categoryId === category.id);
+    return category;
+  });
+
   return {
     props: {
       user: user ?? null,
       limits: limits ?? null,
-      notes: notes ?? null,
+      notes: notes?.filter((note) => !note.categoryId) ?? null,
       randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,

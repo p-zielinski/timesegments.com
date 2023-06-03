@@ -91,6 +91,7 @@ export default function AddNew({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
+      console.log('note', response.note);
       //...notes?
       if (response.controlValue) {
         setControlValue(response.controlValue);
@@ -109,29 +110,14 @@ export default function AddNew({
     text: yup.string().required('Text is required'),
   });
 
-  const Pointer = () => {
-    return (
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          borderRadius: '50%',
-          transform: 'translate(-8px, -5px)',
-          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
-          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
-        }}
-      />
-    );
-  };
-
   return (
     <Formik
       initialValues={{
         ...data,
-        note: '',
+        text: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        await saveNote(values.note, category?.id);
+        await saveNote(values.text, category?.id);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
@@ -172,7 +158,7 @@ export default function AddNew({
                     type="text"
                     rows={3}
                     multiline={true}
-                    name={'note'}
+                    name={'text'}
                     label={`Note`}
                     TextField={StyledTextField}
                     helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}

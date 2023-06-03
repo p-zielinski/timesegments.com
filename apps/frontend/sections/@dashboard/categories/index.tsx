@@ -105,6 +105,7 @@ export default function Categories({
                   setCategories={setCategories}
                   isSaving={isSaving}
                   setIsSaving={setIsSaving}
+                  user={user}
                 />
               </Box>
             </Grid>
