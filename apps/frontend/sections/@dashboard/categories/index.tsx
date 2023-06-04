@@ -1,6 +1,6 @@
 // @mui
 import {Box, Grid, Stack} from '@mui/material';
-import CategoryCard from './CategoryCard';
+import Category from './Category';
 import React, {useState} from 'react';
 import AddNew from './AddNew';
 import SortCategories from './Sort';
@@ -77,7 +77,7 @@ export default function Categories({
           <>
             <Grid key={category.id} item xs={1} sm={1} md={1}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <CategoryCard
+                <Category
                   groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
                   user={user}
                   checkActiveDateCorrectness={checkActiveDateCorrectness}

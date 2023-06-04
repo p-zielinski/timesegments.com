@@ -46,6 +46,7 @@ export default function CategoryNotesCards({
         {category.showRecentNotes &&
           (category.notes || []).map((note) => (
             <Note
+              category={category}
               controlValue={controlValue}
               setControlValue={setControlValue}
               isSaving={isSaving}

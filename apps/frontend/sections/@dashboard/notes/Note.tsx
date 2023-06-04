@@ -14,6 +14,7 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/ge
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 
 export const Note = ({
+  category,
   controlValue,
   setControlValue,
   isSaving,
@@ -71,10 +72,10 @@ export const Note = ({
       )
     : undefined;
 
-  const color = note?.category?.color
+  const color = category?.color
     ? {
-        hex: note.category.color,
-        rgb: getRgbaObjectFromHexString(note.category.color),
+        hex: category.color,
+        rgb: getRgbaObjectFromHexString(category.color),
       }
     : getRandomRgbObjectForSliderPicker();
 
