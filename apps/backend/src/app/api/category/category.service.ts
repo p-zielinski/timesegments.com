@@ -182,7 +182,7 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
-    if (categoryWithUser.active || categoryWithUser.visible) {
+    if (categoryWithUser.active) {
       return {
         success: false,
         error: `Category cannot be deleted, bad request`,

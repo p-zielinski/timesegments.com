@@ -6,15 +6,16 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import React from 'react';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
-import { handleFetch } from '../../../utils/fetchingData/handleFetch';
-import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 import parse from 'html-react-parser';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
+import EditNote from './EditNote';
 
 export const Note = ({
   category,
+  categories,
+  setCategories,
   controlValue,
   setControlValue,
   isSaving,
@@ -79,34 +80,6 @@ export const Note = ({
       }
     : getRandomRgbObjectForSliderPicker();
 
-  const deleteNote = async (noteId) => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'note/delete',
-      body: {
-        noteId,
-        controlValue,
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED) {
-      setIsEditing({
-        isEditing: undefined,
-        isDeleting: false,
-      });
-      if (response.cotrolValue) {
-        setControlValue(response.cotrolValue);
-      }
-    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-      return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
-    }
-    setIsSaving(false);
-    return;
-  };
-
   const getBackgroundColor = (alpha) =>
     getHexFromRGBAObject(
       getRgbaObjectFromHexString(
@@ -121,6 +94,23 @@ export const Note = ({
         alpha
       )
     );
+
+  if (isEditing.noteId === note.id) {
+    return (
+      <EditNote
+        note={note}
+        controlValue={controlValue}
+        setControlValue={setControlValue}
+        disableHover={disableHover}
+        isSaving={isSaving}
+        setIsSaving={setIsSaving}
+        setIsEditing={setIsEditing}
+        category={category}
+        categories={categories}
+        setCategories={setCategories}
+      />
+    );
+  }
 
   return (
     <Box
@@ -153,7 +143,7 @@ export const Note = ({
           >
             {updatedAtLocale ? (
               <>
-                {updatedAtLocale}
+                {updatedAtLocale}{' '}
                 <span style={{ fontWeight: '400' }}>(edited)</span>
               </>
             ) : (
@@ -184,6 +174,7 @@ export const Note = ({
                 border: `solid 1px ${getBackgroundColor(1)}`,
               },
           }}
+          onClick={() => !isSaving && setIsEditing({ noteId: note.id })}
         >
           <Iconify
             icon={'fluent:edit-32-regular'}

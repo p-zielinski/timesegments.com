@@ -1,45 +1,53 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import React from 'react';
-import * as yup from 'yup';
-import { Formik } from 'formik';
-import { styled } from '@mui/material/styles';
-import { StatusCodes } from 'http-status-codes';
-import { handleFetch } from '../../../utils/fetchingData/handleFetch';
-import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import {
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
+  SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import Iconify from '../../../components/iconify';
-import InputText from '../../../components/form/Text';
-import { Checkbox } from '../Form/Checkbox';
+import React from 'react';
+import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
+import * as yup from 'yup';
+import { Formik } from 'formik';
+import { InputText } from '../../../components/form/Text';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
+import { styled } from '@mui/material/styles';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 
 export default function EditNote({
+  note,
   controlValue,
   setControlValue,
-  note,
-  notes,
-  setNotes,
   disableHover,
   isSaving,
   setIsSaving,
-  setEditing,
-  color,
+  setIsEditing,
+  category,
+  categories,
+  setCategories,
 }) {
   const router = useRouter();
+
+  const color = category?.color
+    ? {
+        hex: category.color,
+        rgb: getRgbaObjectFromHexString(category.color),
+      }
+    : getRandomRgbObjectForSliderPicker();
+
   let StyledTextField, darkHexColor;
-  const setStyledTextField = (hexColor) => {
+  const setStyledTextField = (isSaving, hexColor) => {
     darkHexColor = getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
-        getRgbaObjectFromHexString(hexColor)
+        getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
       )
     );
     StyledTextField = styled(TextField)({
@@ -57,7 +65,12 @@ export default function EditNote({
       },
       '& .MuiOutlinedInput-root': {
         '& fieldset': {
-          borderColor: hexColor,
+          borderColor: isSaving
+            ? IS_SAVING_HEX
+            : getHexFromRGBAObject({
+                ...getRgbaObjectFromHexString(hexColor),
+                a: 0.3,
+              }),
         },
         '&:hover fieldset': {
           borderColor: hexColor,
@@ -68,45 +81,74 @@ export default function EditNote({
       },
     });
   };
-  setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
+  setStyledTextField(isSaving, category.color);
 
-  const initialValues = {
-    note: note.note,
-    favorite: note.favorite,
-  };
-
-  const updateNote = async (
-    noteId: string,
-    note: string,
-    favorite: boolean
-  ) => {
+  const updateNote = async (text: string, noteId: string) => {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'note/update',
+      body: { text, noteId },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED && response.note) {
+      setCategories(
+        categories.map((category_) => {
+          if (category_.id !== category.id) {
+            return category_;
+          }
+          return {
+            ...category,
+            notes: (category.notes || []).map((note_) => {
+              if (note_.id !== response.note?.id) {
+                return note_;
+              }
+              return response.note;
+            }),
+          };
+        })
+      );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+      setIsEditing({});
+    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+      return router.push('/');
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined); //skip setting isSaving(false)
+      return;
+    }
+    setIsSaving(false);
+    return;
+  };
+
+  const deleteNote = async (noteId) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'note/delete',
       body: {
         noteId,
-        note,
-        favorite,
         controlValue,
       },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setNotes(
-        notes.map((currentNote) => {
-          if (currentNote.id === noteId) {
-            return response.note;
+    if (response.statusCode === StatusCodes.CREATED) {
+      setCategories(
+        categories.map((category_) => {
+          if (category_.id !== category.id) {
+            return category_;
           }
-          return currentNote;
+          return {
+            ...category,
+            notes: (category.notes || []).filter(
+              (note_) => note_.id !== response.note?.id
+            ),
+          };
         })
       );
-      setEditing({
-        isEditing: undefined,
-        isDeleting: false,
-      });
-      if (response.cotrolValue) {
-        setControlValue(response.cotrolValue);
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
       }
+      setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
     } else if (response.statusCode === StatusCodes.CONFLICT) {
@@ -118,248 +160,228 @@ export default function EditNote({
   };
 
   const validationSchema = yup.object().shape({
-    note: yup.string().required(),
+    text: yup.string().required('Text is required'),
   });
 
   return (
-    <Card>
-      <Formik
-        initialValues={initialValues}
-        onSubmit={async (values, { setSubmitting }) => {
-          await updateNote(note.id, values.note, values.favorite);
-          setSubmitting(false);
-        }}
-        validationSchema={validationSchema}
-      >
-        {({ handleSubmit, values, setFieldValue }) => {
-          const isFormValid = validationSchema.isValidSync(values);
+    <Formik
+      initialValues={{
+        text: note.text,
+      }}
+      onSubmit={async (values, { setSubmitting }) => {
+        await updateNote(values.text, note?.id);
+        setSubmitting(false);
+      }}
+      validationSchema={validationSchema}
+    >
+      {({ handleSubmit, values, setFieldValue }) => {
+        const isFormValid = validationSchema.isValidSync(values);
 
-          return (
-            <Card>
-              <Box>
-                <Box
-                  sx={{
-                    borderTopLeftRadius: '12px',
-                    borderTopRightRadius: '12px',
-                    cursor: 'auto',
-                    minHeight: 54,
-                    background: getRepeatingLinearGradient(
-                      isSaving ? IS_SAVING_HEX : color.hex,
-                      0.2,
-                      45,
-                      false
-                    ),
-                    border: `solid 2px ${
-                      isSaving
-                        ? IS_SAVING_HEX
-                        : getHexFromRGBAObject({
-                            ...(color.rgb as {
-                              r: number;
-                              g: number;
-                              b: number;
-                            }),
-                            a: 0.3,
-                          })
-                    }`,
-                    borderBottom: '0px',
-                  }}
-                >
-                  <Box sx={{ p: 2, pt: 3.5, pb: 1.5 }}>
-                    {isSaving && (
-                      <Box
-                        sx={{
-                          width: 'calc(100% + 20px)',
-                          height: 'calc(100% + 20px)',
-                          background: 'transparent',
-                          position: 'absolute',
-                          zIndex: 1,
-                          transform: 'translate(-20px, -20px)',
-                        }}
-                      />
-                    )}
-                    <InputText
-                      type="text"
-                      rows={3}
-                      multiline={true}
-                      name={'note'}
-                      label={`Note`}
-                      TextField={StyledTextField}
-                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
-                      disabled={isSaving}
-                      inputBackground={getHexFromRGBAObject({
-                        ...getRgbaObjectFromHexString(
-                          isSaving ? IS_SAVING_HEX : color.hex
-                        ),
-                        a: 0.03,
-                      })}
-                    />
-                    <Box sx={{ ml: 1, mb: 0.5 }}>
-                      <Checkbox
-                        label={'Favorite'}
-                        name={'favorite'}
-                        hideHelpText={true}
-                        color={darkHexColor}
-                        onChange={(e) => {
-                          setFieldValue('favorite', e.target.checked);
-                        }}
-                      />
-                    </Box>
-                  </Box>
+        const backgroundColor = getHexFromRGBAObject(
+          getRgbaObjectFromHexString(
+            isSaving
+              ? IS_SAVING_HEX
+              : getHexFromRGBAObject(
+                  getColorShadeBasedOnSliderPickerSchema(
+                    getRgbaObjectFromHexString(color?.hex),
+                    'bright'
+                  )
+                ),
+            0.2
+          )
+        );
+
+        return (
+          <Card>
+            <Box>
+              <Box
+                sx={{
+                  borderTopLeftRadius: '12px',
+                  borderTopRightRadius: '12px',
+                  cursor: 'auto',
+                  minHeight: 54,
+                  background: backgroundColor,
+                  border: `solid 1px ${backgroundColor}`,
+                  borderBottom: '0px',
+                }}
+              >
+                <Box sx={{ p: 1.5, pb: 0 }}>
+                  <InputText
+                    type="text"
+                    rows={3}
+                    multiline={true}
+                    name={'text'}
+                    label={`Note`}
+                    TextField={StyledTextField}
+                    helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                    disabled={isSaving}
+                  />
                 </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  width: '100%',
+                }}
+              >
                 <Box
                   sx={{
                     display: 'flex',
-                    width: '100%',
+                    flexDirection: 'row',
                     background:
                       !isFormValid || isSaving
-                        ? getRepeatingLinearGradient(
-                            isSaving ? IS_SAVING_HEX : '000000',
-                            isSaving ? 0.2 : 0.05,
-                            135,
-                            false
-                          )
+                        ? SUPER_LIGHT_SILVER
                         : LIGHT_GREEN,
-                    minHeight: 58,
                     borderBottomLeftRadius: 12,
-                    borderBottomRightRadius: 12,
-                    border: isSaving
-                      ? `solid 2px ${IS_SAVING_HEX}`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 0,
-                          g: 0,
-                          b: 0,
-                          a: 0.05,
-                        })}`
-                      : `solid 2px ${LIGHT_GREEN}`,
-                    borderTop: 0,
+                    border: `solid 1px ${
+                      isSaving || !isFormValid
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN
+                    }`,
                     color: isSaving
                       ? IS_SAVING_HEX
                       : !isFormValid
                       ? 'rgba(0,0,0,.2)'
                       : 'black',
                     cursor: !isFormValid || isSaving ? 'default' : 'pointer',
+                    flex: 1,
+                    '&:hover': !isSaving &&
+                      isFormValid &&
+                      !disableHover && {
+                        border: !isFormValid
+                          ? `solid 1px ${getHexFromRGBAObject({
+                              r: 0,
+                              g: 0,
+                              b: 0,
+                              a: 0.05,
+                            })}`
+                          : `solid 1px ${GREEN}`,
+                      },
+                  }}
+                  onClick={() => {
+                    !isSaving && handleSubmit();
                   }}
                 >
                   <Box
                     sx={{
-                      flex: 1,
-                      p: 2,
-                      margin: `0 0 -2px -2px`,
-                      border: isSaving
-                        ? `solid 2px ${IS_SAVING_HEX}`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 0,
-                            g: 0,
-                            b: 0,
-                            a: 0.05,
-                          })}`
-                        : `solid 2px ${LIGHT_GREEN}`,
-                      borderBottomLeftRadius: 12,
-                      borderRight: 0,
-                      borderTop: 0,
-                      '&:hover': !disableHover &&
-                        !isSaving && {
-                          border: !isFormValid
-                            ? `solid 2px ${getHexFromRGBAObject({
-                                r: 0,
-                                g: 0,
-                                b: 0,
-                                a: 0.05,
-                              })}`
-                            : `solid 2px ${GREEN}`,
-                          borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
-                          pt: !isFormValid ? 2 : 1.8,
-                        },
-                    }}
-                    onClick={() => {
-                      !isSaving && handleSubmit();
+                      p: '5px',
                     }}
                   >
                     <Iconify
-                      icon={'material-symbols:save-outline'}
-                      width={42}
+                      icon={'ic:outline-note-add'}
+                      width={40}
                       sx={{
-                        m: -2,
-                        position: 'absolute',
-                        bottom: 25,
-                        left: 25,
+                        position: 'relative',
+                        top: '50%',
+                        left: '40%',
+                        transform: 'translate(-40%, -50%)',
                       }}
                     />
-                    <Stack spacing={2} sx={{ ml: 5 }}>
-                      <Typography variant="subtitle2" noWrap>
-                        SAVE NOTE FOR LATER
-                      </Typography>
-                    </Stack>
                   </Box>
                   <Box
                     sx={{
-                      margin: `0 -2px -2px 0`,
-                      cursor: !isSaving && 'pointer',
-                      color: !isSaving && 'black',
-                      border: isSaving
-                        ? `solid 2px ${IS_SAVING_HEX}`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                            a: 0.2,
-                          })}`
-                        : `solid 2px ${LIGHT_RED}`,
-                      borderLeft: isSaving
-                        ? `solid 2px transparent`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                            a: 0.2,
-                          })}`
-                        : `solid 2px ${LIGHT_RED}`,
-                      borderTop: isSaving
-                        ? `solid 2px transparent`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                            a: 0.2,
-                          })}`
-                        : `solid 2px ${LIGHT_RED}`,
-                      width: '60px',
-                      borderBottomRightRadius: 12,
-                      background: isSaving
-                        ? 'transparent'
-                        : !isFormValid
-                        ? `rgba(255, 0, 0, 0.2)`
-                        : LIGHT_RED,
-                      '&:hover': !disableHover &&
-                        !isSaving && {
-                          background: LIGHT_RED,
-                          border: `solid 2px ${RED}`,
-                        },
+                      position: 'relative',
                     }}
-                    onClick={() => !isSaving && setEditing('')}
                   >
-                    <Iconify
-                      icon={'mdi:cancel-bold'}
-                      width={42}
+                    <Stack
                       sx={{
-                        m: -2,
                         position: 'absolute',
-                        bottom: 26,
-                        right: 24,
+                        top: '50%',
+                        transform: 'translate(0, -50%)',
                       }}
-                    />
+                    >
+                      <Typography variant="subtitle2" noWrap>
+                        SAVE NOTE
+                      </Typography>
+                    </Stack>
                   </Box>
                 </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                    pl: '5px',
+                    pr: '5px',
+                    border: `solid 1px ${
+                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
+                    }`,
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    cursor: isSaving ? 'default' : 'pointer',
+                    '&:hover': !isSaving && {
+                      background: LIGHT_RED,
+                      border: `solid 1px ${RED}`,
+                    },
+                  }}
+                  onClick={() => !isSaving && deleteNote(note.id)}
+                >
+                  <Iconify
+                    icon={'material-symbols:delete-forever-outline-rounded'}
+                    width={40}
+                    sx={{
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    width: '16px',
+                    background:
+                      !isFormValid || isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN,
+                    border: `solid 1px ${
+                      isSaving || !isFormValid
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN
+                    }`,
+                  }}
+                />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                    borderBottomRightRadius: 14,
+                    pl: '5px',
+                    pr: '5px',
+                    border: `solid 1px ${
+                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
+                    }`,
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    cursor: isSaving ? 'default' : 'pointer',
+                    '&:hover': !isSaving &&
+                      !disableHover && {
+                        background: LIGHT_RED,
+                        border: `solid 1px ${RED}`,
+                      },
+                  }}
+                  onClick={() => {
+                    if (isSaving) {
+                      return;
+                    }
+                    setIsEditing({});
+                  }}
+                >
+                  <Iconify
+                    icon={'eva:close-outline'}
+                    width={40}
+                    sx={{
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
+                    }}
+                  />
+                </Box>
               </Box>
-            </Card>
-          );
-        }}
-      </Formik>
-    </Card>
+            </Box>
+          </Card>
+        );
+      }}
+    </Formik>
   );
 }

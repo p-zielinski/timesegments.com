@@ -39,14 +39,18 @@ export default function CategoryNotesCards({
             disableHover={disableHover}
             isSaving={isSaving}
             setIsSaving={setIsSaving}
-            category={category}
             setIsEditing={setIsEditing}
+            category={category}
+            categories={categories}
+            setCategories={setCategories}
           />
         )}
         {category.showRecentNotes &&
           (category.notes || []).map((note) => (
             <Note
               category={category}
+              categories={categories}
+              setCategories={setCategories}
               controlValue={controlValue}
               setControlValue={setControlValue}
               isSaving={isSaving}

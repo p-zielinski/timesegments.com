@@ -78,6 +78,32 @@ export default function EditCategory({
   };
   setStyledTextField(isSaving, category.color);
 
+  const setCategoryAsDeleted = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'category/set-as-deleted',
+      body: {
+        categoryId: category.id,
+        controlValue,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setCategories(
+        categories.filter((category_) => category_.id !== category.id)
+      );
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+      setIsEditing({});
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
+    }
+    setIsSaving(false);
+    return;
+  };
+
   const updateCategory = async (categoryName: string, color: string) => {
     setIsSaving(true);
     const response = await handleFetch({
@@ -319,23 +345,7 @@ export default function EditCategory({
                       border: `solid 1px ${RED}`,
                     },
                   }}
-                  onClick={() => {
-                    if (isSaving) {
-                      return;
-                    }
-                    setCategories(
-                      categories.map((_category) => {
-                        if (_category.id !== category.id) {
-                          return _category;
-                        }
-                        return staticCategory;
-                      })
-                    );
-                    setIsEditing({
-                      categoryId: undefined,
-                      createNew: undefined,
-                    });
-                  }}
+                  onClick={() => !isSaving && setCategoryAsDeleted()}
                 >
                   <Iconify
                     icon={'material-symbols:delete-forever-outline-rounded'}

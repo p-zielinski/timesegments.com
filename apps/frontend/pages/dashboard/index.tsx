@@ -11,7 +11,6 @@ import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColo
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog} from '@prisma/client';
 import navConfig from '../../layouts/dashboard/nav/config';
-import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
@@ -240,24 +239,6 @@ export default function Index({
 }
 
 export const getServerSideProps = async ({ req, res }) => {
-  const query = req.query || {};
-  const possibleQueryOptions = navConfig
-    .filter((config) => config.path === '/dashboard' && config.query)
-    .map((config) => config.query);
-  const queryOk = possibleQueryOptions.find((optionQuery) =>
-    isEqual(optionQuery, query)
-  );
-  if (!queryOk && possibleQueryOptions.length) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/dashboard?${new URLSearchParams(
-          possibleQueryOptions[0]
-        ).toString()}`,
-      },
-    };
-  }
-
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndNotes,
@@ -332,7 +313,9 @@ export const getServerSideProps = async ({ req, res }) => {
   }
 
   user.categories.map((category) => {
-    category.notes = notes.filter((note) => note.categoryId === category.id);
+    category.notes = notes
+      .filter((note) => note.categoryId === category.id)
+      .reverse();
     return category;
   });
 

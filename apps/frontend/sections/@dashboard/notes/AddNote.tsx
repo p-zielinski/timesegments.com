@@ -26,11 +26,10 @@ export default function AddNew({
   controlValue,
   setControlValue,
   disableHover,
-  data = {},
-  setIsEditing,
-  category,
   isSaving,
   setIsSaving,
+  setIsEditing,
+  category,
   categories,
   setCategories,
 }) {
@@ -91,8 +90,17 @@ export default function AddNew({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      console.log('note', response.note);
-      //...notes?
+      setCategories(
+        categories.map((category_) => {
+          if (category_.id !== category.id) {
+            return category_;
+          }
+          return {
+            ...category,
+            notes: [response.note, ...(category.notes || [])],
+          };
+        })
+      );
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
@@ -113,7 +121,6 @@ export default function AddNew({
   return (
     <Formik
       initialValues={{
-        ...data,
         text: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
@@ -194,7 +201,8 @@ export default function AddNew({
                     cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                     flex: 1,
                     '&:hover': !isSaving &&
-                      isFormValid && {
+                      isFormValid &&
+                      !disableHover && {
                         border: !isFormValid
                           ? `solid 1px ${getHexFromRGBAObject({
                               r: 0,
@@ -256,10 +264,11 @@ export default function AddNew({
                     }`,
                     color: isSaving ? IS_SAVING_HEX : 'black',
                     cursor: isSaving ? 'default' : 'pointer',
-                    '&:hover': !isSaving && {
-                      background: LIGHT_RED,
-                      border: `solid 1px ${RED}`,
-                    },
+                    '&:hover': !isSaving &&
+                      !disableHover && {
+                        background: LIGHT_RED,
+                        border: `solid 1px ${RED}`,
+                      },
                   }}
                   onClick={() => {
                     if (isSaving) {
