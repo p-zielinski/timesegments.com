@@ -1,7 +1,6 @@
 import {Box, Container, useMediaQuery} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
-import {CategoriesPageMode} from '../../enum/categoriesPageMode';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
@@ -10,14 +9,11 @@ import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
-import {NotesSection} from '../../sections/@dashboard/notes';
 import {Category, Note, TimeLog} from '@prisma/client';
 import navConfig from '../../layouts/dashboard/nav/config';
-import {isEqual} from 'lodash';
 import {useRouter} from 'next/router';
 import {getIsPageState} from '../../utils/getIsPageState';
 import {DashboardPageState} from '../../enum/DashboardPageState';
-import {GoToCategoriesOrNotes} from '../../sections/@dashboard/categories/GoToCategoriesOrNotes';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
@@ -25,7 +21,7 @@ import {
 } from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {DateTime} from 'luxon';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
-import CategoriesSection from '../../sections/@dashboard/categories';
+import Categories from '../../sections/@dashboard/categories';
 import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
 import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import {getGroupedTimeLogsWithDateSorted} from '../../utils/mapper/getGroupedTimeLogsWithDateSorted';
@@ -167,21 +163,6 @@ export default function Index({
     user?.categories || []
   );
   const [notes, setNotes] = useState<Note[]>(serverSideFetchedNotes || []);
-  const [viewMode, setViewMode] = useState<CategoriesPageMode>(
-    CategoriesPageMode.VIEW
-  );
-
-  useEffect(() => {
-    if (viewMode === CategoriesPageMode.EDIT || !user) {
-      return;
-    }
-    if (!categories.length) {
-      setViewMode(CategoriesPageMode.EDIT);
-    } else {
-      setViewMode(CategoriesPageMode.VIEW);
-    }
-  }, [categories.length]);
-
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
@@ -235,72 +216,29 @@ export default function Index({
       randomSliderHexColor={randomSliderHexColor}
     >
       <Container>
-        {!width1200px ? (
-          <GoToCategoriesOrNotes
-            currentPageState={currentPageState}
-            setCurrentPageState={setCurrentPageState}
-            isSaving={isSaving}
-            disableHover={disableHover}
-          />
-        ) : (
-          <Box sx={{ mt: -5 }} />
-        )}
-        {currentPageState === DashboardPageState.CATEGORIES ? (
-          <CategoriesSection
-            activeDate={activeDate}
-            setActiveDate={setActiveDate}
-            groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
-            timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-            setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
-            categories={categories}
-            setCategories={setCategories}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            limits={limits}
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            user={user}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            disableHover={disableHover}
-          />
-        ) : currentPageState === DashboardPageState.NOTES ? (
-          <NotesSection
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            user={user}
-            setUser={setUser}
-            notes={notes}
-            setNotes={setNotes}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            disableHover={disableHover}
-          />
-        ) : undefined}
+        <Box sx={{ mt: -5 }} />
+        <Categories
+          activeDate={activeDate}
+          setActiveDate={setActiveDate}
+          groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
+          timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+          setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
+          categories={categories}
+          setCategories={setCategories}
+          limits={limits}
+          controlValue={controlValue}
+          setControlValue={setControlValue}
+          user={user}
+          isSaving={isSaving}
+          setIsSaving={setIsSaving}
+          disableHover={disableHover}
+        />
       </Container>
     </DashboardLayout>
   );
 }
 
 export const getServerSideProps = async ({ req, res }) => {
-  const query = req.query || {};
-  const possibleQueryOptions = navConfig
-    .filter((config) => config.path === '/dashboard' && config.query)
-    .map((config) => config.query);
-  const queryOk = possibleQueryOptions.find((optionQuery) =>
-    isEqual(optionQuery, query)
-  );
-  if (!queryOk && possibleQueryOptions.length) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: `/dashboard?${new URLSearchParams(
-          possibleQueryOptions[0]
-        ).toString()}`,
-      },
-    };
-  }
-
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndNotes,
@@ -374,11 +312,18 @@ export const getServerSideProps = async ({ req, res }) => {
     ] as TimeLogsWithinDateISO[];
   }
 
+  user.categories.map((category) => {
+    category.notes = notes
+      .filter((note) => note.categoryId === category.id)
+      .reverse();
+    return category;
+  });
+
   return {
     props: {
       user: user ?? null,
       limits: limits ?? null,
-      notes: notes ?? null,
+      notes: notes?.filter((note) => !note.categoryId) ?? null,
       randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,

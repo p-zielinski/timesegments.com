@@ -28,12 +28,19 @@ export class NoteController {
     @UserDecorator() user: User,
     @Body() createNoteDto: CreateNoteDto
   ) {
+    const { categoryId, text } = createNoteDto;
+    const createNoteStatus = await this.noteService.createNote(
+      text,
+      user.id,
+      categoryId
+    );
+    if (!createNoteStatus.success) {
+      throw new BadRequestException({
+        error: createNoteStatus.error,
+      });
+    }
     return {
-      note: await this.noteService.createNote(
-        createNoteDto.note,
-        createNoteDto.favorite,
-        user.id
-      ),
+      ...createNoteStatus,
       controlValue: this.userService.getNewControlValue(user),
     };
   }
@@ -43,11 +50,10 @@ export class NoteController {
     @UserDecorator() user: User,
     @Body() updateNoteDto: UpdateNoteDto
   ) {
-    const { noteId, note, favorite } = updateNoteDto;
+    const { noteId, text } = updateNoteDto;
     const updateNoteStatus = await this.noteService.updateNote(
       noteId,
-      note,
-      favorite,
+      text,
       user
     );
     if (!updateNoteStatus.success) {

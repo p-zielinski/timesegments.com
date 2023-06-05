@@ -38,8 +38,10 @@ model Note {
   id            String      @id @default(cuid())
   user          User        @relation(fields: [userId], references: [id])
   userId        String
-  note          String?
-  favorite      Boolean     @default(false)
+  title         String?
+  text          String?
+  category      Category?   @relation(fields: [categoryId], references: [id])
+  categoryId    String?
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }
@@ -53,6 +55,8 @@ model Category {
   active              Boolean     @default(false)
   visible             Boolean     @default(true)
   timeLogs            TimeLog[]
+  notes               Note[]
+  showRecentNotes     Boolean     @default(true)
   deleted             Boolean     @default(false)
   createdAt           DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt           DateTime    @updatedAt @db.Timestamptz(3)

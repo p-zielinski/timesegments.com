@@ -22,8 +22,7 @@ import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 
-export default function EditNote({
-  note,
+export default function AddNew({
   controlValue,
   setControlValue,
   disableHover,
@@ -83,11 +82,11 @@ export default function EditNote({
   };
   setStyledTextField(isSaving, category.color);
 
-  const updateNote = async (text: string, noteId: string) => {
+  const saveNote = async (text: string, categoryId?: string) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'note/update',
-      body: { text, noteId },
+      pathOrUrl: 'note/create',
+      body: { text, categoryId },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
@@ -98,57 +97,13 @@ export default function EditNote({
           }
           return {
             ...category,
-            notes: (category.notes || []).map((note_) => {
-              if (note_.id !== response.note?.id) {
-                return note_;
-              }
-              return response.note;
-            }),
+            notes: [response.note, ...(category.notes || [])],
           };
         })
       );
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
-      setIsEditing({});
-    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-      return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
-    }
-    setIsSaving(false);
-    return;
-  };
-
-  const deleteNote = async (noteId) => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'note/delete',
-      body: {
-        noteId,
-        controlValue,
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: (category.notes || []).filter(
-              (note_) => note_.id !== response.note?.id
-            ),
-          };
-        })
-      );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
-      }
-      setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
     } else if (response.statusCode === StatusCodes.CONFLICT) {
@@ -166,10 +121,10 @@ export default function EditNote({
   return (
     <Formik
       initialValues={{
-        text: note.text,
+        text: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        await updateNote(values.text, note?.id);
+        await saveNote(values.text, category?.id);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
@@ -291,55 +246,11 @@ export default function EditNote({
                       }}
                     >
                       <Typography variant="subtitle2" noWrap>
-                        SAVE NOTE
+                        ADD NOTE
                       </Typography>
                     </Stack>
                   </Box>
                 </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
-                    pl: '5px',
-                    pr: '5px',
-                    border: `solid 1px ${
-                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
-                    }`,
-                    color: isSaving ? IS_SAVING_HEX : 'black',
-                    cursor: isSaving ? 'default' : 'pointer',
-                    '&:hover': !isSaving && {
-                      background: LIGHT_RED,
-                      border: `solid 1px ${RED}`,
-                    },
-                  }}
-                  onClick={() => !isSaving && deleteNote(note.id)}
-                >
-                  <Iconify
-                    icon={'material-symbols:delete-forever-outline-rounded'}
-                    width={40}
-                    sx={{
-                      position: 'relative',
-                      top: '50%',
-                      left: '40%',
-                      transform: 'translate(-40%, -50%)',
-                    }}
-                  />
-                </Box>
-                <Box
-                  sx={{
-                    width: '16px',
-                    background:
-                      !isFormValid || isSaving
-                        ? SUPER_LIGHT_SILVER
-                        : LIGHT_GREEN,
-                    border: `solid 1px ${
-                      isSaving || !isFormValid
-                        ? SUPER_LIGHT_SILVER
-                        : LIGHT_GREEN
-                    }`,
-                  }}
-                />
                 <Box
                   sx={{
                     display: 'flex',

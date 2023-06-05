@@ -1,4 +1,7 @@
 export const getDuration = (totalPeriodInMs) => {
+  if (!totalPeriodInMs) {
+    return `0 seconds`;
+  }
   const periodInSecondsTotal = Math.floor(totalPeriodInMs / 1000);
   const periodInMinutesTotal = Math.floor(periodInSecondsTotal / 60);
   const durationHours = Math.floor(periodInMinutesTotal / 60);

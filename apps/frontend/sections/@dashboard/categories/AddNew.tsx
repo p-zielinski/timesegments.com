@@ -1,30 +1,24 @@
 import { Box, Card, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import {
-  BLUE,
   GREEN,
   IS_SAVING_HEX,
-  LIGHT_BLUE,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import { SliderPicker } from 'react-color';
+import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
 import React from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../components/form/Text';
-import { CreateNewType } from '../../../enum/createNewType';
-import capitalize from 'capitalize';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
-import { Checkbox } from '../Form/Checkbox';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
@@ -32,7 +26,6 @@ export default function AddNew({
   controlValue,
   setControlValue,
   disableHover,
-  type,
   data = {},
   isEditing,
   setIsEditing,
@@ -50,10 +43,10 @@ export default function AddNew({
     : getRandomRgbObjectForSliderPicker();
 
   let StyledTextField, darkHexColor;
-  const setStyledTextField = (hexColor) => {
+  const setStyledTextField = (isSaving, hexColor) => {
     darkHexColor = getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
-        getRgbaObjectFromHexString(hexColor)
+        getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
       )
     );
     StyledTextField = styled(TextField)({
@@ -71,7 +64,12 @@ export default function AddNew({
       },
       '& .MuiOutlinedInput-root': {
         '& fieldset': {
-          borderColor: hexColor,
+          borderColor: isSaving
+            ? IS_SAVING_HEX
+            : getHexFromRGBAObject({
+                ...getRgbaObjectFromHexString(hexColor),
+                a: 0.3,
+              }),
         },
         '&:hover fieldset': {
           borderColor: hexColor,
@@ -82,7 +80,7 @@ export default function AddNew({
       },
     });
   };
-  setStyledTextField(isSaving ? IS_SAVING_HEX : startingColor.hex);
+  setStyledTextField(isSaving, startingColor.hex);
 
   const createCategory = async (name: string, color: string) => {
     setIsSaving(true);
@@ -93,10 +91,7 @@ export default function AddNew({
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories([{ ...response.category }, ...categories]);
-      setIsEditing({
-        categoryId: undefined,
-        createNew: undefined,
-      });
+      setIsEditing({});
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
@@ -108,100 +103,104 @@ export default function AddNew({
     return;
   };
 
-  function Picker() {
+  if (!isEditing.createNew) {
+    return (
+      <Card
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          cursor: !isSaving && 'pointer',
+          color: isSaving && IS_SAVING_HEX,
+          border: `solid 1px ${isSaving ? IS_SAVING_HEX : LIGHT_GREEN}`,
+          background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_GREEN,
+          '&:hover': !disableHover &&
+            !isSaving && {
+              border: `solid 1px ${GREEN}`,
+            },
+        }}
+        onClick={() => setIsEditing({ createNew: true })}
+      >
+        <Box>
+          <Iconify
+            icon={'material-symbols:add'}
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: 'relative',
+          }}
+        >
+          <Stack
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              transform: 'translate(0, -50%)',
+            }}
+          >
+            <Typography variant="subtitle2" noWrap>
+              ADD NEW CATEGORY
+            </Typography>
+          </Stack>
+        </Box>
+      </Card>
+    );
+  }
+
+  const validationSchema = yup.object().shape({
+    categoryName: yup.string().required('Category name is required'),
+  });
+
+  const Pointer = () => {
     return (
       <div
         style={{
           width: '18px',
           height: '18px',
           borderRadius: '50%',
-          transform: 'translate(-8px, -3px)',
+          transform: 'translate(-8px, -5px)',
           backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
           boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
         }}
       />
     );
-  }
-
-  if (
-    isEditing?.createNew !==
-    `${type}${category?.id ? `4categoryId:${category.id}` : ''}`
-  ) {
-    return (
-      <Card
-        sx={{
-          p: 2,
-          cursor: !isSaving && 'pointer',
-          minHeight: 54,
-          color: isSaving && IS_SAVING_HEX,
-          background: isSaving
-            ? SUPER_LIGHT_SILVER
-            : type === CreateNewType.CATEGORY
-            ? LIGHT_GREEN
-            : LIGHT_BLUE,
-          border: `solid 2px  ${
-            isSaving
-              ? IS_SAVING_HEX
-              : type === CreateNewType.CATEGORY
-              ? LIGHT_GREEN
-              : LIGHT_BLUE
-          }`,
-          '&:hover': !disableHover &&
-            !isSaving && {
-              border: `solid 2px  ${
-                type === CreateNewType.CATEGORY ? GREEN : BLUE
-              }`,
-            },
-        }}
-        onClick={() =>
-          !isSaving &&
-          setIsEditing({
-            categoryId: undefined,
-            createNew: `${type}${
-              category?.id ? `4categoryId:${category.id}` : ''
-            }`,
-          })
-        }
-      >
-        <Iconify
-          icon={'material-symbols:add'}
-          width={50}
-          sx={{
-            m: -2,
-            position: 'absolute',
-            bottom: 18,
-            left: 20,
-          }}
-        />
-        <Stack spacing={2} sx={{ ml: 5 }}>
-          <Typography variant="subtitle2" noWrap>
-            CREATE NEW {type?.toUpperCase()}
-          </Typography>
-        </Stack>
-      </Card>
-    );
-  }
-
-  const validationSchema = yup.object().shape({
-    [type + 'Name']: yup.string().required('Category name is required'),
-  });
+  };
 
   return (
     <Formik
       initialValues={{
         ...data,
-        [type + 'Name']: '',
-        inheritColor: category?.id ? true : undefined,
+        categoryName: '',
         color: startingColor,
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        await createCategory(values?.[type + 'Name'], values.color.hex);
+        await createCategory(values.categoryName, values.color.hex);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
     >
       {({ handleSubmit, values, setFieldValue }) => {
         const isFormValid = validationSchema.isValidSync(values);
+
+        const backgroundColor = getHexFromRGBAObject(
+          getRgbaObjectFromHexString(
+            isSaving
+              ? IS_SAVING_HEX
+              : getHexFromRGBAObject(
+                  getColorShadeBasedOnSliderPickerSchema(
+                    getRgbaObjectFromHexString(values.color?.hex),
+                    'bright'
+                  )
+                ),
+            0.2
+          )
+        );
 
         return (
           <Card>
@@ -212,29 +211,13 @@ export default function AddNew({
                   borderTopRightRadius: '12px',
                   cursor: 'auto',
                   minHeight: 54,
-                  background: getRepeatingLinearGradient(
-                    isSaving ? IS_SAVING_HEX : values.color?.hex,
-                    0.3,
-                    45,
-                    false
-                  ),
-                  border: `solid 2px ${
-                    isSaving
-                      ? IS_SAVING_HEX
-                      : getHexFromRGBAObject({
-                          ...(values.color.rgb as {
-                            r: number;
-                            g: number;
-                            b: number;
-                          }),
-                          a: 0.3,
-                        })
-                  }`,
+                  background: backgroundColor,
+                  border: `solid 1px ${backgroundColor}`,
                   borderBottom: '0px',
                 }}
               >
-                <Box sx={{ p: 2 }}>
-                  <Stack spacing={2}>
+                <Box sx={{ p: 1.5 }}>
+                  <Stack spacing={3}>
                     <Box
                       sx={{
                         filter: isSaving ? 'grayscale(100%)' : 'none',
@@ -253,44 +236,22 @@ export default function AddNew({
                           }}
                         />
                       )}
-                      <SliderPicker
+                      <HuePicker
                         height={`8px`}
+                        width={'100%'}
                         onChange={(value) => {
                           setFieldValue('color', value);
-                          setStyledTextField(value.hex);
-                          if (category) {
-                            setFieldValue(
-                              'inheritColor',
-                              value.hex === category.color
-                            );
-                          }
+                          setFieldValue('color', value);
+                          setStyledTextField(isSaving, value.hex);
                         }}
                         color={values.color}
-                        pointer={Picker}
+                        pointer={Pointer}
                       />
                     </Box>
-                    {category && (
-                      <Checkbox
-                        label={'Inherit from category'}
-                        name={'inheritColor'}
-                        hideHelpText={true}
-                        color={darkHexColor}
-                        onChange={(e) => {
-                          setFieldValue('inheritColor', e.target.checked);
-                          if (e.target.checked) {
-                            setFieldValue('color', {
-                              hex: category.color,
-                              rgb: getRgbaObjectFromHexString(category.color),
-                            });
-                            setStyledTextField(category.color);
-                          }
-                        }}
-                      />
-                    )}
                     <InputText
                       type="text"
-                      name={`${type}Name`}
-                      label={`${capitalize(type)} name`}
+                      name="categoryName"
+                      label="Category name"
                       TextField={StyledTextField}
                       helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
                       disabled={isSaving}
@@ -302,149 +263,113 @@ export default function AddNew({
                 sx={{
                   display: 'flex',
                   width: '100%',
-                  background:
-                    !isFormValid || isSaving
-                      ? getRepeatingLinearGradient(
-                          isSaving ? IS_SAVING_HEX : '000000',
-                          isSaving ? 0.2 : 0.05,
-                          135,
-                          false
-                        )
-                      : LIGHT_GREEN,
-                  minHeight: 58,
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                  border: isSaving
-                    ? `solid 2px ${IS_SAVING_HEX}`
-                    : !isFormValid
-                    ? `solid 2px ${getHexFromRGBAObject({
-                        r: 0,
-                        g: 0,
-                        b: 0,
-                        a: 0.05,
-                      })}`
-                    : `solid 2px ${LIGHT_GREEN}`,
-                  borderTop: 0,
-                  color: isSaving
-                    ? IS_SAVING_HEX
-                    : !isFormValid
-                    ? 'rgba(0,0,0,.2)'
-                    : 'black',
-                  cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                 }}
               >
                 <Box
                   sx={{
-                    flex: 1,
-                    p: 2,
-                    margin: `0 0 -2px -2px`,
-                    border: isSaving
-                      ? `solid 2px ${IS_SAVING_HEX}`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 0,
-                          g: 0,
-                          b: 0,
-                          a: 0.05,
-                        })}`
-                      : `solid 2px ${LIGHT_GREEN}`,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background:
+                      !isFormValid || isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN,
                     borderBottomLeftRadius: 12,
-                    borderRight: 0,
-                    borderTop: 0,
-                    '&:hover': !disableHover &&
-                      !isSaving && {
+                    border: `solid 1px ${
+                      isSaving || !isFormValid
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN
+                    }`,
+                    color: isSaving
+                      ? IS_SAVING_HEX
+                      : !isFormValid
+                      ? 'rgba(0,0,0,.2)'
+                      : 'black',
+                    cursor: !isFormValid || isSaving ? 'default' : 'pointer',
+                    flex: 1,
+                    '&:hover': !isSaving &&
+                      isFormValid && {
                         border: !isFormValid
-                          ? `solid 2px ${getHexFromRGBAObject({
+                          ? `solid 1px ${getHexFromRGBAObject({
                               r: 0,
                               g: 0,
                               b: 0,
                               a: 0.05,
                             })}`
-                          : `solid 2px ${GREEN}`,
-                        borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
-                        pt: !isFormValid ? 2 : 1.8,
+                          : `solid 1px ${GREEN}`,
                       },
                   }}
                   onClick={() => {
                     !isSaving && handleSubmit();
                   }}
                 >
-                  <Iconify
-                    icon={'material-symbols:add'}
-                    width={50}
+                  <Box
                     sx={{
-                      m: -2,
-                      position: 'absolute',
-                      bottom: 21,
-                      left: 22,
+                      p: '5px',
                     }}
-                  />
-                  <Stack spacing={2} sx={{ ml: 5 }}>
-                    <Typography variant="subtitle2" noWrap>
-                      CREATE NEW {type?.toUpperCase()}
-                    </Typography>
-                  </Stack>
+                  >
+                    <Iconify
+                      icon={'material-symbols:save-outline'}
+                      width={40}
+                      sx={{
+                        position: 'relative',
+                        top: '50%',
+                        left: '40%',
+                        transform: 'translate(-40%, -50%)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                    }}
+                  >
+                    <Stack
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        transform: 'translate(0, -50%)',
+                      }}
+                    >
+                      <Typography variant="subtitle2" noWrap>
+                        SAVE CATEGORY
+                      </Typography>
+                    </Stack>
+                  </Box>
                 </Box>
                 <Box
                   sx={{
-                    margin: `0 -2px -2px 0`,
-                    cursor: !isSaving && 'pointer',
-                    color: !isSaving && 'black',
-                    border: isSaving
-                      ? `solid 2px ${IS_SAVING_HEX}`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 255,
-                          g: 0,
-                          b: 0,
-                          a: 0.2,
-                        })}`
-                      : `solid 2px ${LIGHT_RED}`,
-                    borderLeft: isSaving
-                      ? `solid 2px transparent`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 255,
-                          g: 0,
-                          b: 0,
-                          a: 0.2,
-                        })}`
-                      : `solid 2px ${LIGHT_RED}`,
-                    borderTop: isSaving
-                      ? `solid 2px transparent`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 255,
-                          g: 0,
-                          b: 0,
-                          a: 0.2,
-                        })}`
-                      : `solid 2px ${LIGHT_RED}`,
-                    width: '60px',
-                    borderBottomRightRadius: 12,
-                    background: isSaving
-                      ? 'transparent'
-                      : !isFormValid
-                      ? `rgba(255, 0, 0, 0.2)`
-                      : LIGHT_RED,
-                    '&:hover': !disableHover &&
-                      !isSaving && {
-                        background: LIGHT_RED,
-                        border: `solid 2px ${RED}`,
-                      },
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                    borderBottomRightRadius: 14,
+                    pl: '5px',
+                    pr: '5px',
+                    border: `solid 1px ${
+                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
+                    }`,
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    cursor: isSaving ? 'default' : 'pointer',
+                    '&:hover': !isSaving && {
+                      background: LIGHT_RED,
+                      border: `solid 1px ${RED}`,
+                    },
                   }}
-                  onClick={() =>
-                    !isSaving &&
-                    setIsEditing({
-                      categoryId: undefined,
-                      createNew: undefined,
-                    })
-                  }
+                  onClick={() => {
+                    if (isSaving) {
+                      return;
+                    }
+                    setIsEditing({});
+                  }}
                 >
                   <Iconify
-                    icon={'mdi:cancel-bold'}
-                    width={42}
-                    sx={{ m: -2, position: 'absolute', bottom: 26, right: 24 }}
+                    icon={'eva:close-outline'}
+                    width={40}
+                    sx={{
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
+                    }}
                   />
                 </Box>
               </Box>

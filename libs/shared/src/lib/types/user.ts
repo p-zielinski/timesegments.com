@@ -9,7 +9,7 @@ export type UserWithCategories = Prisma.UserGetPayload<
 >;
 
 const userWithCategoriesAndNotes = Prisma.validator<Prisma.UserArgs>()({
-  include: { categories: true, notes: true },
+  include: { categories: { include: { notes: true } }, notes: true },
 });
 
 export type UserWithCategoriesAndNotes = Prisma.UserGetPayload<
