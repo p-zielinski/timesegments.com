@@ -120,9 +120,7 @@ export default function EditCategory({
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            const updatedCategory = { ...response.category };
-            setStaticCategory(updatedCategory);
-            return updatedCategory;
+            return { ...response.category, notes: category?.notes };
           }
           return { ...category, active: false };
         })
@@ -402,10 +400,7 @@ export default function EditCategory({
                         return staticCategory;
                       })
                     );
-                    setIsEditing({
-                      categoryId: undefined,
-                      createNew: undefined,
-                    });
+                    setIsEditing({});
                   }}
                 >
                   <Iconify

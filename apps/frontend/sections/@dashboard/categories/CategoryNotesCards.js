@@ -48,6 +48,7 @@ export default function CategoryNotesCards({
         {category.showRecentNotes &&
           (category.notes || []).map((note) => (
             <Note
+              key={note.id}
               category={category}
               categories={categories}
               setCategories={setCategories}
@@ -60,7 +61,6 @@ export default function CategoryNotesCards({
               disableHover={disableHover}
               note={note}
               user={user}
-              key={note.id}
             />
           ))}
       </Box>

@@ -59,6 +59,9 @@ export class NoteService {
         error: `Note not found, bad request`,
       };
     }
+    if (noteWithUser.text === text) {
+      return { success: true, note: { ...noteWithUser, user: undefined } };
+    }
     const updatedNote = await this.prisma.note.update({
       where: { id: noteId },
       data: { text },

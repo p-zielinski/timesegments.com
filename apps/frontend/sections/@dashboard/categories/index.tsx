@@ -74,42 +74,40 @@ export default function Categories({
         </Grid>
 
         {categories.map((category) => (
-          <>
-            <Grid key={category.id} item xs={1} sm={1} md={1}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Category
-                  groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
-                  user={user}
-                  checkActiveDateCorrectness={checkActiveDateCorrectness}
-                  timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-                  setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
-                  controlValue={controlValue}
-                  setControlValue={setControlValue}
-                  disableHover={disableHover}
-                  isEditing={isEditing}
-                  setIsEditing={setIsEditing}
-                  category={category}
-                  categories={categories}
-                  setCategories={setCategories}
-                  isSaving={isSaving}
-                  setIsSaving={setIsSaving}
-                />
-                <CategoryNotesCards
-                  controlValue={controlValue}
-                  setControlValue={setControlValue}
-                  disableHover={disableHover}
-                  isEditing={isEditing}
-                  setIsEditing={setIsEditing}
-                  category={category}
-                  categories={categories}
-                  setCategories={setCategories}
-                  isSaving={isSaving}
-                  setIsSaving={setIsSaving}
-                  user={user}
-                />
-              </Box>
-            </Grid>
-          </>
+          <Grid key={category.id} item xs={1} sm={1} md={1}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Category
+                groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
+                user={user}
+                checkActiveDateCorrectness={checkActiveDateCorrectness}
+                timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+                setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
+                controlValue={controlValue}
+                setControlValue={setControlValue}
+                disableHover={disableHover}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                category={category}
+                categories={categories}
+                setCategories={setCategories}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
+              />
+              <CategoryNotesCards
+                controlValue={controlValue}
+                setControlValue={setControlValue}
+                disableHover={disableHover}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                category={category}
+                categories={categories}
+                setCategories={setCategories}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
+                user={user}
+              />
+            </Box>
+          </Grid>
         ))}
         <Grid key={'new category'} item xs={1} sm={1} md={1}>
           <AddNew
