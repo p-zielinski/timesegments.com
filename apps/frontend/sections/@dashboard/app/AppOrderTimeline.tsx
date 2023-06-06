@@ -42,11 +42,7 @@ export default function AppOrderTimeline({
                   ))
               : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
                   (group) => (
-                    <GroupedPeriod
-                      group={group}
-                      user={user}
-                      key={group.category?.id}
-                    ></GroupedPeriod>
+                    <GroupedPeriod group={group} user={user} key={nanoid()} />
                   )
                 )}
           </Timeline>
