@@ -5,19 +5,19 @@ const navConfig = [
     title: 'Active categories',
     path: '/dashboard',
     icon: 'fluent:shifts-activity-24-filled',
-    state: DashboardPageState.CATEGORIES,
+    state: DashboardPageState.ACTIVE_CATEGORIES,
   },
-  {
-    title: 'Notes',
-    path: '/notes',
-    icon: 'material-symbols:note-outline',
-    state: DashboardPageState.NOTES,
-  },
+  // {
+  //   title: 'Notes',
+  //   path: '/notes',
+  //   icon: 'material-symbols:note-outline',
+  //   state: DashboardPageState.NOTES,
+  // },
   {
     title: 'Time Logs',
-    path: '/dashboard/time-segments',
+    path: '/dashboard/time-logs',
     icon: `icon-park-twotone:database-time`,
-    state: DashboardPageState.TIME_SEGMENTS,
+    state: DashboardPageState.TIME_LOGS,
   },
   {
     title: 'settings',

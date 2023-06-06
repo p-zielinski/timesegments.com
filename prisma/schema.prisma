@@ -53,7 +53,6 @@ model Category {
   userId              String
   color               String
   active              Boolean     @default(false)
-  visible             Boolean     @default(true)
   timeLogs            TimeLog[]
   notes               Note[]
   showRecentNotes     Boolean     @default(true)

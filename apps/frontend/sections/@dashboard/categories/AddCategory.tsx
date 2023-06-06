@@ -22,7 +22,7 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
-export default function AddNew({
+export default function AddCategory({
   controlValue,
   setControlValue,
   disableHover,

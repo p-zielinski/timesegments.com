@@ -1,6 +1,6 @@
 export enum DashboardPageState {
-  CATEGORIES = 'categories',
+  ACTIVE_CATEGORIES = 'active categories',
   NOTES = 'notes',
-  TIME_SEGMENTS = 'time segments',
+  TIME_LOGS = 'time logs',
   SETTINGS = 'settings',
 }

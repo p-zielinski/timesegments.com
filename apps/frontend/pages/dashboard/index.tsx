@@ -244,8 +244,9 @@ export const getServerSideProps = async ({ req, res }) => {
           body: JSON.stringify({
             extend: [
               MeExtendedOption.CATEGORIES,
+              MeExtendedOption.CATEGORIES_NOTES,
               MeExtendedOption.CATEGORIES_LIMIT,
-              MeExtendedOption.NOTES,
+              MeExtendedOption.NOTES_PER_CATEGORY_LIMIT,
               MeExtendedOption.TODAYS_TIMELOGS,
             ],
           }),
@@ -254,7 +255,6 @@ export const getServerSideProps = async ({ req, res }) => {
       const response = await responseUser.json();
       user = response.user;
       limits = response.limits;
-      notes = response.user.notes;
       timeLogs = response.timeLogs;
     } catch (e) {
       console.log(e);
@@ -297,18 +297,10 @@ export const getServerSideProps = async ({ req, res }) => {
     ] as TimeLogsWithinDateISO[];
   }
 
-  user.categories.map((category) => {
-    category.notes = notes
-      .filter((note) => note.categoryId === category.id)
-      .reverse();
-    return category;
-  });
-
   return {
     props: {
       user: user ?? null,
       limits: limits ?? null,
-      notes: notes?.filter((note) => !note.categoryId) ?? null,
       randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,

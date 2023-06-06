@@ -71,42 +71,6 @@ export class CategoryService {
     return { success: true, category };
   }
 
-  public async updateVisibilityCategory(
-    categoryId: string,
-    visible: boolean,
-    user: User
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
-    const categoryWithUser = await this.findIfNotDeleted(categoryId, {
-      user: true,
-    });
-    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
-      return {
-        success: false,
-        error: `Category not found, bad request`,
-      };
-    }
-    if (categoryWithUser.active) {
-      return {
-        success: false,
-        error: `You cannot hide active category`,
-      };
-    }
-    if (categoryWithUser.visible === visible) {
-      return {
-        success: true,
-        category: { ...categoryWithUser, user: undefined } as Category,
-      };
-    }
-    const updatedCategory = await this.updateVisibility(categoryId, visible);
-    if (updatedCategory.visible !== visible) {
-      return {
-        success: false,
-        error: `Could not update visibility`,
-      };
-    }
-    return { success: true, category: updatedCategory };
-  }
-
   public async setCategoryActive(
     categoryId: string,
     user: User
@@ -217,13 +181,6 @@ export class CategoryService {
 
   private async countUserCategories(userId: string) {
     return await this.prisma.category.count({ where: { userId } });
-  }
-
-  private async updateVisibility(categoryId: string, visible: boolean) {
-    return await this.prisma.category.update({
-      where: { id: categoryId },
-      data: { visible },
-    });
   }
 
   private async updateDeleted(categoryId: string, deleted: boolean) {

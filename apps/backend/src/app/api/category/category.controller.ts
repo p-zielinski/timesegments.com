@@ -8,7 +8,6 @@ import {
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
 import { UpdateCategoryDto } from './dto/updateCategoryDto';
-import { ChangeVisibilityCategoryDto } from './dto/changeVisibilityCategory.dto';
 import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
@@ -67,29 +66,6 @@ export class CategoryController {
     }
     return {
       ...createCategoryStatus,
-      controlValue: this.userService.getNewControlValue(user),
-    };
-  }
-
-  @Post('change-visibility')
-  async handleRequestDisableCategory(
-    @UserDecorator() user: User,
-    @Body() changeVisibilityCategoryDto: ChangeVisibilityCategoryDto
-  ) {
-    const { categoryId, visible } = changeVisibilityCategoryDto;
-    const updateCategoryStatus =
-      await this.categoryService.updateVisibilityCategory(
-        categoryId,
-        visible,
-        user
-      );
-    if (!updateCategoryStatus.success) {
-      throw new BadRequestException({
-        error: updateCategoryStatus.error,
-      });
-    }
-    return {
-      ...updateCategoryStatus,
       controlValue: this.userService.getNewControlValue(user),
     };
   }

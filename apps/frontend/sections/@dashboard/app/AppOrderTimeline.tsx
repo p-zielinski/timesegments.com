@@ -2,7 +2,6 @@
 import {Box, Card, CardContent, Typography} from '@mui/material';
 import {Timeline, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,} from '@mui/lab';
 import {nanoid} from 'nanoid'; // utils
-import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import {useEffect, useState} from 'react';
 import {DateTime} from 'luxon';
@@ -11,6 +10,7 @@ import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getC
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGroupedTimeLogsWithDateSorted';
 import {getDuration} from '../../../utils/mapper/getDuration';
+import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 // utils
 // ----------------------------------------------------------------------
 
@@ -92,9 +92,7 @@ function GroupedPeriod({ group, user }) {
   return (
     <TimelineItem
       sx={{
-        background: getHexFromRGBAObject(
-          getRgbaObjectFromHexString(color, 0.2)
-        ),
+        background: getBackgroundColor(0.2, color),
         borderRadius: '10px',
         gap: '10px',
         pl: 1.5,
@@ -165,9 +163,7 @@ function DetailPeriod({ timeLogExtended, user }) {
   return (
     <TimelineItem
       sx={{
-        background: getHexFromRGBAObject(
-          getRgbaObjectFromHexString(color, 0.2)
-        ),
+        background: getBackgroundColor(0.2, color),
         borderRadius: '10px',
         gap: '10px',
         pr: 1.5,

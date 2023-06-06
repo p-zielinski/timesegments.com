@@ -49,11 +49,16 @@ export class UserService {
     let timeLogs;
     const include: Prisma.UserInclude = {};
     if (extend.includes(MeExtendedOption.CATEGORIES)) {
-      include.categories = { where: { deleted: false } };
+      include.categories = {
+        where: { deleted: false },
+        include: extend.includes(MeExtendedOption.CATEGORIES_NOTES)
+          ? { notes: true }
+          : undefined,
+      };
     }
 
     if (extend.includes(MeExtendedOption.NOTES)) {
-      include.notes = true;
+      include.notes = true; //to be changed
     }
 
     if (extend.includes(MeExtendedOption.TODAYS_TIMELOGS)) {
@@ -70,10 +75,16 @@ export class UserService {
       }
     }
 
-    const limits: { categoriesLimit?: number } = {};
+    const limits: { categoriesLimit?: number; categoriesNotesLimit?: number } =
+      {};
     if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
       limits.categoriesLimit = this.configService.get<number>(
         'MAX_NUMBER_OF_CATEGORIES_PER_USER'
+      );
+    }
+    if (extend.includes(MeExtendedOption.NOTES_PER_CATEGORY_LIMIT)) {
+      limits.categoriesNotesLimit = this.configService.get<number>(
+        'MAX_NUMBER_OF_NOTES_PER_CATEGORY'
       );
     }
     return {

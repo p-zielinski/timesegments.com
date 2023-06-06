@@ -42,6 +42,7 @@ import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import { findOrFetchTimeLogsWithinActiveDate } from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
+import AppOrderTimeline from '../../sections/@dashboard/app/AppOrderTimeline';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -76,10 +77,6 @@ const AppTasks = dynamic(
   () => import('../../sections/@dashboard/app/AppTasks'),
   { ssr: false }
 );
-const AppOrderTimeline = dynamic(
-  () => import('../../sections/@dashboard/app/AppOrderTimeline'),
-  { ssr: false }
-);
 
 // ----------------------------------------------------------------------
 
@@ -89,7 +86,7 @@ type Props = {
   randomSliderHexColor: string;
 };
 
-export default function TimeSegments({
+export default function TimeLogs({
   user: serverSideFetchedUser,
   timeLogsWithDatesISO,
   randomSliderHexColor,

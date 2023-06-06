@@ -7,6 +7,7 @@ import {Note} from '../notes/Note'; // -----------------------------------------
 // ----------------------------------------------------------------------
 
 export default function CategoryNotesCards({
+  limits,
   controlValue,
   setControlValue,
   category,
@@ -19,6 +20,9 @@ export default function CategoryNotesCards({
   disableHover,
   user,
 }) {
+  const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
+  const currentCategoryNumberOfNotes = (category.notes || []).length;
+
   return (isEditing?.createNewNote === category.id ||
     (category.showRecentNotes && category.notes?.length)) > 0 ? (
     <Box sx={{ display: 'flex', flexDirection: 'row', m: 0 }}>
@@ -32,19 +36,20 @@ export default function CategoryNotesCards({
           gap: 2,
         }}
       >
-        {isEditing?.createNewNote === category.id && (
-          <AddNote
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            disableHover={disableHover}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            setIsEditing={setIsEditing}
-            category={category}
-            categories={categories}
-            setCategories={setCategories}
-          />
-        )}
+        {isEditing?.createNewNote === category.id &&
+          categoriesNotesLimit > currentCategoryNumberOfNotes && (
+            <AddNote
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              disableHover={disableHover}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              setIsEditing={setIsEditing}
+              category={category}
+              categories={categories}
+              setCategories={setCategories}
+            />
+          )}
         {category.showRecentNotes &&
           (category.notes || []).map((note) => (
             <Note

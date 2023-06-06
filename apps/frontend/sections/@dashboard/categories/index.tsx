@@ -2,7 +2,7 @@
 import {Box, Grid, Stack} from '@mui/material';
 import Category from './Category';
 import React, {useState} from 'react';
-import AddNew from './AddNew';
+import AddCategory from './AddCategory';
 import SortCategories from './Sort';
 import {Timezones} from '@test1/shared';
 import {getCurrentDate} from '../../../utils/getCurrentDate';
@@ -27,6 +27,7 @@ export default function Categories({
   setIsSaving,
   limits,
 }) {
+  const categoriesLimit = limits?.categoriesLimit || 5;
   const checkActiveDateCorrectness = () => {
     const currentDate = getCurrentDate(Timezones[user.timezone]);
     if (currentDate.ts === activeDate.ts) {
@@ -77,6 +78,7 @@ export default function Categories({
           <Grid key={category.id} item xs={1} sm={1} md={1}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Category
+                limits={limits}
                 groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
                 user={user}
                 checkActiveDateCorrectness={checkActiveDateCorrectness}
@@ -94,6 +96,7 @@ export default function Categories({
                 setIsSaving={setIsSaving}
               />
               <CategoryNotesCards
+                limits={limits}
                 controlValue={controlValue}
                 setControlValue={setControlValue}
                 disableHover={disableHover}
@@ -109,21 +112,23 @@ export default function Categories({
             </Box>
           </Grid>
         ))}
-        <Grid key={'new category'} item xs={1} sm={1} md={1}>
-          <AddNew
-            controlValue={controlValue}
-            setControlValue={setControlValue}
-            disableHover={disableHover}
-            data={undefined}
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            categories={categories}
-            setCategories={setCategories}
-            category={undefined}
-          />
-        </Grid>
+        {categoriesLimit > categories.length && (
+          <Grid key={'new category'} item xs={1} sm={1} md={1}>
+            <AddCategory
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              disableHover={disableHover}
+              data={undefined}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              categories={categories}
+              setCategories={setCategories}
+              category={undefined}
+            />
+          </Grid>
+        )}
       </Grid>
     </>
   );

@@ -1,16 +1,14 @@
 import { Box, Typography } from '@mui/material';
-import { IS_SAVING_HEX } from '../../../consts/colors';
 import Iconify from '../../../components/iconify';
-import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import React from 'react';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
 import { useRouter } from 'next/router';
 import parse from 'html-react-parser';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import EditNote from './EditNote';
+import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
 
 export const Note = ({
   category,
@@ -80,21 +78,6 @@ export const Note = ({
       }
     : getRandomRgbObjectForSliderPicker();
 
-  const getBackgroundColor = (alpha) =>
-    getHexFromRGBAObject(
-      getRgbaObjectFromHexString(
-        isSaving
-          ? IS_SAVING_HEX
-          : getHexFromRGBAObject(
-              getColorShadeBasedOnSliderPickerSchema(
-                getRgbaObjectFromHexString(color.hex),
-                'bright'
-              )
-            ),
-        alpha
-      )
-    );
-
   if (isEditing.noteId === note.id) {
     return (
       <EditNote
@@ -117,7 +100,7 @@ export const Note = ({
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
-        background: getBackgroundColor(0.2),
+        background: getBackgroundColor(0.2, color.hex),
         borderRadius: '10px',
         pl: 0,
         m: 0,
@@ -132,7 +115,7 @@ export const Note = ({
           alignContent: 'flex-start',
           gap: '10px',
           borderRadius: '10px',
-          border: `solid 1px ${getBackgroundColor(0.2)}`,
+          border: `solid 1px ${getBackgroundColor(0.2, color.hex)}`,
           flex: 1,
         }}
       >
@@ -164,14 +147,14 @@ export const Note = ({
         <Box
           sx={{
             borderRadius: '10px',
-            border: `solid 1px ${getBackgroundColor(0.2)}`,
+            border: `solid 1px ${getBackgroundColor(0.2, color.hex)}`,
 
             pl: '5px',
             pr: '5px',
             '&:hover': !disableHover &&
               !isSaving && {
                 cursor: 'pointer',
-                border: `solid 1px ${getBackgroundColor(1)}`,
+                border: `solid 1px ${getBackgroundColor(1, color.hex)}`,
               },
           }}
           onClick={() => !isSaving && setIsEditing({ noteId: note.id })}
