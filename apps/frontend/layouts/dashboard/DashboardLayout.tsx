@@ -36,8 +36,6 @@ export default function DashboardLayout({
   user,
   setUser,
   title,
-  currentPageState,
-  setCurrentPageState,
   randomSliderHexColor,
 }: {
   children: any;
@@ -59,8 +57,6 @@ export default function DashboardLayout({
         onCloseNav={() => setOpen(false)}
         user={user}
         setUser={setUser}
-        currentPageState={currentPageState}
-        setCurrentPageState={setCurrentPageState}
         randomSliderHexColor={randomSliderHexColor}
       />
 

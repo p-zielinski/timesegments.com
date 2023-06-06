@@ -115,7 +115,10 @@ export default function AddNew({
   };
 
   const validationSchema = yup.object().shape({
-    text: yup.string().required('Text is required'),
+    text: yup
+      .string()
+      .required('Text is required')
+      .max(1000, 'Text cannot be longer than 1000 characters'),
   });
 
   return (

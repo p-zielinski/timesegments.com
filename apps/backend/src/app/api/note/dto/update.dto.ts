@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class UpdateNoteDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(1000)
   noteId: string;
 
   @IsString()

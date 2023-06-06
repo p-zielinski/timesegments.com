@@ -154,7 +154,10 @@ export default function AddNew({
   }
 
   const validationSchema = yup.object().shape({
-    categoryName: yup.string().required('Category name is required'),
+    categoryName: yup
+      .string()
+      .required('Category name is required')
+      .max(40, 'Category name cannot be longer than 40 characters'),
   });
 
   const Pointer = () => {

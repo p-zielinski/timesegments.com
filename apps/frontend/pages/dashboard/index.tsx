@@ -10,10 +10,7 @@ import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgb
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog} from '@prisma/client';
-import navConfig from '../../layouts/dashboard/nav/config';
 import {useRouter} from 'next/router';
-import {getIsPageState} from '../../utils/getIsPageState';
-import {DashboardPageState} from '../../enum/DashboardPageState';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
@@ -73,10 +70,6 @@ export default function Index({
   }, [isMobile]);
 
   const router = useRouter();
-  const [currentPageState, setCurrentPageState] = useState<DashboardPageState>(
-    navConfig.find((configItem) => getIsPageState({ router, configItem }))
-      ?.state
-  );
 
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
   const [controlValue, setControlValue] = useState(user?.controlValue);
@@ -204,15 +197,7 @@ export default function Index({
     <DashboardLayout
       user={user}
       setUser={setUser}
-      title={
-        currentPageState === DashboardPageState.CATEGORIES
-          ? 'Categories'
-          : currentPageState === DashboardPageState.NOTES
-          ? 'Recent notes'
-          : undefined
-      }
-      currentPageState={currentPageState}
-      setCurrentPageState={setCurrentPageState}
+      title={'Categories'}
       randomSliderHexColor={randomSliderHexColor}
     >
       <Container>

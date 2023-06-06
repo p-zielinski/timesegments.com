@@ -19,7 +19,7 @@ import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 
 const NAV_WIDTH = 280;
 
-const StyledAccount = styled('div')(({theme}) => ({
+const StyledAccount = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(2, 2.5),
@@ -35,14 +35,12 @@ Nav.propTypes = {
 };
 
 export default function Nav({
-                              openNav,
-                              onCloseNav,
-                              user,
-                              setUser,
-                              currentPageState,
-                              setCurrentPageState,
-                              randomSliderHexColor,
-                            }) {
+  openNav,
+  onCloseNav,
+  user,
+  setUser,
+  randomSliderHexColor,
+}) {
   const router = useRouter();
 
   const isDesktop = useResponsive('up', 'lg');
@@ -67,7 +65,7 @@ export default function Nav({
       <Typography
         variant="subtitle2"
         sx={{
-          color: getHexFromRGBAObject({r: 0, g: 0, b: 0, a: 0.7}),
+          color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
           px: 2.5,
           py: 3,
           display: 'inline-flex',
@@ -85,11 +83,11 @@ export default function Nav({
         s.com
       </Typography>
 
-      <Box sx={{mb: 3, mx: 2.5}}>
+      <Box sx={{ mb: 3, mx: 2.5 }}>
         <Link underline="none">
           <StyledAccount>
-            <Box sx={{ml: 0}}>
-              <Typography variant="subtitle2" sx={{color: 'text.primary'}}>
+            <Box sx={{ ml: 0 }}>
+              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
                 {user.name ||
                   capitalizeFirstLetter(user.email.split('@')[0] ?? '')}
               </Typography>
@@ -98,14 +96,9 @@ export default function Nav({
         </Link>
       </Box>
 
-      <NavSection
-        data={navConfig}
-        setUser={setUser}
-        currentPageState={currentPageState}
-        setCurrentPageState={setCurrentPageState}
-      />
+      <NavSection data={navConfig} setUser={setUser} />
 
-      <Box sx={{flexGrow: 1}}/>
+      <Box sx={{ flexGrow: 1 }} />
     </Scrollbar>
   );
 
@@ -113,8 +106,8 @@ export default function Nav({
     <Box
       component="nav"
       sx={{
-        flexShrink: {lg: 0},
-        width: {lg: NAV_WIDTH},
+        flexShrink: { lg: 0 },
+        width: { lg: NAV_WIDTH },
       }}
     >
       {isDesktop ? (
@@ -139,7 +132,7 @@ export default function Nav({
             keepMounted: true,
           }}
           PaperProps={{
-            sx: {width: NAV_WIDTH},
+            sx: { width: NAV_WIDTH },
           }}
         >
           {renderContent}

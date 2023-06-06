@@ -6,8 +6,7 @@ import Iconify from '../iconify';
 import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
-import {useEffect, useState} from 'react';
-import {getIsPageState} from '../../utils/getIsPageState'; // ----------------------------------------------------------------------
+import {getIsPageState} from '../../utils/getIsPageState';
 
 // ----------------------------------------------------------------------
 
@@ -15,24 +14,12 @@ NavSection.propTypes = {
   data: PropTypes.array,
 };
 
-export default function NavSection({
-  data = [],
-  setUser,
-  currentPageState,
-  setCurrentPageState,
-  ...other
-}) {
+export default function NavSection({ data = [], setUser, ...other }) {
   return (
     <Box {...other}>
       <List disablePadding sx={{ p: 1 }}>
         {data.map((item) => (
-          <NavItem
-            key={item.title}
-            item={item}
-            setUser={setUser}
-            currentPageState={currentPageState}
-            setCurrentPageState={setCurrentPageState}
-          />
+          <NavItem key={item.title} item={item} setUser={setUser} />
         ))}
       </List>
     </Box>
@@ -45,16 +32,14 @@ NavItem.propTypes = {
   item: PropTypes.object,
 };
 
-function NavItem({ item, currentPageState, setCurrentPageState }) {
+function NavItem({ item }) {
   const router = useRouter();
   const { title, path, icon, query } = item;
 
-  const [isSelected, setIsSelected] = useState(false);
-
-  useEffect(() => {
-    const urlObject = new URL(window.location.href);
-    setIsSelected(getIsPageState({ urlObject, configItem: item }));
-  }, [currentPageState]);
+  const isSelected = getIsPageState({
+    urlObject: new URL(window.location.href),
+    configItem: item,
+  });
 
   const revokeCurrentToken = async () => {
     await handleFetch({
@@ -66,9 +51,6 @@ function NavItem({ item, currentPageState, setCurrentPageState }) {
   return (
     <StyledNavItem
       onClick={async () => {
-        if (typeof setCurrentPageState === 'function') {
-          setCurrentPageState(item.state);
-        }
         switch (path) {
           case '*logout':
             revokeCurrentToken();
