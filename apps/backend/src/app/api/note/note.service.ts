@@ -4,13 +4,15 @@ import { LoggerService } from '../../common/logger/loger.service';
 import { Note, Prisma, User } from '@prisma/client';
 import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 import { CategoryService } from '../category/category.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class NoteService {
   constructor(
     private prisma: PrismaService,
     private loggerService: LoggerService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private readonly configService: ConfigService
   ) {}
 
   async createNote(
@@ -19,16 +21,27 @@ export class NoteService {
     categoryId?: string
   ): Promise<{ success: boolean; error?: string; note?: Note }> {
     if (categoryId) {
-      const categoryWithUser = await this.categoryService.findIfNotDeleted(
-        categoryId,
-        {
+      const categoryWithUserAndNotes =
+        await this.categoryService.findIfNotDeleted(categoryId, {
           user: true,
-        }
-      );
-      if (!categoryWithUser || categoryWithUser?.user?.id !== userId) {
+          notes: true,
+        });
+      if (
+        !categoryWithUserAndNotes ||
+        categoryWithUserAndNotes?.user?.id !== userId
+      ) {
         return {
           success: false,
           error: `Category not found, bad request`,
+        };
+      }
+      const categoriesNotesLimit = this.configService.get<number>(
+        'MAX_NUMBER_OF_NOTES_PER_CATEGORY'
+      );
+      if (categoryWithUserAndNotes.notes.length >= categoriesNotesLimit) {
+        return {
+          success: false,
+          error: `The limit of notes for this category was reached`,
         };
       }
     }
