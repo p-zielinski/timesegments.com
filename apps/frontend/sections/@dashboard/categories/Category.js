@@ -24,22 +24,22 @@ Category.propTypes = {
 };
 
 export default function Category({
-  groupedTimeLogsWithDateSorted,
-  user,
-  checkActiveDateCorrectness,
-  timeLogsWithinActiveDate,
-  setTimeLogsWithinActiveDate,
-  controlValue,
-  setControlValue,
-  category,
-  categories,
-  setCategories,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  disableHover,
-}) {
+                                   groupedTimeLogsWithDateSorted,
+                                   user,
+                                   checkActiveDateCorrectness,
+                                   timeLogsWithinActiveDate,
+                                   setTimeLogsWithinActiveDate,
+                                   controlValue,
+                                   setControlValue,
+                                   category,
+                                   categories,
+                                   setCategories,
+                                   isEditing,
+                                   setIsEditing,
+                                   isSaving,
+                                   setIsSaving,
+                                   disableHover,
+                                 }) {
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
     groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
   );
@@ -101,9 +101,9 @@ export default function Category({
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category, notes: category?.notes };
+            return {...response.category, notes: category?.notes};
           }
-          return { ...category };
+          return {...category};
         })
       );
       if (response.controlValue) {
@@ -121,16 +121,16 @@ export default function Category({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: { categoryId: category.id, controlValue },
+      body: {categoryId: category.id, controlValue},
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category, notes: category?.notes };
+            return {...response.category, notes: category?.notes};
           }
-          return { ...category };
+          return {...category};
         })
       );
       if (response.controlValue) {
@@ -184,11 +184,11 @@ export default function Category({
         isSaving
           ? IS_SAVING_HEX
           : getHexFromRGBAObject(
-              getColorShadeBasedOnSliderPickerSchema(
-                getRgbaObjectFromHexString(category.color),
-                'bright'
-              )
-            ),
+            getColorShadeBasedOnSliderPickerSchema(
+              getRgbaObjectFromHexString(category.color),
+              'bright'
+            )
+          ),
         alpha
       )
     );
@@ -225,13 +225,13 @@ export default function Category({
         }}
         onClick={() => !isSaving && changeCategoryActiveState()}
       >
-        <Box sx={{ marginLeft: '10px' }}>
-          <TimelineDot sx={{ background: category.color, mb: 0 }} />
+        <Box sx={{marginLeft: '10px'}}>
+          <TimelineDot sx={{background: category.color, mb: 0}}/>
         </Box>
-        <Box sx={{ margin: '6px', marginLeft: 0 }}>
+        <Box sx={{margin: '6px', marginLeft: 0}}>
           <Typography
             variant="subtitle2"
-            sx={{ color: isSaving ? '#637381' : undefined }}
+            sx={{color: isSaving ? '#637381' : undefined}}
           >
             {category?.name}
             <span
@@ -239,27 +239,27 @@ export default function Category({
                 color: isSaving
                   ? '#637381'
                   : getHexFromRGBObject(
-                      getColorShadeBasedOnSliderPickerSchema(
-                        getRgbaObjectFromHexString(category.color)
-                      )
-                    ),
+                    getColorShadeBasedOnSliderPickerSchema(
+                      getRgbaObjectFromHexString(category.color)
+                    )
+                  ),
                 fontWeight: 400,
               }}
             >
               {category.active && ' *active*'}
             </span>
           </Typography>
-          <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
+          <Box sx={{display: 'flex', direction: 'column', mb: 0}}>
             <Typography
               variant="caption"
-              sx={{ color: 'text.secondary', mb: 0 }}
+              sx={{color: 'text.secondary', mb: 0}}
             >
               {hideDuration ? (
                 <>Duration temporarily hidden</>
               ) : (
                 <>
                   Duration:{' '}
-                  {disableHover && duration.includes('hour') && <br />}
+                  {disableHover && duration.includes('hour') && <br/>}
                   {duration}
                 </>
               )}
@@ -267,7 +267,7 @@ export default function Category({
           </Box>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', mr: '-12px' }}>
+      <Box sx={{display: 'flex', mr: '-12px'}}>
         <Box
           sx={{
             borderRadius: '10px',
@@ -299,7 +299,7 @@ export default function Category({
             }}
           />
         </Box>
-        <Box
+        {category.showRecentNotes && <Box
           sx={{
             borderRadius: '10px',
             border: `solid 1px ${getBackgroundColor(
@@ -314,7 +314,7 @@ export default function Category({
               },
           }}
           onClick={() =>
-            !isSaving && setIsEditing({ createNewNote: category.id })
+            !isSaving && setIsEditing({createNewNote: category.id})
           }
         >
           <Iconify
@@ -327,7 +327,8 @@ export default function Category({
               transform: 'translate(-40%, -50%)',
             }}
           />
-        </Box>
+        </Box>}
+
         <Box
           sx={{
             borderRadius: '10px',

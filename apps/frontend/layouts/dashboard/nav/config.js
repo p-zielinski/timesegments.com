@@ -2,15 +2,15 @@ import { DashboardPageState } from '../../../enum/DashboardPageState';
 
 const navConfig = [
   {
-    title: 'Time Segments',
+    title: 'Active categories',
     path: '/dashboard',
     icon: 'fluent:shifts-activity-24-filled',
     state: DashboardPageState.CATEGORIES,
   },
   {
-    title: 'Recent Notes',
+    title: 'Notes',
     path: '/notes',
-    icon: 'material-symbols:note-alt-outline',
+    icon: 'material-symbols:note-outline',
     state: DashboardPageState.NOTES,
   },
   {

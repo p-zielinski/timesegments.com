@@ -197,7 +197,7 @@ export default function Index({
     <DashboardLayout
       user={user}
       setUser={setUser}
-      title={'Categories'}
+      title={'Active Categories'}
       randomSliderHexColor={randomSliderHexColor}
     >
       <Container>
