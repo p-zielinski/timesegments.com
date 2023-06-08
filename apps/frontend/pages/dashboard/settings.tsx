@@ -1,25 +1,25 @@
 import {Helmet} from 'react-helmet-async'; // @mui
-import {Box, Container, Grid, Stack, Typography} from '@mui/material'; // components
+import {Box, Container, Grid, Typography} from '@mui/material'; // components
 import DashboardLayout from '../../layouts/dashboard';
 import React, {useEffect, useState} from 'react';
 import {Token, User} from '@prisma/client';
 import Cookies from 'cookies';
-import {getRepeatingLinearGradient} from '../../utils/colors/getRepeatingLinearGradient';
-import {getHexFromRGBAObject} from '../../utils/colors/getHexFromRGBAObject';
-import {IS_SAVING_HEX, LIGHT_RED, RED, SUPER_LIGHT_SILVER,} from '../../consts/colors';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import EditName from '../../sections/@dashboard/settings/EditName';
+import SetName from '../../sections/@dashboard/settings/SetName';
 import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';
 import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
-import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail';
 import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
+import {getBackgroundColor} from '../../utils/colors/getBackgroundColor';
+import {TimelineDot} from '@mui/lab';
+import Iconify from '../../components/iconify';
 import {SettingOption} from 'apps/frontend/enum/settingOption';
+import {findKeyOfValueInObject} from '@test1/shared'; // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -123,7 +123,35 @@ export default function Index({
     setDisableHover(isMobile);
   }, [isMobile]);
 
-  const allSettingOptions = Object.keys(SettingOption);
+  const allSettingOptions = Object.keys(SettingOption).map((key) => {
+    let icon;
+    switch (key) {
+      case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
+        icon = 'icon-park-outline:edit-name';
+        break;
+      case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_TIMEZONE):
+        icon = 'mdi:timezone-outline';
+        break;
+      case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_PASSWORD):
+        icon = 'material-symbols:password';
+        break;
+      case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_EMAIL):
+        icon = 'ic:outline-email';
+        break;
+      case findKeyOfValueInObject(
+        SettingOption,
+        SettingOption.MANAGE_LOGIN_SESSIONS
+      ):
+        icon = 'tabler:lock-access';
+        break;
+    }
+    return {
+      id: key,
+      name: SettingOption[key],
+      icon,
+      color: { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' },
+    };
+  });
 
   return (
     <DashboardLayout
@@ -147,14 +175,14 @@ export default function Index({
             >
               {allSettingOptions.map((currentSettingOption) => {
                 const isActive =
-                  openedSettingOption === SettingOption[currentSettingOption];
+                  openedSettingOption === currentSettingOption.name;
 
                 if (
                   isActive &&
                   openedSettingOption === SettingOption.SET_NAME
                 ) {
                   return (
-                    <EditName
+                    <SetName
                       key={`${controlValue}-${currentSettingOption}-active`}
                       controlValue={controlValue}
                       setControlValue={setControlValue}
@@ -163,7 +191,7 @@ export default function Index({
                       setUser={setUser}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={optionsColors[currentSettingOption]}
+                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
                     />
                   );
@@ -183,7 +211,7 @@ export default function Index({
                       setUser={setUser}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={optionsColors[currentSettingOption]}
+                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
                     />
                   );
@@ -199,7 +227,7 @@ export default function Index({
                       disableHover={disableHover}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={optionsColors[currentSettingOption]}
+                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
                     />
                   );
@@ -215,7 +243,7 @@ export default function Index({
                       disableHover={disableHover}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={optionsColors[currentSettingOption]}
+                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
                     />
                   );
@@ -237,123 +265,237 @@ export default function Index({
                       user={user}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={optionsColors[currentSettingOption]}
+                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
                     />
                   );
                 }
 
                 return (
-                  <Box key={currentSettingOption}>
+                  <Box
+                    key={`${currentSettingOption.id}_not_selected`}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      background: getBackgroundColor(
+                        0.2,
+                        currentSettingOption.color.hex
+                      ),
+                      borderRadius: '10px',
+                      border: `solid 1px ${getBackgroundColor(
+                        0.2,
+                        currentSettingOption.color.hex
+                      )}`,
+                      pl: 0,
+                      m: 0,
+                      pr: 1.5,
+                      minHeight: '52px',
+                      '&:hover': !disableHover &&
+                        !isSaving && {
+                          cursor: 'pointer',
+                          border: `solid 1px ${getBackgroundColor(
+                            1,
+                            currentSettingOption.color.hex
+                          )}`,
+                        },
+                    }}
+                    onClick={() =>
+                      !isSaving &&
+                      setOpenedSettingOption(currentSettingOption.name)
+                    }
+                  >
                     <Box
-                      sx={{ display: 'flex', width: '100%' }}
-                      onClick={() =>
-                        isSaving
-                          ? null
-                          : isActive
-                          ? setOpenedSettingOption(undefined)
-                          : setOpenedSettingOption(
-                              SettingOption[currentSettingOption]
-                            )
-                      }
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignContent: 'flex-start',
+                        gap: '10px',
+                        flex: 1,
+                      }}
                     >
-                      <Box
-                        sx={{
-                          width: `60px`,
-                          minWidth: '60px',
-                          p: 2,
-                          background: getRepeatingLinearGradient(
-                            isSaving
-                              ? IS_SAVING_HEX
-                              : optionsColors[currentSettingOption].hex,
-                            0.3
-                          ),
-                          border: isSaving
-                            ? `solid 2px ${getHexFromRGBAObject({
-                                ...getRgbaObjectFromHexString(IS_SAVING_HEX),
-                                a: 0.5,
-                              })}`
-                            : isActive
-                            ? `solid 2px ${getHexFromRGBAObject({
-                                ...optionsColors[currentSettingOption].rgb,
-                                a: 0.5,
-                              })}`
-                            : `solid 2px ${getHexFromRGBAObject({
-                                ...optionsColors[currentSettingOption].rgb,
-                                a: 0.3,
-                              })}`,
-                          borderRight: 0,
-                          borderTopLeftRadius: 12,
-                          borderBottomLeftRadius: 12,
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          color: isSaving
-                            ? IS_SAVING_HEX
-                            : getHexFromRGBObject(
-                                getColorShadeBasedOnSliderPickerSchema(
-                                  optionsColors[currentSettingOption].rgb,
-                                  'normal'
-                                )
-                              ),
-                          background: isSaving
-                            ? SUPER_LIGHT_SILVER
-                            : isActive
-                            ? getHexFromRGBAObject({
-                                ...optionsColors[currentSettingOption].rgb,
-                                a: 0.24,
-                              })
-                            : getHexFromRGBAObject({
-                                ...optionsColors[currentSettingOption].rgb,
-                                a: 0.1,
-                              }),
-                          flex: 1,
-                          border: isSaving
-                            ? `solid 2px ${getHexFromRGBAObject({
-                                ...getRgbaObjectFromHexString(IS_SAVING_HEX),
-                                a: 0.5,
-                              })}`
-                            : `solid 2px ${
-                                isActive
-                                  ? getHexFromRGBAObject({
-                                      ...optionsColors[currentSettingOption]
-                                        .rgb,
-                                      a: 0.5,
-                                    })
-                                  : LIGHT_RED
-                              }`,
-                          borderLeft: 0,
-                          borderRadius: '12px',
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
-                          cursor: !isSaving && 'pointer',
-                          '&:hover': !disableHover &&
-                            !isSaving && {
-                              border: isActive
-                                ? `solid 2px ${RED}`
-                                : `solid 2px ${getHexFromRGBAObject({
-                                    ...optionsColors[currentSettingOption].rgb,
-                                    a: 0.5,
-                                  })}`,
-                              borderStyle: isActive ? 'solid' : 'dashed',
-                              borderLeft: 0,
-                            },
-                        }}
-                      >
-                        <Stack
-                          spacing={1}
-                          sx={{ p: 3 }}
-                          direction="row"
-                          alignItems="center"
-                          justifyContent="left"
+                      <Box sx={{ marginLeft: '10px' }}>
+                        <TimelineDot
+                          sx={{
+                            background: currentSettingOption.color.hex,
+                            mb: 0,
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ margin: '6px', marginLeft: 0 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ color: isSaving ? '#637381' : undefined }}
                         >
-                          <Typography variant="subtitle2" noWrap>
-                            {SettingOption[currentSettingOption]}
-                          </Typography>
-                        </Stack>
+                          {currentSettingOption.name}
+                        </Typography>
                       </Box>
                     </Box>
+                    <Box sx={{ display: 'flex', mr: '-12px' }}>
+                      <Box
+                        sx={{
+                          pl: '5px',
+                          pr: '5px',
+                        }}
+                        onClick={() => !isSaving && null}
+                      >
+                        <Iconify
+                          icon={currentSettingOption.icon}
+                          width={40}
+                          sx={{
+                            position: 'relative',
+                            top: '50%',
+                            left: '40%',
+                            transform: 'translate(-40%, -50%)',
+                          }}
+                        />
+                      </Box>
+                      {/*{category.showRecentNotes &&*/}
+                      {/*  categoriesNotesLimit > currentCategoryNumberOfNotes && (*/}
+                      {/*    <Box*/}
+                      {/*      sx={{*/}
+                      {/*        borderRadius: '10px',*/}
+                      {/*        border: `solid 1px ${getBackgroundColor(*/}
+                      {/*          isEditing.createNewNote === category.id ? 1 : 0.2,*/}
+                      {/*          category.color*/}
+                      {/*        )}`,*/}
+                      {/*        pl: disableHover ? 0 : '5px',*/}
+                      {/*        pr: disableHover ? 0 : '5px',*/}
+                      {/*        '&:hover': !disableHover &&*/}
+                      {/*          !isSaving && {*/}
+                      {/*            cursor: 'pointer',*/}
+                      {/*            border: `solid 1px ${getBackgroundColor(*/}
+                      {/*              1,*/}
+                      {/*              category.color*/}
+                      {/*            )}`,*/}
+                      {/*          },*/}
+                      {/*      }}*/}
+                      {/*      onClick={() =>*/}
+                      {/*        !isSaving && setIsEditing({createNewNote: category.id})*/}
+                      {/*      }*/}
+                      {/*    >*/}
+                      {/*      <Iconify*/}
+                      {/*        icon={'ic:outline-note-add'}*/}
+                      {/*        width={40}*/}
+                      {/*        sx={{*/}
+                      {/*          position: 'relative',*/}
+                      {/*          top: '50%',*/}
+                      {/*          left: '40%',*/}
+                      {/*          transform: 'translate(-40%, -50%)',*/}
+                      {/*        }}*/}
+                      {/*      />*/}
+                      {/*    </Box>*/}
+                      {/*  )}*/}
+                    </Box>
+
+                    {/*<Box*/}
+                    {/*  sx={{ display: 'flex', width: '100%' }}*/}
+                    {/*  onClick={() =>*/}
+                    {/*    isSaving*/}
+                    {/*      ? null*/}
+                    {/*      : isActive*/}
+                    {/*      ? setOpenedSettingOption(undefined)*/}
+                    {/*      : setOpenedSettingOption(*/}
+                    {/*          SettingOption[currentSettingOption]*/}
+                    {/*        )*/}
+                    {/*  }*/}
+                    {/*>*/}
+                    {/*  <Box*/}
+                    {/*    sx={{*/}
+                    {/*      width: `60px`,*/}
+                    {/*      minWidth: '60px',*/}
+                    {/*      p: 2,*/}
+                    {/*      background: getRepeatingLinearGradient(*/}
+                    {/*        isSaving*/}
+                    {/*          ? IS_SAVING_HEX*/}
+                    {/*          : optionsColors[currentSettingOption].hex,*/}
+                    {/*        0.3*/}
+                    {/*      ),*/}
+                    {/*      border: isSaving*/}
+                    {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
+                    {/*            ...getRgbaObjectFromHexString(IS_SAVING_HEX),*/}
+                    {/*            a: 0.5,*/}
+                    {/*          })}`*/}
+                    {/*        : isActive*/}
+                    {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
+                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
+                    {/*            a: 0.5,*/}
+                    {/*          })}`*/}
+                    {/*        : `solid 2px ${getHexFromRGBAObject({*/}
+                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
+                    {/*            a: 0.3,*/}
+                    {/*          })}`,*/}
+                    {/*      borderRight: 0,*/}
+                    {/*      borderTopLeftRadius: 12,*/}
+                    {/*      borderBottomLeftRadius: 12,*/}
+                    {/*    }}*/}
+                    {/*  />*/}
+                    {/*  <Box*/}
+                    {/*    sx={{*/}
+                    {/*      color: isSaving*/}
+                    {/*        ? IS_SAVING_HEX*/}
+                    {/*        : getHexFromRGBObject(*/}
+                    {/*            getColorShadeBasedOnSliderPickerSchema(*/}
+                    {/*              optionsColors[currentSettingOption].rgb,*/}
+                    {/*              'normal'*/}
+                    {/*            )*/}
+                    {/*          ),*/}
+                    {/*      background: isSaving*/}
+                    {/*        ? SUPER_LIGHT_SILVER*/}
+                    {/*        : isActive*/}
+                    {/*        ? getHexFromRGBAObject({*/}
+                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
+                    {/*            a: 0.24,*/}
+                    {/*          })*/}
+                    {/*        : getHexFromRGBAObject({*/}
+                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
+                    {/*            a: 0.1,*/}
+                    {/*          }),*/}
+                    {/*      flex: 1,*/}
+                    {/*      border: isSaving*/}
+                    {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
+                    {/*            ...getRgbaObjectFromHexString(IS_SAVING_HEX),*/}
+                    {/*            a: 0.5,*/}
+                    {/*          })}`*/}
+                    {/*        : `solid 2px ${*/}
+                    {/*            isActive*/}
+                    {/*              ? getHexFromRGBAObject({*/}
+                    {/*                  ...optionsColors[currentSettingOption]*/}
+                    {/*                    .rgb,*/}
+                    {/*                  a: 0.5,*/}
+                    {/*                })*/}
+                    {/*              : LIGHT_RED*/}
+                    {/*          }`,*/}
+                    {/*      borderLeft: 0,*/}
+                    {/*      borderRadius: '12px',*/}
+                    {/*      borderTopLeftRadius: 0,*/}
+                    {/*      borderBottomLeftRadius: 0,*/}
+                    {/*      cursor: !isSaving && 'pointer',*/}
+                    {/*      '&:hover': !disableHover &&*/}
+                    {/*        !isSaving && {*/}
+                    {/*          border: isActive*/}
+                    {/*            ? `solid 2px ${RED}`*/}
+                    {/*            : `solid 2px ${getHexFromRGBAObject({*/}
+                    {/*                ...optionsColors[currentSettingOption].rgb,*/}
+                    {/*                a: 0.5,*/}
+                    {/*              })}`,*/}
+                    {/*          borderStyle: isActive ? 'solid' : 'dashed',*/}
+                    {/*          borderLeft: 0,*/}
+                    {/*        },*/}
+                    {/*    }}*/}
+                    {/*  >*/}
+                    {/*    <Stack*/}
+                    {/*      spacing={1}*/}
+                    {/*      sx={{ p: 3 }}*/}
+                    {/*      direction="row"*/}
+                    {/*      alignItems="center"*/}
+                    {/*      justifyContent="left"*/}
+                    {/*    >*/}
+                    {/*      <Typography variant="subtitle2" noWrap>*/}
+                    {/*        {SettingOption[currentSettingOption]}*/}
+                    {/*      </Typography>*/}
+                    {/*    </Stack>*/}
+                    {/*  </Box>*/}
+                    {/*</Box>*/}
                   </Box>
                 );
               })}

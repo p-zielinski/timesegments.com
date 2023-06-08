@@ -20,7 +20,7 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
-export default function EditName({
+export default function SetName({
   controlValue,
   setControlValue,
   disableHover,

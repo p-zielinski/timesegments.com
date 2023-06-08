@@ -226,10 +226,7 @@ export default function Index({
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-  let user: UserWithCategoriesAndNotes,
-    limits: Limits,
-    notes: Note[],
-    timeLogs: TimeLog[];
+  let user: UserWithCategoriesAndNotes, limits: Limits, timeLogs: TimeLog[];
 
   if (jwt_token) {
     try {
