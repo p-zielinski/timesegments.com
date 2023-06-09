@@ -208,6 +208,18 @@ export default function EditNote({
                   borderBottom: '0px',
                 }}
               >
+                {isSaving && (
+                  <Box
+                    sx={{
+                      width: 'calc(100% + 20px)',
+                      height: 'calc(100% + 20px)',
+                      background: 'transparent',
+                      position: 'absolute',
+                      zIndex: 1,
+                      transform: 'translate(-10px, -10px)',
+                    }}
+                  />
+                )}
                 <Box sx={{ p: 1.5, pb: 0 }}>
                   <InputText
                     type="text"

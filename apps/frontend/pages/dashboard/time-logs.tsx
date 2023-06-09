@@ -522,7 +522,7 @@ export const getServerSideProps = async ({ req, res }) => {
 
   const now = DateTime.now().setZone(Timezones[user.timezone]);
   const to = { month: now.month, year: now.year, day: now.day };
-  const sevenDaysAgo = now.minus({ days: 7 });
+  const sevenDaysAgo = now.minus({ days: 1 });
   const from = {
     month: sevenDaysAgo.month,
     year: sevenDaysAgo.year,
@@ -550,7 +550,7 @@ export const getServerSideProps = async ({ req, res }) => {
 
   const timeLogsWithDates = [] as TimeLogsWithinDateISO[];
 
-  for (let i = 0; i <= 7; i++) {
+  for (let i = 0; i <= 0; i++) {
     const nDaysAgo = i > 0 ? now.minus({ days: i }) : now;
     const date = {
       month: nDaysAgo.month,

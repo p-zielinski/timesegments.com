@@ -1,110 +1,200 @@
-import { Box, Stack, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
-import { IS_SAVING_HEX, RED, SUPER_LIGHT_SILVER } from '../../../consts/colors';
-import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
-import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
-import { SettingOption } from '../../../enum/settingOption';
+import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
+import Iconify from '../../../components/iconify';
 
 export default function ShowCompletedInfoSettings({
   isSaving,
   setOpenedSettingOption,
-  color,
+  currentSettingOption,
   disableHover,
-  completedInfo,
-}: {
-  isSaving: boolean;
-  setOpenedSettingOption: (settingOption: SettingOption) => void;
-  color: { rgb: { r: number; g: number; b: number; a: number }; hex: string };
-  disableHover: boolean;
-  completedInfo: string;
 }) {
   return (
-    <Box key={'passwordChanged'}>
-      <Box
-        sx={{ display: 'flex', width: '100%' }}
-        onClick={() => {
-          if (isSaving) {
-            return;
-          }
-          setOpenedSettingOption(undefined);
-        }}
-      >
+    <Box
+      key={`${currentSettingOption.id}_success`}
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        background: getBackgroundColor(0.4, currentSettingOption.color.hex),
+        borderRadius: '10px',
+        border: `solid 1px ${getBackgroundColor(
+          0.4,
+          currentSettingOption.color.hex
+        )}`,
+        pl: 0,
+        m: 0,
+        pr: 1.5,
+        minHeight: '52px',
+        '&:hover': !disableHover &&
+          !isSaving && {
+            cursor: 'pointer',
+            border: `solid 1px ${getBackgroundColor(
+              1,
+              currentSettingOption.color.hex
+            )}`,
+          },
+      }}
+      onClick={() =>
+        !isSaving && setOpenedSettingOption(currentSettingOption.name)
+      }
+    >
+      <Box sx={{ display: 'flex', mr: '-12px' }}>
         <Box
           sx={{
-            width: `60px`,
-            minWidth: '60px',
-            p: 2,
-            background: getRepeatingLinearGradient(
-              isSaving ? IS_SAVING_HEX : color.hex,
-              0.3,
-              135
-            ),
-            border: isSaving
-              ? `solid 2px ${getHexFromRGBAObject({
-                  ...getRgbaObjectFromHexString(IS_SAVING_HEX),
-                  a: 0.5,
-                })}`
-              : `solid 2px ${getHexFromRGBAObject({
-                  ...color.rgb,
-                  a: 0.5,
-                })}`,
-            borderRight: 0,
-            borderTopLeftRadius: 12,
-            borderBottomLeftRadius: 12,
+            ml: '-3px',
+            pr: '-3px',
+            color: currentSettingOption.color.hex,
           }}
-        />
+          onClick={() => !isSaving && null}
+        >
+          <Iconify
+            icon={'fluent-emoji-high-contrast:red-exclamation-mark'}
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
+        </Box>
         <Box
           sx={{
-            color: isSaving
-              ? IS_SAVING_HEX
-              : getHexFromRGBObject(
-                  getColorShadeBasedOnSliderPickerSchema(color.rgb, 'normal')
-                ),
-            background: isSaving
-              ? SUPER_LIGHT_SILVER
-              : getHexFromRGBAObject({
-                  ...color.rgb,
-                  a: 0.24,
-                }),
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignContent: 'flex-start',
+            gap: '10px',
             flex: 1,
-            border: isSaving
-              ? `solid 2px ${getHexFromRGBAObject({
-                  ...getRgbaObjectFromHexString(IS_SAVING_HEX),
-                  a: 0.5,
-                })}`
-              : `solid 2px ${getHexFromRGBAObject({
-                  ...color.rgb,
-                  a: 0.5,
-                })}`,
-            borderLeft: 0,
-            borderRadius: '12px',
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-            cursor: !isSaving && 'pointer',
-            '&:hover': !disableHover &&
-              !isSaving && {
-                border: `solid 2px ${RED}`,
-                borderStyle: 'solid',
-                borderLeft: 0,
-              },
           }}
         >
-          <Stack
-            spacing={1}
-            sx={{ p: 2.6 }}
-            direction="row"
-            alignItems="center"
-            justifyContent="left"
-          >
-            <Typography variant="subtitle2" noWrap sx={{ fontSize: 18 }}>
-              {completedInfo}
+          <Box sx={{ margin: '6px', marginLeft: '-5px' }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: isSaving ? '#637381' : undefined }}
+            >
+              {currentSettingOption.successText}
             </Typography>
-          </Stack>
+            <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: 'text.secondary', mb: 0 }}
+              >
+                {currentSettingOption.subtitle}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
+
+      {/*<Box*/}
+      {/*  sx={{ display: 'flex', width: '100%' }}*/}
+      {/*  onClick={() =>*/}
+      {/*    isSaving*/}
+      {/*      ? null*/}
+      {/*      : isActive*/}
+      {/*      ? setOpenedSettingOption(undefined)*/}
+      {/*      : setOpenedSettingOption(*/}
+      {/*          SettingOption[currentSettingOption]*/}
+      {/*        )*/}
+      {/*  }*/}
+      {/*>*/}
+      {/*  <Box*/}
+      {/*    sx={{*/}
+      {/*      width: `60px`,*/}
+      {/*      minWidth: '60px',*/}
+      {/*      p: 2,*/}
+      {/*      background: getRepeatingLinearGradient(*/}
+      {/*        isSaving*/}
+      {/*          ? IS_SAVING_HEX*/}
+      {/*          : optionsColors[currentSettingOption].hex,*/}
+      {/*        0.3*/}
+      {/*      ),*/}
+      {/*      border: isSaving*/}
+      {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
+      {/*            ...getRgbaObjectFromHexString(IS_SAVING_HEX),*/}
+      {/*            a: 0.5,*/}
+      {/*          })}`*/}
+      {/*        : isActive*/}
+      {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
+      {/*            ...optionsColors[currentSettingOption].rgb,*/}
+      {/*            a: 0.5,*/}
+      {/*          })}`*/}
+      {/*        : `solid 2px ${getHexFromRGBAObject({*/}
+      {/*            ...optionsColors[currentSettingOption].rgb,*/}
+      {/*            a: 0.3,*/}
+      {/*          })}`,*/}
+      {/*      borderRight: 0,*/}
+      {/*      borderTopLeftRadius: 12,*/}
+      {/*      borderBottomLeftRadius: 12,*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*  <Box*/}
+      {/*    sx={{*/}
+      {/*      color: isSaving*/}
+      {/*        ? IS_SAVING_HEX*/}
+      {/*        : getHexFromRGBObject(*/}
+      {/*            getColorShadeBasedOnSliderPickerSchema(*/}
+      {/*              optionsColors[currentSettingOption].rgb,*/}
+      {/*              'normal'*/}
+      {/*            )*/}
+      {/*          ),*/}
+      {/*      background: isSaving*/}
+      {/*        ? SUPER_LIGHT_SILVER*/}
+      {/*        : isActive*/}
+      {/*        ? getHexFromRGBAObject({*/}
+      {/*            ...optionsColors[currentSettingOption].rgb,*/}
+      {/*            a: 0.24,*/}
+      {/*          })*/}
+      {/*        : getHexFromRGBAObject({*/}
+      {/*            ...optionsColors[currentSettingOption].rgb,*/}
+      {/*            a: 0.1,*/}
+      {/*          }),*/}
+      {/*      flex: 1,*/}
+      {/*      border: isSaving*/}
+      {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
+      {/*            ...getRgbaObjectFromHexString(IS_SAVING_HEX),*/}
+      {/*            a: 0.5,*/}
+      {/*          })}`*/}
+      {/*        : `solid 2px ${*/}
+      {/*            isActive*/}
+      {/*              ? getHexFromRGBAObject({*/}
+      {/*                  ...optionsColors[currentSettingOption]*/}
+      {/*                    .rgb,*/}
+      {/*                  a: 0.5,*/}
+      {/*                })*/}
+      {/*              : LIGHT_RED*/}
+      {/*          }`,*/}
+      {/*      borderLeft: 0,*/}
+      {/*      borderRadius: '12px',*/}
+      {/*      borderTopLeftRadius: 0,*/}
+      {/*      borderBottomLeftRadius: 0,*/}
+      {/*      cursor: !isSaving && 'pointer',*/}
+      {/*      '&:hover': !disableHover &&*/}
+      {/*        !isSaving && {*/}
+      {/*          border: isActive*/}
+      {/*            ? `solid 2px ${RED}`*/}
+      {/*            : `solid 2px ${getHexFromRGBAObject({*/}
+      {/*                ...optionsColors[currentSettingOption].rgb,*/}
+      {/*                a: 0.5,*/}
+      {/*              })}`,*/}
+      {/*          borderStyle: isActive ? 'solid' : 'dashed',*/}
+      {/*          borderLeft: 0,*/}
+      {/*        },*/}
+      {/*    }}*/}
+      {/*  >*/}
+      {/*    <Stack*/}
+      {/*      spacing={1}*/}
+      {/*      sx={{ p: 3 }}*/}
+      {/*      direction="row"*/}
+      {/*      alignItems="center"*/}
+      {/*      justifyContent="left"*/}
+      {/*    >*/}
+      {/*      <Typography variant="subtitle2" noWrap>*/}
+      {/*        {SettingOption[currentSettingOption]}*/}
+      {/*      </Typography>*/}
+      {/*    </Stack>*/}
+      {/*  </Box>*/}
+      {/*</Box>*/}
     </Box>
   );
 }

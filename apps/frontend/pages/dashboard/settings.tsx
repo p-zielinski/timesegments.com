@@ -19,7 +19,8 @@ import {getBackgroundColor} from '../../utils/colors/getBackgroundColor';
 import {TimelineDot} from '@mui/lab';
 import Iconify from '../../components/iconify';
 import {SettingOption} from 'apps/frontend/enum/settingOption';
-import {findKeyOfValueInObject} from '@test1/shared'; // ----------------------------------------------------------------------
+import {findKeyOfValueInObject, Timezones} from '@test1/shared';
+import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo'; // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -124,32 +125,42 @@ export default function Index({
   }, [isMobile]);
 
   const allSettingOptions = Object.keys(SettingOption).map((key) => {
-    let icon;
+    let icon, subtitle, successText;
     switch (key) {
       case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
         icon = 'icon-park-outline:edit-name';
+        subtitle = user.name;
+        successText = 'Name was successfully changed';
         break;
       case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_TIMEZONE):
         icon = 'mdi:timezone-outline';
+        subtitle = Timezones[user.timezone];
+        successText = 'Timezone was successfully changed';
         break;
       case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_PASSWORD):
         icon = 'material-symbols:password';
+        successText = 'Password was successfully changed';
         break;
       case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_EMAIL):
         icon = 'ic:outline-email';
+        subtitle = user.email;
+        successText = 'We sent you an email with further instructions';
         break;
       case findKeyOfValueInObject(
         SettingOption,
         SettingOption.MANAGE_LOGIN_SESSIONS
       ):
         icon = 'tabler:lock-access';
+        successText = 'Action successfully executed';
         break;
     }
     return {
       id: key,
       name: SettingOption[key],
+      subtitle,
       icon,
       color: { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' },
+      successText,
     };
   });
 
@@ -191,8 +202,8 @@ export default function Index({
                       setUser={setUser}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
+                      currentSettingOption={currentSettingOption}
                     />
                   );
                 }
@@ -271,6 +282,20 @@ export default function Index({
                   );
                 }
 
+                if (
+                  openedSettingOption ===
+                  currentSettingOption.id + 'completed'
+                ) {
+                  return (
+                    <ShowCompletedInfoSettings
+                      isSaving={isSaving}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                      currentSettingOption={currentSettingOption}
+                      disableHover={disableHover}
+                    />
+                  );
+                }
+
                 return (
                   <Box
                     key={`${currentSettingOption.id}_not_selected`}
@@ -328,6 +353,16 @@ export default function Index({
                         >
                           {currentSettingOption.name}
                         </Typography>
+                        <Box
+                          sx={{ display: 'flex', direction: 'column', mb: 0 }}
+                        >
+                          <Typography
+                            variant="caption"
+                            sx={{ color: 'text.secondary', mb: 0 }}
+                          >
+                            {currentSettingOption.subtitle}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', mr: '-12px' }}>
