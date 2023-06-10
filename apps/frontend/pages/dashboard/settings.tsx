@@ -227,11 +227,13 @@ export default function Index({
                   return (
                     <ChangeEmail
                       key={`${currentSettingOption}-active`}
+                      user={user}
                       disableHover={disableHover}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
+                      currentSettingOption={currentSettingOption}
+                      setCompleted={setCompleted}
                     />
                   );
                 }
@@ -271,7 +273,7 @@ export default function Index({
                       setUser={setUser}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={currentSettingOption.color}
+                      currentSettingOption={currentSettingOption}
                       setOpenedSettingOption={setOpenedSettingOption}
                       setCompleted={setCompleted}
                     />
@@ -288,8 +290,9 @@ export default function Index({
                       disableHover={disableHover}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
+                      currentSettingOption={currentSettingOption}
+                      setCompleted={setCompleted}
                     />
                   );
                 }
@@ -310,13 +313,13 @@ export default function Index({
                       user={user}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
-                      color={currentSettingOption.color}
+                      currentSettingOption={currentSettingOption}
                       setOpenedSettingOption={setOpenedSettingOption}
+                      setCompleted={setCompleted}
                     />
                   );
                 }
 
-                console.log(currentSettingOption);
                 return (
                   <Box
                     key={`${currentSettingOption.id}_not_selected`}

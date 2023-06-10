@@ -29,11 +29,12 @@ export default function ChangeTimezone({
   user,
   isSaving,
   setIsSaving,
-  color,
   setUser,
   setOpenedSettingOption,
+  currentSettingOption,
   setCompleted,
 }) {
+  const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = isSaving
@@ -258,7 +259,7 @@ export default function ChangeTimezone({
                       }}
                     >
                       <Typography variant="subtitle2" noWrap>
-                        SAVE NAME
+                        SAVE TIMEZONE
                       </Typography>
                     </Stack>
                   </Box>
