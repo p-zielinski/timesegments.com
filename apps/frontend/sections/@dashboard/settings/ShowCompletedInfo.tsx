@@ -34,9 +34,7 @@ export default function ShowCompletedInfoSettings({
             )}`,
           },
       }}
-      onClick={() =>
-        !isSaving && setOpenedSettingOption(currentSettingOption.name)
-      }
+      onClick={() => !isSaving && setOpenedSettingOption()}
     >
       <Box sx={{ display: 'flex', mr: '-12px' }}>
         <Box

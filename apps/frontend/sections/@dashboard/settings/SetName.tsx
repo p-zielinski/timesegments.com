@@ -30,6 +30,7 @@ export default function SetName({
   currentSettingOption,
   setUser,
   setOpenedSettingOption,
+  setCompleted,
 }) {
   const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
@@ -79,7 +80,7 @@ export default function SetName({
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
-      setOpenedSettingOption(currentSettingOption.id + 'completed');
+      setCompleted(true);
     } else if (response.statusCode === StatusCodes.CONFLICT) {
       setControlValue(undefined);
       return; //skip setting isSaving(false)

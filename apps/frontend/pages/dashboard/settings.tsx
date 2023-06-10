@@ -164,6 +164,11 @@ export default function Index({
     };
   });
 
+  const [completed, setCompleted] = useState(false);
+  useEffect(() => {
+    setCompleted(false);
+  }, [openedSettingOption]);
+
   return (
     <DashboardLayout
       user={user}
@@ -188,6 +193,33 @@ export default function Index({
                 const isActive =
                   openedSettingOption === currentSettingOption.name;
 
+                if (isActive && completed) {
+                  return (
+                    <ShowCompletedInfoSettings
+                      isSaving={isSaving}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                      currentSettingOption={currentSettingOption}
+                      disableHover={disableHover}
+                    ></ShowCompletedInfoSettings>
+                  );
+                }
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.CHANGE_EMAIL
+                ) {
+                  return (
+                    <ChangeEmail
+                      key={`${currentSettingOption}-active`}
+                      disableHover={disableHover}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      color={currentSettingOption.color}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                    />
+                  );
+                }
+
                 if (
                   isActive &&
                   openedSettingOption === SettingOption.SET_NAME
@@ -204,6 +236,7 @@ export default function Index({
                       setIsSaving={setIsSaving}
                       setOpenedSettingOption={setOpenedSettingOption}
                       currentSettingOption={currentSettingOption}
+                      setCompleted={setCompleted}
                     />
                   );
                 }
@@ -246,22 +279,6 @@ export default function Index({
 
                 if (
                   isActive &&
-                  openedSettingOption === SettingOption.CHANGE_EMAIL
-                ) {
-                  return (
-                    <ChangeEmail
-                      key={`${currentSettingOption}-active`}
-                      disableHover={disableHover}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      color={currentSettingOption.color}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
                   openedSettingOption === SettingOption.MANAGE_LOGIN_SESSIONS
                 ) {
                   return (
@@ -278,20 +295,6 @@ export default function Index({
                       setIsSaving={setIsSaving}
                       color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
-                    />
-                  );
-                }
-
-                if (
-                  openedSettingOption ===
-                  currentSettingOption.id + 'completed'
-                ) {
-                  return (
-                    <ShowCompletedInfoSettings
-                      isSaving={isSaving}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      currentSettingOption={currentSettingOption}
-                      disableHover={disableHover}
                     />
                   );
                 }
