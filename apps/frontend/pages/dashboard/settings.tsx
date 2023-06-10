@@ -124,45 +124,60 @@ export default function Index({
     setDisableHover(isMobile);
   }, [isMobile]);
 
-  const allSettingOptions = Object.keys(SettingOption).map((key) => {
-    let icon, subtitle, successText;
-    switch (key) {
-      case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
-        icon = 'icon-park-outline:edit-name';
-        subtitle = user.name;
-        successText = 'Name was successfully changed';
-        break;
-      case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_TIMEZONE):
-        icon = 'mdi:timezone-outline';
-        subtitle = Timezones[user.timezone];
-        successText = 'Timezone was successfully changed';
-        break;
-      case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_PASSWORD):
-        icon = 'material-symbols:password';
-        successText = 'Password was successfully changed';
-        break;
-      case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_EMAIL):
-        icon = 'ic:outline-email';
-        subtitle = user.email;
-        successText = 'We sent you an email with further instructions';
-        break;
-      case findKeyOfValueInObject(
-        SettingOption,
-        SettingOption.MANAGE_LOGIN_SESSIONS
-      ):
-        icon = 'tabler:lock-access';
-        successText = 'Action successfully executed';
-        break;
-    }
-    return {
-      id: key,
-      name: SettingOption[key],
-      subtitle,
-      icon,
-      color: { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' },
-      successText,
-    };
-  });
+  const getAllSettingOptions = (user) => {
+    return Object.keys(SettingOption).map((key) => {
+      let icon, subtitle, successText;
+      switch (key) {
+        case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
+          icon = 'icon-park-outline:edit-name';
+          subtitle = user.name;
+          successText = 'Name was successfully changed';
+          break;
+        case findKeyOfValueInObject(
+          SettingOption,
+          SettingOption.CHANGE_TIMEZONE
+        ):
+          icon = 'mdi:timezone-outline';
+          subtitle = Timezones[user.timezone];
+          successText = 'Timezone was successfully changed';
+          break;
+        case findKeyOfValueInObject(
+          SettingOption,
+          SettingOption.CHANGE_PASSWORD
+        ):
+          icon = 'material-symbols:password';
+          successText = 'Password was successfully changed';
+          break;
+        case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_EMAIL):
+          icon = 'ic:outline-email';
+          subtitle = user.email;
+          successText = 'We sent you an email with further instructions';
+          break;
+        case findKeyOfValueInObject(
+          SettingOption,
+          SettingOption.MANAGE_LOGIN_SESSIONS
+        ):
+          icon = 'tabler:lock-access';
+          successText = 'Action successfully executed';
+          break;
+      }
+      return {
+        id: key,
+        name: SettingOption[key],
+        subtitle,
+        icon,
+        color: { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' },
+        successText,
+      };
+    });
+  };
+
+  const [allSettingOptions, setAllSettingOptions] = useState(
+    getAllSettingOptions(user)
+  );
+  useEffect(() => {
+    setAllSettingOptions(getAllSettingOptions(user));
+  }, [user]);
 
   const [completed, setCompleted] = useState(false);
   useEffect(() => {
@@ -196,6 +211,7 @@ export default function Index({
                 if (isActive && completed) {
                   return (
                     <ShowCompletedInfoSettings
+                      key={`completed${currentSettingOption.id}`}
                       isSaving={isSaving}
                       setOpenedSettingOption={setOpenedSettingOption}
                       currentSettingOption={currentSettingOption}
@@ -257,6 +273,7 @@ export default function Index({
                       setIsSaving={setIsSaving}
                       color={currentSettingOption.color}
                       setOpenedSettingOption={setOpenedSettingOption}
+                      setCompleted={setCompleted}
                     />
                   );
                 }
@@ -299,6 +316,7 @@ export default function Index({
                   );
                 }
 
+                console.log(currentSettingOption);
                 return (
                   <Box
                     key={`${currentSettingOption.id}_not_selected`}
