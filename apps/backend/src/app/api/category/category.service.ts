@@ -210,4 +210,13 @@ export class CategoryService {
       data: { showRecentNotes },
     });
   }
+
+  public async getActiveCategoriesIds(userId: string) {
+    return (
+      await this.prisma.category.findMany({
+        where: { userId, active: true },
+        select: { id: true },
+      })
+    ).map((category) => category.id);
+  }
 }

@@ -1,10 +1,10 @@
 import React from 'react';
-import { FastField } from 'formik';
 import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import { TextField as DefaultTextField } from '@mui/material';
 import helperTextHandler from '../../helperFunctions/helperTextHandler';
 import { StyledComponent } from 'styled-components';
+import { FastField } from 'formik';
 
 type SelectWithSearchProps = {
   label?: string;
@@ -15,6 +15,9 @@ type SelectWithSearchProps = {
   disabled?: boolean;
   TextField?: StyledComponent<any>;
   helperTextColor?: string;
+  inputBackground?: string;
+  startAdornment?: React.ReactNode;
+  endAdornment?: React.ReactNode;
 };
 
 export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
@@ -26,6 +29,9 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   disabled = false,
   TextField = DefaultTextField,
   helperTextColor = '#888888',
+  inputBackground = 'white',
+  startAdornment,
+  endAdornment,
 }) => {
   return (
     <FastField autoComplete="nope" name={name}>
@@ -49,7 +55,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
             value={options.find((o) => o.value === field.value) || null}
             renderInput={(params) => (
               <TextField
-                disabled={true}
+                disabled={disabled}
                 {...params}
                 size="small"
                 autoComplete="nope"
@@ -65,11 +71,17 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                   sx: {
                     mt: helperText?.match(/optional/i) ? 0 : '-3px',
                     ml: '4px',
-                    mb: helperText?.match(/optional/i) ? -0.5 : -1,
+                    mb: -2,
                     color: helperTextColor,
                   },
                 }}
-                sx={{ mb: 0 }}
+                InputLabelProps={{
+                  sx: {
+                    background: 'rgba(255,255,255,.5)',
+                    borderRadius: '7px',
+                  },
+                }}
+                sx={{ mb: 1, background: 'white', borderRadius: '7px' }}
                 error={!!(meta.touched && meta.error)}
                 name={name}
                 id={`select-${label}`}

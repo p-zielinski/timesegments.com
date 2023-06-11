@@ -10,6 +10,7 @@ import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
   CategoriesSortOption,
+  findKeyOfValueInObject,
   Limits,
   MeExtendedOption,
   NotesSortOption,
@@ -17,7 +18,6 @@ import {
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
-import { findKeyOfValueInObject } from '../../common/findKeyOfValueInObject';
 import { DateTime } from 'luxon';
 
 @Injectable()

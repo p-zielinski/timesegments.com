@@ -1,15 +1,15 @@
 import { Box, Stack, TextField, Typography } from '@mui/material';
-import { getRepeatingLinearGradient } from '../../../utils/colors/getRepeatingLinearGradient';
 import {
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
+  SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -20,7 +20,7 @@ import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { timezoneOptionsForSelect } from '../Form/timezoneOptionsForSelect';
 import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
-import { Timezones } from '@test1/shared';
+import { findKeyOfValueInObject, Timezones } from '@test1/shared';
 
 export default function ChangeTimezone({
   controlValue,
@@ -29,11 +29,12 @@ export default function ChangeTimezone({
   user,
   isSaving,
   setIsSaving,
-  color,
   setUser,
   setOpenedSettingOption,
+  currentSettingOption,
+  setCompleted,
 }) {
-  const mainBoxRef = useRef(null);
+  const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = isSaving
@@ -70,15 +71,7 @@ export default function ChangeTimezone({
     });
   };
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
-
-  const [initialValues, setInitialValues] = useState({
-    timezone: Timezones[user.timezone] || '',
-  });
-
-  const saveTimezone = async (timezone: string, resetForm: () => void) => {
-    setInitialValues({
-      timezone,
-    });
+  const saveTimezone = async (timezone: string) => {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/change-timezone',
@@ -86,15 +79,15 @@ export default function ChangeTimezone({
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
-      resetForm();
-      setUser({ ...user, timezone });
+      setUser({
+        ...user,
+        timezone: findKeyOfValueInObject(Timezones, timezone),
+      });
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
+      setCompleted(true);
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setInitialValues({
-        timezone: Timezones[user.timezone],
-      });
       setControlValue(undefined);
       return; //skip setting isSaving(false)
     }
@@ -109,231 +102,203 @@ export default function ChangeTimezone({
   });
 
   return (
-    <Box key={initialValues.timezone + isSaving} ref={mainBoxRef}>
+    <Box>
       <Formik
-        initialValues={initialValues}
-        onSubmit={async (values, { setSubmitting, resetForm }) => {
-          await saveTimezone(values.timezone, resetForm);
+        initialValues={{
+          timezone: Timezones[user.timezone] || '',
+        }}
+        onSubmit={async (values, { setSubmitting }) => {
+          await saveTimezone(values.timezone);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
       >
-        {({ handleSubmit, values }) => {
+        {({ handleSubmit, values, setFieldValue }) => {
           const isFormValid = validationSchema.isValidSync(values);
 
-          return (
-            <Box sx={{ boxSizing: 'content-box' }}>
-              <Box>
-                <Box
-                  sx={{
-                    borderTopLeftRadius: '12px',
-                    borderTopRightRadius: '12px',
-                    cursor: 'auto',
-                    minHeight: 54,
-                    background: getRepeatingLinearGradient(
-                      isSaving ? IS_SAVING_HEX : color.hex,
-                      0.3,
-                      45,
-                      false
-                    ),
-                    border: `solid 2px ${
-                      isSaving
-                        ? IS_SAVING_HEX
-                        : getHexFromRGBAObject({
-                            ...(color.rgb as {
-                              r: number;
-                              g: number;
-                              b: number;
-                            }),
-                            a: 0.3,
-                          })
-                    }`,
-                    mb: '-3px',
-                    borderBottom: '0px',
-                  }}
-                >
-                  <Box sx={{ p: 2, pt: 3.5 }}>
-                    {isSaving && (
-                      <Box
-                        sx={{
-                          width: mainBoxRef.current?.clientWidth || '100%',
-                          height: mainBoxRef.current?.clientHeight || '100%',
-                          background: 'transparent',
-                          zIndex: 1,
-                          position: 'absolute',
-                          transform: 'translate(-18px, -26px)',
-                        }}
-                      />
-                    )}
+          const backgroundColor = getHexFromRGBAObject(
+            getRgbaObjectFromHexString(
+              isSaving
+                ? IS_SAVING_HEX
+                : getHexFromRGBAObject(
+                    getColorShadeBasedOnSliderPickerSchema(
+                      getRgbaObjectFromHexString(color?.hex),
+                      'bright'
+                    )
+                  ),
+              0.2
+            )
+          );
 
-                    <Stack spacing={2}>
-                      <Box>
-                        <SelectWithSearch
-                          name="timezone"
-                          groupBy={(option) => option.groupBy}
-                          label="Timezone"
-                          options={timezoneOptionsForSelect}
-                          TextField={StyledTextField}
-                          helperTextColor={
-                            isSaving ? IS_SAVING_HEX : darkHexColor
-                          }
-                          disabled={isSaving}
+          return (
+            <Box>
+              <Box
+                sx={{
+                  borderTopLeftRadius: '12px',
+                  borderTopRightRadius: '12px',
+                  cursor: 'auto',
+                  background: backgroundColor,
+                  border: `solid 1px ${backgroundColor}`,
+                  borderBottom: '0px',
+                }}
+              >
+                <Box sx={{ p: 1.5, pt: 0 }}>
+                  {isSaving && (
+                    <Box
+                      sx={{
+                        width: 'calc(100% + 20px)',
+                        height: 'calc(100% + 20px)',
+                        background: 'transparent',
+                        position: 'absolute',
+                        zIndex: 1,
+                        transform: 'translate(-10px, -10px)',
+                      }}
+                    />
+                  )}
+                  <Stack spacing={3} sx={{ mb: 0.8 }}>
+                    <Box
+                      sx={{
+                        filter: isSaving ? 'grayscale(100%)' : 'none',
+                        cursor: isSaving ? 'default' : 'pointer',
+                      }}
+                    >
+                      {isSaving && (
+                        <Box
+                          sx={{
+                            width: 'calc(100% + 20px)',
+                            height: 'calc(100% + 20px)',
+                            background: 'transparent',
+                            position: 'absolute',
+                            zIndex: 1,
+                            transform: 'translate(-10px, -10px)',
+                          }}
                         />
-                      </Box>
-                    </Stack>
-                  </Box>
+                      )}
+                    </Box>
+                    <SelectWithSearch
+                      name="timezone"
+                      groupBy={(option) => option.groupBy}
+                      label="Timezone"
+                      options={timezoneOptionsForSelect}
+                      TextField={StyledTextField}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
+                    />
+                  </Stack>
                 </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  width: '100%',
+                }}
+              >
                 <Box
                   sx={{
                     display: 'flex',
-                    width: '100%',
+                    flexDirection: 'row',
                     background:
                       !isFormValid || isSaving
-                        ? getRepeatingLinearGradient(
-                            isSaving ? IS_SAVING_HEX : '000000',
-                            isSaving ? 0.2 : 0.05,
-                            135,
-                            false
-                          )
+                        ? SUPER_LIGHT_SILVER
                         : LIGHT_GREEN,
-                    minHeight: 58,
-                    maxHeight: 58,
                     borderBottomLeftRadius: 12,
-                    borderBottomRightRadius: 12,
-                    border: isSaving
-                      ? `solid 2px ${IS_SAVING_HEX}`
-                      : !isFormValid
-                      ? `solid 2px ${getHexFromRGBAObject({
-                          r: 0,
-                          g: 0,
-                          b: 0,
-                          a: 0.05,
-                        })}`
-                      : `solid 2px ${LIGHT_GREEN}`,
-                    borderTop: 0,
+                    border: `solid 1px ${
+                      isSaving || !isFormValid
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN
+                    }`,
                     color: isSaving
                       ? IS_SAVING_HEX
                       : !isFormValid
                       ? 'rgba(0,0,0,.2)'
                       : 'black',
                     cursor: !isFormValid || isSaving ? 'default' : 'pointer',
+                    flex: 1,
+                    '&:hover': !isSaving &&
+                      isFormValid && {
+                        border: !isFormValid
+                          ? `solid 1px ${getHexFromRGBAObject({
+                              r: 0,
+                              g: 0,
+                              b: 0,
+                              a: 0.05,
+                            })}`
+                          : `solid 1px ${GREEN}`,
+                      },
+                  }}
+                  onClick={() => {
+                    !isSaving && handleSubmit();
                   }}
                 >
                   <Box
                     sx={{
-                      flex: 1,
-                      p: 2,
-                      margin: `0 0 -2px -2px`,
-                      border: isSaving
-                        ? `solid 2px ${IS_SAVING_HEX}`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 0,
-                            g: 0,
-                            b: 0,
-                            a: 0.05,
-                          })}`
-                        : `solid 2px ${LIGHT_GREEN}`,
-                      borderBottomLeftRadius: 12,
-                      borderRight: 0,
-                      borderTop: 0,
-                      '&:hover': !disableHover &&
-                        !isSaving && {
-                          border: !isFormValid
-                            ? `solid 2px ${getHexFromRGBAObject({
-                                r: 0,
-                                g: 0,
-                                b: 0,
-                                a: 0.05,
-                              })}`
-                            : `solid 2px ${GREEN}`,
-                          borderTop: !isFormValid ? 0 : `solid 2px ${GREEN}`,
-                          pt: !isFormValid ? 2 : 1.8,
-                        },
-                    }}
-                    onClick={() => {
-                      !isSaving && handleSubmit();
+                      p: '5px',
                     }}
                   >
                     <Iconify
                       icon={'material-symbols:save-outline'}
-                      width={42}
+                      width={40}
                       sx={{
-                        m: -2,
                         position: 'relative',
-                        bottom: -6,
-                        left: 8,
+                        top: '50%',
+                        left: '40%',
+                        transform: 'translate(-40%, -50%)',
                       }}
                     />
-                    <Stack spacing={2} sx={{ ml: 5, mt: -3 }}>
-                      <Typography variant="subtitle2" noWrap>
-                        SAVE NAME
-                      </Typography>
-                    </Stack>
                   </Box>
                   <Box
                     sx={{
-                      margin: `0 -2px -2px 0`,
-                      cursor: !isSaving && 'pointer',
-                      color: !isSaving && 'black',
-                      border: isSaving
-                        ? `solid 2px ${IS_SAVING_HEX}`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                            a: 0.2,
-                          })}`
-                        : `solid 2px ${LIGHT_RED}`,
-                      borderLeft: isSaving
-                        ? `solid 2px transparent`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                            a: 0.2,
-                          })}`
-                        : `solid 2px ${LIGHT_RED}`,
-                      borderTop: isSaving
-                        ? `solid 2px transparent`
-                        : !isFormValid
-                        ? `solid 2px ${getHexFromRGBAObject({
-                            r: 255,
-                            g: 0,
-                            b: 0,
-                            a: 0.2,
-                          })}`
-                        : `solid 2px ${LIGHT_RED}`,
-                      width: '60px',
-                      borderBottomRightRadius: 12,
-                      background: isSaving
-                        ? 'transparent'
-                        : !isFormValid
-                        ? `rgba(255, 0, 0, 0.2)`
-                        : LIGHT_RED,
-                      '&:hover': !disableHover &&
-                        !isSaving && {
-                          background: LIGHT_RED,
-                          border: `solid 2px ${RED}`,
-                        },
+                      position: 'relative',
                     }}
-                    onClick={() =>
-                      !isSaving && setOpenedSettingOption(undefined)
-                    }
                   >
-                    <Iconify
-                      icon={'mdi:cancel-bold'}
-                      width={42}
+                    <Stack
                       sx={{
-                        m: -2,
-                        position: 'relative',
-                        bottom: -22,
-                        right: -24,
+                        position: 'absolute',
+                        top: '50%',
+                        transform: 'translate(0, -50%)',
                       }}
-                    />
+                    >
+                      <Typography variant="subtitle2" noWrap>
+                        SAVE TIMEZONE
+                      </Typography>
+                    </Stack>
                   </Box>
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                    borderBottomRightRadius: 14,
+                    pl: '5px',
+                    pr: '5px',
+                    border: `solid 1px ${
+                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
+                    }`,
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    cursor: isSaving ? 'default' : 'pointer',
+                    '&:hover': !isSaving && {
+                      background: LIGHT_RED,
+                      border: `solid 1px ${RED}`,
+                    },
+                  }}
+                  onClick={() => {
+                    if (isSaving) {
+                      return;
+                    }
+                    setOpenedSettingOption(undefined);
+                  }}
+                >
+                  <Iconify
+                    icon={'eva:close-outline'}
+                    width={40}
+                    sx={{
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
+                    }}
+                  />
                 </Box>
               </Box>
             </Box>

@@ -6,3 +6,5 @@ export * from './lib/enums/timezones';
 export * from './lib/types/user';
 export * from './lib/types/limits';
 export * from './lib/types/dates';
+export * from './lib/utils/findKeyOfValueInObject';
+export * from './lib/utils/asyncMap';

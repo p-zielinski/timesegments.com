@@ -3,7 +3,8 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { DateTime } from 'luxon';
 import { TimeLog, User } from '@prisma/client';
-import { FromToDate, Timezones } from '@test1/shared';
+import { asyncMap, FromToDate, Timezones } from '@test1/shared';
+import { uniqBy } from 'lodash';
 
 @Injectable()
 export class TimeLogService {
@@ -74,6 +75,8 @@ export class TimeLogService {
   ): Promise<
     { success: false; error: string } | { success: true; timeLogs: TimeLog[] }
   > {
+    const activeCategoriesIds =
+      await this.categoryService.getActiveCategoriesIds(user.id);
     const usersTimezone = Timezones[user.timezone];
     const fromDateTime = DateTime.fromObject(
       { ...fromRaw, hour: 0, minute: 0, second: 0 },
@@ -107,6 +110,38 @@ export class TimeLogService {
         startedAt: 'asc',
       },
     });
+    const missingTimeLogsWithFollowingCategoryIds = activeCategoriesIds.filter(
+      (categoryId) =>
+        !results.map((result) => result.categoryId).includes(categoryId)
+    );
+    if (missingTimeLogsWithFollowingCategoryIds.length) {
+      //multiple categories can be active for more than a day...
+      const opportunisticResults = (
+        await asyncMap(
+          missingTimeLogsWithFollowingCategoryIds,
+          async (categoryId) =>
+            await this.prisma.timeLog.findFirst({
+              where: {
+                userId: user.id,
+                startedAt: { lte: toDateTime.toISO() },
+                categoryId,
+              },
+              orderBy: {
+                startedAt: 'desc',
+              },
+            })
+        )
+      ).filter((timeLog) => timeLog);
+      if (opportunisticResults.length > 0) {
+        return {
+          success: true,
+          timeLogs: uniqBy(
+            [...results, ...opportunisticResults],
+            'id'
+          ) as TimeLog[],
+        };
+      }
+    }
     if (results.length > 0) {
       return { success: true, timeLogs: results };
     }
@@ -122,7 +157,7 @@ export class TimeLogService {
 
     return {
       success: true,
-      timeLogs: [result],
+      timeLogs: result ? [result] : undefined,
     };
   }
 }
