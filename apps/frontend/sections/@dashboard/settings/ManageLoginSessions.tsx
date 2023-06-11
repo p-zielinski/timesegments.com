@@ -23,7 +23,7 @@ import { Token } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
-import { SelectWithSearch } from 'apps/frontend/components/form/SelectWithSearch';
+import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
 
 export default function ManageLoginSessions({
   userTokens,
