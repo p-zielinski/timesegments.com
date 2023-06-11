@@ -303,10 +303,6 @@ export default function Index({
                 ) {
                   return (
                     <ManageLoginSessions
-                      userTokens={userTokens}
-                      setUserTokens={setUserTokens}
-                      userTokensFetched={userTokensFetched}
-                      setUserTokensFetched={setUserTokensFetched}
                       currentTokenId={currentTokenId}
                       key={`${controlValue}-${currentSettingOption}-active`}
                       disableHover={disableHover}

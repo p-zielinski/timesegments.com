@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -26,10 +26,6 @@ import Cookies from 'js-cookie';
 import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
 
 export default function ManageLoginSessions({
-  userTokens,
-  setUserTokens,
-  userTokensFetched,
-  setUserTokensFetched,
   currentTokenId,
   disableHover,
   user,
@@ -39,6 +35,9 @@ export default function ManageLoginSessions({
   currentSettingOption,
   setCompleted,
 }) {
+  const [userTokens, setUserTokens] = useState<Token[]>([]);
+  const [userTokensFetched, setUserTokensFetched] = useState(false);
+
   const { color } = currentSettingOption;
   const router = useRouter();
   const getUserTokens = async () => {
@@ -71,13 +70,14 @@ export default function ManageLoginSessions({
         day: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
+        second: 'numeric',
       });
       return {
         value: token.id,
         label:
           token.id === currentTokenId
-            ? `Current session, created at: ${createdAtString}`
-            : `${token.userAgent}, created at: ${createdAtString}`,
+            ? `Current session, created ${createdAtString}`
+            : `${token.userAgent}, created ${createdAtString}`,
       };
     });
   };
@@ -207,7 +207,11 @@ export default function ManageLoginSessions({
                       }}
                     />
                   )}
-                  <Stack spacing={3} sx={{ mb: 0.8 }}>
+                  <Stack
+                    spacing={3}
+                    sx={{ mb: 0.8 }}
+                    key={`${userTokens.map((token) => token.id).join(',')}`}
+                  >
                     <Box
                       sx={{
                         filter: isSaving ? 'grayscale(100%)' : 'none',
