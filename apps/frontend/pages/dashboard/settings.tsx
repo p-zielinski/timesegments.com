@@ -18,7 +18,7 @@ import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginS
 import {getBackgroundColor} from '../../utils/colors/getBackgroundColor';
 import {TimelineDot} from '@mui/lab';
 import Iconify from '../../components/iconify';
-import {SettingOption} from 'apps/frontend/enum/settingOption';
+import {SettingOption} from '../../enum/settingOption';
 import {findKeyOfValueInObject, Timezones} from '@test1/shared';
 import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo'; // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
