@@ -7,7 +7,6 @@ import EditCategory from './EditCategory';
 import React, {useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import {mapTimeLogToDateTimeLogs} from '../../../utils/mapper/mapTimeLogsToDateTimeLogs';
 import {Timezones} from '@test1/shared';
 import {DateTime} from 'luxon';
 import {getDuration} from '../../../utils/mapper/getDuration';
@@ -28,7 +27,8 @@ export default function Category({
   user,
   checkActiveDateCorrectness,
   timeLogsWithinActiveDate,
-  setTimeLogsWithinActiveDate,
+  timeLogs,
+  setTimeLogs,
   controlValue,
   setControlValue,
   category,
@@ -144,17 +144,9 @@ export default function Category({
       }
       if (response.timeLog) {
         const responseTimeLogId = response.timeLog.id;
-        const timeLogExtended = mapTimeLogToDateTimeLogs(
+        setTimeLogs([
+          ...timeLogs.filter((timeLog) => timeLog.id !== responseTimeLogId),
           response.timeLog,
-          Timezones[user.timezone],
-          categories
-        );
-        setTimeLogsWithinActiveDate([
-          ...timeLogsWithinActiveDate.filter(
-            (timeLogsExtended) =>
-              responseTimeLogId !== timeLogsExtended.timeLogId
-          ),
-          timeLogExtended,
         ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {

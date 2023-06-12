@@ -16,7 +16,8 @@ export default function Categories({
   setActiveDate,
   groupedTimeLogsWithDateSorted,
   timeLogsWithinActiveDate,
-  setTimeLogsWithinActiveDate,
+  timeLogs,
+  setTimeLogs,
   user,
   controlValue,
   setControlValue,
@@ -83,7 +84,8 @@ export default function Categories({
                 user={user}
                 checkActiveDateCorrectness={checkActiveDateCorrectness}
                 timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-                setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
+                timeLogs={timeLogs}
+                setTimeLogs={setTimeLogs}
                 controlValue={controlValue}
                 setControlValue={setControlValue}
                 disableHover={disableHover}
