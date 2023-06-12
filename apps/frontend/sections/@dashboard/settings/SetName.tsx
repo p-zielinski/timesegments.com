@@ -90,8 +90,11 @@ export default function SetName({
   };
 
   const validationSchema = yup.object().shape({
-    name: yup.string().test((value) => {
-      return value !== (user.name || '');
+    name: yup.string().test({
+      test: (value) => {
+        return (value || '') !== (user.name || '');
+      },
+      message: 'Name cannot be the same as the current one',
     }),
   });
 
@@ -210,7 +213,8 @@ export default function SetName({
                         : 'black',
                       cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                       flex: 1,
-                      '&:hover': !isSaving &&
+                      '&:hover': !disableHover &&
+                        !isSaving &&
                         isFormValid && {
                           border: !isFormValid
                             ? `solid 1px ${getHexFromRGBAObject({
@@ -273,10 +277,11 @@ export default function SetName({
                       }`,
                       color: isSaving ? IS_SAVING_HEX : 'black',
                       cursor: isSaving ? 'default' : 'pointer',
-                      '&:hover': !isSaving && {
-                        background: LIGHT_RED,
-                        border: `solid 1px ${RED}`,
-                      },
+                      '&:hover': !disableHover &&
+                        !isSaving && {
+                          background: LIGHT_RED,
+                          border: `solid 1px ${RED}`,
+                        },
                     }}
                     onClick={() => {
                       if (isSaving) {

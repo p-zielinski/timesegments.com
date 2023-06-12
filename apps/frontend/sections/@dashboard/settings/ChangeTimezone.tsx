@@ -214,7 +214,8 @@ export default function ChangeTimezone({
                       : 'black',
                     cursor: !isFormValid || isSaving ? 'default' : 'pointer',
                     flex: 1,
-                    '&:hover': !isSaving &&
+                    '&:hover': !disableHover &&
+                      !isSaving &&
                       isFormValid && {
                         border: !isFormValid
                           ? `solid 1px ${getHexFromRGBAObject({
@@ -277,10 +278,11 @@ export default function ChangeTimezone({
                     }`,
                     color: isSaving ? IS_SAVING_HEX : 'black',
                     cursor: isSaving ? 'default' : 'pointer',
-                    '&:hover': !isSaving && {
-                      background: LIGHT_RED,
-                      border: `solid 1px ${RED}`,
-                    },
+                    '&:hover': !disableHover &&
+                      !isSaving && {
+                        background: LIGHT_RED,
+                        border: `solid 1px ${RED}`,
+                      },
                   }}
                   onClick={() => {
                     if (isSaving) {
