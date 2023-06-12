@@ -1,4 +1,4 @@
-import {Box, Container, useMediaQuery} from '@mui/material'; // hooks
+import {Box, Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
@@ -10,17 +10,10 @@ import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgb
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog} from '@prisma/client';
-import {useRouter} from 'next/router';
-import {
-  findTimeLogsWithinCurrentPeriod,
-  TimeLogWithinCurrentPeriod,
-  TimeLogWithinCurrentPeriodISO,
-} from '../../utils/findTimeLogsWithinCurrentPeriod';
+import {findTimeLogsWithinCurrentPeriod, TimeLogWithinCurrentPeriod,} from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {DateTime} from 'luxon';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
 import Categories from '../../sections/@dashboard/categories';
-import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
-import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import {getGroupedTimeLogsWithDateSorted} from '../../utils/mapper/getGroupedTimeLogsWithDateSorted';
 import {getCurrentDate} from '../../utils/getCurrentDate';
 // ---------------------------------------------------------------------
@@ -49,7 +42,7 @@ type Props = {
   user: UserWithCategories;
   limits: Limits;
   notes: Note[];
-  timeLogsWithDatesISO?: TimeLogsWithinDateISO[];
+  timeLogs: TimeLog[];
   randomSliderHexColor: string;
 };
 
@@ -58,21 +51,19 @@ export default function Index({
   limits: serverSideFetchedLimits,
   notes: serverSideFetchedNotes,
   randomSliderHexColor: randomSliderHexColor,
-  timeLogsWithDatesISO,
+  timeLogs: serverSideFetchedTimeLogs,
 }: Props) {
   const [user, setUser] = useState<UserWithCategories>(serverSideFetchedUser);
-
-  const width1200px = useMediaQuery('(min-width:1200px)');
-
   const [disableHover, setDisableHover] = useState<boolean>(true);
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
-
-  const router = useRouter();
-
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
   const [controlValue, setControlValue] = useState(user?.controlValue);
+  const [timeLogs, setTimeLogs] = useState(serverSideFetchedTimeLogs);
+  const [activeDate, setActiveDate] = useState(
+    getCurrentDate(Timezones[user.timezone])
+  );
 
   useEffect(() => {
     setControlValue(user?.controlValue);
@@ -155,43 +146,31 @@ export default function Index({
   const [categories, setCategories] = useState<Category[]>(
     user?.categories || []
   );
-  const [notes, setNotes] = useState<Note[]>(serverSideFetchedNotes || []);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
-    TimeLogsWithinDate[]
-  >(getTimeLogsWithinDatesFromIsoType(timeLogsWithDatesISO));
-  const [activeDate, setActiveDate] = useState(
-    getCurrentDate(Timezones[user.timezone])
-  );
   const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
     TimeLogWithinCurrentPeriod[]
   >([]);
-
-  useEffect(() => {
-    (async () => {
-      setIsSaving(true);
-      await setTimeLogsWithinActiveDate(
-        await findOrFetchTimeLogsWithinActiveDate(
-          activeDate.c,
-          timeLogsWithinDates,
-          activeDate,
-          setTimeLogsWithinDates,
-          user
-        )
-      );
-      setIsSaving(false);
-    })();
-  }, [activeDate?.ts]);
 
   const [groupedTimeLogsWithDateSorted, setGroupedTimeLogsWithDateSorted] =
     useState([]);
 
   useEffect(() => {
-    setGroupedTimeLogsWithDateSorted(
-      getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
-    );
-  }, [timeLogsWithinActiveDate]);
+    if (timeLogs) {
+      const timeLogsWithinActiveDate = findTimeLogsWithinCurrentPeriod({
+        allTimeLogs: timeLogs,
+        userTimezone: Timezones[user.timezone],
+        fromDate: activeDate.c,
+        toDate: activeDate.c,
+        categories: user.categories,
+      }) as TimeLogWithinCurrentPeriod[];
+
+      setGroupedTimeLogsWithDateSorted(
+        getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
+      );
+      setTimeLogsWithinActiveDate(timeLogsWithinActiveDate);
+    }
+  }, [activeDate?.ts, timeLogs]);
 
   return (
     <DashboardLayout
@@ -207,7 +186,8 @@ export default function Index({
           setActiveDate={setActiveDate}
           groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
           timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-          setTimeLogsWithinActiveDate={setTimeLogsWithinActiveDate}
+          timeLogs={timeLogs}
+          setTimeLogs={setTimeLogs}
           categories={categories}
           setCategories={setCategories}
           limits={limits}
@@ -226,7 +206,9 @@ export default function Index({
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-  let user: UserWithCategoriesAndNotes, limits: Limits, timeLogs: TimeLog[];
+  let userWithCategoriesAndCategoriesNotes: UserWithCategoriesAndNotes,
+    limits: Limits,
+    timeLogs: TimeLog[];
 
   if (jwt_token) {
     try {
@@ -250,7 +232,7 @@ export const getServerSideProps = async ({ req, res }) => {
         }
       );
       const response = await responseUser.json();
-      user = response.user;
+      userWithCategoriesAndCategoriesNotes = response.user;
       limits = response.limits;
       timeLogs = response.timeLogs;
     } catch (e) {
@@ -265,7 +247,7 @@ export const getServerSideProps = async ({ req, res }) => {
     });
   }
 
-  if (!user) {
+  if (!userWithCategoriesAndCategoriesNotes) {
     return {
       redirect: {
         permanent: false,
@@ -273,30 +255,10 @@ export const getServerSideProps = async ({ req, res }) => {
       },
     };
   }
-  let timeLogsWithDatesISO;
-  if (timeLogs) {
-    const allCategories = user?.categories || [];
-    const now = DateTime.now().setZone(Timezones[user.timezone]);
-    const today = { month: now.month, year: now.year, day: now.day };
-    timeLogsWithDatesISO = [
-      {
-        date: today,
-        timeLogsExtended: deleteUndefinedFromObject(
-          findTimeLogsWithinCurrentPeriod({
-            allTimeLogs: timeLogs,
-            userTimezone: Timezones[user.timezone],
-            fromDate: today,
-            categories: allCategories,
-            options: { asIso: true },
-          }) as TimeLogWithinCurrentPeriodISO[]
-        ),
-      },
-    ] as TimeLogsWithinDateISO[];
-  }
 
   return {
     props: {
-      user: user ?? null,
+      user: userWithCategoriesAndCategoriesNotes ?? null,
       limits: limits ?? null,
       randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
@@ -304,7 +266,7 @@ export const getServerSideProps = async ({ req, res }) => {
           'very bright'
         )
       ),
-      timeLogsWithDatesISO: timeLogsWithDatesISO || null,
+      timeLogs: deleteUndefinedFromObject(timeLogs) || [],
     },
   };
 };
