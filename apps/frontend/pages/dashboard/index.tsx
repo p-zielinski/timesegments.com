@@ -172,6 +172,24 @@ export default function Index({
     }
   }, [activeDate?.ts, timeLogs]);
 
+  const checkActiveDateCorrectness = () => {
+    const currentDate = getCurrentDate(Timezones[user.timezone]);
+    if (currentDate.ts === activeDate.ts) {
+      return true;
+    }
+    setActiveDate(currentDate);
+    return false;
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkActiveDateCorrectness();
+    }, 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   return (
     <DashboardLayout
       user={user}
@@ -182,10 +200,7 @@ export default function Index({
       <Container>
         <Box sx={{ mt: -5 }} />
         <Categories
-          activeDate={activeDate}
-          setActiveDate={setActiveDate}
           groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
-          timeLogsWithinActiveDate={timeLogsWithinActiveDate}
           timeLogs={timeLogs}
           setTimeLogs={setTimeLogs}
           categories={categories}

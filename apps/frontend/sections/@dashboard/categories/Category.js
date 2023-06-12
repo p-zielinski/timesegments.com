@@ -25,8 +25,6 @@ export default function Category({
   limits,
   groupedTimeLogsWithDateSorted,
   user,
-  checkActiveDateCorrectness,
-  timeLogsWithinActiveDate,
   timeLogs,
   setTimeLogs,
   controlValue,
@@ -138,9 +136,6 @@ export default function Category({
       );
       if (response.controlValue) {
         setControlValue(response.controlValue);
-      }
-      if (!checkActiveDateCorrectness()) {
-        return; //skip setting isSaving(false)
       }
       if (response.timeLog) {
         const responseTimeLogId = response.timeLog.id;

@@ -4,18 +4,13 @@ import Category from './Category';
 import React, {useState} from 'react';
 import AddCategory from './AddCategory';
 import SortCategories from './Sort';
-import {Timezones} from '@test1/shared';
-import {getCurrentDate} from '../../../utils/getCurrentDate';
 import {Helmet} from 'react-helmet-async';
 import CategoryNotesCards from './CategoryNotesCards';
 
 // ----------------------------------------------------------------------
 
 export default function Categories({
-  activeDate,
-  setActiveDate,
   groupedTimeLogsWithDateSorted,
-  timeLogsWithinActiveDate,
   timeLogs,
   setTimeLogs,
   user,
@@ -29,14 +24,6 @@ export default function Categories({
   limits,
 }) {
   const categoriesLimit = limits?.categoriesLimit || 5;
-  const checkActiveDateCorrectness = () => {
-    const currentDate = getCurrentDate(Timezones[user.timezone]);
-    if (currentDate.ts === activeDate.ts) {
-      return true;
-    }
-    setActiveDate(currentDate);
-    return false;
-  };
 
   const [isEditing, setIsEditing] = useState({
     categoryId: undefined,
@@ -82,8 +69,6 @@ export default function Categories({
                 limits={limits}
                 groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
                 user={user}
-                checkActiveDateCorrectness={checkActiveDateCorrectness}
-                timeLogsWithinActiveDate={timeLogsWithinActiveDate}
                 timeLogs={timeLogs}
                 setTimeLogs={setTimeLogs}
                 controlValue={controlValue}
