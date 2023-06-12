@@ -148,10 +148,6 @@ export default function Index({
   );
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
-    TimeLogWithinCurrentPeriod[]
-  >([]);
-
   const [groupedTimeLogsWithDateSorted, setGroupedTimeLogsWithDateSorted] =
     useState([]);
 
@@ -168,7 +164,6 @@ export default function Index({
       setGroupedTimeLogsWithDateSorted(
         getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
       );
-      setTimeLogsWithinActiveDate(timeLogsWithinActiveDate);
     }
   }, [activeDate?.ts, timeLogs]);
 
