@@ -195,18 +195,6 @@ export default function ManageLoginSessions({
                 }}
               >
                 <Box sx={{ p: 1.5, pt: 0 }}>
-                  {isSaving && (
-                    <Box
-                      sx={{
-                        width: 'calc(100%)',
-                        height: 'calc(100%)',
-                        background: 'transparent',
-                        position: 'absolute',
-                        zIndex: 1,
-                        transform: 'translate(-30px, -30px)',
-                      }}
-                    />
-                  )}
                   <Stack
                     spacing={3}
                     sx={{ mb: 0.8 }}
