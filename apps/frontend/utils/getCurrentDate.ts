@@ -10,7 +10,7 @@ const getRelativeDate = (timezone: Timezones, days: number) =>
       seconds: 0,
       milliseconds: 0,
     })
-    .plus({ days: 1 });
+    .plus({ days: days });
 
 export const getCurrentTime = (timezone: Timezones) =>
   DateTime.now().setZone(timezone);
