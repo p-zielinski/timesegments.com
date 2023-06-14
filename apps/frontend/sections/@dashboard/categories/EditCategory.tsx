@@ -329,50 +329,55 @@ export default function EditCategory({
                     </Stack>
                   </Box>
                 </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
-                    pl: '5px',
-                    pr: '5px',
-                    border: `solid 1px ${
-                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
-                    }`,
-                    color: isSaving ? IS_SAVING_HEX : 'black',
-                    cursor: isSaving ? 'default' : 'pointer',
-                    '&:hover': !isSaving && {
-                      background: LIGHT_RED,
-                      border: `solid 1px ${RED}`,
-                    },
-                  }}
-                  onClick={() => !isSaving && setCategoryAsDeleted()}
-                >
-                  <Iconify
-                    icon={'material-symbols:delete-forever-outline-rounded'}
-                    width={40}
-                    sx={{
-                      position: 'relative',
-                      top: '50%',
-                      left: '40%',
-                      transform: 'translate(-40%, -50%)',
-                    }}
-                  />
-                </Box>
-                <Box
-                  sx={{
-                    width: '16px',
-                    background:
-                      !isFormValid || isSaving
-                        ? SUPER_LIGHT_SILVER
-                        : LIGHT_GREEN,
-                    border: `solid 1px ${
-                      isSaving || !isFormValid
-                        ? SUPER_LIGHT_SILVER
-                        : LIGHT_GREEN
-                    }`,
-                  }}
-                />
+                {!category.active && (
+                  <>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
+                        pl: '5px',
+                        pr: '5px',
+                        border: `solid 1px ${
+                          isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
+                        }`,
+                        color: isSaving ? IS_SAVING_HEX : 'black',
+                        cursor: isSaving ? 'default' : 'pointer',
+                        '&:hover': !isSaving && {
+                          background: LIGHT_RED,
+                          border: `solid 1px ${RED}`,
+                        },
+                      }}
+                      onClick={() => !isSaving && setCategoryAsDeleted()}
+                    >
+                      <Iconify
+                        icon={'material-symbols:delete-forever-outline-rounded'}
+                        width={40}
+                        sx={{
+                          position: 'relative',
+                          top: '50%',
+                          left: '40%',
+                          transform: 'translate(-40%, -50%)',
+                        }}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '16px',
+                        background:
+                          !isFormValid || isSaving
+                            ? SUPER_LIGHT_SILVER
+                            : LIGHT_GREEN,
+                        border: `solid 1px ${
+                          isSaving || !isFormValid
+                            ? SUPER_LIGHT_SILVER
+                            : LIGHT_GREEN
+                        }`,
+                      }}
+                    />
+                  </>
+                )}
+
                 <Box
                   sx={{
                     display: 'flex',
