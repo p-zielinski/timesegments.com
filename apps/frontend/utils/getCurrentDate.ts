@@ -1,7 +1,7 @@
 import { Timezones } from '@test1/shared';
 import { DateTime } from 'luxon';
 
-const getRelativeDate = (timezone: Timezones, days: number) =>
+export const getRelativeDate = (timezone: Timezones, days = 0, months = 0) =>
   DateTime.now()
     .setZone(timezone)
     .set({
@@ -10,7 +10,7 @@ const getRelativeDate = (timezone: Timezones, days: number) =>
       seconds: 0,
       milliseconds: 0,
     })
-    .plus({ days: days });
+    .plus({ days, months });
 
 export const getCurrentTime = (timezone: Timezones) =>
   DateTime.now().setZone(timezone);
