@@ -10,6 +10,8 @@ datasource db {
 model User {
   id                String                @id @default(cuid())
   email             String                @unique
+  emailConfirmed    Boolean               @default(false)
+  emails            Email[]
   password          String
   name              String?
   tokens            Token[]
@@ -22,6 +24,15 @@ model User {
   createdAt         DateTime              @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
   controlValue      String                @default("new user")
+}
+
+model Email {
+  id                String                @id @default(cuid())
+  user              User                  @relation(fields: [userId], references: [id])
+  userId            String
+  type              EmailType
+  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
+  key               String?
 }
 
 model Token {
@@ -81,6 +92,12 @@ model Comment {
   timeLogId     String      @unique
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
+}
+
+enum EmailType {
+  EMAIL_CONTINUATION
+  RESET_PASSWORD
+  CHANGE_EMAIL_ADDRESS
 }
 
 enum CategoriesSortOption {

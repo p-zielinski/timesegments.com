@@ -132,6 +132,7 @@ export default function ChangeEmail({
                   sx={{
                     display: 'flex',
                     width: '100%',
+                    height: '54px',
                   }}
                 >
                   <Box
@@ -175,7 +176,7 @@ export default function ChangeEmail({
                   >
                     <Box
                       sx={{
-                        p: '5px',
+                        ml: 1,
                       }}
                     >
                       <Iconify
@@ -192,6 +193,7 @@ export default function ChangeEmail({
                     <Box
                       sx={{
                         position: 'relative',
+                        pl: 1,
                       }}
                     >
                       <Stack
