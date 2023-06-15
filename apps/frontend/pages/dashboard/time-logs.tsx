@@ -22,11 +22,13 @@ import {
 import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
 import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalseFromObject';
 import {
+  GRAY,
   GREEN,
-  IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
+  LIGHT_SILVER,
   RED,
+  SUPER_LIGHT_SILVER,
   ULTRA_LIGHT_GREEN,
   ULTRA_LIGHT_RED,
 } from '../../consts/colors';
@@ -356,7 +358,7 @@ export default function TimeLogs({
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                color: isFetching && IS_SAVING_HEX,
+                color: isFetching && GRAY,
                 mb: 2,
               }}
             >
@@ -366,9 +368,15 @@ export default function TimeLogs({
                   cursor: !isFetching && showDetails && 'pointer',
                   flex: 1,
                   backgroundColor: !showDetails
-                    ? LIGHT_GREEN
+                    ? isFetching
+                      ? LIGHT_SILVER
+                      : LIGHT_GREEN
+                    : isFetching
+                    ? SUPER_LIGHT_SILVER
                     : ULTRA_LIGHT_GREEN,
-                  border: `1px solid ${LIGHT_GREEN}`,
+                  border: `1px solid ${
+                    isFetching ? LIGHT_SILVER : LIGHT_GREEN
+                  }`,
                   borderTopLeftRadius: '12px',
                   borderBottomLeftRadius: '12px',
                 }}
@@ -386,9 +394,15 @@ export default function TimeLogs({
                   cursor: !isFetching && !showDetails && 'pointer',
                   flex: 1,
                   backgroundColor: showDetails
-                    ? LIGHT_GREEN
+                    ? isFetching
+                      ? LIGHT_SILVER
+                      : LIGHT_GREEN
+                    : isFetching
+                    ? SUPER_LIGHT_SILVER
                     : ULTRA_LIGHT_GREEN,
-                  border: `1px solid ${LIGHT_GREEN}`,
+                  border: `1px solid ${
+                    isFetching ? LIGHT_SILVER : LIGHT_GREEN
+                  }`,
                   borderTopRightRadius: '12px',
                   borderBottomRightRadius: '12px',
                 }}
