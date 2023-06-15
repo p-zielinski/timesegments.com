@@ -356,7 +356,6 @@ export default function TimeLogs({
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                cursor: !isFetching && showDetails && 'pointer',
                 color: isFetching && IS_SAVING_HEX,
                 mb: 2,
               }}
@@ -364,10 +363,14 @@ export default function TimeLogs({
               <Box
                 sx={{
                   position: 'relative',
+                  cursor: !isFetching && showDetails && 'pointer',
                   flex: 1,
                   backgroundColor: !showDetails
                     ? LIGHT_GREEN
                     : ULTRA_LIGHT_GREEN,
+                  border: `1px solid ${LIGHT_GREEN}`,
+                  borderTopLeftRadius: '12px',
+                  borderBottomLeftRadius: '12px',
                 }}
                 onClick={() =>
                   !isFetching && showDetails && setShowDetails(false)
@@ -385,6 +388,9 @@ export default function TimeLogs({
                   backgroundColor: showDetails
                     ? LIGHT_GREEN
                     : ULTRA_LIGHT_GREEN,
+                  border: `1px solid ${LIGHT_GREEN}`,
+                  borderTopRightRadius: '12px',
+                  borderBottomRightRadius: '12px',
                 }}
                 onClick={() =>
                   !isFetching && !showDetails && setShowDetails(true)
