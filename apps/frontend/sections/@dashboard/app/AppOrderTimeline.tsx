@@ -112,7 +112,7 @@ function GroupedPeriod({ group, user }) {
               fontWeight: 400,
             }}
           >
-            {group.notFinishedPeriod && '*active*'}
+            {group.notFinishedPeriod && ' *active*'}
           </span>
         </Typography>
         <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
@@ -183,7 +183,7 @@ function DetailPeriod({ timeLogExtended, user }) {
               fontWeight: 400,
             }}
           >
-            {!timeLogExtended.ended && '*active*'}
+            {!timeLogExtended.ended && ' *active*'}
           </span>
         </Typography>
         <Box sx={{ display: 'flex', direction: 'column' }}>
