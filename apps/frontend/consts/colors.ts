@@ -6,6 +6,7 @@ export const LIGHT_RED = `rgb(254, 198, 198)`;
 export const ULTRA_LIGHT_RED = `rgb(255, 234, 234)`;
 export const RED = `rgb(255, 118, 118)`;
 
+export const ULTRA_LIGHT_BLUE = `rgb(229, 238, 255)`;
 export const LIGHT_BLUE = `rgb(198, 218, 254)`;
 export const BLUE = `rgb(118, 166, 255)`;
 export const ORANGE = `rgb(255, 159, 118)`;

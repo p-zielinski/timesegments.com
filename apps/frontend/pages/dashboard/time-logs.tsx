@@ -1,15 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import {
-  Box,
-  Button,
-  Container,
-  FormControlLabel,
-  Grid,
-  Switch,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Card, Container, Grid, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 // components
 // sections
@@ -31,6 +23,7 @@ import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject
 import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalseFromObject';
 import {
   GREEN,
+  IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   RED,
@@ -43,6 +36,8 @@ import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getCo
 import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import { findOrFetchTimeLogsWithinActiveDate } from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import AppOrderTimeline from '../../sections/@dashboard/app/AppOrderTimeline';
+import { getCurrentDate, getRelativeDate } from '../../utils/getCurrentDate';
+import { isMobile } from 'react-device-detect';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -91,6 +86,11 @@ export default function TimeLogs({
   timeLogsWithDatesISO,
   randomSliderHexColor,
 }: Props) {
+  const [disableHover, setDisableHover] = useState<boolean>(true);
+  useEffect(() => {
+    setDisableHover(isMobile);
+  }, [isMobile]);
+
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
     TimeLogsWithinDate[]
@@ -142,7 +142,7 @@ export default function TimeLogs({
     if (numberOfMonths > 0) {
       return setActiveDate(activeDate.plus({ months: numberOfMonths }));
     }
-    return setActiveDate(activeDate.minus({ months: numberOfMonths }));
+    return setActiveDate(activeDate.plus({ months: numberOfMonths }));
   };
 
   const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
@@ -221,10 +221,9 @@ export default function TimeLogs({
   const theme = useTheme();
 
   const previousDatesButtonSx = {
-    m: 1,
     borderColor: LIGHT_RED,
     color: RED,
-    '&:hover': {
+    '&:hover': !disableHover && {
       borderColor: RED,
       color: RED,
       background: ULTRA_LIGHT_RED,
@@ -232,14 +231,28 @@ export default function TimeLogs({
   };
 
   const futureDatesButtonSx = {
-    m: 1,
     borderColor: LIGHT_GREEN,
     color: GREEN,
-    '&:hover': {
+    '&:hover': !disableHover && {
       borderColor: GREEN,
       color: GREEN,
       background: ULTRA_LIGHT_GREEN,
     },
+  };
+
+  const canSelectFutureDate = () => {
+    const currentDate = getCurrentDate(Timezones[user.timezone]);
+    return currentDate.ts <= activeDate.ts;
+  };
+
+  const canSelect7DaysInTheFutureDate = () => {
+    const date7DaysAgo = getRelativeDate(Timezones[user.timezone], -7);
+    return date7DaysAgo.ts < activeDate.ts;
+  };
+
+  const canSelectAMonthInTheFutureDate = () => {
+    const dateAMonthAgo = getRelativeDate(Timezones[user.timezone], 0, -1);
+    return dateAMonthAgo.ts < activeDate.ts;
   };
 
   return (
@@ -254,109 +267,147 @@ export default function TimeLogs({
       </Helmet>
 
       <Container maxWidth="xl">
-        <Typography variant="h4" sx={{ mb: 2 }}>
-          {title}
-        </Typography>
-        <Box sx={{ mb: 2 }}>
-          <Button
-            variant="outlined"
-            sx={previousDatesButtonSx}
-            onClick={() => changeDay(-1)}
-          >
-            -1 day
-          </Button>
-          <Button
-            variant="outlined"
-            sx={previousDatesButtonSx}
-            onClick={() => changeDay(-7)}
-          >
-            -1 week
-          </Button>
-          <Button
-            variant="outlined"
-            sx={previousDatesButtonSx}
-            onClick={() => changeMonth(-1)}
-          >
-            -1 month
-          </Button>
-          <Button
-            variant="outlined"
-            sx={futureDatesButtonSx}
-            onClick={() => changeDay(1)}
-          >
-            +1 day
-          </Button>
-          <Button
-            variant="outlined"
-            sx={futureDatesButtonSx}
-            onClick={() => changeDay(7)}
-          >
-            +1 week
-          </Button>
-          <Button
-            variant="outlined"
-            sx={futureDatesButtonSx}
-            onClick={() => changeMonth(1)}
-          >
-            +1 month
-          </Button>
-        </Box>
-        <FormControlLabel
-          sx={{
-            m: 1,
-            mb: 2,
-            mt: -1,
-            color: '#c97a9a',
-          }}
-          control={
-            <Switch
-              checked={showDetails}
-              onChange={() => setShowDetails(!showDetails)}
-              inputProps={{ 'aria-label': 'controlled' }}
-              sx={{
-                '& .Mui-disabled': {
-                  color: '#e886a9',
-                },
-                '& .Mui-checked': {
-                  color: '#e886a9',
-                },
-                '& .Mui-checked + .MuiSwitch-track': {
-                  backgroundColor: '#e886a9',
-                },
-                '& .MuiSwitch-track': {
-                  color: '#e886a9',
-                  borderRadius: 22 / 2,
-                  '&:before, &:after': {
-                    color: '#e886a9',
-                    content: '""',
-                    position: 'absolute',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: 16,
-                    height: 16,
-                  },
-                  '&:before': {
-                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-                      theme.palette.getContrastText(theme.palette.primary.main)
-                    )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
-                    left: 12,
-                  },
-                  '&:after': {
-                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-                      theme.palette.getContrastText(theme.palette.primary.main)
-                    )}" d="M19,13H5V11H19V13Z" /></svg>')`,
-                    right: 12,
-                  },
-                },
-              }}
-            />
-          }
-          label="details"
-        />
-
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={6}>
+            <Typography
+              variant="h4"
+              align={'center'}
+              sx={{
+                mb: 1,
+                mt: -3,
+              }}
+            >
+              {title}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 1,
+                mt: 1,
+                mb: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: 1,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  sx={previousDatesButtonSx}
+                  onClick={() => changeDay(-1)}
+                  disabled={isFetching}
+                >
+                  -1 day
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={futureDatesButtonSx}
+                  onClick={() => changeDay(1)}
+                  disabled={isFetching || canSelectFutureDate()}
+                >
+                  +1 day
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  sx={previousDatesButtonSx}
+                  onClick={() => changeDay(-7)}
+                  disabled={isFetching}
+                >
+                  -1 week
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={futureDatesButtonSx}
+                  onClick={() => changeDay(7)}
+                  disabled={isFetching || canSelect7DaysInTheFutureDate()}
+                >
+                  +1 week
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  sx={previousDatesButtonSx}
+                  onClick={() => changeMonth(-1)}
+                  disabled={isFetching}
+                >
+                  -1 month
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={futureDatesButtonSx}
+                  onClick={() => changeMonth(1)}
+                  disabled={isFetching || canSelectAMonthInTheFutureDate()}
+                >
+                  +1 month
+                </Button>
+              </Box>
+            </Box>
+            <Card
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                color: isFetching && IS_SAVING_HEX,
+                mb: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: !isFetching && showDetails && 'pointer',
+                  flex: 1,
+                  backgroundColor: !showDetails
+                    ? LIGHT_GREEN
+                    : ULTRA_LIGHT_GREEN,
+                  border: `1px solid ${LIGHT_GREEN}`,
+                  borderTopLeftRadius: '12px',
+                  borderBottomLeftRadius: '12px',
+                }}
+                onClick={() =>
+                  !isFetching && showDetails && setShowDetails(false)
+                }
+              >
+                <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>
+                  Summary
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: !isFetching && !showDetails && 'pointer',
+                  flex: 1,
+                  backgroundColor: showDetails
+                    ? LIGHT_GREEN
+                    : ULTRA_LIGHT_GREEN,
+                  border: `1px solid ${LIGHT_GREEN}`,
+                  borderTopRightRadius: '12px',
+                  borderBottomRightRadius: '12px',
+                }}
+                onClick={() =>
+                  !isFetching && !showDetails && setShowDetails(true)
+                }
+              >
+                <Typography
+                  variant="subtitle2"
+                  noWrap
+                  sx={{ p: 1 }}
+                  align="right"
+                >
+                  Details
+                </Typography>
+              </Box>
+            </Card>
             <AppOrderTimeline
+              key={'timeLogs'}
               user={user}
               timeLogsWithinActiveDate={timeLogsWithinActiveDate}
               showDetails={showDetails}
