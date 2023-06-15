@@ -223,20 +223,20 @@ export default function TimeLogs({
   const previousDatesButtonSx = {
     borderColor: LIGHT_RED,
     color: RED,
-    '&:hover': !disableHover && {
-      borderColor: RED,
+    '&:hover': {
+      borderColor: disableHover ? LIGHT_RED : RED,
       color: RED,
-      background: ULTRA_LIGHT_RED,
+      background: !disableHover && ULTRA_LIGHT_RED,
     },
   };
 
   const futureDatesButtonSx = {
     borderColor: LIGHT_GREEN,
     color: GREEN,
-    '&:hover': !disableHover && {
-      borderColor: GREEN,
+    '&:hover': {
       color: GREEN,
-      background: ULTRA_LIGHT_GREEN,
+      borderColor: disableHover ? LIGHT_GREEN : GREEN,
+      background: !disableHover && ULTRA_LIGHT_GREEN,
     },
   };
 
