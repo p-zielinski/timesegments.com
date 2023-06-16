@@ -77,7 +77,8 @@
     "styled-components": "5.3.6",
     "tslib": "^2.3.0",
     "yup": "^0.32.11",
-    "yup-password": "^0.2.2"
+    "yup-password": "^0.2.2",
+    "zeptomail": "^3.0.4"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.14.5",
