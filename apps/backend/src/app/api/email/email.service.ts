@@ -5,6 +5,8 @@ import { EmailType } from '@test1/shared';
 import { PrismaService } from '../../prisma.service';
 import { nanoid } from 'nanoid';
 import { SendMailClient } from 'zeptomail';
+import { emailSpec } from './emailSpec';
+import { LoggerService } from '../../common/logger/loger.service';
 
 const sendMailURL = 'api.zeptomail.com/';
 const sendMailToken = '<SEND_MAIL_TOKEN>';
@@ -13,7 +15,8 @@ const sendMailToken = '<SEND_MAIL_TOKEN>';
 export class EmailService {
   constructor(
     private prisma: PrismaService,
-    private userService: UserService
+    private userService: UserService,
+    private loggerService: LoggerService
   ) {}
 
   public resendConfirmationEmail(user: User) {
@@ -24,13 +27,15 @@ export class EmailService {
     userId: string,
     emailType: EmailType
   ) {
-    const alreadySentEmail = (await this.findEmail(
-      userId,
-      emailType,
-      false
-    )) as Email;
-    if (alreadySentEmail) {
-      await this.removeEmailRecordInDatabase(alreadySentEmail.id);
+    if (emailSpec[emailType]?.unique) {
+      const alreadySentEmail = (await this.findEmail(
+        userId,
+        emailType,
+        false
+      )) as Email;
+      if (alreadySentEmail) {
+        await this.removeEmailRecordInDatabase(alreadySentEmail.id);
+      }
     }
     return await this.prisma.email.create({
       data: { userId, type: emailType, key: this.createKey() },
@@ -40,6 +45,7 @@ export class EmailService {
   private sendEmailFromDatabaseRecord(user: User, email: Email) {
     const { email: emailAddress } = user;
     const name = user.name || emailAddress;
+
     //findTamplateBasedOnEmailType
   }
 

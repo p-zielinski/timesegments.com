@@ -33,6 +33,7 @@ model Email {
   type              EmailType
   createdAt         DateTime              @default(now()) @db.Timestamptz(3)
   key               String?
+  status            EmailStatus           @default(CREATED)
 }
 
 model Token {
@@ -98,6 +99,12 @@ enum EmailType {
   EMAIL_CONTINUATION
   RESET_PASSWORD
   CHANGE_EMAIL_ADDRESS
+}
+
+enum EmailStatus {
+  CREATED
+  SENT
+  FAILED
 }
 
 enum CategoriesSortOption {
