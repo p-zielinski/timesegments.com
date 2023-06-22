@@ -1,6 +1,6 @@
 import { EmailType } from '@test1/shared';
 
-export const emailSpec = {
+export const emailsSpec = {
   [EmailType.EMAIL_CONTINUATION]: {
     unique: true,
     templateKey:

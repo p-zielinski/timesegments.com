@@ -17,10 +17,10 @@ export class EmailController {
   @Get('resend-confirmation-email')
   async resendConfirmationEmail(@UserDecorator() user: User) {
     const resendConfirmationEmailResult =
-      await this.emailService.resendConfirmationEmail(user);
+      await this.emailService.sentConfirmationEmail(user);
     if (!resendConfirmationEmailResult.success) {
       throw new BadRequestException({
-        error: 'We have sent you a confirmation email at ',
+        error: resendConfirmationEmailResult?.error || 'Unknown error',
       });
     }
     return { success: true };
