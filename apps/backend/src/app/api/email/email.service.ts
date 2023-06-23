@@ -53,11 +53,7 @@ export class EmailService {
 
   private async createEmailRecordInDatabase(user: User, emailType: EmailType) {
     if (emailsSpec[emailType]?.unique) {
-      const alreadySentEmail = (await this.findEmail(
-        user.id,
-        emailType,
-        false
-      )) as Email;
+      const alreadySentEmail = await this.findEmail(user.id, emailType);
       if (alreadySentEmail) {
         if (!this.canEmailBeSent(alreadySentEmail, user.timezone)) {
           const emailSentAt = DateTime.fromISO(alreadySentEmail.updatedAt, {
@@ -153,20 +149,11 @@ export class EmailService {
     return await this.prisma.email.delete({ where: { id } });
   }
 
-  private async findEmail(
-    userId: string,
-    emailType: EmailType,
-    findMany: boolean
-  ) {
+  private async findEmail(userId: string, emailType: EmailType) {
     const where = {
       userId,
       type: emailType,
     };
-    if (findMany) {
-      return await this.prisma.email.findMany({
-        where,
-      });
-    }
     return await this.prisma.email.findFirst({
       where,
     });
