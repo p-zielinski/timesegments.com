@@ -6,4 +6,5 @@ export const ValidationSchema = Joi.object({
   MAX_NUMBER_OF_CATEGORIES_PER_USER: Joi.number().min(30).max(100).default(30),
   MAX_NUMBER_OF_NOTES_PER_CATEGORY: Joi.number().min(5).max(20).default(5),
   FRONTEND_URL: Joi.string().required(),
+  SEND_MAIL_TOKEN: Joi.string().required(),
 });

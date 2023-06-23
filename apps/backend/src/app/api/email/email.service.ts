@@ -10,9 +10,6 @@ import { LoggerService } from '../../common/logger/loger.service';
 import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
 
-const sendMailURL = 'api.zeptomail.com/';
-const sendMailToken = '<SEND_MAIL_TOKEN>';
-
 @Injectable()
 export class EmailService {
   constructor(
@@ -35,18 +32,18 @@ export class EmailService {
     const result = await this.sendEmailFromDatabaseRecord(user, emailDbRecord);
     this.updateStatusOfEmailRecordInDatabase(
       emailDbRecord.id,
-      result ? EmailStatus.SENT : EmailStatus.FAILED
+      result.success ? EmailStatus.SENT : EmailStatus.FAILED
     );
     return result;
   }
 
   private canEmailBeSent(email, userTimezone) {
-    if (email.status !== EmailStatus.SENT) {
+    if (!email || email.status !== EmailStatus.SENT) {
       return true;
     }
-    const emailCreatedAt = DateTime.fromISO(email.updatedAt, {
-      zone: Timezones[userTimezone],
-    });
+    const emailCreatedAt = DateTime.fromJSDate(email.updatedAt).setZone(
+      Timezones[userTimezone]
+    );
     const now = DateTime.now().setZone(Timezones[userTimezone]);
     return now.ts - emailCreatedAt.ts >= 1000 * 60 * 60;
   }
@@ -55,9 +52,9 @@ export class EmailService {
     const alreadySentEmail = await this.findEmail(user.id, emailType);
     const canEmailBeSent = this.canEmailBeSent(alreadySentEmail, user.timezone);
     if (!canEmailBeSent) {
-      const emailSentAt = DateTime.fromISO(alreadySentEmail.updatedAt, {
-        zone: Timezones[user.timezone],
-      });
+      const emailSentAt = DateTime.fromJSDate(
+        alreadySentEmail.updatedAt
+      ).setZone(Timezones[user.timezone]);
       return {
         success: false,
         error: `Email was already sent ${emailSentAt.toLocaleString({
@@ -116,11 +113,11 @@ export class EmailService {
     data: any
   ) {
     const client = new SendMailClient({
-      url: sendMailURL,
-      token: sendMailToken,
+      url: 'api.zeptomail.com/',
+      token: this.configService.get<string>('SEND_MAIL_TOKEN'),
     });
     try {
-      const response = await client.sendMail({
+      const response = await client.sendMailWithTemplate({
         template_key: templateKey,
         bounce_address: 'bounce@mail.timesegs.com',
         from: {
@@ -140,7 +137,10 @@ export class EmailService {
       return { success: true };
     } catch (error) {
       this.loggerService.error(error);
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: error?.message ?? typeof error === 'string' ?? 'Unknown error',
+      };
     }
   }
 
