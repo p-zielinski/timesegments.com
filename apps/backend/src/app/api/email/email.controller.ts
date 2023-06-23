@@ -9,11 +9,11 @@ import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { EmailService } from './email.service';
 
-@UseGuards(JwtAuthGuard)
 @Controller('email')
 export class EmailController {
   constructor(private emailService: EmailService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('resend-confirmation-email')
   async resendConfirmationEmail(@UserDecorator() user: User) {
     const resendConfirmationEmailResult =
@@ -25,4 +25,8 @@ export class EmailController {
     }
     return { success: true };
   }
+
+  //todo add recaptcha guard
+  @Post('validate-email')
+  async validateEmail();
 }

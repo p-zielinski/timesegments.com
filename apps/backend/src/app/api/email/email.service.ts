@@ -98,7 +98,7 @@ export class EmailService {
       '/email',
       this.configService.get<string>('FRONTEND_URL')
     );
-    url.searchParams.set('userId', user.id);
+    url.searchParams.set('emailId', email.id);
     url.searchParams.set('type', email.type);
     url.searchParams.set('key', email.key);
     return await this.sendMailViaZeptoMail(templateKey, user.email, {
@@ -112,6 +112,7 @@ export class EmailService {
     emailAddress: string,
     data: any
   ) {
+    return { success: true };
     const client = new SendMailClient({
       url: 'api.zeptomail.com/',
       token: this.configService.get<string>('SEND_MAIL_TOKEN'),
@@ -128,10 +129,11 @@ export class EmailService {
           {
             email_address: {
               address: emailAddress,
-              ...data,
+              name: data.name || emailAddress,
             },
           },
         ],
+        merge_info: { ...data },
       });
       this.loggerService.debug(response);
       return { success: true };
@@ -159,6 +161,6 @@ export class EmailService {
   }
 
   private createKey() {
-    return nanoid(50);
+    return nanoid(Math.floor(Math.random() * 11) + 50);
   }
 }
