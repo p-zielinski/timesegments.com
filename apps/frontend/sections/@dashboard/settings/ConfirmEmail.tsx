@@ -62,23 +62,25 @@ export default function ConfirmEmail({
   };
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
+  const [error, setError] = useState<string>();
+
   const resendConfirmationEmail = async () => {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'email/resend-confirmation-email',
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.OK) {
+    if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
     }
     if (response.error) {
-      setError(response.error);
+      setError(
+        typeof response.error === 'string' ? response.error : 'Unknown error'
+      );
     }
     setIsSaving(false);
     return;
   };
-
-  const [error, setError] = useState<string>();
 
   return (
     <Card>

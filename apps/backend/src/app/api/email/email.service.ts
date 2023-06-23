@@ -19,7 +19,51 @@ export class EmailService {
     private loggerService: LoggerService
   ) {}
 
+  public async confirmEmail(emailId, type, key) {
+    const validationResult = await this.validateEmail(emailId, type, key);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Provided parameters did not pass validation',
+      };
+    }
+    const { email } = validationResult;
+    await this.userService.updateUser(email.user.id, { emailConfirmed: true });
+    await this.removeEmailRecordInDatabase(email.id);
+    return { success: true };
+  }
+
+  public async validateEmail(emailId, type, key) {
+    const email = await this.prisma.email.findFirst({
+      where: { id: emailId },
+      include: {
+        user: true,
+      },
+    });
+    if (!email) {
+      return { success: false };
+    }
+    if (type !== email.type || (email.key && !key) || key !== email.key) {
+      return { success: false };
+    }
+    const { validFor } = emailsSpec[type];
+    const emailSentAt = DateTime.fromJSDate(email.updatedAt).setZone(
+      Timezones[email.user.timezone]
+    );
+    const now = DateTime.now().setZone(Timezones[email.user.timezone]);
+    if (now.ts - emailSentAt.ts > validFor) {
+      return { success: false, error: 'Email has expired' };
+    }
+    return { success: true, email };
+  }
+
   public async sentConfirmationEmail(user: User) {
+    if (user.emailConfirmed) {
+      return {
+        success: false,
+        error: 'Your email was already confirmed',
+      };
+    }
     const createEmailRecordInDatabaseResult =
       await this.createEmailRecordInDatabase(
         user,
@@ -41,11 +85,11 @@ export class EmailService {
     if (!email || email.status !== EmailStatus.SENT) {
       return true;
     }
-    const emailCreatedAt = DateTime.fromJSDate(email.updatedAt).setZone(
+    const emailSentAt = DateTime.fromJSDate(email.updatedAt).setZone(
       Timezones[userTimezone]
     );
     const now = DateTime.now().setZone(Timezones[userTimezone]);
-    return now.ts - emailCreatedAt.ts >= 1000 * 60 * 60;
+    return now.ts - emailSentAt.ts >= 1000 * 60 * 60;
   }
 
   private async createEmailRecordInDatabase(user: User, emailType: EmailType) {
@@ -63,7 +107,7 @@ export class EmailService {
           day: '2-digit',
           hour: '2-digit',
           minute: '2-digit',
-        })}`,
+        })}, please check spam folder.`,
       };
     }
     if (emailsSpec[emailType]?.unique && alreadySentEmail) {
@@ -100,7 +144,9 @@ export class EmailService {
     );
     url.searchParams.set('emailId', email.id);
     url.searchParams.set('type', email.type);
-    url.searchParams.set('key', email.key);
+    if (email.key) {
+      url.searchParams.set('key', email.key);
+    }
     return await this.sendMailViaZeptoMail(templateKey, user.email, {
       url,
       name,
@@ -112,7 +158,6 @@ export class EmailService {
     emailAddress: string,
     data: any
   ) {
-    return { success: true };
     const client = new SendMailClient({
       url: 'api.zeptomail.com/',
       token: this.configService.get<string>('SEND_MAIL_TOKEN'),

@@ -2,7 +2,7 @@ import {Helmet} from 'react-helmet-async'; // @mui
 import {Box, Container, Grid, Typography} from '@mui/material'; // components
 import DashboardLayout from '../../layouts/dashboard';
 import React, {useEffect, useState} from 'react';
-import {Token, User} from '@prisma/client';
+import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
@@ -55,8 +55,6 @@ export default function Index({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [controlValue, setControlValue] = useState(user?.controlValue);
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
-  const [userTokens, setUserTokens] = useState<Token[]>([]);
-  const [userTokensFetched, setUserTokensFetched] = useState(false);
 
   const fetchMe = async () => {
     setIsSaving(true);
@@ -145,7 +143,7 @@ export default function Index({
             SettingOption.CONFIRM_EMAIL
           ):
             icon = 'ph:warning-fill';
-            successText = 'Action successfully executed';
+            successText = 'Email was sent!';
             subtitle = user.email;
             iconColor = 'rgb(191,64,64)';
             color = { rgb: { r: 191, g: 64, b: 64, a: 1 }, hex: '#bf4040' };

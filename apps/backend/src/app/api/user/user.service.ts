@@ -346,10 +346,14 @@ export class UserService {
     };
   }
 
-  private async updateControlValue(userId: string, controlValue: string) {
-    await this.prisma.user.update({
+  public async updateUser(userId: string, data: Prisma.UserUpdateInput) {
+    return await this.prisma.user.update({
       where: { id: userId },
-      data: { controlValue },
+      data,
     });
+  }
+
+  private async updateControlValue(userId: string, controlValue: string) {
+    await this.updateUser(userId, { controlValue });
   }
 }
