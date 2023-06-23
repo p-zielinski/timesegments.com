@@ -1,7 +1,7 @@
 import {
   BadRequestException,
   Controller,
-  Get,
+  Post,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
@@ -14,7 +14,7 @@ import { EmailService } from './email.service';
 export class EmailController {
   constructor(private emailService: EmailService) {}
 
-  @Get('resend-confirmation-email')
+  @Post('resend-confirmation-email')
   async resendConfirmationEmail(@UserDecorator() user: User) {
     const resendConfirmationEmailResult =
       await this.emailService.sentConfirmationEmail(user);

@@ -1,24 +1,32 @@
-import {Box, Card, Stack, TextField, Typography} from '@mui/material';
-import {GREEN, IS_SAVING_HEX, LIGHT_GREEN, LIGHT_RED, RED, SUPER_LIGHT_SILVER, ULTRA_LIGHT_RED,} from '../../../consts/colors';
+import { Box, Card, Stack, TextField, Typography } from '@mui/material';
+import {
+  GREEN,
+  IS_SAVING_HEX,
+  LIGHT_GREEN,
+  LIGHT_RED,
+  RED,
+  SUPER_LIGHT_SILVER,
+  ULTRA_LIGHT_RED,
+} from '../../../consts/colors';
 import Iconify from '../../../components/iconify';
-import React, {useState} from 'react';
-import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
-import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
-import {styled} from '@mui/material/styles';
-import {handleFetch} from '../../../utils/fetchingData/handleFetch';
-import {StatusCodes} from 'http-status-codes';
+import React, { useState } from 'react';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
+import { styled } from '@mui/material/styles';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function ConfirmEmail({
-                                       user,
-                                       disableHover,
-                                       isSaving,
-                                       setIsSaving,
-                                       setOpenedSettingOption,
-                                       currentSettingOption,
-                                       setCompleted,
-                                     }) {
-  const {color} = currentSettingOption;
+  user,
+  disableHover,
+  isSaving,
+  setIsSaving,
+  setOpenedSettingOption,
+  currentSettingOption,
+  setCompleted,
+}) {
+  const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
     darkHexColor = getHexFromRGBObject(
@@ -58,9 +66,8 @@ export default function ConfirmEmail({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'email/resend-confirmation-email',
-      method: 'GET',
+      method: 'POST',
     });
-    console.log(response);
     if (response.statusCode === StatusCodes.OK) {
       setCompleted(true);
     }
@@ -98,7 +105,7 @@ export default function ConfirmEmail({
                 flexDirection: 'row',
               }}
             >
-              <Box sx={{ml: 1}}>
+              <Box sx={{ ml: 1 }}>
                 <Iconify
                   icon={'ph:warning-fill'}
                   width={40}
@@ -111,7 +118,7 @@ export default function ConfirmEmail({
                   }}
                 />
               </Box>
-              <Box sx={{p: 1}}>
+              <Box sx={{ p: 1 }}>
                 <Stack>
                   <Typography variant="subtitle2" noWrap>
                     Error: {error}
@@ -140,7 +147,7 @@ export default function ConfirmEmail({
                 },
             }}
             onClick={() => {
-              !isSaving && resendConfirmationEmail(user.email.toLowerCase());
+              !isSaving && resendConfirmationEmail();
             }}
           >
             <Box

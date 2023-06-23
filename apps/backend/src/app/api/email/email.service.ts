@@ -5,7 +5,7 @@ import { EmailStatus, EmailType, Timezones } from '@test1/shared';
 import { PrismaService } from '../../prisma.service';
 import { nanoid } from 'nanoid';
 import { SendMailClient } from 'zeptomail';
-import { emailsSpec } from './emailsSpec';
+import { emailsSpec } from './utils/emailsSpec';
 import { LoggerService } from '../../common/logger/loger.service';
 import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
@@ -52,29 +52,25 @@ export class EmailService {
   }
 
   private async createEmailRecordInDatabase(user: User, emailType: EmailType) {
-    if (emailsSpec[emailType]?.unique) {
-      const alreadySentEmail = await this.findEmail(user.id, emailType);
-      if (alreadySentEmail) {
-        if (!this.canEmailBeSent(alreadySentEmail, user.timezone)) {
-          const emailSentAt = DateTime.fromISO(alreadySentEmail.updatedAt, {
-            zone: Timezones[user.timezone],
-          });
-          const formatOptions = {
-            weekday: 'short',
-            month: 'short',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-          };
-          return {
-            success: false,
-            error: `Email was already sent ${emailSentAt.toLocaleString(
-              formatOptions
-            )}`,
-          };
-        }
-        await this.removeEmailRecordInDatabase(alreadySentEmail.id);
-      }
+    const alreadySentEmail = await this.findEmail(user.id, emailType);
+    const canEmailBeSent = this.canEmailBeSent(alreadySentEmail, user.timezone);
+    if (!canEmailBeSent) {
+      const emailSentAt = DateTime.fromISO(alreadySentEmail.updatedAt, {
+        zone: Timezones[user.timezone],
+      });
+      return {
+        success: false,
+        error: `Email was already sent ${emailSentAt.toLocaleString({
+          weekday: 'short',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}`,
+      };
+    }
+    if (emailsSpec[emailType]?.unique && alreadySentEmail) {
+      await this.removeEmailRecordInDatabase(alreadySentEmail.id);
     }
     return {
       success: true,
@@ -108,10 +104,13 @@ export class EmailService {
     url.searchParams.set('userId', user.id);
     url.searchParams.set('type', email.type);
     url.searchParams.set('key', email.key);
-    return await this.sendEmail(templateKey, user.email, { url, name });
+    return await this.sendMailViaZeptoMail(templateKey, user.email, {
+      url,
+      name,
+    });
   }
 
-  private async sendEmail(
+  private async sendMailViaZeptoMail(
     templateKey: string,
     emailAddress: string,
     data: any
