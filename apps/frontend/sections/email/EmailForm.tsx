@@ -1,22 +1,66 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 // @mui
-import {Box, Button, IconButton, InputAdornment, Link, Stack, Typography,} from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Stack,
+  Typography,
+} from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
-import {Formik} from 'formik';
+import { Formik } from 'formik';
 // components
 import Iconify from '../../components/iconify';
-import {useRouter} from 'next/router';
-import {EmailType, EmailWithUser} from '@test1/shared';
-import {InputText} from '../../components/form/Text';
-import {SelectWithSearch} from '../../components/form/SelectWithSearch';
-import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSelect';
-import {GREEN, RED} from '../../consts/colors';
+import { useRouter } from 'next/router';
+import { EmailType, EmailWithUser } from '@test1/shared';
+import { InputText } from '../../components/form/Text';
+import { GREEN, LIGHT_GREEN, LIGHT_RED, RED } from '../../consts/colors';
+import * as yup from 'yup';
+import YupPassword from 'yup-password';
+import { equalTo } from '../../utils/yupCustomMethods';
+import emailRegexp from '../../regex/email';
+
+YupPassword(yup); // extend yup
+yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
+  equalTo(ref, msg, 'new password')
+);
 // ----------------------------------------------------------------------
 
 export default function EmailForm({ email }: { email: EmailWithUser }) {
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showNewPasswordCheck, setShowNewPasswordCheck] = useState(false);
+
+  if (showConfirmation) {
+    let confirmationText = 'Success!';
+    switch (email.type) {
+      case EmailType.EMAIL_CONTINUATION:
+        confirmationText = 'Success, your email has been confirmed!';
+        break;
+      case EmailType.RESET_PASSWORD:
+        confirmationText = 'Success, your password has been changed!';
+        break;
+      case EmailType.CHANGE_EMAIL_ADDRESS:
+        confirmationText = 'Success, your email has been changed!';
+        break;
+    }
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Typography variant="body2">{confirmationText}</Typography>
+        <LoadingButton
+          fullWidth
+          size="large"
+          variant="contained"
+          onClick={() => router.push('/')}
+        >
+          Go Home
+        </LoadingButton>
+      </Box>
+    );
+  }
 
   switch (email.type) {
     case EmailType.EMAIL_CONTINUATION:
@@ -29,7 +73,14 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
             fullWidth
             size="large"
             variant="contained"
-            sx={{ background: GREEN, '&:hover': GREEN }}
+            sx={{
+              background: GREEN,
+              boxShadow: 'none',
+              '&:hover': {
+                background: GREEN,
+                boxShadow: `0px 3px 1px -2px ${LIGHT_GREEN}, 0px 2px 2px 0px ${LIGHT_GREEN}, 0px 1px 5px 0px ${LIGHT_GREEN}`,
+              },
+            }}
             onClick={() => router.push('/')}
           >
             YES
@@ -38,13 +89,192 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
             fullWidth
             size="large"
             variant="contained"
-            sx={{ background: RED, '&:hover': { background: RED } }}
+            sx={{
+              background: RED,
+              boxShadow: 'none',
+              '&:hover': {
+                background: RED,
+                boxShadow: `0px 3px 1px -2px ${LIGHT_RED}, 0px 2px 2px 0px ${LIGHT_RED}, 0px 1px 5px 0px ${LIGHT_RED}`,
+              },
+            }}
             onClick={() => router.push('/')}
           >
             NO
           </Button>
         </Box>
       );
+    case EmailType.RESET_PASSWORD: {
+      const validationSchema = yup.object().shape({
+        newPassword: yup
+          .string()
+          .password()
+          .minLowercase(1)
+          .minUppercase(1)
+          .minNumbers(1)
+          .minSymbols(1)
+          .min(5)
+          .required()
+          .notOneOf(
+            [yup.ref('currentPassword')],
+            'New password cannot be the same as the current one'
+          )
+          .label('New password'),
+        newPasswordCheck: yup
+          .string()
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment @ts-ignore - We added this method
+          // @ts-ignore - We added this method
+          .equalTo(yup.ref('newPassword'))
+          .label('New password check'),
+      });
+
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2">
+            Looks like you want to change your password?
+          </Typography>
+          <Formik
+            initialValues={{ newPassword: '', newPasswordCheck: '' }}
+            validationSchema={validationSchema}
+            onSubmit={() => undefined}
+          >
+            {({ handleSubmit, values }) => {
+              const isFormValid = validationSchema.isValidSync(values);
+
+              return (
+                <>
+                  <Stack spacing={1}>
+                    <InputText
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => {
+                              setShowNewPassword(!showNewPassword);
+                            }}
+                            edge="end"
+                          >
+                            <Iconify
+                              icon={
+                                showNewPassword
+                                  ? ('eva:eye-fill' as any)
+                                  : ('eva:eye-off-fill' as any)
+                              }
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      type={showNewPassword ? 'text' : 'password'}
+                      name="newPassword"
+                      label="New password"
+                    />
+
+                    <InputText
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => {
+                              setShowNewPasswordCheck(!showNewPasswordCheck);
+                            }}
+                            edge="end"
+                          >
+                            <Iconify
+                              icon={
+                                showNewPasswordCheck
+                                  ? ('eva:eye-fill' as any)
+                                  : ('eva:eye-off-fill' as any)
+                              }
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                      type={showNewPasswordCheck ? 'text' : 'password'}
+                      name={'newPasswordCheck'}
+                      label={`New password check`}
+                    />
+                  </Stack>
+
+                  <LoadingButton
+                    disabled={!isFormValid}
+                    fullWidth
+                    size="large"
+                    type="submit"
+                    variant="contained"
+                    onClick={() => handleSubmit()}
+                  >
+                    Change email
+                  </LoadingButton>
+                </>
+              );
+            }}
+          </Formik>
+        </Box>
+      );
+    }
+
+    case EmailType.CHANGE_EMAIL_ADDRESS: {
+      const validationSchema = yup.object().shape({
+        newEmail: yup
+          .string()
+          .matches(emailRegexp, 'Please enter a valid email')
+          .required()
+          .notOneOf(
+            [yup.ref('userEmail')],
+            'New email cannot be the same as the current one'
+          )
+          .label('New email'),
+        newEmailCheck: yup
+          .string()
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment @ts-ignore - We added this method
+          // @ts-ignore - We added this method
+          .equalTo(yup.ref('newEmail'))
+          .label('New email check'),
+      });
+
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2">
+            Looks like you want to change your email?
+          </Typography>
+          <Formik
+            initialValues={{
+              userEmail: email.user.email,
+              newEmail: '',
+              newEmailCheck: '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={() => undefined}
+          >
+            {({ handleSubmit, values }) => {
+              const isFormValid = validationSchema.isValidSync(values);
+
+              return (
+                <>
+                  <Stack spacing={1}>
+                    <InputText type="text" name="newEmail" label="New email" />
+
+                    <InputText
+                      type="text"
+                      name={'newEmailCheck'}
+                      label={`New email check`}
+                    />
+                  </Stack>
+
+                  <LoadingButton
+                    disabled={!isFormValid}
+                    fullWidth
+                    size="large"
+                    type="submit"
+                    variant="contained"
+                    onClick={() => handleSubmit()}
+                  >
+                    Change password
+                  </LoadingButton>
+                </>
+              );
+            }}
+          </Formik>
+        </Box>
+      );
+    }
   }
 
   // const onLoginOrRegister = async (
@@ -87,116 +317,5 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
   //   setError(new Error(response.error));
   //   return;
   // };
-
-  return (
-    <Formik
-      initialValues={{ email: '', password: '', timezone: '' }}
-      // onSubmit={async (values, { setSubmitting, setFieldError }) => {
-      //   setError(undefined);
-      //   const valuesAndEmailToLowerCase = {
-      //     ...values,
-      //     email: values.email?.toLowerCase() || '',
-      //   };
-      //   if (authPageState === AuthPageState.LOGIN) {
-      //     await onLoginOrRegister(
-      //       valuesAndEmailToLowerCase,
-      //       'login',
-      //       setFieldError
-      //     );
-      //   }
-      //   if (authPageState === AuthPageState.REGISTER) {
-      //     await onLoginOrRegister(
-      //       valuesAndEmailToLowerCase,
-      //       'register',
-      //       setFieldError
-      //     );
-      //   }
-      //   setSubmitting(false);
-      // }}
-      // validationSchema={
-      //   AuthPageState.LOGIN === authPageState
-      //     ? loginSchema
-      //     : AuthPageState.RECOVER_ACCOUNT === authPageState
-      //     ? recoverSchema
-      //     : registerSchema
-      // }
-      onSubmit={() => undefined}
-    >
-      {({
-        handleSubmit,
-        isSubmitting,
-        values,
-        errors,
-        isValid,
-        setFieldValue,
-        touched,
-        setErrors,
-      }) => {
-        return (
-          <>
-            <Stack spacing={1}>
-              <InputText type="text" name="email" label="Email address" />
-
-              <InputText
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => {
-                        setShowPassword(!showPassword);
-                      }}
-                      edge="end"
-                    >
-                      <Iconify
-                        icon={
-                          showPassword
-                            ? ('eva:eye-fill' as any)
-                            : ('eva:eye-off-fill' as any)
-                        }
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                }
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                label="Password"
-              />
-
-              <SelectWithSearch
-                name="timezone"
-                groupBy={(option) => option.groupBy}
-                label="Timezone"
-                options={timezoneOptionsForSelect}
-              />
-            </Stack>
-
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="end"
-              sx={{ my: 2, mt: 1 }}
-            >
-              <Link
-                variant="subtitle2"
-                underline="hover"
-                sx={{ cursor: 'pointer' }}
-                onClick={() => undefined}
-              >
-                Forgot password?
-              </Link>
-            </Stack>
-
-            <LoadingButton
-              fullWidth
-              size="large"
-              type="submit"
-              variant="contained"
-              onClick={() => handleSubmit()}
-            >
-              aa
-            </LoadingButton>
-          </>
-        );
-      }}
-    </Formik>
-  );
+  return undefined;
 }

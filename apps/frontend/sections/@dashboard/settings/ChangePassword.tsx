@@ -136,7 +136,7 @@ export default function ChangePassword({
         initialValues={{
           currentPassword: '',
           newPassword: '',
-          newPassword2: '',
+          newPasswordCheck: '',
         }}
         onSubmit={async (values, { setSubmitting, setFieldError }) => {
           await changePassword(

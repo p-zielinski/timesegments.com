@@ -17,6 +17,3 @@ export const LIGHT_SILVER = `rgb(232, 232, 232)`;
 export const SUPER_LIGHT_SILVER = `rgb(242, 242, 242)`;
 
 export const IS_SAVING_HEX = `#B9B9B9FF`;
-
-//export const LIGHT_RED = `rgb(254, 198, 198)`;
-// export const RED = `rgb(255, 118, 118)`;
