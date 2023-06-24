@@ -2,7 +2,7 @@ import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
 import {CircularProgress, Container, Typography} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {AuthPageState} from '@test1/shared';
+import {AuthPageState, EmailWithUser} from '@test1/shared';
 import {isMobile} from 'react-device-detect';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
 import {useRouter} from 'next/router';
@@ -12,6 +12,7 @@ import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObj
 import {StatusCodes} from 'http-status-codes';
 import {handleFetch} from '../utils/fetchingData/handleFetch';
 import LoadingButton from '@mui/lab/LoadingButton';
+import EmailForm from '../sections/email/EmailForm';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -27,6 +28,7 @@ type Props = {
 export default function Email({ randomSliderColor }: Props) {
   const router = useRouter();
   const { query } = router;
+  const [email, setEmail] = useState<EmailWithUser>(undefined);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isValidating, setIsValidating] = useState<boolean>(true);
   const [error, setError] = useState<string>(undefined);
@@ -38,6 +40,9 @@ export default function Email({ randomSliderColor }: Props) {
       body: query,
       method: 'POST',
     });
+    if (response.email) {
+      setEmail(response.email);
+    }
     if (response.statusCode === StatusCodes.BAD_REQUEST) {
       setError(response.error);
     }
@@ -119,7 +124,7 @@ export default function Email({ randomSliderColor }: Props) {
                 </LoadingButton>
               </>
             ) : (
-              <>{}</>
+              <EmailForm email={email} />
             )}
           </StyledContent>
         </Container>
