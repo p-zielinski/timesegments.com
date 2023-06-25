@@ -1,7 +1,7 @@
 import { EmailType } from '@test1/shared';
 
 export const emailsSpec = {
-  [EmailType.EMAIL_CONTINUATION]: {
+  [EmailType.EMAIL_CONFIRMATION]: {
     unique: true,
     templateKey:
       '2d6f.6d40a782e57efe06.k1.089d5a40-0b60-11ee-b4c9-525400103106.188be6965e4',

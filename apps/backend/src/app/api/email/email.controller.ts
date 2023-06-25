@@ -32,10 +32,9 @@ export class EmailController {
   //todo add recaptcha guard
   @Post('validate-email')
   async validateEmail(@Body() validateEmailDto: ValidateEmailDto) {
-    const { emailId, type, key } = validateEmailDto;
+    const { emailId, key } = validateEmailDto;
     const validateEmailResult = await this.emailService.validateEmail(
       emailId,
-      type,
       key
     );
     if (!validateEmailResult.success) {
@@ -49,10 +48,9 @@ export class EmailController {
   //todo add recaptcha guard
   @Post('confirm-email')
   async confirmEmail(@Body() confirmEmailDto: ConfirmEmailDto) {
-    const { emailId, type, key } = confirmEmailDto;
+    const { emailId, key } = confirmEmailDto;
     const confirmEmailResult = await this.emailService.confirmEmail(
       emailId,
-      type,
       key
     );
     if (!confirmEmailResult.success) {

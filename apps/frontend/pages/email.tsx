@@ -2,7 +2,7 @@ import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
 import {CircularProgress, Container, Typography} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {AuthPageState, EmailWithUser} from '@test1/shared';
+import {EmailWithUser} from '@test1/shared';
 import {isMobile} from 'react-device-detect';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
 import {useRouter} from 'next/router';
@@ -64,8 +64,6 @@ export default function Email({ randomSliderColor }: Props) {
     padding: theme.spacing(isMobile ? 6 : 12, 0),
   }));
 
-  const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
-
   return (
     <>
       <Helmet>
@@ -76,30 +74,26 @@ export default function Email({ randomSliderColor }: Props) {
         <Container maxWidth="sm">
           <StyledContent>
             <Typography variant="h4" gutterBottom>
-              {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
-                currentPageState
-              ) && (
+              <span
+                style={{
+                  color: getHexFromRGBAObject({
+                    r: 0,
+                    g: 0,
+                    b: 0,
+                    a: 0.7,
+                  }),
+                }}
+              >
+                TimeSeg
                 <span
                   style={{
-                    color: getHexFromRGBAObject({
-                      r: 0,
-                      g: 0,
-                      b: 0,
-                      a: 0.7,
-                    }),
+                    color: randomSliderColor,
                   }}
                 >
-                  TimeSeg
-                  <span
-                    style={{
-                      color: randomSliderColor,
-                    }}
-                  >
-                    ment
-                  </span>
-                  s.com
+                  ment
                 </span>
-              )}
+                s.com
+              </span>
             </Typography>
             {isValidating ? (
               <Typography variant="body2" sx={{ mb: 3 }}>
@@ -135,7 +129,7 @@ export default function Email({ randomSliderColor }: Props) {
 
 export const getServerSideProps = async ({ req }) => {
   const { query } = req;
-  if (!query.emailId || !query.type) {
+  if (!query.emailId) {
     return {
       redirect: {
         permanent: false,

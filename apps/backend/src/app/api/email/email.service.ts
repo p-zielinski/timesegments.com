@@ -19,8 +19,8 @@ export class EmailService {
     private loggerService: LoggerService
   ) {}
 
-  public async confirmEmail(emailId, type, key) {
-    const validationResult = await this.validateEmail(emailId, type, key);
+  public async confirmEmail(emailId, key) {
+    const validationResult = await this.validateEmail(emailId, key);
     if (!validationResult.success) {
       return {
         success: false,
@@ -33,7 +33,7 @@ export class EmailService {
     return { success: true };
   }
 
-  public async validateEmail(emailId, type, key) {
+  public async validateEmail(emailId, key) {
     const email = await this.prisma.email.findFirst({
       where: { id: emailId },
       include: {
@@ -43,10 +43,10 @@ export class EmailService {
     if (!email) {
       return { success: false };
     }
-    if (type !== email.type || (email.key && !key) || key !== email.key) {
+    if ((email.key && !key) || key !== email.key) {
       return { success: false };
     }
-    const { validFor } = emailsSpec[type];
+    const { validFor } = emailsSpec[email.type];
     const emailSentAt = DateTime.fromJSDate(email.updatedAt).setZone(
       Timezones[email.user.timezone]
     );
@@ -67,7 +67,7 @@ export class EmailService {
     const createEmailRecordInDatabaseResult =
       await this.createEmailRecordInDatabase(
         user,
-        EmailType.EMAIL_CONTINUATION
+        EmailType.EMAIL_CONFIRMATION
       );
     if (!createEmailRecordInDatabaseResult.success) {
       return createEmailRecordInDatabaseResult;

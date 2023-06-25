@@ -32,7 +32,7 @@ model Email {
   userId            String
   type              EmailType
   status            EmailStatus           @default(CREATED)
-  key               String?
+  secretKey         String
   createdAt         DateTime              @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
 }
@@ -97,7 +97,7 @@ model Comment {
 }
 
 enum EmailType {
-  EMAIL_CONTINUATION
+  EMAIL_CONFIRMATION
   RESET_PASSWORD
   CHANGE_EMAIL_ADDRESS
 }

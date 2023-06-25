@@ -37,7 +37,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
   if (showConfirmation) {
     let confirmationText = 'Success!';
     switch (email.type) {
-      case EmailType.EMAIL_CONTINUATION:
+      case EmailType.EMAIL_CONFIRMATION:
         confirmationText = 'Success, your email has been confirmed!';
         break;
       case EmailType.RESET_PASSWORD:
@@ -63,7 +63,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
   }
 
   switch (email.type) {
-    case EmailType.EMAIL_CONTINUATION:
+    case EmailType.EMAIL_CONFIRMATION:
       return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Typography variant="body2">
@@ -119,10 +119,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
             'New password cannot be the same as the current one'
           )
           .label('New password'),
-        newPasswordCheck: yup
-          .string()
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment @ts-ignore - We added this method
-          // @ts-ignore - We added this method
+        newPasswordCheck: (yup as any)
           .equalTo(yup.ref('newPassword'))
           .label('New password check'),
       });
@@ -217,14 +214,12 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
           .matches(emailRegexp, 'Please enter a valid email')
           .required()
           .notOneOf(
-            [yup.ref('userEmail')],
+            [yup.ref('currentEmail')],
             'New email cannot be the same as the current one'
           )
           .label('New email'),
-        newEmailCheck: yup
+        newEmailCheck: (yup as any)
           .string()
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment @ts-ignore - We added this method
-          // @ts-ignore - We added this method
           .equalTo(yup.ref('newEmail'))
           .label('New email check'),
       });
@@ -236,7 +231,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
           </Typography>
           <Formik
             initialValues={{
-              userEmail: email.user.email,
+              currentEmail: email.user.email,
               newEmail: '',
               newEmailCheck: '',
             }}

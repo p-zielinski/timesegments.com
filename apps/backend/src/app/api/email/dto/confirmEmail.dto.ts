@@ -1,11 +1,8 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { EmailType } from '@test1/shared';
+import { IsOptional, IsString } from 'class-validator';
 
 export class ConfirmEmailDto {
   @IsString()
   emailId: string;
-  @IsEnum(EmailType)
-  type: string;
   @IsOptional()
   @IsString()
   key?: string;
