@@ -32,6 +32,48 @@ export class EmailService {
     return await this.sendEmail(user, EmailType.RESET_PASSWORD);
   }
 
+  public async changeEmail(emailId, secretKey, newEmail, userAgent) {
+    const validationResult = await this.validateEmail(emailId, secretKey);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Provided parameters did not pass validation',
+      };
+    }
+    const { email } = validationResult;
+    try {
+      await this.userService.updateUser(email.user.id, {
+        email: newEmail,
+        emailConfirmed: false,
+      });
+    } catch (error) {
+      if (error?.meta?.target?.includes('email')) {
+        return { success: false, error: 'This email is already taken' };
+      }
+      return {
+        success: false,
+        error:
+          typeof error?.message === 'string'
+            ? error?.message?.trim()
+            : error?.message ?? 'Unknown error',
+      };
+    }
+    await this.removeEmailRecordInDatabase(email.id);
+    const token = await this.tokenService.generateToken(
+      email.user.id,
+      new Date(Date.now() + 3600 * 1000 * 24 * 60),
+      userAgent
+    );
+    return {
+      success: true,
+      token: this.jwtService.sign({
+        userId: email.user.id,
+        tokenId: token.id,
+        expiresAt: token.expiresAt,
+      }),
+    };
+  }
+
   public async changePassword(emailId, secretKey, newPassword, userAgent) {
     const validationResult = await this.validateEmail(emailId, secretKey);
     if (!validationResult.success) {

@@ -65,14 +65,13 @@ export default function ChangeEmail({
   };
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
-  const initializeEmailChange = async (
+  const sendChangeEmailAddressEmail = async (
     currentEmailToLowerCase: string,
     setFieldError: (field: string, message: string) => void
   ) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'user/initialize-email-change',
-      body: { currentEmail: currentEmailToLowerCase },
+      pathOrUrl: 'email/send-change-email-address-email',
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
@@ -100,7 +99,7 @@ export default function ChangeEmail({
           currentEmail: user.email,
         }}
         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-          await initializeEmailChange(
+          await sendChangeEmailAddressEmail(
             values.currentEmail.toLowerCase(),
             setFieldError
           );

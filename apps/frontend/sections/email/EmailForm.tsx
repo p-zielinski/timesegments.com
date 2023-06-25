@@ -111,6 +111,38 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
     return;
   };
 
+  const changeEmailAddress = async (
+    email: EmailWithUser,
+    newEmail: string,
+    setFieldError: (field: string, message: string) => void
+  ) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'email/change-email-address',
+      body: {
+        emailId: email.id,
+        secretKey: email.secretKey,
+        newEmail: newEmail.toLowerCase(),
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      if (response.token) {
+        await handleFetch({
+          pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
+          body: { name: 'jwt_token', value: response.token },
+          method: 'POST',
+        });
+      }
+      setCompleted(true);
+    }
+    if (response.error) {
+      setFieldError('newEmail', response.error);
+    }
+    setIsSaving(false);
+    return;
+  };
+
   switch (email.type) {
     case EmailType.EMAIL_CONFIRMATION:
       return (
@@ -297,7 +329,9 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
               newEmailCheck: '',
             }}
             validationSchema={validationSchema}
-            onSubmit={() => undefined}
+            onSubmit={async (values, { setFieldError }) => {
+              await changeEmailAddress(email, values.newEmail, setFieldError);
+            }}
           >
             {({ handleSubmit, values }) => {
               const isFormValid = validationSchema.isValidSync(values);
@@ -315,14 +349,21 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
                   </Stack>
 
                   <LoadingButton
-                    disabled={!isFormValid}
+                    disabled={!isFormValid || isSaving}
                     fullWidth
                     size="large"
                     type="submit"
                     variant="contained"
                     onClick={() => handleSubmit()}
                   >
-                    Change email
+                    {!isSaving ? (
+                      'Change email'
+                    ) : (
+                      <CircularProgress
+                        size={'15px'}
+                        sx={{ color: 'silver' }}
+                      />
+                    )}
                   </LoadingButton>
                 </>
               );

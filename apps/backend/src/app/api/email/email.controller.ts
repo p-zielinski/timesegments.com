@@ -13,7 +13,8 @@ import { EmailService } from './email.service';
 import { ValidateEmailDto } from './dto/validateEmail.dto';
 import { ConfirmEmailDto } from './dto/confirmEmail.dto';
 import { SendResetPasswordEmailDto } from './dto/sendResetPasswordEmail.dto';
-import { ChangeEmailDto } from './dto/changePassword.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
+import { ChangeEmailDto } from './dto/changeEmail.dto';
 
 @Controller('email')
 export class EmailController {
@@ -63,14 +64,34 @@ export class EmailController {
 
   @Post('change-password')
   async changePasswordAndLogin(
-    @Body() changeEmailDto: ChangeEmailDto,
+    @Body() changePasswordDto: ChangePasswordDto,
     @Headers('User-Agent') userAgent: string
   ) {
-    const { emailId, secretKey, newPassword } = changeEmailDto;
+    const { emailId, secretKey, newPassword } = changePasswordDto;
     const changePasswordResult = await this.emailService.changePassword(
       emailId,
       secretKey,
       newPassword,
+      userAgent
+    );
+    if (!changePasswordResult.success) {
+      throw new BadRequestException({
+        error: changePasswordResult?.error || 'Bad request',
+      });
+    }
+    return changePasswordResult;
+  }
+
+  @Post('change-email-address')
+  async changeEmailAndLogin(
+    @Body() changeEmailDto: ChangeEmailDto,
+    @Headers('User-Agent') userAgent: string
+  ) {
+    const { emailId, secretKey, newEmail } = changeEmailDto;
+    const changePasswordResult = await this.emailService.changeEmail(
+      emailId,
+      secretKey,
+      newEmail,
       userAgent
     );
     if (!changePasswordResult.success) {
