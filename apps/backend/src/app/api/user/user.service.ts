@@ -191,6 +191,7 @@ export class UserService {
           ) as Timezone,
         },
       });
+      await this.emailService.sendEmail(newUser, EmailType.EMAIL_CONFIRMATION);
       if (!options?.generateToken) {
         return { success: true, user: newUser };
       }
