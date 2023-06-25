@@ -285,6 +285,7 @@ export class EmailService {
     }
   }
 
+  //fake commit
   public async removeEmailRecordInDatabase(id) {
     return await this.prisma.email.delete({ where: { id } });
   }
