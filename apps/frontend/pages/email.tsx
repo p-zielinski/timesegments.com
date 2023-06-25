@@ -43,7 +43,7 @@ export default function Email({ randomSliderColor }: Props) {
     if (response.email) {
       setEmail(response.email);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setError(response.error);
     }
     setIsValidating(false);

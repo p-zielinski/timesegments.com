@@ -73,7 +73,7 @@ export default function ConfirmEmail({
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setError(
         typeof response.error === 'string' ? response.error : 'Unknown error'
       );

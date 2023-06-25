@@ -76,7 +76,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setError(response.error);
     }
     setIsSaving(false);
@@ -104,7 +104,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
       }
       setCompleted(true);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setFieldError('currentPassword', response.error);
     }
     setIsSaving(false);
@@ -136,7 +136,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
       }
       setCompleted(true);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setFieldError('newEmail', response.error);
     }
     setIsSaving(false);

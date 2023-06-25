@@ -86,7 +86,7 @@ export default function ChangePassword({
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setFieldError('currentPassword', response.error);
     }
     setIsSaving(false);
