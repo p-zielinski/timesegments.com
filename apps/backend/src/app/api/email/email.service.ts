@@ -152,7 +152,7 @@ export class EmailService {
       this.configService.get<string>('FRONTEND_URL')
     );
     url.searchParams.set('emailId', email.id);
-    url.searchParams.set('key', email.secretKey);
+    url.searchParams.set('secretKey', email.secretKey);
     return await this.sendMailViaZeptoMail(templateKey, user.email, {
       url,
       name,
