@@ -9,7 +9,6 @@ import {useRouter} from 'next/router';
 import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObjectForSliderPicker';
-import {StatusCodes} from 'http-status-codes';
 import {handleFetch} from '../utils/fetchingData/handleFetch';
 import LoadingButton from '@mui/lab/LoadingButton';
 import EmailForm from '../sections/email/EmailForm';
@@ -34,6 +33,7 @@ export default function Email({ randomSliderColor }: Props) {
   const [error, setError] = useState<string>(undefined);
 
   const handleEmailRequestValidation = async (query) => {
+    console.log(query);
     setIsValidating(true);
     const response = await handleFetch({
       pathOrUrl: 'email/validate-email',
@@ -43,7 +43,7 @@ export default function Email({ randomSliderColor }: Props) {
     if (response.email) {
       setEmail(response.email);
     }
-    if (response.statusCode === StatusCodes.BAD_REQUEST) {
+    if (response.error) {
       setError(response.error);
     }
     setIsValidating(false);

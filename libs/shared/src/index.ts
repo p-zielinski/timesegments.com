@@ -11,3 +11,4 @@ export * from './lib/types/dates';
 export * from './lib/types/email';
 export * from './lib/utils/findKeyOfValueInObject';
 export * from './lib/utils/asyncMap';
+export * from './lib/utils/getDuration';

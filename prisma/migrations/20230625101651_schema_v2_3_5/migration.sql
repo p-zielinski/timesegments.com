@@ -5,7 +5,9 @@
   - Added the required column `secretKey` to the `Email` table without a default value. This is not possible if the table is not empty.
 
 */
-SP
 
 -- AlterTable
-ALTER TABLE "Email" RENAME COLUMN "key" TO "secretKey",
+BEGIN;
+ALTER TABLE "Email" RENAME COLUMN "key" TO "secretKey";
+ALTER TABLE "Email" ALTER COLUMN "secretKey" SET NOT NULL;
+COMMIT;

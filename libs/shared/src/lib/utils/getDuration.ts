@@ -1,4 +1,4 @@
-export const getDuration = (totalPeriodInMs) => {
+export const getDuration = (totalPeriodInMs: number) => {
   if (!totalPeriodInMs) {
     return `0 seconds`;
   }

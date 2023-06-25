@@ -11,6 +11,7 @@ import { User } from '@prisma/client';
 import { EmailService } from './email.service';
 import { ValidateEmailDto } from './dto/validateEmail.dto';
 import { ConfirmEmailDto } from './dto/confirmEmail.dto';
+import { SendResetPasswordEmailDto } from './dto/sendResetPasswordEmail.dto';
 
 @Controller('email')
 export class EmailController {
@@ -20,7 +21,7 @@ export class EmailController {
   @Post('resend-confirmation-email')
   async resendConfirmationEmail(@UserDecorator() user: User) {
     const resendConfirmationEmailResult =
-      await this.emailService.sentConfirmationEmail(user);
+      await this.emailService.sendConfirmationEmail(user);
     if (!resendConfirmationEmailResult.success) {
       throw new BadRequestException({
         error: resendConfirmationEmailResult?.error || 'Unknown error',
@@ -30,12 +31,28 @@ export class EmailController {
   }
 
   //todo add recaptcha guard
+  @Post('send-reset-password-email')
+  async sendResetPasswordEmail(
+    @Body() sendResetPasswordEmailDto: SendResetPasswordEmailDto
+  ) {
+    const { email } = sendResetPasswordEmailDto;
+    const sendResetPasswordEmailResult =
+      await this.emailService.sendResetPasswordEmail(email);
+    if (!sendResetPasswordEmailResult.success) {
+      throw new BadRequestException({
+        error: sendResetPasswordEmailResult?.error || 'Bad request',
+      });
+    }
+    return sendResetPasswordEmailResult;
+  }
+
+  //todo add recaptcha guard
   @Post('validate-email')
   async validateEmail(@Body() validateEmailDto: ValidateEmailDto) {
-    const { emailId, key } = validateEmailDto;
+    const { emailId, secretKey } = validateEmailDto;
     const validateEmailResult = await this.emailService.validateEmail(
       emailId,
-      key
+      secretKey
     );
     if (!validateEmailResult.success) {
       throw new BadRequestException({
@@ -48,10 +65,10 @@ export class EmailController {
   //todo add recaptcha guard
   @Post('confirm-email')
   async confirmEmail(@Body() confirmEmailDto: ConfirmEmailDto) {
-    const { emailId, key } = confirmEmailDto;
+    const { emailId, secretKey } = confirmEmailDto;
     const confirmEmailResult = await this.emailService.confirmEmail(
       emailId,
-      key
+      secretKey
     );
     if (!confirmEmailResult.success) {
       throw new BadRequestException({

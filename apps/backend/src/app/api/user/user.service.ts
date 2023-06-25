@@ -356,4 +356,8 @@ export class UserService {
   private async updateControlValue(userId: string, controlValue: string) {
     await this.updateUser(userId, { controlValue });
   }
+
+  public async findUserByEmail(email: string) {
+    return await this.prisma.user.findFirst({ where: { email } });
+  }
 }

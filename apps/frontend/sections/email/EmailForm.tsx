@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   IconButton,
   InputAdornment,
   Stack,
@@ -20,6 +21,8 @@ import * as yup from 'yup';
 import YupPassword from 'yup-password';
 import { equalTo } from '../../utils/yupCustomMethods';
 import emailRegexp from '../../regex/email';
+import { handleFetch } from '../../utils/fetchingData/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 YupPassword(yup); // extend yup
 yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
@@ -28,13 +31,14 @@ yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
 // ----------------------------------------------------------------------
 
 export default function EmailForm({ email }: { email: EmailWithUser }) {
-  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [completed, setCompleted] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewPasswordCheck, setShowNewPasswordCheck] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  if (showConfirmation) {
+  if (completed) {
     let confirmationText = 'Success!';
     switch (email.type) {
       case EmailType.EMAIL_CONFIRMATION:
@@ -62,6 +66,44 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
     );
   }
 
+  const confirmEmail = async (email: EmailWithUser) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'email/confirm-email',
+      body: { emailId: email.id, secretKey: email.secretKey },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setCompleted(true);
+    }
+    if (response.error) {
+      setError(response.error);
+    }
+    setIsSaving(false);
+    return;
+  };
+
+  // const changePassword = async (
+  //   email: EmailWithUser,
+  //   newPassword: string,
+  //   setFieldError: (field: string, message: string) => void
+  // ) => {
+  //   setIsSaving(true);
+  //   const response = await handleFetch({
+  //     pathOrUrl: 'user/change-password',
+  //     body: { currentPassword, newPassword },
+  //     method: 'POST',
+  //   });
+  //   if (response.statusCode === StatusCodes.CREATED) {
+  //     setCompleted(true);
+  //   }
+  //   if (response.error) {
+  //     setFieldError('currentPassword', response.error);
+  //   }
+  //   setIsSaving(false);
+  //   return;
+  // };
+
   switch (email.type) {
     case EmailType.EMAIL_CONFIRMATION:
       return (
@@ -70,6 +112,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
             Looks like you want to confirm email: {email.user.email}
           </Typography>
           <LoadingButton
+            disabled={isSaving}
             fullWidth
             size="large"
             variant="contained"
@@ -81,11 +124,16 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
                 boxShadow: `0px 3px 1px -2px ${LIGHT_GREEN}, 0px 2px 2px 0px ${LIGHT_GREEN}, 0px 1px 5px 0px ${LIGHT_GREEN}`,
               },
             }}
-            onClick={() => router.push('/')}
+            onClick={() => !isSaving && confirmEmail(email)}
           >
-            YES
+            {!isSaving ? (
+              'YES'
+            ) : (
+              <CircularProgress size={'15px'} sx={{ color: 'silver' }} />
+            )}
           </LoadingButton>
           <Button
+            disabled={isSaving}
             fullWidth
             size="large"
             variant="contained"
@@ -97,7 +145,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
                 boxShadow: `0px 3px 1px -2px ${LIGHT_RED}, 0px 2px 2px 0px ${LIGHT_RED}, 0px 1px 5px 0px ${LIGHT_RED}`,
               },
             }}
-            onClick={() => router.push('/')}
+            onClick={() => !isSaving && router.push('/')}
           >
             NO
           </Button>
@@ -114,12 +162,9 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
           .minSymbols(1)
           .min(5)
           .required()
-          .notOneOf(
-            [yup.ref('currentPassword')],
-            'New password cannot be the same as the current one'
-          )
           .label('New password'),
         newPasswordCheck: (yup as any)
+          .string()
           .equalTo(yup.ref('newPassword'))
           .label('New password check'),
       });
@@ -197,7 +242,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
                     variant="contained"
                     onClick={() => handleSubmit()}
                   >
-                    Change email
+                    Change password
                   </LoadingButton>
                 </>
               );
@@ -261,7 +306,7 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
                     variant="contained"
                     onClick={() => handleSubmit()}
                   >
-                    Change password
+                    Change email
                   </LoadingButton>
                 </>
               );
@@ -272,45 +317,5 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
     }
   }
 
-  // const onLoginOrRegister = async (
-  //   valuesAndEmailToLowerCase: {
-  //     email: string;
-  //     password: string;
-  //     timezone?: string;
-  //   },
-  //   endpoint: 'login' | 'register',
-  //   setFieldError: (field: string, message: string) => void
-  // ): Promise<boolean> => {
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/' + endpoint,
-  //     body: valuesAndEmailToLowerCase,
-  //     method: 'POST',
-  //   });
-  //   if (response.statusCode === StatusCodes.CREATED) {
-  //     if (typeof process.env.NEXT_PUBLIC_FRONTEND_URL !== 'string') {
-  //       console.log({
-  //         NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
-  //       });
-  //       throw new Error('misconfiguration of NEXT_PUBLIC_API_URL');
-  //     }
-  //     await handleFetch({
-  //       pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
-  //       body: { name: 'jwt_token', value: response.token },
-  //       method: 'POST',
-  //     });
-  //     return await router.push('/dashboard');
-  //   }
-  //   if (response.statusCode === StatusCodes.BAD_REQUEST) {
-  //     const error = response.error || '';
-  //     if (error.match(/password/i)) {
-  //       setFieldError('password', error);
-  //     }
-  //     if (error.match(/email/i)) {
-  //       setFieldError('email', error);
-  //     }
-  //   }
-  //   setError(new Error(response.error));
-  //   return;
-  // };
   return undefined;
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { Email, User } from '@prisma/client';
-import { EmailStatus, EmailType, Timezones } from '@test1/shared';
+import { EmailStatus, EmailType, getDuration, Timezones } from '@test1/shared';
 import { PrismaService } from '../../prisma.service';
 import { nanoid } from 'nanoid';
 import { SendMailClient } from 'zeptomail';
@@ -19,8 +19,16 @@ export class EmailService {
     private loggerService: LoggerService
   ) {}
 
-  public async confirmEmail(emailId, key) {
-    const validationResult = await this.validateEmail(emailId, key);
+  public async sendResetPasswordEmail(email: string) {
+    const user = await this.userService.findUserByEmail(email);
+    if (!user) {
+      return { success: false, error: 'Could not find user with that email' };
+    }
+    return await this.sendEmail(user, EmailType.RESET_PASSWORD);
+  }
+
+  public async confirmEmail(emailId, secretKey) {
+    const validationResult = await this.validateEmail(emailId, secretKey);
     if (!validationResult.success) {
       return {
         success: false,
@@ -33,7 +41,7 @@ export class EmailService {
     return { success: true };
   }
 
-  public async validateEmail(emailId, key) {
+  public async validateEmail(emailId, secretKey) {
     const email = await this.prisma.email.findFirst({
       where: { id: emailId },
       include: {
@@ -43,7 +51,7 @@ export class EmailService {
     if (!email) {
       return { success: false };
     }
-    if ((email.key && !key) || key !== email.key) {
+    if ((email.secretKey && !secretKey) || secretKey !== email.secretKey) {
       return { success: false };
     }
     const { validFor } = emailsSpec[email.type];
@@ -57,18 +65,19 @@ export class EmailService {
     return { success: true, email };
   }
 
-  public async sentConfirmationEmail(user: User) {
+  public async sendConfirmationEmail(user: User) {
     if (user.emailConfirmed) {
       return {
         success: false,
         error: 'Your email was already confirmed',
       };
     }
+    return await this.sendEmail(user, EmailType.EMAIL_CONFIRMATION);
+  }
+
+  private async sendEmail(user, emailType) {
     const createEmailRecordInDatabaseResult =
-      await this.createEmailRecordInDatabase(
-        user,
-        EmailType.EMAIL_CONFIRMATION
-      );
+      await this.createEmailRecordInDatabase(user, emailType);
     if (!createEmailRecordInDatabaseResult.success) {
       return createEmailRecordInDatabaseResult;
     }
@@ -116,7 +125,7 @@ export class EmailService {
     return {
       success: true,
       emailDbRecord: await this.prisma.email.create({
-        data: { userId: user.id, type: emailType, key: this.createKey() },
+        data: { userId: user.id, type: emailType, secretKey: this.createKey() },
       }),
     };
   }
@@ -134,7 +143,7 @@ export class EmailService {
   private async sendEmailFromDatabaseRecord(user: User, email: Email) {
     const name = user.name || user.email;
     const emailSpec = emailsSpec[email.type];
-    const { templateKey } = emailSpec;
+    const { templateKey, validFor: validForMs } = emailSpec;
     if (!templateKey) {
       throw new Error(`missing template key for type: ${email.type}`);
     }
@@ -143,13 +152,14 @@ export class EmailService {
       this.configService.get<string>('FRONTEND_URL')
     );
     url.searchParams.set('emailId', email.id);
-    url.searchParams.set('type', email.type);
-    if (email.key) {
-      url.searchParams.set('key', email.key);
-    }
+    url.searchParams.set('key', email.secretKey);
     return await this.sendMailViaZeptoMail(templateKey, user.email, {
       url,
       name,
+      validFor:
+        validForMs > 0 && validForMs < Infinity
+          ? getDuration(validForMs)
+          : undefined,
     });
   }
 
