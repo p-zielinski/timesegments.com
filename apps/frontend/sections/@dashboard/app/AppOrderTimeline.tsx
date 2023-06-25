@@ -5,11 +5,10 @@ import {nanoid} from 'nanoid'; // utils
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import {useEffect, useState} from 'react';
 import {DateTime} from 'luxon';
-import {Timezones} from '@test1/shared';
+import {getDuration, Timezones} from '@test1/shared';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGroupedTimeLogsWithDateSorted';
-import {getDuration} from '../../../utils/mapper/getDuration';
 import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 // utils
 // ----------------------------------------------------------------------

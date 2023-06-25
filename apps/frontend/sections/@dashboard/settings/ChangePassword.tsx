@@ -86,7 +86,7 @@ export default function ChangePassword({
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
     }
-    if (response.error) {
+    if (response.error && typeof response.error === 'string') {
       setFieldError('currentPassword', response.error);
     }
     setIsSaving(false);
@@ -118,10 +118,8 @@ export default function ChangePassword({
         'New password cannot be the same as the current one'
       )
       .label('New password'),
-    newPasswordCheck: yup
+    newPasswordCheck: (yup as any)
       .string()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment @ts-ignore - We added this method
-      // @ts-ignore - We added this method
       .equalTo(yup.ref('newPassword'))
       .notOneOf(
         [yup.ref('currentPassword')],
@@ -136,7 +134,7 @@ export default function ChangePassword({
         initialValues={{
           currentPassword: '',
           newPassword: '',
-          newPassword2: '',
+          newPasswordCheck: '',
         }}
         onSubmit={async (values, { setSubmitting, setFieldError }) => {
           await changePassword(

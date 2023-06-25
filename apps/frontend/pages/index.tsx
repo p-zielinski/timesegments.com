@@ -1,7 +1,6 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
-import {Box, Container, Typography} from '@mui/material'; // hooks
-import useResponsive from '../hooks/useResponsive'; // sections
+import {Container, Typography} from '@mui/material'; // hooks
 import {AuthForm} from '../sections/auth';
 import React, {useState} from 'react';
 import {AuthPageState, UserWithCategoriesAndNotes} from '@test1/shared';
@@ -20,16 +19,6 @@ const StyledRoot = styled('div')(({ theme }) => ({
   },
 }));
 
-const StyledSection = styled('div')(({ theme }) => ({
-  width: '100%',
-  maxWidth: 480,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  boxShadow: (theme as any).customShadows.card,
-  backgroundColor: theme.palette.background.default,
-}));
-
 type Props = {
   randomSliderColor: string;
 };
@@ -45,8 +34,6 @@ export default function Index({ randomSliderColor }: Props) {
     padding: theme.spacing(isMobile ? 6 : 12, 0),
   }));
 
-  //Auth page states
-  const mdUp = useResponsive('up', 'md');
   const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
 
   return (
@@ -56,19 +43,6 @@ export default function Index({ randomSliderColor }: Props) {
       </Helmet>
 
       <StyledRoot>
-        {mdUp && (
-          <StyledSection>
-            <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 3 }}>
-              {currentPageState === AuthPageState.REGISTER
-                ? 'Welcome!'
-                : 'Hi, Welcome Back'}
-            </Typography>
-            <Box sx={{ ml: 5, mr: 5, mt: 0 }}>
-              <img src="/assets/clock.png" alt="login" />
-            </Box>
-          </StyledSection>
-        )}
-
         <Container maxWidth="sm">
           <StyledContent>
             <Typography variant="h4" gutterBottom>

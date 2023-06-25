@@ -1,6 +1,6 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 // @mui
-import {IconButton, InputAdornment, Link, Stack} from '@mui/material';
+import {Box, CircularProgress, IconButton, InputAdornment, Link, Stack, Typography,} from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {Formik} from 'formik';
 import loginSchema from '../../yupSchemas/login';
@@ -18,10 +18,34 @@ import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSel
 // ----------------------------------------------------------------------
 
 export default function AuthForm({ authPageState, setAuthPageState }) {
-  const [error, setError] = useState<Error | undefined>(undefined);
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [resetPasswordEmailSent, setResetPasswordEmailSent] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const onResetPassword = async (
+    email: string,
+    setFieldError: (field: string, message: string) => void
+  ): Promise<boolean> => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'email/send-reset-password-email',
+      body: { email },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      setResetPasswordEmailSent(true);
+    }
+    if (response.statusCode === StatusCodes.BAD_REQUEST) {
+      const error = response.error;
+      if (response.error && typeof response.error === 'string') {
+        setFieldError('email', error);
+      }
+    }
+    setIsSaving(false);
+    return;
+  };
 
   const onLoginOrRegister = async (
     valuesAndEmailToLowerCase: {
@@ -32,6 +56,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
     endpoint: 'login' | 'register',
     setFieldError: (field: string, message: string) => void
   ): Promise<boolean> => {
+    setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/' + endpoint,
       body: valuesAndEmailToLowerCase,
@@ -60,15 +85,24 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         setFieldError('email', error);
       }
     }
-    setError(new Error(response.error));
+    setIsSaving(false);
     return;
   };
+
+  useEffect(() => setResetPasswordEmailSent(false), [authPageState]);
+
+  if (resetPasswordEmailSent) {
+    return (
+      <Typography variant="body1" sx={{ fontWeight: 800, mt: -1 }}>
+        Success, email with further instructions has been sent!
+      </Typography>
+    );
+  }
 
   return (
     <Formik
       initialValues={{ email: '', password: '', timezone: '' }}
       onSubmit={async (values, { setSubmitting, setFieldError }) => {
-        setError(undefined);
         const valuesAndEmailToLowerCase = {
           ...values,
           email: values.email?.toLowerCase() || '',
@@ -86,6 +120,9 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
             'register',
             setFieldError
           );
+        }
+        if (authPageState === AuthPageState.RECOVER_ACCOUNT) {
+          await onResetPassword(values.email, setFieldError);
         }
         setSubmitting(false);
       }}
@@ -111,6 +148,14 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         useEffect(() => {
           setErrors({});
         }, [authPageState]);
+
+        const isFormValid = (
+          AuthPageState.LOGIN === authPageState
+            ? loginSchema
+            : AuthPageState.RECOVER_ACCOUNT === authPageState
+            ? recoverSchema
+            : registerSchema
+        ).isValidSync(values);
 
         return (
           <>
@@ -153,13 +198,13 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
               )}
             </Stack>
 
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="end"
-              sx={{ my: 2, mt: 1 }}
-            >
-              {authPageState !== AuthPageState.RECOVER_ACCOUNT && (
+            {authPageState !== AuthPageState.RECOVER_ACCOUNT ? (
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="end"
+                sx={{ my: 2, mt: 1 }}
+              >
                 <Link
                   variant="subtitle2"
                   underline="hover"
@@ -170,17 +215,25 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                 >
                   Forgot password?
                 </Link>
-              )}
-            </Stack>
-
+              </Stack>
+            ) : (
+              <Box sx={{ mb: 1, background: 'red' }} />
+            )}
             <LoadingButton
+              disabled={
+                isSaving || !isFormValid || !!Object.keys(errors).length
+              }
               fullWidth
               size="large"
               type="submit"
               variant="contained"
               onClick={() => handleSubmit()}
             >
-              {authPageState}
+              {!isSaving ? (
+                authPageState
+              ) : (
+                <CircularProgress size={'15px'} sx={{ color: 'silver' }} />
+              )}
             </LoadingButton>
           </>
         );

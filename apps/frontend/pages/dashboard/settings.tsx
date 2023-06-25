@@ -2,7 +2,7 @@ import {Helmet} from 'react-helmet-async'; // @mui
 import {Box, Container, Grid, Typography} from '@mui/material'; // components
 import DashboardLayout from '../../layouts/dashboard';
 import React, {useEffect, useState} from 'react';
-import {Token, User} from '@prisma/client';
+import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
@@ -20,7 +20,8 @@ import {TimelineDot} from '@mui/lab';
 import Iconify from '../../components/iconify';
 import {SettingOption} from '../../enum/settingOption';
 import {findKeyOfValueInObject, Timezones} from '@test1/shared';
-import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo'; // ----------------------------------------------------------------------
+import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo';
+import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail'; // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -35,14 +36,12 @@ type OptionsColors = {
 
 type Props = {
   user: User;
-  optionsColors: OptionsColors;
   currentTokenId: string;
   randomSliderHexColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
-  optionsColors,
   currentTokenId,
   randomSliderHexColor,
 }: Props) {
@@ -54,8 +53,6 @@ export default function Index({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [controlValue, setControlValue] = useState(user?.controlValue);
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
-  const [userTokens, setUserTokens] = useState<Token[]>([]);
-  const [userTokensFetched, setUserTokensFetched] = useState(false);
 
   const fetchMe = async () => {
     setIsSaving(true);
@@ -125,51 +122,77 @@ export default function Index({
   }, [isMobile]);
 
   const getAllSettingOptions = (user) => {
-    return Object.keys(SettingOption).map((key) => {
-      let icon, subtitle, successText;
-      switch (key) {
-        case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
-          icon = 'icon-park-outline:edit-name';
-          subtitle = user.name;
-          successText = 'Name was successfully changed';
-          break;
-        case findKeyOfValueInObject(
-          SettingOption,
-          SettingOption.CHANGE_TIMEZONE
-        ):
-          icon = 'mdi:timezone-outline';
-          subtitle = Timezones[user.timezone];
-          successText = 'Timezone was successfully changed';
-          break;
-        case findKeyOfValueInObject(
-          SettingOption,
-          SettingOption.CHANGE_PASSWORD
-        ):
-          icon = 'material-symbols:password';
-          successText = 'Password was successfully changed';
-          break;
-        case findKeyOfValueInObject(SettingOption, SettingOption.CHANGE_EMAIL):
-          icon = 'ic:outline-email';
-          subtitle = user.email;
-          successText = 'We sent you an email with further instructions';
-          break;
-        case findKeyOfValueInObject(
-          SettingOption,
-          SettingOption.MANAGE_LOGIN_SESSIONS
-        ):
-          icon = 'tabler:lock-access';
-          successText = 'Action successfully executed';
-          break;
-      }
-      return {
-        id: key,
-        name: SettingOption[key],
-        subtitle,
-        icon,
-        color: { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' },
-        successText,
-      };
-    });
+    return Object.keys(SettingOption)
+      .filter((key) =>
+        !user.emailConfirmed
+          ? true
+          : key !==
+            findKeyOfValueInObject(SettingOption, SettingOption.CONFIRM_EMAIL)
+      )
+      .map((key) => {
+        let icon,
+          subtitle,
+          successText,
+          iconColor,
+          color = { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' };
+        switch (key) {
+          case findKeyOfValueInObject(
+            SettingOption,
+            SettingOption.CONFIRM_EMAIL
+          ):
+            icon = 'ph:warning-fill';
+            successText =
+              'We sent you an email with link to confirm your email address!';
+            subtitle = user.email;
+            iconColor = 'rgb(191,64,64)';
+            color = { rgb: { r: 191, g: 64, b: 64, a: 1 }, hex: '#bf4040' };
+            break;
+          case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
+            icon = 'icon-park-outline:edit-name';
+            subtitle = user.name;
+            successText = 'Name was successfully changed';
+            break;
+          case findKeyOfValueInObject(
+            SettingOption,
+            SettingOption.CHANGE_TIMEZONE
+          ):
+            icon = 'mdi:timezone-outline';
+            subtitle = Timezones[user.timezone];
+            successText = 'Timezone was successfully changed';
+            break;
+          case findKeyOfValueInObject(
+            SettingOption,
+            SettingOption.CHANGE_PASSWORD
+          ):
+            icon = 'material-symbols:password';
+            successText = 'Password was successfully changed';
+            break;
+          case findKeyOfValueInObject(
+            SettingOption,
+            SettingOption.CHANGE_EMAIL
+          ):
+            icon = 'ic:outline-email';
+            subtitle = user.email;
+            successText = 'We sent you an email with further instructions';
+            break;
+          case findKeyOfValueInObject(
+            SettingOption,
+            SettingOption.MANAGE_LOGIN_SESSIONS
+          ):
+            icon = 'tabler:lock-access';
+            successText = 'Action successfully executed';
+            break;
+        }
+        return {
+          id: key,
+          name: SettingOption[key],
+          subtitle,
+          icon,
+          color,
+          iconColor,
+          successText,
+        };
+      });
   };
 
   const [allSettingOptions, setAllSettingOptions] = useState(
@@ -217,6 +240,24 @@ export default function Index({
                       currentSettingOption={currentSettingOption}
                       disableHover={disableHover}
                     ></ShowCompletedInfoSettings>
+                  );
+                }
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.CONFIRM_EMAIL
+                ) {
+                  return (
+                    <ConfirmEmail
+                      key={`${currentSettingOption}-active`}
+                      user={user}
+                      disableHover={disableHover}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      setOpenedSettingOption={setOpenedSettingOption}
+                      currentSettingOption={currentSettingOption}
+                      setCompleted={setCompleted}
+                    />
                   );
                 }
 
@@ -397,6 +438,7 @@ export default function Index({
                           icon={currentSettingOption.icon}
                           width={40}
                           sx={{
+                            color: currentSettingOption.iconColor,
                             position: 'relative',
                             top: '50%',
                             left: '40%',
@@ -404,153 +446,7 @@ export default function Index({
                           }}
                         />
                       </Box>
-                      {/*{category.showRecentNotes &&*/}
-                      {/*  categoriesNotesLimit > currentCategoryNumberOfNotes && (*/}
-                      {/*    <Box*/}
-                      {/*      sx={{*/}
-                      {/*        borderRadius: '10px',*/}
-                      {/*        border: `solid 1px ${getBackgroundColor(*/}
-                      {/*          isEditing.createNewNote === category.id ? 1 : 0.2,*/}
-                      {/*          category.color*/}
-                      {/*        )}`,*/}
-                      {/*        pl: disableHover ? 0 : '5px',*/}
-                      {/*        pr: disableHover ? 0 : '5px',*/}
-                      {/*        '&:hover': !disableHover &&*/}
-                      {/*          !isSaving && {*/}
-                      {/*            cursor: 'pointer',*/}
-                      {/*            border: `solid 1px ${getBackgroundColor(*/}
-                      {/*              1,*/}
-                      {/*              category.color*/}
-                      {/*            )}`,*/}
-                      {/*          },*/}
-                      {/*      }}*/}
-                      {/*      onClick={() =>*/}
-                      {/*        !isSaving && setIsEditing({createNewNote: category.id})*/}
-                      {/*      }*/}
-                      {/*    >*/}
-                      {/*      <Iconify*/}
-                      {/*        icon={'ic:outline-note-add'}*/}
-                      {/*        width={40}*/}
-                      {/*        sx={{*/}
-                      {/*          position: 'relative',*/}
-                      {/*          top: '50%',*/}
-                      {/*          left: '40%',*/}
-                      {/*          transform: 'translate(-40%, -50%)',*/}
-                      {/*        }}*/}
-                      {/*      />*/}
-                      {/*    </Box>*/}
-                      {/*  )}*/}
                     </Box>
-
-                    {/*<Box*/}
-                    {/*  sx={{ display: 'flex', width: '100%' }}*/}
-                    {/*  onClick={() =>*/}
-                    {/*    isSaving*/}
-                    {/*      ? null*/}
-                    {/*      : isActive*/}
-                    {/*      ? setOpenedSettingOption(undefined)*/}
-                    {/*      : setOpenedSettingOption(*/}
-                    {/*          SettingOption[currentSettingOption]*/}
-                    {/*        )*/}
-                    {/*  }*/}
-                    {/*>*/}
-                    {/*  <Box*/}
-                    {/*    sx={{*/}
-                    {/*      width: `60px`,*/}
-                    {/*      minWidth: '60px',*/}
-                    {/*      p: 2,*/}
-                    {/*      background: getRepeatingLinearGradient(*/}
-                    {/*        isSaving*/}
-                    {/*          ? IS_SAVING_HEX*/}
-                    {/*          : optionsColors[currentSettingOption].hex,*/}
-                    {/*        0.3*/}
-                    {/*      ),*/}
-                    {/*      border: isSaving*/}
-                    {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
-                    {/*            ...getRgbaObjectFromHexString(IS_SAVING_HEX),*/}
-                    {/*            a: 0.5,*/}
-                    {/*          })}`*/}
-                    {/*        : isActive*/}
-                    {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
-                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
-                    {/*            a: 0.5,*/}
-                    {/*          })}`*/}
-                    {/*        : `solid 2px ${getHexFromRGBAObject({*/}
-                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
-                    {/*            a: 0.3,*/}
-                    {/*          })}`,*/}
-                    {/*      borderRight: 0,*/}
-                    {/*      borderTopLeftRadius: 12,*/}
-                    {/*      borderBottomLeftRadius: 12,*/}
-                    {/*    }}*/}
-                    {/*  />*/}
-                    {/*  <Box*/}
-                    {/*    sx={{*/}
-                    {/*      color: isSaving*/}
-                    {/*        ? IS_SAVING_HEX*/}
-                    {/*        : getHexFromRGBObject(*/}
-                    {/*            getColorShadeBasedOnSliderPickerSchema(*/}
-                    {/*              optionsColors[currentSettingOption].rgb,*/}
-                    {/*              'normal'*/}
-                    {/*            )*/}
-                    {/*          ),*/}
-                    {/*      background: isSaving*/}
-                    {/*        ? SUPER_LIGHT_SILVER*/}
-                    {/*        : isActive*/}
-                    {/*        ? getHexFromRGBAObject({*/}
-                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
-                    {/*            a: 0.24,*/}
-                    {/*          })*/}
-                    {/*        : getHexFromRGBAObject({*/}
-                    {/*            ...optionsColors[currentSettingOption].rgb,*/}
-                    {/*            a: 0.1,*/}
-                    {/*          }),*/}
-                    {/*      flex: 1,*/}
-                    {/*      border: isSaving*/}
-                    {/*        ? `solid 2px ${getHexFromRGBAObject({*/}
-                    {/*            ...getRgbaObjectFromHexString(IS_SAVING_HEX),*/}
-                    {/*            a: 0.5,*/}
-                    {/*          })}`*/}
-                    {/*        : `solid 2px ${*/}
-                    {/*            isActive*/}
-                    {/*              ? getHexFromRGBAObject({*/}
-                    {/*                  ...optionsColors[currentSettingOption]*/}
-                    {/*                    .rgb,*/}
-                    {/*                  a: 0.5,*/}
-                    {/*                })*/}
-                    {/*              : LIGHT_RED*/}
-                    {/*          }`,*/}
-                    {/*      borderLeft: 0,*/}
-                    {/*      borderRadius: '12px',*/}
-                    {/*      borderTopLeftRadius: 0,*/}
-                    {/*      borderBottomLeftRadius: 0,*/}
-                    {/*      cursor: !isSaving && 'pointer',*/}
-                    {/*      '&:hover': !disableHover &&*/}
-                    {/*        !isSaving && {*/}
-                    {/*          border: isActive*/}
-                    {/*            ? `solid 2px ${RED}`*/}
-                    {/*            : `solid 2px ${getHexFromRGBAObject({*/}
-                    {/*                ...optionsColors[currentSettingOption].rgb,*/}
-                    {/*                a: 0.5,*/}
-                    {/*              })}`,*/}
-                    {/*          borderStyle: isActive ? 'solid' : 'dashed',*/}
-                    {/*          borderLeft: 0,*/}
-                    {/*        },*/}
-                    {/*    }}*/}
-                    {/*  >*/}
-                    {/*    <Stack*/}
-                    {/*      spacing={1}*/}
-                    {/*      sx={{ p: 3 }}*/}
-                    {/*      direction="row"*/}
-                    {/*      alignItems="center"*/}
-                    {/*      justifyContent="left"*/}
-                    {/*    >*/}
-                    {/*      <Typography variant="subtitle2" noWrap>*/}
-                    {/*        {SettingOption[currentSettingOption]}*/}
-                    {/*      </Typography>*/}
-                    {/*    </Stack>*/}
-                    {/*  </Box>*/}
-                    {/*</Box>*/}
                   </Box>
                 );
               })}
@@ -606,12 +502,6 @@ export const getServerSideProps = async ({ req, res }) => {
     props: {
       user: user,
       currentTokenId,
-      optionsColors: Object.fromEntries(
-        Object.entries(SettingOption).map((keyAndValue) => [
-          keyAndValue[0],
-          getRandomRgbObjectForSliderPicker(),
-        ])
-      ),
       randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,

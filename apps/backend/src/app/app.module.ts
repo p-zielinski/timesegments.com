@@ -18,6 +18,8 @@ import { TokenController } from './api/token/token.controller';
 import { TimeLogController } from './api/time-log/time-log.controller';
 import { NoteController } from './api/note/note.controller';
 import { NoteService } from './api/note/note.service';
+import { EmailService } from './api/email/email.service';
+import { EmailController } from './api/email/email.controller';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { NoteService } from './api/note/note.service';
     TokenController,
     TimeLogController,
     NoteController,
+    EmailController,
   ],
   providers: [
     LoggerService,
@@ -49,6 +52,7 @@ import { NoteService } from './api/note/note.service';
     CategoryService,
     TimeLogService,
     NoteService,
+    EmailService,
   ],
 })
 export class AppModule {}
