@@ -9,6 +9,9 @@ import { emailsSpec } from './utils/emailsSpec';
 import { LoggerService } from '../../common/logger/loger.service';
 import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
+import { hashString } from '../../common/hashString';
+import { TokenService } from '../token/token.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class EmailService {
@@ -16,7 +19,9 @@ export class EmailService {
     private prisma: PrismaService,
     private readonly configService: ConfigService,
     private userService: UserService,
-    private loggerService: LoggerService
+    private loggerService: LoggerService,
+    private tokenService: TokenService,
+    private jwtService: JwtService
   ) {}
 
   public async sendResetPasswordEmail(email: string) {
@@ -25,6 +30,37 @@ export class EmailService {
       return { success: false, error: 'Could not find user with that email' };
     }
     return await this.sendEmail(user, EmailType.RESET_PASSWORD);
+  }
+
+  public async changePassword(emailId, secretKey, newPassword, userAgent) {
+    const validationResult = await this.validateEmail(emailId, secretKey);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Provided parameters did not pass validation',
+      };
+    }
+    const { email } = validationResult;
+    await this.userService.updateUser(email.user.id, {
+      password: await hashString(
+        newPassword,
+        this.configService.get<number>('SALT_ROUNDS')
+      ),
+    });
+    await this.removeEmailRecordInDatabase(email.id);
+    const token = await this.tokenService.generateToken(
+      email.user.id,
+      new Date(Date.now() + 3600 * 1000 * 24 * 60),
+      userAgent
+    );
+    return {
+      success: true,
+      token: this.jwtService.sign({
+        userId: email.user.id,
+        tokenId: token.id,
+        expiresAt: token.expiresAt,
+      }),
+    };
   }
 
   public async confirmEmail(emailId, secretKey) {
@@ -73,6 +109,10 @@ export class EmailService {
       };
     }
     return await this.sendEmail(user, EmailType.EMAIL_CONFIRMATION);
+  }
+
+  public async sendChangeEmailAddressEmail(user: User) {
+    return await this.sendEmail(user, EmailType.CHANGE_EMAIL_ADDRESS);
   }
 
   private async sendEmail(user, emailType) {

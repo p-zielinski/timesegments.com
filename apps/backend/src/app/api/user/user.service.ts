@@ -231,14 +231,11 @@ export class UserService {
       };
     }
     try {
-      const updatedUser = await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          password: await hashString(
-            newPassword,
-            this.configService.get<number>('SALT_ROUNDS')
-          ),
-        },
+      const updatedUser = await this.updateUser(user.id, {
+        password: await hashString(
+          newPassword,
+          this.configService.get<number>('SALT_ROUNDS')
+        ),
       });
       if (updatedUser) {
         return { success: true };

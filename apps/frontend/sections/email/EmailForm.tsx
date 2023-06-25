@@ -83,26 +83,33 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
     return;
   };
 
-  // const changePassword = async (
-  //   email: EmailWithUser,
-  //   newPassword: string,
-  //   setFieldError: (field: string, message: string) => void
-  // ) => {
-  //   setIsSaving(true);
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/change-password',
-  //     body: { currentPassword, newPassword },
-  //     method: 'POST',
-  //   });
-  //   if (response.statusCode === StatusCodes.CREATED) {
-  //     setCompleted(true);
-  //   }
-  //   if (response.error) {
-  //     setFieldError('currentPassword', response.error);
-  //   }
-  //   setIsSaving(false);
-  //   return;
-  // };
+  const changePassword = async (
+    email: EmailWithUser,
+    newPassword: string,
+    setFieldError: (field: string, message: string) => void
+  ) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'email/change-password',
+      body: { emailId: email.id, secretKey: email.secretKey, newPassword },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      if (response.token) {
+        await handleFetch({
+          pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
+          body: { name: 'jwt_token', value: response.token },
+          method: 'POST',
+        });
+      }
+      setCompleted(true);
+    }
+    if (response.error) {
+      setFieldError('currentPassword', response.error);
+    }
+    setIsSaving(false);
+    return;
+  };
 
   switch (email.type) {
     case EmailType.EMAIL_CONFIRMATION:
@@ -177,7 +184,9 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
           <Formik
             initialValues={{ newPassword: '', newPasswordCheck: '' }}
             validationSchema={validationSchema}
-            onSubmit={() => undefined}
+            onSubmit={async (values, { setFieldError }) => {
+              await changePassword(email, values.newPassword, setFieldError);
+            }}
           >
             {({ handleSubmit, values }) => {
               const isFormValid = validationSchema.isValidSync(values);
@@ -235,14 +244,21 @@ export default function EmailForm({ email }: { email: EmailWithUser }) {
                   </Stack>
 
                   <LoadingButton
-                    disabled={!isFormValid}
+                    disabled={!isFormValid || isSaving}
                     fullWidth
                     size="large"
                     type="submit"
                     variant="contained"
-                    onClick={() => handleSubmit()}
+                    onClick={() => !isSaving && handleSubmit()}
                   >
-                    Change password
+                    {!isSaving ? (
+                      'Change password'
+                    ) : (
+                      <CircularProgress
+                        size={'15px'}
+                        sx={{ color: 'silver' }}
+                      />
+                    )}
                   </LoadingButton>
                 </>
               );

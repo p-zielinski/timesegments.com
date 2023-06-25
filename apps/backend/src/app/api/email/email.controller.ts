@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Headers,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { EmailService } from './email.service';
 import { ValidateEmailDto } from './dto/validateEmail.dto';
 import { ConfirmEmailDto } from './dto/confirmEmail.dto';
 import { SendResetPasswordEmailDto } from './dto/sendResetPasswordEmail.dto';
+import { ChangeEmailDto } from './dto/changePassword.dto';
 
 @Controller('email')
 export class EmailController {
@@ -22,6 +24,19 @@ export class EmailController {
   async resendConfirmationEmail(@UserDecorator() user: User) {
     const resendConfirmationEmailResult =
       await this.emailService.sendConfirmationEmail(user);
+    if (!resendConfirmationEmailResult.success) {
+      throw new BadRequestException({
+        error: resendConfirmationEmailResult?.error || 'Unknown error',
+      });
+    }
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('send-change-email-address-email')
+  async sendChangeEmailAddressEmail(@UserDecorator() user: User) {
+    const resendConfirmationEmailResult =
+      await this.emailService.sendChangeEmailAddressEmail(user);
     if (!resendConfirmationEmailResult.success) {
       throw new BadRequestException({
         error: resendConfirmationEmailResult?.error || 'Unknown error',
@@ -44,6 +59,26 @@ export class EmailController {
       });
     }
     return sendResetPasswordEmailResult;
+  }
+
+  @Post('change-password')
+  async changePasswordAndLogin(
+    @Body() changeEmailDto: ChangeEmailDto,
+    @Headers('User-Agent') userAgent: string
+  ) {
+    const { emailId, secretKey, newPassword } = changeEmailDto;
+    const changePasswordResult = await this.emailService.changePassword(
+      emailId,
+      secretKey,
+      newPassword,
+      userAgent
+    );
+    if (!changePasswordResult.success) {
+      throw new BadRequestException({
+        error: changePasswordResult?.error || 'Bad request',
+      });
+    }
+    return changePasswordResult;
   }
 
   //todo add recaptcha guard
@@ -72,7 +107,7 @@ export class EmailController {
     );
     if (!confirmEmailResult.success) {
       throw new BadRequestException({
-        error: confirmEmailResult?.error,
+        error: confirmEmailResult?.error || 'Bad request',
       });
     }
     return confirmEmailResult;
