@@ -36,14 +36,12 @@ type OptionsColors = {
 
 type Props = {
   user: User;
-  optionsColors: OptionsColors;
   currentTokenId: string;
   randomSliderHexColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
-  optionsColors,
   currentTokenId,
   randomSliderHexColor,
 }: Props) {
@@ -143,7 +141,8 @@ export default function Index({
             SettingOption.CONFIRM_EMAIL
           ):
             icon = 'ph:warning-fill';
-            successText = 'Email was sent!';
+            successText =
+              'We sent you an email with link to confirm your email address!';
             subtitle = user.email;
             iconColor = 'rgb(191,64,64)';
             color = { rgb: { r: 191, g: 64, b: 64, a: 1 }, hex: '#bf4040' };
@@ -503,12 +502,6 @@ export const getServerSideProps = async ({ req, res }) => {
     props: {
       user: user,
       currentTokenId,
-      optionsColors: Object.fromEntries(
-        Object.entries(SettingOption).map((keyAndValue) => [
-          keyAndValue[0],
-          getRandomRgbObjectForSliderPicker(),
-        ])
-      ),
       randomSliderHexColor: getHexFromRGBObject(
         getColorShadeBasedOnSliderPickerSchema(
           getRandomRgbObjectForSliderPicker().rgb,
