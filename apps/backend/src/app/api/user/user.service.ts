@@ -10,6 +10,7 @@ import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
   CategoriesSortOption,
+  EmailType,
   findKeyOfValueInObject,
   Limits,
   MeExtendedOption,
@@ -19,6 +20,7 @@ import {
 import { LoggerService } from '../../common/logger/loger.service';
 import { nanoid } from 'nanoid';
 import { DateTime } from 'luxon';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class UserService {
@@ -29,8 +31,72 @@ export class UserService {
     private readonly tokenService: TokenService,
     private readonly categoryService: CategoryService,
     private readonly timeLogService: TimeLogService,
-    private loggerService: LoggerService
+    private loggerService: LoggerService,
+    private emailService: EmailService
   ) {}
+
+  public async changeEmailAddress(user: User, newEmail: string) {
+    if (user.emailConfirmed) {
+      return {
+        success: false,
+        error:
+          'Your email has been already confirmed. Please refresh the page.',
+      };
+    }
+    const confirmationEmail = await this.emailService.findEmail(
+      user.id,
+      EmailType.EMAIL_CONFIRMATION
+    );
+    if (!confirmationEmail) {
+      return await this.changeEmailAddressAndSendConfirmationEmail(
+        user,
+        newEmail
+      );
+    }
+    const confirmationEmailUpdatedAt = DateTime.fromJSDate(
+      confirmationEmail.updatedAt
+    ).setZone(Timezones[user.timezone]);
+    const now = DateTime.now().setZone(Timezones[user.timezone]);
+    if (now.ts - confirmationEmailUpdatedAt.ts < 1000 * 60 * 60) {
+      return {
+        success: false,
+        error: 'You have changed your email recently, please try again later',
+      };
+    }
+    return await this.changeEmailAddressAndSendConfirmationEmail(
+      user,
+      newEmail,
+      confirmationEmail.id
+    );
+  }
+
+  private async changeEmailAddressAndSendConfirmationEmail(
+    user: User,
+    newEmail: string,
+    emailIdToDelete?: string
+  ) {
+    try {
+      await this.updateUser(user.id, { email: newEmail });
+    } catch (error) {
+      if (error?.meta?.target?.includes('email')) {
+        return { success: false, error: 'This email is already taken' };
+      }
+      return {
+        success: false,
+        error:
+          typeof error?.message === 'string'
+            ? error?.message?.trim()
+            : error?.message ?? 'Unknown error',
+      };
+    }
+    if (emailIdToDelete) {
+      await this.emailService.removeEmailRecordInDatabase(emailIdToDelete);
+    }
+    return await this.emailService.sendEmail(
+      user,
+      EmailType.EMAIL_CONFIRMATION
+    );
+  }
 
   public getNewControlValue(user: User): string {
     const newControlValue = nanoid();

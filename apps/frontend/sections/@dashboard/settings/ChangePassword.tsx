@@ -118,10 +118,8 @@ export default function ChangePassword({
         'New password cannot be the same as the current one'
       )
       .label('New password'),
-    newPasswordCheck: yup
+    newPasswordCheck: (yup as any)
       .string()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment @ts-ignore - We added this method
-      // @ts-ignore - We added this method
       .equalTo(yup.ref('newPassword'))
       .notOneOf(
         [yup.ref('currentPassword')],

@@ -23,6 +23,7 @@ import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
 import { SetSortingNotesDto } from './dto/setSortingNotes.dto';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories.dto';
+import { ChangeEmailAddressDto } from './dto/changeEmailAddress.dto';
 
 @Controller('user')
 export class UserController {
@@ -32,6 +33,25 @@ export class UserController {
   @Post('check-control-value')
   checkControlValue() {
     return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-email-address')
+  async changeEmailAddress(
+    @UserDecorator() user: User,
+    @Body() changeEmailAddressDto: ChangeEmailAddressDto
+  ) {
+    const { newEmail } = changeEmailAddressDto;
+    const changeEmailAddressResult = await this.userService.changeEmailAddress(
+      user,
+      newEmail
+    );
+    if (changeEmailAddressResult.success === false) {
+      throw new BadRequestException({
+        error: changeEmailAddressResult.error,
+      });
+    }
+    return changeEmailAddressResult;
   }
 
   @Post('register')

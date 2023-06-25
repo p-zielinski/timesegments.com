@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { Email, User } from '@prisma/client';
 import { EmailStatus, EmailType, getDuration, Timezones } from '@test1/shared';
@@ -18,6 +18,7 @@ export class EmailService {
   constructor(
     private prisma: PrismaService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private loggerService: LoggerService,
     private tokenService: TokenService,
@@ -59,6 +60,7 @@ export class EmailService {
       };
     }
     await this.removeEmailRecordInDatabase(email.id);
+    await this.sendEmail(email.user, EmailType.EMAIL_CONFIRMATION);
     const token = await this.tokenService.generateToken(
       email.user.id,
       new Date(Date.now() + 3600 * 1000 * 24 * 60),
@@ -157,7 +159,7 @@ export class EmailService {
     return await this.sendEmail(user, EmailType.CHANGE_EMAIL_ADDRESS);
   }
 
-  private async sendEmail(user, emailType) {
+  public async sendEmail(user, emailType) {
     const createEmailRecordInDatabaseResult =
       await this.createEmailRecordInDatabase(user, emailType);
     if (!createEmailRecordInDatabaseResult.success) {
@@ -283,11 +285,11 @@ export class EmailService {
     }
   }
 
-  private async removeEmailRecordInDatabase(id) {
+  public async removeEmailRecordInDatabase(id) {
     return await this.prisma.email.delete({ where: { id } });
   }
 
-  private async findEmail(userId: string, emailType: EmailType) {
+  public async findEmail(userId: string, emailType: EmailType) {
     const where = {
       userId,
       type: emailType,
