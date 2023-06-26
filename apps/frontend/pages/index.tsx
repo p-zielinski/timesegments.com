@@ -92,21 +92,6 @@ export default function Index({ randomSliderColor }: Props) {
 
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
-  if (process.env.PAGE_PASSWORD) {
-    if (
-      process.env.PAGE_PASSWORD.split(':')[0] !==
-        cookies.get('website_login') ||
-      process.env.PAGE_PASSWORD.split(':')[1] !==
-        cookies.get('website_password')
-    ) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: '/password',
-        },
-      };
-    }
-  }
 
   const jwt_token = cookies.get('jwt_token');
   let user: UserWithCategoriesAndNotes;
