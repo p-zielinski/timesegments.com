@@ -223,7 +223,7 @@ export default function EditNote({
                 <Box sx={{ p: 1.5, pb: 0 }}>
                   <InputText
                     type="text"
-                    rows={3}
+                    rows={4}
                     multiline={true}
                     name={'text'}
                     label={`Note`}

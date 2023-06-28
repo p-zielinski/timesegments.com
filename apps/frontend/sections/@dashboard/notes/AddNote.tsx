@@ -104,6 +104,7 @@ export default function AddNew({
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
+      setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
     } else if (response.statusCode === StatusCodes.CONFLICT) {
@@ -178,7 +179,7 @@ export default function AddNew({
                 <Box sx={{ p: 1.5, pb: 0 }}>
                   <InputText
                     type="text"
-                    rows={3}
+                    rows={4}
                     multiline={true}
                     name={'text'}
                     label={`Note`}
