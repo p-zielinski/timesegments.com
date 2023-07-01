@@ -229,7 +229,7 @@ export default function TimeLogs({
     return {
       border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_RED}`,
       p: 1,
-      borderRadius: 1,
+      borderRadius: '12px',
       fontWeight: 500,
       width: '50%',
       textAlign: 'right',
@@ -249,7 +249,7 @@ export default function TimeLogs({
     return {
       border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_GREEN}`,
       p: 1,
-      borderRadius: 1,
+      borderRadius: '12px',
       fontWeight: 500,
       width: '50%',
       textAlign: 'left',
