@@ -1,9 +1,9 @@
 // @mui
-import {Box, Card, CardContent, Typography} from '@mui/material';
-import {Timeline, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator,} from '@mui/lab';
+import {Box, Typography} from '@mui/material';
+import {TimelineDot,} from '@mui/lab';
 import {nanoid} from 'nanoid'; // utils
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {DateTime} from 'luxon';
 import {getDuration, Timezones} from '@test1/shared';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
@@ -19,37 +19,29 @@ export default function AppOrderTimeline({
   showDetails,
 }) {
   return (
-    <Card>
-      <CardContent
-        sx={{
-          '& .MuiTimelineItem-missingOppositeContent:before': {
-            display: 'none',
-          },
-        }}
-      >
-        {timeLogsWithinActiveDate?.length ? (
-          <Timeline sx={{ gap: 1.5, m: -2 }}>
-            {showDetails
-              ? timeLogsWithinActiveDate
-                  .sort((a, b) => b.startedAt - a.startedAt)
-                  .map((timeLogExtended) => (
-                    <DetailPeriod
-                      timeLogExtended={timeLogExtended}
-                      user={user}
-                      key={nanoid()}
-                    />
-                  ))
-              : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
-                  (group) => (
-                    <GroupedPeriod group={group} user={user} key={nanoid()} />
-                  )
-                )}
-          </Timeline>
-        ) : (
-          'no data'
-        )}
-      </CardContent>
-    </Card>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      {timeLogsWithinActiveDate?.length ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {showDetails
+            ? timeLogsWithinActiveDate
+                .sort((a, b) => b.startedAt - a.startedAt)
+                .map((timeLogExtended) => (
+                  <DetailPeriod
+                    timeLogExtended={timeLogExtended}
+                    user={user}
+                    key={nanoid()}
+                  />
+                ))
+            : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
+                (group) => (
+                  <GroupedPeriod group={group} user={user} key={nanoid()} />
+                )
+              )}
+        </Box>
+      ) : (
+        'no data'
+      )}
+    </Box>
   );
 }
 
@@ -85,20 +77,24 @@ function GroupedPeriod({ group, user }) {
   const color = group?.category?.color;
 
   return (
-    <TimelineItem
+    <Box
       sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
         background: getBackgroundColor(0.2, color),
         borderRadius: '10px',
-        gap: '10px',
-        pl: 1.5,
+        pl: 0,
+        m: 0,
         pr: 1.5,
         minHeight: '30px',
       }}
     >
-      <TimelineSeparator>
+      <Box sx={{ marginLeft: '10px' }}>
         <TimelineDot sx={{ background: color, mb: 0 }} />
-      </TimelineSeparator>
-      <TimelineContent>
+      </Box>
+      <Box
+        sx={{ margin: '6px', marginLeft: '10px', marginBottom: '8px', flex: 1 }}
+      >
         <Typography variant="subtitle2">
           {group.category?.name}
           <span
@@ -119,8 +115,8 @@ function GroupedPeriod({ group, user }) {
             Duration: <b>{getDuration(totalPeriodInMs)}</b>
           </Typography>
         </Box>
-      </TimelineContent>
-    </TimelineItem>
+      </Box>
+    </Box>
   );
 }
 
@@ -156,20 +152,24 @@ function DetailPeriod({ timeLogExtended, user }) {
   const color = timeLogExtended?.category?.color;
 
   return (
-    <TimelineItem
+    <Box
       sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
         background: getBackgroundColor(0.2, color),
         borderRadius: '10px',
-        gap: '10px',
+        pl: 0,
+        m: 0,
         pr: 1.5,
-        pl: 1.5,
+        minHeight: '30px',
       }}
     >
-      <TimelineSeparator>
-        <TimelineDot sx={{ background: color }} />
-      </TimelineSeparator>
-
-      <TimelineContent>
+      <Box sx={{ marginLeft: '10px' }}>
+        <TimelineDot sx={{ background: color, mb: 0 }} />
+      </Box>
+      <Box
+        sx={{ margin: '6px', marginLeft: '10px', marginBottom: '8px', flex: 1 }}
+      >
         <Typography variant="subtitle2">
           {timeLogExtended.category?.name}
           <span
@@ -227,7 +227,7 @@ function DetailPeriod({ timeLogExtended, user }) {
             </b>
           </Typography>
         </Box>
-      </TimelineContent>
-    </TimelineItem>
+      </Box>
+    </Box>
   );
 }
