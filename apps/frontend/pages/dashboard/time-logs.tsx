@@ -40,6 +40,8 @@ import { findOrFetchTimeLogsWithinActiveDate } from '../../utils/fetchingData/fi
 import AppOrderTimeline from '../../sections/@dashboard/app/AppOrderTimeline';
 import { getCurrentDate, getRelativeDate } from '../../utils/getCurrentDate';
 import { isMobile } from 'react-device-detect';
+import { getHexFromRGBAString } from '../../utils/colors/getHexFromRGBString';
+import { getRgbaObjectFromHexString } from '../../utils/colors/getRgbaObjectFromHexString';
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -267,10 +269,9 @@ export default function TimeLogs({
       <Helmet>
         <title>Settings</title>
       </Helmet>
-
-      <Container maxWidth="xl">
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6} lg={6}>
+      <Container sx={{ mt: -3 }}>
+        <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
+          <Grid item xs={1} sm={1} md={1}>
             <Typography
               variant="h4"
               align={'center'}
@@ -413,10 +414,26 @@ export default function TimeLogs({
                 <Typography
                   variant="subtitle2"
                   noWrap
-                  sx={{ p: 1 }}
+                  sx={{ p: 1, lineHeight: 0.8 }}
                   align="right"
                 >
                   Details
+                  <br />
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      fontSize: 12,
+                      color: getHexFromRGBObject(
+                        getColorShadeBasedOnSliderPickerSchema(
+                          getRgbaObjectFromHexString(
+                            getHexFromRGBAString(GREEN)
+                          )
+                        )
+                      ),
+                    }}
+                  >
+                    (edit data)
+                  </span>
                 </Typography>
               </Box>
             </Card>

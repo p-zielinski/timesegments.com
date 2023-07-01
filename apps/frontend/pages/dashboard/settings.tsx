@@ -217,7 +217,7 @@ export default function Index({
       <Helmet>
         <title>Dashboard</title>
       </Helmet>
-      <Container sx={{ minHeight: 'calc(100vh - 200px)' }}>
+      <Container sx={{ minHeight: 'calc(100vh - 200px)', mt: -5 }}>
         <Grid container spacing={2} columns={1}>
           <Grid item xs={1} sm={1} md={1}>
             <Box

@@ -1,4 +1,4 @@
-import {Box, Container} from '@mui/material'; // hooks
+import {Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
 import {Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
@@ -192,8 +192,7 @@ export default function Index({
       title={'Active Categories'}
       randomSliderHexColor={randomSliderHexColor}
     >
-      <Container>
-        <Box sx={{ mt: -5 }} />
+      <Container sx={{ mt: -5 }}>
         <Categories
           groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
           timeLogs={timeLogs}
