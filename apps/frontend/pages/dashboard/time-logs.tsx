@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Box, Button, Card, Container, Grid, Typography } from '@mui/material';
+import { Box, Card, Container, Grid, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 // components
 // sections
@@ -24,6 +24,7 @@ import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalse
 import {
   GRAY,
   GREEN,
+  IS_SAVING_HEX,
   LIGHT_GREEN,
   LIGHT_RED,
   LIGHT_SILVER,
@@ -224,24 +225,44 @@ export default function TimeLogs({
 
   const theme = useTheme();
 
-  const previousDatesButtonSx = {
-    borderColor: LIGHT_RED,
-    color: RED,
-    '&:hover': {
-      borderColor: disableHover ? LIGHT_RED : RED,
-      color: RED,
-      background: !disableHover && ULTRA_LIGHT_RED,
-    },
+  const previousDatesButtonSx = (isDisabled) => {
+    return {
+      border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_RED}`,
+      p: 1,
+      borderRadius: 1,
+      fontWeight: 500,
+      width: '50%',
+      textAlign: 'right',
+      cursor: isDisabled ? 'auto' : 'pointer',
+      color: isDisabled ? IS_SAVING_HEX : RED,
+      textTransform: 'capitalize',
+      '&:hover': !disableHover &&
+        !isDisabled && {
+          borderColor: disableHover ? LIGHT_RED : RED,
+          color: RED,
+          background: !disableHover && ULTRA_LIGHT_RED,
+        },
+    };
   };
 
-  const futureDatesButtonSx = {
-    borderColor: LIGHT_GREEN,
-    color: GREEN,
-    '&:hover': {
-      color: GREEN,
-      borderColor: disableHover ? LIGHT_GREEN : GREEN,
-      background: !disableHover && ULTRA_LIGHT_GREEN,
-    },
+  const futureDatesButtonSx = (isDisabled) => {
+    return {
+      border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_GREEN}`,
+      p: 1,
+      borderRadius: 1,
+      fontWeight: 500,
+      width: '50%',
+      textAlign: 'left',
+      cursor: isDisabled ? 'auto' : 'pointer',
+      color: isDisabled ? IS_SAVING_HEX : GREEN,
+      textTransform: 'capitalize',
+      '&:hover': !disableHover &&
+        !isDisabled && {
+          color: GREEN,
+          borderColor: disableHover ? LIGHT_GREEN : GREEN,
+          background: !disableHover && ULTRA_LIGHT_GREEN,
+        },
+    };
   };
 
   const canSelectFutureDate = () => {
@@ -297,61 +318,76 @@ export default function TimeLogs({
                 sx={{
                   display: 'flex',
                   flexDirection: 'row',
+                  width: '100%',
                   gap: 1,
                 }}
               >
-                <Button
-                  variant="outlined"
-                  sx={previousDatesButtonSx}
-                  onClick={() => changeDay(-1)}
-                  disabled={isFetching}
+                <Box
+                  sx={previousDatesButtonSx(isFetching)}
+                  onClick={() => !isFetching && changeDay(-1)}
                 >
                   -1 day
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={futureDatesButtonSx}
-                  onClick={() => changeDay(1)}
-                  disabled={isFetching || canSelectFutureDate()}
+                </Box>
+                <Box
+                  sx={futureDatesButtonSx(isFetching || canSelectFutureDate())}
+                  onClick={() =>
+                    !(isFetching || canSelectFutureDate()) && changeDay(1)
+                  }
                 >
                   +1 day
-                </Button>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  sx={previousDatesButtonSx}
-                  onClick={() => changeDay(-7)}
-                  disabled={isFetching}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  width: '100%',
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={previousDatesButtonSx(isFetching)}
+                  onClick={() => !isFetching && changeDay(-7)}
                 >
                   -1 week
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={futureDatesButtonSx}
-                  onClick={() => changeDay(7)}
-                  disabled={isFetching || canSelect7DaysInTheFutureDate()}
+                </Box>
+                <Box
+                  sx={futureDatesButtonSx(
+                    isFetching || canSelect7DaysInTheFutureDate()
+                  )}
+                  onClick={() =>
+                    !(isFetching || canSelect7DaysInTheFutureDate()) &&
+                    changeDay(7)
+                  }
                 >
                   +1 week
-                </Button>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  sx={previousDatesButtonSx}
-                  onClick={() => changeMonth(-1)}
-                  disabled={isFetching}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  width: '100%',
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={previousDatesButtonSx(isFetching)}
+                  onClick={() => !isFetching && changeMonth(-1)}
                 >
                   -1 month
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={futureDatesButtonSx}
-                  onClick={() => changeMonth(1)}
-                  disabled={isFetching || canSelectAMonthInTheFutureDate()}
+                </Box>
+                <Box
+                  sx={futureDatesButtonSx(
+                    isFetching || canSelectAMonthInTheFutureDate()
+                  )}
+                  onClick={() =>
+                    !(isFetching || canSelectAMonthInTheFutureDate()) &&
+                    changeMonth(1)
+                  }
                 >
                   +1 month
-                </Button>
+                </Box>
               </Box>
             </Box>
             <Card
