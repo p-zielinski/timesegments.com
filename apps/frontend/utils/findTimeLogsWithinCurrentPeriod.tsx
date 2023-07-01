@@ -69,6 +69,9 @@ export const findTimeLogsWithinCurrentPeriod = ({
   categories: Category[];
   options?: { asIso: true };
 }): TimeLogWithinCurrentPeriod[] | TimeLogWithinCurrentPeriodISO[] => {
+  if (!Array.isArray(allTimeLogs)) {
+    return [];
+  }
   const fromDateTime = DateTime.fromObject(
     { ...fromDate, hour: 0, minute: 0, second: 0 },
     { zone: userTimezone }
