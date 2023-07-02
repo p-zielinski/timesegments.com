@@ -45,7 +45,6 @@ import {getHexFromRGBAString} from '../../utils/colors/getHexFromRGBString';
 import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterLuxon} from '@mui/x-date-pickers/AdapterLuxon';
-import Iconify from '../../components/iconify';
 import Calendar from 'apps/frontend/sections/@dashboard/browse/Calendar';
 
 // const Calendar = dynamic(
@@ -303,8 +302,6 @@ export default function TimeLogs({
     return dateAMonthAgo.ts < activeDate.ts;
   };
 
-  const [showCalendar, setShowCalendar] = useState(false);
-
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <DashboardLayout
@@ -319,201 +316,11 @@ export default function TimeLogs({
         <Container sx={{ mt: -3 }}>
           <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
             <Grid item xs={1} sm={1} md={1}>
-              {!showCalendar ? (
-                <>
-                  <Box
-                    sx={{
-                      mb: 1,
-                      mt: -3,
-                      alignItems: 'center',
-                      display: 'flex',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex' }}>
-                      <Typography variant="h4">{title}</Typography>
-                      <Box onClick={() => setShowCalendar(true)}>
-                        <Iconify
-                          icon="mdi:calendar"
-                          width={35}
-                          sx={{
-                            cursor: 'pointer',
-                            opacity: 1,
-                            marginTop: 0.31,
-                            marginLeft: 0.5,
-                            color: GREEN,
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      mt: 1,
-                      mb: 2,
-                      gap: 2,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        width: '100%',
-                      }}
-                    >
-                      <Box
-                        sx={previousDatesButtonSx(isFetching)}
-                        onClick={() => !isFetching && changeDay(-1)}
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="right"
-                        >
-                          -1
-                        </Typography>
-                      </Box>
-                      <Box sx={previousDatesButtonSxA(isFetching)}>
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="right"
-                        >
-                          day
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={futureDatesButtonSx(
-                          isFetching || canSelectFutureDate()
-                        )}
-                        onClick={() =>
-                          !(isFetching || canSelectFutureDate()) && changeDay(1)
-                        }
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="left"
-                        >
-                          +1
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        width: '100%',
-                      }}
-                    >
-                      <Box
-                        sx={previousDatesButtonSx(isFetching)}
-                        onClick={() => !isFetching && changeDay(-7)}
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="right"
-                        >
-                          -1
-                        </Typography>
-                      </Box>
-                      <Box sx={previousDatesButtonSxA(isFetching)}>
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="right"
-                        >
-                          week
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={futureDatesButtonSx(
-                          isFetching || canSelect7DaysInTheFutureDate()
-                        )}
-                        onClick={() =>
-                          !(isFetching || canSelect7DaysInTheFutureDate()) &&
-                          changeDay(7)
-                        }
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="left"
-                        >
-                          +1
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        width: '100%',
-                      }}
-                    >
-                      <Box
-                        sx={previousDatesButtonSx(isFetching)}
-                        onClick={() => !isFetching && changeMonth(-1)}
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="right"
-                        >
-                          -1
-                        </Typography>
-                      </Box>
-                      <Box sx={previousDatesButtonSxA(isFetching)}>
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="right"
-                        >
-                          Month
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={futureDatesButtonSx(
-                          isFetching || canSelectAMonthInTheFutureDate()
-                        )}
-                        onClick={() =>
-                          !(isFetching || canSelectAMonthInTheFutureDate()) &&
-                          changeMonth(1)
-                        }
-                      >
-                        <Typography
-                          variant="subtitle2"
-                          noWrap
-                          sx={{ p: 1 }}
-                          align="left"
-                        >
-                          +1
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                </>
-              ) : (
-                <Calendar
-                  activeDate={activeDate}
-                  setActiveDate={setActiveDate}
-                  disabled={isFetching}
-                  setShowCalendar={setShowCalendar}
-                />
-              )}
+              <Calendar
+                activeDate={activeDate}
+                setActiveDate={setActiveDate}
+                disabled={isFetching}
+              />
               {/*  <Box*/}
               {/*    sx={previousDatesButtonSx(isFetching, 0)}*/}
               {/*    onClick={() =>*/}

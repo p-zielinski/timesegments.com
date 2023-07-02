@@ -2,19 +2,16 @@ import { DateCalendar } from '@mui/x-date-pickers';
 import React from 'react';
 import { DateTime } from 'luxon';
 import { Box } from '@mui/material';
-import { LIGHT_BLUE, RED, ULTRA_LIGHT_BLUE } from '../../../consts/colors';
-import Iconify from '../../../components/iconify';
+import { LIGHT_BLUE, ULTRA_LIGHT_BLUE } from '../../../consts/colors';
 
 export default function Calendar({
   activeDate,
   setActiveDate,
   disabled,
-  setShowCalendar,
 }: {
   activeDate: DateTime;
   setActiveDate: (date: DateTime) => void;
   disabled: boolean;
-  setShowCalendar: (showCalendar: boolean) => void;
 }) {
   return (
     <Box
@@ -31,37 +28,16 @@ export default function Calendar({
     >
       <Box
         sx={{
-          position: 'absolute',
-          right: 0,
-          color: RED,
-        }}
-        onClick={() => setShowCalendar(false)}
-      >
-        <Iconify
-          icon="ph:x-bold"
-          width={30}
-          sx={{
-            cursor: 'pointer',
-            opacity: 1,
-            mt: 0.31,
-            ml: 0.5,
-          }}
-        />
-      </Box>
-      <Box
-        sx={{
           display: 'flex',
         }}
       >
-        <Box sx={{ width: '320px' }}>
-          <DateCalendar
-            value={activeDate}
-            onChange={(newValue) => setActiveDate(newValue)}
-            disableFuture
-            disabled={disabled}
-            sx={{ mr: -1 }}
-          />
-        </Box>
+        <DateCalendar
+          value={activeDate}
+          onChange={(newValue) => setActiveDate(newValue)}
+          disableFuture
+          disabled={disabled}
+          sx={{ mr: -1 }}
+        />
       </Box>
     </Box>
   );
