@@ -1,48 +1,57 @@
-import { Helmet } from 'react-helmet-async';
+import {Helmet} from 'react-helmet-async';
 // @mui
-import { useTheme } from '@mui/material/styles';
-import { Box, Card, Container, Grid, Typography } from '@mui/material';
+import {useTheme} from '@mui/material/styles';
+import {Box, Card, Container, Grid, Typography} from '@mui/material';
 import dynamic from 'next/dynamic';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
-import React, { useEffect, useState } from 'react';
-import { User } from '@prisma/client';
-import { DateTime } from 'luxon';
-import { Timezones } from '@test1/shared';
+import React, {useEffect, useState} from 'react';
+import {User} from '@prisma/client';
+import {DateTime} from 'luxon';
+import {Timezones} from '@test1/shared';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
   TimeLogWithinCurrentPeriodISO,
 } from '../../utils/findTimeLogsWithinCurrentPeriod';
+import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
+import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
+import {deleteIfValueIsFalseFromObject} from '../../utils/deleteIfValueIsFalseFromObject';
 import {
-  TimeLogsWithinDate,
-  TimeLogsWithinDateISO,
-} from '../../types/timeLogsWithinDate';
-import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
-import { deleteIfValueIsFalseFromObject } from '../../utils/deleteIfValueIsFalseFromObject';
-import {
+  BLUE,
   GRAY,
   GREEN,
   IS_SAVING_HEX,
+  LIGHT_BLUE,
   LIGHT_GREEN,
   LIGHT_RED,
   LIGHT_SILVER,
   RED,
   SUPER_LIGHT_SILVER,
+  ULTRA_LIGHT_BLUE,
   ULTRA_LIGHT_GREEN,
   ULTRA_LIGHT_RED,
 } from '../../consts/colors';
 import Cookies from 'cookies';
-import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
-import { findOrFetchTimeLogsWithinActiveDate } from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
+import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
+import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
+import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import AppOrderTimeline from '../../sections/@dashboard/app/AppOrderTimeline';
-import { getCurrentDate, getRelativeDate } from '../../utils/getCurrentDate';
-import { isMobile } from 'react-device-detect';
-import { getHexFromRGBAString } from '../../utils/colors/getHexFromRGBString';
-import { getRgbaObjectFromHexString } from '../../utils/colors/getRgbaObjectFromHexString';
+import {getCurrentDate, getRelativeDate} from '../../utils/getCurrentDate';
+import {isMobile} from 'react-device-detect';
+import {getHexFromRGBAString} from '../../utils/colors/getHexFromRGBString';
+import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterLuxon} from '@mui/x-date-pickers/AdapterLuxon';
+import Iconify from '../../components/iconify';
+import Calendar from 'apps/frontend/sections/@dashboard/browse/Calendar';
+
+// const Calendar = dynamic(
+//   () => import('../../sections/@dashboard/browse/Calendar'),
+//   { ssr: false }
+// );
 
 const AppNewsUpdate = dynamic(
   () => import('../../sections/@dashboard/app/AppNewsUpdate'),
@@ -119,7 +128,7 @@ export default function TimeLogs({
     }) as unknown as any
   );
   const [isFetching, setIsFetching] = useState(false);
-  const [activeDate, setActiveDate] = useState(
+  const [activeDate, setActiveDate] = useState<DateTime>(
     DateTime.now().setZone(Timezones[user.timezone]).set({
       hours: 0,
       minutes: 0,
@@ -225,14 +234,27 @@ export default function TimeLogs({
 
   const theme = useTheme();
 
+  const previousDatesButtonSxA = (isDisabled) => {
+    return {
+      position: 'relative',
+      backgroundColor: isDisabled ? SUPER_LIGHT_SILVER : ULTRA_LIGHT_BLUE,
+      border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_BLUE}`,
+      borderRight: 'none',
+      borderLeft: 'none',
+      color: isDisabled ? IS_SAVING_HEX : BLUE,
+      textTransform: 'capitalize',
+    };
+  };
+
   const previousDatesButtonSx = (isDisabled) => {
     return {
+      position: 'relative',
+      flex: 1,
+      backgroundColor: isDisabled ? SUPER_LIGHT_SILVER : ULTRA_LIGHT_RED,
       border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_RED}`,
-      p: 1,
-      borderRadius: '12px',
-      fontWeight: 500,
-      width: '50%',
-      textAlign: 'right',
+      borderTopLeftRadius: '12px',
+      borderBottomLeftRadius: '12px',
+      borderRight: 'none',
       cursor: isDisabled ? 'auto' : 'pointer',
       color: isDisabled ? IS_SAVING_HEX : RED,
       textTransform: 'capitalize',
@@ -247,19 +269,20 @@ export default function TimeLogs({
 
   const futureDatesButtonSx = (isDisabled) => {
     return {
+      position: 'relative',
+      flex: 1,
+      backgroundColor: isDisabled ? SUPER_LIGHT_SILVER : ULTRA_LIGHT_GREEN,
       border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_GREEN}`,
-      p: 1,
-      borderRadius: '12px',
-      fontWeight: 500,
-      width: '50%',
-      textAlign: 'left',
+      borderTopRightRadius: '12px',
+      borderBottomRightRadius: '12px',
+      borderLeft: 'none',
       cursor: isDisabled ? 'auto' : 'pointer',
       color: isDisabled ? IS_SAVING_HEX : GREEN,
       textTransform: 'capitalize',
       '&:hover': !disableHover &&
         !isDisabled && {
-          color: GREEN,
           borderColor: disableHover ? LIGHT_GREEN : GREEN,
+          color: GREEN,
           background: !disableHover && ULTRA_LIGHT_GREEN,
         },
     };
@@ -280,321 +303,465 @@ export default function TimeLogs({
     return dateAMonthAgo.ts < activeDate.ts;
   };
 
+  const [showCalendar, setShowCalendar] = useState(false);
+
   return (
-    <DashboardLayout
-      user={user}
-      setUser={setUser}
-      title={'Dashboard'}
-      randomSliderHexColor={randomSliderHexColor}
-    >
-      <Helmet>
-        <title>Settings</title>
-      </Helmet>
-      <Container sx={{ mt: -3 }}>
-        <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
-          <Grid item xs={1} sm={1} md={1}>
-            <Typography
-              variant="h4"
-              align={'center'}
-              sx={{
-                mb: 1,
-                mt: -3,
-              }}
-            >
-              {title}
-            </Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 1,
-                mt: 1,
-                mb: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  width: '100%',
-                  gap: 1,
-                }}
-              >
-                <Box
-                  sx={previousDatesButtonSx(isFetching)}
-                  onClick={() => !isFetching && changeDay(-1)}
-                >
-                  -1 day
-                </Box>
-                <Box
-                  sx={futureDatesButtonSx(isFetching || canSelectFutureDate())}
-                  onClick={() =>
-                    !(isFetching || canSelectFutureDate()) && changeDay(1)
-                  }
-                >
-                  +1 day
-                </Box>
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  width: '100%',
-                  gap: 1,
-                }}
-              >
-                <Box
-                  sx={previousDatesButtonSx(isFetching)}
-                  onClick={() => !isFetching && changeDay(-7)}
-                >
-                  -1 week
-                </Box>
-                <Box
-                  sx={futureDatesButtonSx(
-                    isFetching || canSelect7DaysInTheFutureDate()
-                  )}
-                  onClick={() =>
-                    !(isFetching || canSelect7DaysInTheFutureDate()) &&
-                    changeDay(7)
-                  }
-                >
-                  +1 week
-                </Box>
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  width: '100%',
-                  gap: 1,
-                }}
-              >
-                <Box
-                  sx={previousDatesButtonSx(isFetching)}
-                  onClick={() => !isFetching && changeMonth(-1)}
-                >
-                  -1 month
-                </Box>
-                <Box
-                  sx={futureDatesButtonSx(
-                    isFetching || canSelectAMonthInTheFutureDate()
-                  )}
-                  onClick={() =>
-                    !(isFetching || canSelectAMonthInTheFutureDate()) &&
-                    changeMonth(1)
-                  }
-                >
-                  +1 month
-                </Box>
-              </Box>
-            </Box>
-            <Card
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                color: isFetching && GRAY,
-                mb: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  position: 'relative',
-                  cursor: !isFetching && showDetails && 'pointer',
-                  flex: 1,
-                  backgroundColor: !showDetails
-                    ? isFetching
-                      ? LIGHT_SILVER
-                      : LIGHT_GREEN
-                    : isFetching
-                    ? SUPER_LIGHT_SILVER
-                    : ULTRA_LIGHT_GREEN,
-                  border: `1px solid ${
-                    isFetching ? LIGHT_SILVER : LIGHT_GREEN
-                  }`,
-                  borderTopLeftRadius: '12px',
-                  borderBottomLeftRadius: '12px',
-                }}
-                onClick={() =>
-                  !isFetching && showDetails && setShowDetails(false)
-                }
-              >
-                <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>
-                  Summary
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  position: 'relative',
-                  cursor: !isFetching && !showDetails && 'pointer',
-                  flex: 1,
-                  backgroundColor: showDetails
-                    ? isFetching
-                      ? LIGHT_SILVER
-                      : LIGHT_GREEN
-                    : isFetching
-                    ? SUPER_LIGHT_SILVER
-                    : ULTRA_LIGHT_GREEN,
-                  border: `1px solid ${
-                    isFetching ? LIGHT_SILVER : LIGHT_GREEN
-                  }`,
-                  borderTopRightRadius: '12px',
-                  borderBottomRightRadius: '12px',
-                }}
-                onClick={() =>
-                  !isFetching && !showDetails && setShowDetails(true)
-                }
-              >
-                <Typography
-                  variant="subtitle2"
-                  noWrap
-                  sx={{ p: 1, lineHeight: 0.8 }}
-                  align="right"
-                >
-                  Details
-                  <br />
-                  <span
-                    style={{
-                      fontWeight: 400,
-                      fontSize: 12,
-                      color: getHexFromRGBObject(
-                        getColorShadeBasedOnSliderPickerSchema(
-                          getRgbaObjectFromHexString(
-                            getHexFromRGBAString(GREEN)
-                          )
-                        )
-                      ),
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <DashboardLayout
+        user={user}
+        setUser={setUser}
+        title={'Dashboard'}
+        randomSliderHexColor={randomSliderHexColor}
+      >
+        <Helmet>
+          <title>Settings</title>
+        </Helmet>
+        <Container sx={{ mt: -3 }}>
+          <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
+            <Grid item xs={1} sm={1} md={1}>
+              {!showCalendar ? (
+                <>
+                  <Box
+                    sx={{
+                      mb: 1,
+                      mt: -3,
+                      alignItems: 'center',
+                      display: 'flex',
+                      justifyContent: 'center',
                     }}
                   >
-                    (edit data)
-                  </span>
-                </Typography>
-              </Box>
-            </Card>
-            <AppOrderTimeline
-              key={'timeLogs'}
-              user={user}
-              timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-              showDetails={showDetails}
-            />
+                    <Box sx={{ display: 'flex' }}>
+                      <Typography variant="h4">{title}</Typography>
+                      <Box onClick={() => setShowCalendar(true)}>
+                        <Iconify
+                          icon="mdi:calendar"
+                          width={35}
+                          sx={{
+                            cursor: 'pointer',
+                            opacity: 1,
+                            marginTop: 0.31,
+                            marginLeft: 0.5,
+                            color: GREEN,
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      mt: 1,
+                      mb: 2,
+                      gap: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                      }}
+                    >
+                      <Box
+                        sx={previousDatesButtonSx(isFetching)}
+                        onClick={() => !isFetching && changeDay(-1)}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="right"
+                        >
+                          -1
+                        </Typography>
+                      </Box>
+                      <Box sx={previousDatesButtonSxA(isFetching)}>
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="right"
+                        >
+                          day
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={futureDatesButtonSx(
+                          isFetching || canSelectFutureDate()
+                        )}
+                        onClick={() =>
+                          !(isFetching || canSelectFutureDate()) && changeDay(1)
+                        }
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="left"
+                        >
+                          +1
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                      }}
+                    >
+                      <Box
+                        sx={previousDatesButtonSx(isFetching)}
+                        onClick={() => !isFetching && changeDay(-7)}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="right"
+                        >
+                          -1
+                        </Typography>
+                      </Box>
+                      <Box sx={previousDatesButtonSxA(isFetching)}>
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="right"
+                        >
+                          week
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={futureDatesButtonSx(
+                          isFetching || canSelect7DaysInTheFutureDate()
+                        )}
+                        onClick={() =>
+                          !(isFetching || canSelect7DaysInTheFutureDate()) &&
+                          changeDay(7)
+                        }
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="left"
+                        >
+                          +1
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                      }}
+                    >
+                      <Box
+                        sx={previousDatesButtonSx(isFetching)}
+                        onClick={() => !isFetching && changeMonth(-1)}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="right"
+                        >
+                          -1
+                        </Typography>
+                      </Box>
+                      <Box sx={previousDatesButtonSxA(isFetching)}>
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="right"
+                        >
+                          Month
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={futureDatesButtonSx(
+                          isFetching || canSelectAMonthInTheFutureDate()
+                        )}
+                        onClick={() =>
+                          !(isFetching || canSelectAMonthInTheFutureDate()) &&
+                          changeMonth(1)
+                        }
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          noWrap
+                          sx={{ p: 1 }}
+                          align="left"
+                        >
+                          +1
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </>
+              ) : (
+                <Calendar
+                  activeDate={activeDate}
+                  setActiveDate={setActiveDate}
+                  disabled={isFetching}
+                  setShowCalendar={setShowCalendar}
+                />
+              )}
+              {/*  <Box*/}
+              {/*    sx={previousDatesButtonSx(isFetching, 0)}*/}
+              {/*    onClick={() =>*/}
+              {/*      !isFetching && showDetails && setShowDetails(false)*/}
+              {/*    }*/}
+              {/*  >*/}
+              {/*    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>*/}
+              {/*      -1 Day*/}
+              {/*    </Typography>*/}
+              {/*  </Box>*/}
+              {/*  <Box*/}
+              {/*    sx={{*/}
+              {/*      position: 'relative',*/}
+              {/*      cursor: !isFetching && !showDetails && 'pointer',*/}
+              {/*      flex: 1,*/}
+              {/*      backgroundColor: showDetails*/}
+              {/*        ? isFetching*/}
+              {/*          ? LIGHT_SILVER*/}
+              {/*          : LIGHT_GREEN*/}
+              {/*        : isFetching*/}
+              {/*        ? SUPER_LIGHT_SILVER*/}
+              {/*        : ULTRA_LIGHT_GREEN,*/}
+              {/*      border: `1px solid ${*/}
+              {/*        isFetching ? LIGHT_SILVER : LIGHT_GREEN*/}
+              {/*      }`,*/}
+              {/*      borderTopRightRadius: '12px',*/}
+              {/*      borderBottomRightRadius: '12px',*/}
+              {/*    }}*/}
+              {/*    onClick={() =>*/}
+              {/*      !isFetching && !showDetails && setShowDetails(true)*/}
+              {/*    }*/}
+              {/*  >*/}
+              {/*    <Typography*/}
+              {/*      variant="subtitle2"*/}
+              {/*      noWrap*/}
+              {/*      sx={{ p: 1 }}*/}
+              {/*      align="right"*/}
+              {/*    >*/}
+              {/*      +1 Day*/}
+              {/*    </Typography>*/}
+              {/*  </Box>*/}
+              {/*</Card>*/}
+              <Card
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  color: isFetching && GRAY,
+                  mb: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'relative',
+                    cursor: !isFetching && showDetails && 'pointer',
+                    flex: 1,
+                    backgroundColor: !showDetails
+                      ? isFetching
+                        ? LIGHT_SILVER
+                        : LIGHT_GREEN
+                      : isFetching
+                      ? SUPER_LIGHT_SILVER
+                      : ULTRA_LIGHT_GREEN,
+                    border: `1px solid ${
+                      isFetching ? LIGHT_SILVER : LIGHT_GREEN
+                    }`,
+                    borderTopLeftRadius: '12px',
+                    borderBottomLeftRadius: '12px',
+                  }}
+                  onClick={() =>
+                    !isFetching && showDetails && setShowDetails(false)
+                  }
+                >
+                  <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>
+                    Summary
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    position: 'relative',
+                    cursor: !isFetching && !showDetails && 'pointer',
+                    flex: 1,
+                    backgroundColor: showDetails
+                      ? isFetching
+                        ? LIGHT_SILVER
+                        : LIGHT_GREEN
+                      : isFetching
+                      ? SUPER_LIGHT_SILVER
+                      : ULTRA_LIGHT_GREEN,
+                    border: `1px solid ${
+                      isFetching ? LIGHT_SILVER : LIGHT_GREEN
+                    }`,
+                    borderTopRightRadius: '12px',
+                    borderBottomRightRadius: '12px',
+                  }}
+                  onClick={() =>
+                    !isFetching && !showDetails && setShowDetails(true)
+                  }
+                >
+                  <Typography
+                    variant="subtitle2"
+                    noWrap
+                    sx={{ p: 1, lineHeight: 0.8 }}
+                    align="right"
+                  >
+                    Details
+                    <br />
+                    <span
+                      style={{
+                        fontWeight: 400,
+                        fontSize: 12,
+                        color: getHexFromRGBObject(
+                          getColorShadeBasedOnSliderPickerSchema(
+                            getRgbaObjectFromHexString(
+                              getHexFromRGBAString(GREEN)
+                            )
+                          )
+                        ),
+                      }}
+                    >
+                      (edit data)
+                    </span>
+                  </Typography>
+                </Box>
+              </Card>
+              <AppOrderTimeline
+                key={'timeLogs'}
+                user={user}
+                timeLogsWithinActiveDate={timeLogsWithinActiveDate}
+                showDetails={showDetails}
+              />
+            </Grid>
+
+            {/*<Grid item xs={12} md={6} lg={8}>*/}
+            {/*  <AppWebsiteVisits*/}
+            {/*    title="Website Visits"*/}
+            {/*    subheader="(+43%) than last year"*/}
+            {/*    chartLabels={[*/}
+            {/*      '01/01/2003',*/}
+            {/*      '02/01/2003',*/}
+            {/*      '03/01/2003',*/}
+            {/*      '04/01/2003',*/}
+            {/*      '05/01/2003',*/}
+            {/*      '06/01/2003',*/}
+            {/*      '07/01/2003',*/}
+            {/*      '08/01/2003',*/}
+            {/*      '09/01/2003',*/}
+            {/*      '10/01/2003',*/}
+            {/*      '11/01/2003',*/}
+            {/*    ]}*/}
+            {/*    chartData={[*/}
+            {/*      {*/}
+            {/*        name: 'Team A',*/}
+            {/*        type: 'column',*/}
+            {/*        fill: 'solid',*/}
+            {/*        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],*/}
+            {/*      },*/}
+            {/*      {*/}
+            {/*        name: 'Team B',*/}
+            {/*        type: 'area',*/}
+            {/*        fill: 'gradient',*/}
+            {/*        data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],*/}
+            {/*      },*/}
+            {/*      {*/}
+            {/*        name: 'Team C',*/}
+            {/*        type: 'line',*/}
+            {/*        fill: 'solid',*/}
+            {/*        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],*/}
+            {/*      },*/}
+            {/*    ]}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
+
+            {/*<Grid item xs={12} md={6} lg={4}>*/}
+            {/*  <AppCurrentVisits*/}
+            {/*    title="Current Visits"*/}
+            {/*    chartData={[*/}
+            {/*      { label: 'America', value: 4344 },*/}
+            {/*      { label: 'Asia', value: 5435 },*/}
+            {/*      { label: 'Europe', value: 1443 },*/}
+            {/*      { label: 'Africa', value: 4443 },*/}
+            {/*    ]}*/}
+            {/*    chartColors={[*/}
+            {/*      theme.palette.primary.main,*/}
+            {/*      theme.palette.info.main,*/}
+            {/*      theme.palette.warning.main,*/}
+            {/*      theme.palette.error.main,*/}
+            {/*    ]}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
+
+            {/*<Grid item xs={12} md={6} lg={8}>*/}
+            {/*  <AppConversionRates*/}
+            {/*    title="Conversion Rates"*/}
+            {/*    subheader="(+43%) than last year"*/}
+            {/*    chartData={[*/}
+            {/*      { label: 'Italy', value: 400 },*/}
+            {/*      { label: 'Japan', value: 430 },*/}
+            {/*      { label: 'China', value: 448 },*/}
+            {/*      { label: 'Canada', value: 470 },*/}
+            {/*      { label: 'France', value: 540 },*/}
+            {/*      { label: 'Germany', value: 580 },*/}
+            {/*      { label: 'South Korea', value: 690 },*/}
+            {/*      { label: 'Netherlands', value: 1100 },*/}
+            {/*      { label: 'United States', value: 1200 },*/}
+            {/*      { label: 'United Kingdom', value: 1380 },*/}
+            {/*    ]}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
+
+            {/*<Grid item xs={12} md={6} lg={4}>*/}
+            {/*  <AppCurrentSubject*/}
+            {/*    title="Current Subject"*/}
+            {/*    chartLabels={[*/}
+            {/*      'English',*/}
+            {/*      'History',*/}
+            {/*      'Physics',*/}
+            {/*      'Geography',*/}
+            {/*      'Chinese',*/}
+            {/*      'Math',*/}
+            {/*    ]}*/}
+            {/*    chartData={[*/}
+            {/*      { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },*/}
+            {/*      { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },*/}
+            {/*      { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },*/}
+            {/*    ]}*/}
+            {/*    chartColors={[...Array(6)].map(*/}
+            {/*      () => theme.palette.text.secondary*/}
+            {/*    )}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
+
+            {/*<Grid item xs={12} md={6} lg={8}>*/}
+            {/*  <AppNewsUpdate*/}
+            {/*    title="News Update"*/}
+            {/*    list={[...Array(5)].map((_, index) => ({*/}
+            {/*      id: faker.datatype.uuid(),*/}
+            {/*      title: faker.name.jobTitle(),*/}
+            {/*      description: faker.name.jobTitle(),*/}
+            {/*      image: `/assets/images/covers/cover_${index + 1}.jpg`,*/}
+            {/*      postedAt: faker.date.recent(),*/}
+            {/*    }))}*/}
+            {/*  />*/}
+            {/*</Grid>*/}
           </Grid>
-
-          {/*<Grid item xs={12} md={6} lg={8}>*/}
-          {/*  <AppWebsiteVisits*/}
-          {/*    title="Website Visits"*/}
-          {/*    subheader="(+43%) than last year"*/}
-          {/*    chartLabels={[*/}
-          {/*      '01/01/2003',*/}
-          {/*      '02/01/2003',*/}
-          {/*      '03/01/2003',*/}
-          {/*      '04/01/2003',*/}
-          {/*      '05/01/2003',*/}
-          {/*      '06/01/2003',*/}
-          {/*      '07/01/2003',*/}
-          {/*      '08/01/2003',*/}
-          {/*      '09/01/2003',*/}
-          {/*      '10/01/2003',*/}
-          {/*      '11/01/2003',*/}
-          {/*    ]}*/}
-          {/*    chartData={[*/}
-          {/*      {*/}
-          {/*        name: 'Team A',*/}
-          {/*        type: 'column',*/}
-          {/*        fill: 'solid',*/}
-          {/*        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],*/}
-          {/*      },*/}
-          {/*      {*/}
-          {/*        name: 'Team B',*/}
-          {/*        type: 'area',*/}
-          {/*        fill: 'gradient',*/}
-          {/*        data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],*/}
-          {/*      },*/}
-          {/*      {*/}
-          {/*        name: 'Team C',*/}
-          {/*        type: 'line',*/}
-          {/*        fill: 'solid',*/}
-          {/*        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],*/}
-          {/*      },*/}
-          {/*    ]}*/}
-          {/*  />*/}
-          {/*</Grid>*/}
-
-          {/*<Grid item xs={12} md={6} lg={4}>*/}
-          {/*  <AppCurrentVisits*/}
-          {/*    title="Current Visits"*/}
-          {/*    chartData={[*/}
-          {/*      { label: 'America', value: 4344 },*/}
-          {/*      { label: 'Asia', value: 5435 },*/}
-          {/*      { label: 'Europe', value: 1443 },*/}
-          {/*      { label: 'Africa', value: 4443 },*/}
-          {/*    ]}*/}
-          {/*    chartColors={[*/}
-          {/*      theme.palette.primary.main,*/}
-          {/*      theme.palette.info.main,*/}
-          {/*      theme.palette.warning.main,*/}
-          {/*      theme.palette.error.main,*/}
-          {/*    ]}*/}
-          {/*  />*/}
-          {/*</Grid>*/}
-
-          {/*<Grid item xs={12} md={6} lg={8}>*/}
-          {/*  <AppConversionRates*/}
-          {/*    title="Conversion Rates"*/}
-          {/*    subheader="(+43%) than last year"*/}
-          {/*    chartData={[*/}
-          {/*      { label: 'Italy', value: 400 },*/}
-          {/*      { label: 'Japan', value: 430 },*/}
-          {/*      { label: 'China', value: 448 },*/}
-          {/*      { label: 'Canada', value: 470 },*/}
-          {/*      { label: 'France', value: 540 },*/}
-          {/*      { label: 'Germany', value: 580 },*/}
-          {/*      { label: 'South Korea', value: 690 },*/}
-          {/*      { label: 'Netherlands', value: 1100 },*/}
-          {/*      { label: 'United States', value: 1200 },*/}
-          {/*      { label: 'United Kingdom', value: 1380 },*/}
-          {/*    ]}*/}
-          {/*  />*/}
-          {/*</Grid>*/}
-
-          {/*<Grid item xs={12} md={6} lg={4}>*/}
-          {/*  <AppCurrentSubject*/}
-          {/*    title="Current Subject"*/}
-          {/*    chartLabels={[*/}
-          {/*      'English',*/}
-          {/*      'History',*/}
-          {/*      'Physics',*/}
-          {/*      'Geography',*/}
-          {/*      'Chinese',*/}
-          {/*      'Math',*/}
-          {/*    ]}*/}
-          {/*    chartData={[*/}
-          {/*      { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },*/}
-          {/*      { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },*/}
-          {/*      { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },*/}
-          {/*    ]}*/}
-          {/*    chartColors={[...Array(6)].map(*/}
-          {/*      () => theme.palette.text.secondary*/}
-          {/*    )}*/}
-          {/*  />*/}
-          {/*</Grid>*/}
-
-          {/*<Grid item xs={12} md={6} lg={8}>*/}
-          {/*  <AppNewsUpdate*/}
-          {/*    title="News Update"*/}
-          {/*    list={[...Array(5)].map((_, index) => ({*/}
-          {/*      id: faker.datatype.uuid(),*/}
-          {/*      title: faker.name.jobTitle(),*/}
-          {/*      description: faker.name.jobTitle(),*/}
-          {/*      image: `/assets/images/covers/cover_${index + 1}.jpg`,*/}
-          {/*      postedAt: faker.date.recent(),*/}
-          {/*    }))}*/}
-          {/*  />*/}
-          {/*</Grid>*/}
-        </Grid>
-      </Container>
-    </DashboardLayout>
+        </Container>
+      </DashboardLayout>
+    </LocalizationProvider>
   );
 }
 
