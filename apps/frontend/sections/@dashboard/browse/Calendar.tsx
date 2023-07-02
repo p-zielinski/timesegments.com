@@ -2,7 +2,7 @@ import { DateCalendar } from '@mui/x-date-pickers';
 import React from 'react';
 import { DateTime } from 'luxon';
 import { Box } from '@mui/material';
-import { ORANGE, RED, ULTRA_LIGHT_YELLOW } from '../../../consts/colors';
+import { LIGHT_BLUE, RED, ULTRA_LIGHT_BLUE } from '../../../consts/colors';
 import Iconify from '../../../components/iconify';
 
 export default function Calendar({
@@ -21,9 +21,9 @@ export default function Calendar({
       sx={{
         mb: 2,
         mt: -1,
-        background: ULTRA_LIGHT_YELLOW,
+        background: ULTRA_LIGHT_BLUE,
         borderRadius: '12px',
-        border: `1px solid ${ORANGE}`,
+        border: `1px solid ${LIGHT_BLUE}`,
         display: 'flex',
         justifyContent: 'center',
         position: 'relative',
