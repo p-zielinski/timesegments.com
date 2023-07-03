@@ -1,6 +1,6 @@
 // @mui
 import {Box, Typography} from '@mui/material';
-import {TimelineDot,} from '@mui/lab';
+import {TimelineDot} from '@mui/lab';
 import {nanoid} from 'nanoid'; // utils
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import React, {useEffect, useState} from 'react';
@@ -10,13 +10,16 @@ import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getC
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGroupedTimeLogsWithDateSorted';
 import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
+import Iconify from '../../../components/iconify';
+import ShowNoData from '../browse/ShowNoData';
 // utils
 // ----------------------------------------------------------------------
 
-export default function AppOrderTimeline({
+export default function BrowseTimeLogs({
   user,
   timeLogsWithinActiveDate,
   showDetails,
+  setIsEditing,
 }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -30,6 +33,7 @@ export default function AppOrderTimeline({
                     timeLogExtended={timeLogExtended}
                     user={user}
                     key={nanoid()}
+                    setIsEditing={setIsEditing}
                   />
                 ))
             : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
@@ -39,7 +43,7 @@ export default function AppOrderTimeline({
               )}
         </Box>
       ) : (
-        'no data'
+        <ShowNoData />
       )}
     </Box>
   );
@@ -122,7 +126,7 @@ function GroupedPeriod({ group, user }) {
 
 // ----------------------------------------------------------------------
 
-function DetailPeriod({ timeLogExtended, user }) {
+function DetailPeriod({ timeLogExtended, user, setIsEditing }) {
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
     timeLogExtended.periodTotalMs
   );
@@ -150,6 +154,9 @@ function DetailPeriod({ timeLogExtended, user }) {
   }, []);
 
   const color = timeLogExtended?.category?.color;
+
+  const isSaving = false;
+  const disableHover = false;
 
   return (
     <Box
@@ -226,6 +233,35 @@ function DetailPeriod({ timeLogExtended, user }) {
                 : 'error'}
             </b>
           </Typography>
+        </Box>
+      </Box>
+      <Box sx={{ display: 'flex', mr: '-12px' }}>
+        <Box
+          sx={{
+            borderRadius: '10px',
+            border: `solid 1px ${getBackgroundColor(0.2, color)}`,
+            pl: '5px',
+            pr: '5px',
+            '&:hover': !disableHover &&
+              !isSaving && {
+                cursor: 'pointer',
+                border: `solid 1px ${getBackgroundColor(1, color)}`,
+              },
+          }}
+          onClick={() =>
+            !isSaving && setIsEditing({ timeLogId: timeLogExtended.id })
+          }
+        >
+          <Iconify
+            icon={'fluent:edit-32-regular'}
+            width={40}
+            sx={{
+              position: 'relative',
+              top: '50%',
+              left: '40%',
+              transform: 'translate(-40%, -50%)',
+            }}
+          />
         </Box>
       </Box>
     </Box>

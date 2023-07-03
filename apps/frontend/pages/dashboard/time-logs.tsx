@@ -38,14 +38,14 @@ import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
-import AppOrderTimeline from '../../sections/@dashboard/app/AppOrderTimeline';
+import BrowseTimeLogs from '../../sections/@dashboard/app/BrowseTimeLogs';
 import {getCurrentDate, getRelativeDate} from '../../utils/getCurrentDate';
 import {isMobile} from 'react-device-detect';
 import {getHexFromRGBAString} from '../../utils/colors/getHexFromRGBString';
 import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterLuxon} from '@mui/x-date-pickers/AdapterLuxon';
-import Calendar from 'apps/frontend/sections/@dashboard/browse/Calendar';
+import Calendar from '../../sections/@dashboard/browse/Calendar';
 
 // const Calendar = dynamic(
 //   () => import('../../sections/@dashboard/browse/Calendar'),
@@ -302,6 +302,8 @@ export default function TimeLogs({
     return dateAMonthAgo.ts < activeDate.ts;
   };
 
+  const [isEditing, setIsEditing] = useState({});
+
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <DashboardLayout
@@ -321,48 +323,6 @@ export default function TimeLogs({
                 setActiveDate={setActiveDate}
                 disabled={isFetching}
               />
-              {/*  <Box*/}
-              {/*    sx={previousDatesButtonSx(isFetching, 0)}*/}
-              {/*    onClick={() =>*/}
-              {/*      !isFetching && showDetails && setShowDetails(false)*/}
-              {/*    }*/}
-              {/*  >*/}
-              {/*    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>*/}
-              {/*      -1 Day*/}
-              {/*    </Typography>*/}
-              {/*  </Box>*/}
-              {/*  <Box*/}
-              {/*    sx={{*/}
-              {/*      position: 'relative',*/}
-              {/*      cursor: !isFetching && !showDetails && 'pointer',*/}
-              {/*      flex: 1,*/}
-              {/*      backgroundColor: showDetails*/}
-              {/*        ? isFetching*/}
-              {/*          ? LIGHT_SILVER*/}
-              {/*          : LIGHT_GREEN*/}
-              {/*        : isFetching*/}
-              {/*        ? SUPER_LIGHT_SILVER*/}
-              {/*        : ULTRA_LIGHT_GREEN,*/}
-              {/*      border: `1px solid ${*/}
-              {/*        isFetching ? LIGHT_SILVER : LIGHT_GREEN*/}
-              {/*      }`,*/}
-              {/*      borderTopRightRadius: '12px',*/}
-              {/*      borderBottomRightRadius: '12px',*/}
-              {/*    }}*/}
-              {/*    onClick={() =>*/}
-              {/*      !isFetching && !showDetails && setShowDetails(true)*/}
-              {/*    }*/}
-              {/*  >*/}
-              {/*    <Typography*/}
-              {/*      variant="subtitle2"*/}
-              {/*      noWrap*/}
-              {/*      sx={{ p: 1 }}*/}
-              {/*      align="right"*/}
-              {/*    >*/}
-              {/*      +1 Day*/}
-              {/*    </Typography>*/}
-              {/*  </Box>*/}
-              {/*</Card>*/}
               <Card
                 sx={{
                   display: 'flex',
@@ -446,11 +406,12 @@ export default function TimeLogs({
                   </Typography>
                 </Box>
               </Card>
-              <AppOrderTimeline
-                key={'timeLogs'}
+              <BrowseTimeLogs
+                key={`timeLogs-${showDetails ? 'details' : 'summary'}`}
                 user={user}
                 timeLogsWithinActiveDate={timeLogsWithinActiveDate}
                 showDetails={showDetails}
+                setIsEditing={setIsEditing}
               />
             </Grid>
 
