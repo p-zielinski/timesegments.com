@@ -10,6 +10,8 @@ export const ULTRA_LIGHT_BLUE = `rgb(245, 249, 255)`;
 export const LIGHT_BLUE = `rgb(198, 218, 254)`;
 export const BLUE = `rgb(118, 166, 255)`;
 export const ORANGE = `rgb(255, 159, 118)`;
+export const LIGHT_ORANGE = `rgb(255, 210, 190)`;
+export const ULTRA_LIGHT_ORANGE = `rgb(255, 245, 241)`;
 
 export const YELLOW = `rgb(255, 228, 118)`;
 

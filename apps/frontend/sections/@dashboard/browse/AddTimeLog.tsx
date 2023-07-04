@@ -1,4 +1,4 @@
-import { Box, Card, Stack, TextField, Typography } from '@mui/material';
+import { Box, Card, Stack, Typography } from '@mui/material';
 import {
   GREEN,
   IS_SAVING_HEX,
@@ -14,13 +14,10 @@ import React from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { InputText } from '../../../components/form/Text';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
-import { styled } from '@mui/material/styles';
-import { handleFetch } from '../../../utils/fetchingData/handleFetch';
-import { StatusCodes } from 'http-status-codes';
+import DatePicker from '../../../components/form/DatePicker';
 
 export default function AddTimeLog({
   controlValue,
@@ -29,79 +26,53 @@ export default function AddTimeLog({
   data = {},
   isEditing,
   setIsEditing,
-  category,
   isSaving,
   setIsSaving,
   categories,
-  setCategories,
 }) {
-  const startingColor = category?.color
-    ? {
-        hex: category.color,
-        rgb: getRgbaObjectFromHexString(category.color),
-      }
-    : getRandomRgbObjectForSliderPicker();
+  const startingColor = getRandomRgbObjectForSliderPicker();
 
-  let StyledTextField, darkHexColor;
+  let TextFieldProps, darkHexColor;
   const setStyledTextField = (isSaving, hexColor) => {
     darkHexColor = getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
         getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
       )
     );
-    StyledTextField = styled(TextField)({
-      '& input': {
-        color: darkHexColor,
-      },
-      '& label.Mui-focused': {
-        color: darkHexColor,
-      },
-      '& label': {
-        color: darkHexColor,
-      },
-      '& .MuiInput-underline:after': {
-        borderBottomColor: hexColor,
-      },
-      '& .MuiOutlinedInput-root': {
-        '& fieldset': {
-          borderColor: isSaving
-            ? IS_SAVING_HEX
-            : getHexFromRGBAObject({
-                ...getRgbaObjectFromHexString(hexColor),
-                a: 0.3,
-              }),
+    TextFieldProps = {
+      sx: {
+        '& input': {
+          color: darkHexColor,
         },
-        '&:hover fieldset': {
-          borderColor: hexColor,
+        '& label.Mui-focused': {
+          color: darkHexColor,
         },
-        '&.Mui-focused fieldset': {
-          borderColor: hexColor,
+        '& label': {
+          color: darkHexColor,
+        },
+        '& .MuiInput-underline:after': {
+          borderBottomColor: hexColor,
+        },
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: isSaving
+              ? IS_SAVING_HEX
+              : getHexFromRGBAObject({
+                  ...getRgbaObjectFromHexString(hexColor),
+                  a: 0.3,
+                }),
+          },
+          '&:hover fieldset': {
+            borderColor: hexColor,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: hexColor,
+          },
         },
       },
-    });
+    };
   };
   setStyledTextField(isSaving, startingColor.hex);
-
-  const createCategory = async (name: string, color: string) => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'category/create',
-      body: { name, color, controlValue },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED && response?.category) {
-      setCategories([{ ...response.category }, ...categories]);
-      setIsEditing({});
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
-      }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
-      return; //skip setting isSaving(false)
-    }
-    setIsSaving(false);
-    return;
-  };
 
   if (!isEditing.createNew) {
     return (
@@ -145,7 +116,7 @@ export default function AddTimeLog({
             }}
           >
             <Typography variant="subtitle2" noWrap>
-              ADD NEW CATEGORY
+              ADD NEW TIMELOG
             </Typography>
           </Stack>
         </Box>
@@ -183,7 +154,6 @@ export default function AddTimeLog({
         color: startingColor,
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        await createCategory(values.categoryName, values.color.hex);
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
@@ -251,11 +221,10 @@ export default function AddTimeLog({
                         pointer={Pointer}
                       />
                     </Box>
-                    <InputText
-                      type="text"
+                    <DatePicker
                       name="categoryName"
                       label="Category name"
-                      TextField={StyledTextField}
+                      textFieldProps={TextFieldProps}
                       helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
                       disabled={isSaving}
                     />
@@ -334,7 +303,7 @@ export default function AddTimeLog({
                       }}
                     >
                       <Typography variant="subtitle2" noWrap>
-                        SAVE CATEGORY
+                        CREATE TIME LOG
                       </Typography>
                     </Stack>
                   </Box>

@@ -12,6 +12,7 @@ import {getGroupedTimeLogsWithDateSorted} from '../../../utils/mapper/getGrouped
 import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 import Iconify from '../../../components/iconify';
 import ShowNoData from '../browse/ShowNoData';
+import AddTimeLog from '../browse/AddTimeLog';
 // utils
 // ----------------------------------------------------------------------
 
@@ -19,14 +20,22 @@ export default function BrowseTimeLogs({
   user,
   timeLogsWithinActiveDate,
   showDetails,
+  isEditing,
   setIsEditing,
+  categories,
 }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {timeLogsWithinActiveDate?.length ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {showDetails
-            ? timeLogsWithinActiveDate
+          {showDetails ? (
+            <>
+              <AddTimeLog
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                categories={categories}
+              />
+              {timeLogsWithinActiveDate
                 .sort((a, b) => b.startedAt - a.startedAt)
                 .map((timeLogExtended) => (
                   <DetailPeriod
@@ -35,12 +44,15 @@ export default function BrowseTimeLogs({
                     key={nanoid()}
                     setIsEditing={setIsEditing}
                   />
-                ))
-            : getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
-                (group) => (
-                  <GroupedPeriod group={group} user={user} key={nanoid()} />
-                )
-              )}
+                ))}
+            </>
+          ) : (
+            getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
+              (group) => (
+                <GroupedPeriod group={group} user={user} key={nanoid()} />
+              )
+            )
+          )}
         </Box>
       ) : (
         <ShowNoData />
