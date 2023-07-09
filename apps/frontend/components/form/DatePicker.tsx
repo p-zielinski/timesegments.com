@@ -37,7 +37,13 @@ export const DatePicker = ({
           error={!!meta.touched && !!meta.error}
         >
           <MuiDatePickerComponent
-            slotProps={{ textField: { size: 'small', ...textFieldProps } }}
+            slotProps={{
+              textField: {
+                size: 'small',
+                background: 'white',
+                ...textFieldProps,
+              },
+            }}
             disableFuture={true}
             showTodayButton={false}
             disabled={disabled}

@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography } from '@mui/material';
+import { Box, Card, Stack, TextField, Typography } from '@mui/material';
 import {
   GREEN,
   IS_SAVING_HEX,
@@ -18,6 +18,8 @@ import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import DatePicker from '../../../components/form/DatePicker';
+import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
+import { styled } from '@mui/material/styles';
 
 export default function AddTimeLog({
   controlValue,
@@ -32,7 +34,7 @@ export default function AddTimeLog({
 }) {
   const startingColor = getRandomRgbObjectForSliderPicker();
 
-  let TextFieldProps, darkHexColor;
+  let TextFieldProps, StyledTextField, darkHexColor;
   const setStyledTextField = (isSaving, hexColor) => {
     darkHexColor = getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
@@ -43,9 +45,12 @@ export default function AddTimeLog({
       sx: {
         '& input': {
           color: darkHexColor,
+          backgroundColor: 'white',
+          borderRadius: '6px',
         },
         '& label.Mui-focused': {
           color: darkHexColor,
+          backgroundColor: 'white',
         },
         '& label': {
           color: darkHexColor,
@@ -71,6 +76,7 @@ export default function AddTimeLog({
         },
       },
     };
+    StyledTextField = styled(TextField)(TextFieldProps.sx);
   };
   setStyledTextField(isSaving, startingColor.hex);
 
@@ -221,6 +227,16 @@ export default function AddTimeLog({
                         pointer={Pointer}
                       />
                     </Box>
+                    <SelectWithSearch
+                      name="category"
+                      label="Category"
+                      options={categories.map((category) => {
+                        return { label: category.name, value: category.id };
+                      })}
+                      TextField={StyledTextField}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
+                    />
                     <DatePicker
                       name="categoryName"
                       label="Category name"

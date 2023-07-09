@@ -2,8 +2,8 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { DateTime } from 'luxon';
-import { TimeLog, User } from '@prisma/client';
-import { asyncMap, FromToDate, Timezones } from '@test1/shared';
+import { Prisma, TimeLog, User } from '@prisma/client';
+import { asyncMap, FromToDate, FromToDateTime, Timezones } from '@test1/shared';
 import { uniqBy } from 'lodash';
 
 @Injectable()
@@ -13,6 +13,62 @@ export class TimeLogService {
     @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService
   ) {}
+
+  public async editTimeLog(
+    user: User,
+    timeLogId: string,
+    from: FromToDateTime,
+    to?: FromToDateTime
+  ) {
+    const timeLogWithUser = await this.findOne(timeLogId, { user: true });
+    if (!timeLogWithUser || timeLogWithUser.user.id !== user.id) {
+      return {
+        success: false,
+        error: 'Could not find time log, bad request',
+      };
+    }
+    const startedAt = DateTime.fromObject(from, {
+      zone: Timezones[user.timezone],
+    }).toISO();
+    const endedAt = to
+      ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
+      : null;
+    const updatedTimeLog = await this.prisma.timeLog.update({
+      where: { id: timeLogId },
+      data: { startedAt, endedAt },
+    });
+    return { success: true, timeLog: updatedTimeLog };
+  }
+
+  public async createTimeLog(
+    user: User,
+    categoryId: string,
+    from: FromToDateTime,
+    to?: FromToDateTime
+  ) {
+    const categoryWithUser = await this.categoryService.findIfNotDeleted(
+      categoryId,
+      {
+        user: true,
+      }
+    );
+    if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
+      return {
+        success: false,
+        error: `Category not found, bad request`,
+      };
+    }
+    const startedAt = DateTime.fromObject(from, {
+      zone: Timezones[user.timezone],
+    }).toISO();
+    const endedAt = to
+      ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
+      : null;
+    const createdTimeLog = await this.prisma.timeLog.create({
+      data: { userId: user.id, categoryId, startedAt, endedAt },
+    });
+    return { success: true, timeLog: createdTimeLog };
+  }
 
   public async findFromToTimeLogsEnrichedWithCategories(
     user: User,
@@ -159,5 +215,15 @@ export class TimeLogService {
       success: true,
       timeLogs: result ? [result] : undefined,
     };
+  }
+
+  public async findOne(
+    timeLogId: string,
+    include: Prisma.CategoryInclude = null
+  ) {
+    return await this.prisma.timeLog.findFirst({
+      where: { id: timeLogId },
+      include,
+    });
   }
 }
