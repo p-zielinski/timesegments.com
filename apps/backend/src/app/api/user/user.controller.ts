@@ -59,6 +59,11 @@ export class UserController {
     @Body() registerDto: RegisterDto,
     @Headers('User-Agent') userAgent: string
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new BadRequestException({
+        error: 'Registration is disabled',
+      });
+    }
     const { email, password, timezone } = registerDto;
     const registeringResult = await this.userService.createNewUser(
       { email, plainPassword: password, timezone, userAgent },
