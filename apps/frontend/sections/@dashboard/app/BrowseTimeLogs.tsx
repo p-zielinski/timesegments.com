@@ -31,6 +31,7 @@ export default function BrowseTimeLogs({
           {showDetails ? (
             <>
               <AddTimeLog
+                user={user}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
                 categories={categories}

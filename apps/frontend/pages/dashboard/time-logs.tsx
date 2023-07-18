@@ -7,7 +7,7 @@ import DashboardLayout from '../../layouts/dashboard';
 import React, {useEffect, useState} from 'react';
 import {Category, User} from '@prisma/client';
 import {DateTime} from 'luxon';
-import {Timezones} from '@test1/shared';
+import {MeExtendedOption, Timezones} from '@test1/shared';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
@@ -15,7 +15,6 @@ import {
 } from '../../utils/findTimeLogsWithinCurrentPeriod';
 import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
-import {deleteIfValueIsFalseFromObject} from '../../utils/deleteIfValueIsFalseFromObject';
 import {GRAY, LIGHT_ORANGE, LIGHT_SILVER, ORANGE, SUPER_LIGHT_SILVER, ULTRA_LIGHT_ORANGE,} from '../../consts/colors';
 import Cookies from 'cookies';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
@@ -103,55 +102,6 @@ export default function TimeLogs({
     })();
   }, [activeDate]);
 
-  const getTitle = (activeDate: DateTime) => {
-    const daysDifference = deleteIfValueIsFalseFromObject(
-      DateTime.now()
-        .setZone(Timezones[user.timezone])
-        .set({
-          hours: 0,
-          minutes: 0,
-          seconds: 0,
-          milliseconds: 0,
-        })
-        .diff(activeDate, ['years', 'months', 'days'])
-        .toObject()
-    );
-    const mapDaysDifferenceToText = (daysDifference: {
-      years?: number;
-      months?: number;
-      days?: number;
-    }) => {
-      if (Object.keys(daysDifference).length === 0) {
-        return '(Today)';
-      }
-      const years = daysDifference.years
-        ? `${daysDifference.years} year${daysDifference.years !== 1 ? 's' : ''}`
-        : undefined;
-
-      const months = daysDifference.months
-        ? `${daysDifference.months} month${
-            daysDifference.months !== 1 ? 's' : ''
-          }`
-        : undefined;
-
-      const days = daysDifference.days
-        ? `${daysDifference.days} day${daysDifference.days !== 1 ? 's' : ''}`
-        : undefined;
-
-      return `(${[years, months, days]
-        .filter((text) => !!text)
-        .join(' ')} ago)`;
-    };
-
-    return `${activeDate.toLocaleString(
-      {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      },
-      { locale: 'en' }
-    )} ${mapDaysDifferenceToText(daysDifference)}`;
-  };
   const [isEditing, setIsEditing] = useState({});
 
   return (
@@ -280,13 +230,16 @@ export const getServerSideProps = async ({ req, res }) => {
   let user;
   try {
     const responseUser = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + 'user/me',
+      process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
       {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-type': 'application/json',
           authorization: `Bearer ${jwt_token}`,
         },
+        body: JSON.stringify({
+          extend: [MeExtendedOption.CATEGORIES],
+        }),
       }
     );
     user = (await responseUser.json()).user;
@@ -373,7 +326,7 @@ export const getServerSideProps = async ({ req, res }) => {
           'very bright'
         )
       ),
-      categories,
+      categories: user.categories,
     },
   };
 };

@@ -1,4 +1,11 @@
-import { Box, Card, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  Checkbox,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import {
   GREEN,
   IS_SAVING_HEX,
@@ -7,11 +14,10 @@ import {
   RED,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
+import { DateTime } from 'luxon';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
-import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React from 'react';
-import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
+import React, { useEffect } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -20,8 +26,11 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import DatePicker from '../../../components/form/DatePicker';
 import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
 import { styled } from '@mui/material/styles';
+import { Timezones } from '@test1/shared';
+import { TimePicker } from '../../../components/form/TimePicker';
 
 export default function AddTimeLog({
+  user,
   controlValue,
   setControlValue,
   disableHover,
@@ -32,17 +41,24 @@ export default function AddTimeLog({
   setIsSaving,
   categories,
 }) {
-  const startingColor = getRandomRgbObjectForSliderPicker();
+  const startingColor = {
+    hex: '#bf8940',
+    rgb: { r: 191, g: 137, b: 64, a: 1 },
+  }; //getRandomRgbObjectForSliderPicker();
 
-  let TextFieldProps, StyledTextField, darkHexColor;
+  let getTextFieldProps: (error, focused) => Record<string, any>,
+    StyledTextField,
+    darkHexColor;
   const setStyledTextField = (isSaving, hexColor) => {
     darkHexColor = getHexFromRGBObject(
       getColorShadeBasedOnSliderPickerSchema(
         getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
       )
     );
-    TextFieldProps = {
-      sx: {
+    getTextFieldProps = (error, focused) => {
+      return {
+        background: 'white',
+        borderRadius: '8px',
         '& input': {
           color: darkHexColor,
           backgroundColor: 'white',
@@ -50,10 +66,11 @@ export default function AddTimeLog({
         },
         '& label.Mui-focused': {
           color: darkHexColor,
-          backgroundColor: 'white',
         },
         '& label': {
-          color: darkHexColor,
+          color: error ? '#FF4842' : darkHexColor,
+          backgroundColor: 'rgba(255,255,255,.5)',
+          borderRadius: '6px',
         },
         '& .MuiInput-underline:after': {
           borderBottomColor: hexColor,
@@ -62,21 +79,26 @@ export default function AddTimeLog({
           '& fieldset': {
             borderColor: isSaving
               ? IS_SAVING_HEX
+              : error
+              ? '#FF4842'
+              : focused
+              ? darkHexColor
               : getHexFromRGBAObject({
                   ...getRgbaObjectFromHexString(hexColor),
                   a: 0.3,
                 }),
           },
           '&:hover fieldset': {
-            borderColor: hexColor,
+            borderColor: focused ? darkHexColor : hexColor,
           },
           '&.Mui-focused fieldset': {
             borderColor: hexColor,
+            border: `1px solid ${darkHexColor}`,
           },
         },
-      },
+      };
     };
-    StyledTextField = styled(TextField)(TextFieldProps.sx);
+    StyledTextField = styled(TextField)(getTextFieldProps(false, false));
   };
   setStyledTextField(isSaving, startingColor.hex);
 
@@ -131,40 +153,32 @@ export default function AddTimeLog({
   }
 
   const validationSchema = yup.object().shape({
-    categoryName: yup
-      .string()
-      .required('Category name is required')
-      .max(40, 'Category name cannot be longer than 40 characters'),
+    categoryId: yup.string().required('Category is required').min(1),
+    startDate: yup.string().required('Start date is required').min(1),
+    startTime: yup.string().required('Start time is required').min(1),
+    endDate: yup.string().required('End date is required').min(1),
+    endTime: yup.string().required('End time is required').min(1),
   });
-
-  const Pointer = () => {
-    return (
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          borderRadius: '50%',
-          transform: 'translate(-8px, -5px)',
-          backgroundColor: isSaving ? IS_SAVING_HEX : 'rgb(248, 248, 248)',
-          boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.37)',
-        }}
-      />
-    );
-  };
 
   return (
     <Formik
       initialValues={{
         ...data,
-        categoryName: '',
-        color: startingColor,
+        finished: false,
+        categoryId: '',
+        startDate: DateTime.now(),
+        startTime: '',
+        endDate: '',
+        endTime: '',
+        endDateHidden: '',
+        endTimeHidden: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
       validationSchema={validationSchema}
     >
-      {({ handleSubmit, values, setFieldValue }) => {
+      {({ handleSubmit, values, setFieldValue, touched }) => {
         const isFormValid = validationSchema.isValidSync(values);
 
         const backgroundColor = getHexFromRGBAObject(
@@ -173,13 +187,26 @@ export default function AddTimeLog({
               ? IS_SAVING_HEX
               : getHexFromRGBAObject(
                   getColorShadeBasedOnSliderPickerSchema(
-                    getRgbaObjectFromHexString(values.color?.hex),
+                    getRgbaObjectFromHexString(
+                      categories.find(
+                        (category) => category.id === values.categoryId
+                      )?.color || startingColor.hex
+                    ),
                     'bright'
                   )
                 ),
             0.2
           )
         );
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useEffect(() => {
+          setStyledTextField(
+            isSaving,
+            categories.find((category) => category.id === values.categoryId)
+              ?.color || startingColor.hex
+          );
+        }, [values.categoryId]);
 
         return (
           <Card>
@@ -196,18 +223,62 @@ export default function AddTimeLog({
                 }}
               >
                 <Box sx={{ p: 1.5 }}>
-                  <Stack spacing={3}>
+                  {isSaving && (
                     <Box
                       sx={{
-                        filter: isSaving ? 'grayscale(100%)' : 'none',
-                        cursor: isSaving ? 'default' : 'pointer',
+                        width: 'calc(100% + 20px)',
+                        height: 'calc(100% + 20px)',
+                        background: 'transparent',
+                        position: 'absolute',
+                        zIndex: 1,
+                        transform: 'translate(-10px, -10px)',
                       }}
-                    >
-                      {isSaving && (
+                    />
+                  )}
+                  <Stack spacing={1}>
+                    <Box>
+                      <SelectWithSearch
+                        key={darkHexColor}
+                        name="categoryId"
+                        label="Category"
+                        options={categories.map((category) => {
+                          return { label: category.name, value: category.id };
+                        })}
+                        TextField={StyledTextField}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: '10px' }}>
+                      <DatePicker
+                        name="startDate"
+                        label="Start date"
+                        getTextFieldProps={getTextFieldProps}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving}
+                        timezone={Timezones[user.timezone]}
+                        initialFocused={true}
+                      />
+                      <TimePicker
+                        name="startTime"
+                        label="Start time"
+                        getTextFieldProps={getTextFieldProps}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: '10px' }}>
+                      {(isSaving || !values.finished) && (
                         <Box
                           sx={{
                             width: 'calc(100% + 20px)',
-                            height: 'calc(100% + 20px)',
+                            height: '70px',
                             background: 'transparent',
                             position: 'absolute',
                             zIndex: 1,
@@ -215,35 +286,26 @@ export default function AddTimeLog({
                           }}
                         />
                       )}
-                      <HuePicker
-                        height={`8px`}
-                        width={'100%'}
-                        onChange={(value) => {
-                          setFieldValue('color', value);
-                          setFieldValue('color', value);
-                          setStyledTextField(isSaving, value.hex);
-                        }}
-                        color={values.color}
-                        pointer={Pointer}
+                      <DatePicker
+                        name="endDate"
+                        label={values.finished ? 'End date' : 'Not finished'}
+                        getTextFieldProps={getTextFieldProps}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving || !values.finished}
+                        timezone={Timezones[user.timezone]}
+                      />
+                      <TimePicker
+                        name="endTime"
+                        label={values.finished ? 'End time' : 'Not finished'}
+                        getTextFieldProps={getTextFieldProps}
+                        helperTextColor={
+                          isSaving ? IS_SAVING_HEX : darkHexColor
+                        }
+                        disabled={isSaving || !values.finished}
                       />
                     </Box>
-                    <SelectWithSearch
-                      name="category"
-                      label="Category"
-                      options={categories.map((category) => {
-                        return { label: category.name, value: category.id };
-                      })}
-                      TextField={StyledTextField}
-                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
-                      disabled={isSaving}
-                    />
-                    <DatePicker
-                      name="categoryName"
-                      label="Category name"
-                      textFieldProps={TextFieldProps}
-                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
-                      disabled={isSaving}
-                    />
                   </Stack>
                 </Box>
               </Box>
@@ -324,6 +386,71 @@ export default function AddTimeLog({
                     </Stack>
                   </Box>
                 </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    background: isSaving ? SUPER_LIGHT_SILVER : backgroundColor,
+                    pl: '5px',
+                    pr: '5px',
+                    border: `solid 1px ${
+                      isSaving ? SUPER_LIGHT_SILVER : backgroundColor
+                    }`,
+                    color: isSaving ? IS_SAVING_HEX : 'black',
+                    cursor: isSaving ? 'default' : 'pointer',
+                    '&:hover': !isSaving && {
+                      background: backgroundColor,
+                    },
+                  }}
+                  onClick={() => !isSaving && undefined}
+                >
+                  <Checkbox
+                    checked={!!values.finished}
+                    sx={{
+                      position: 'relative',
+                      top: '50%',
+                      left: '40%',
+                      transform: 'translate(-40%, -50%)',
+                      p: 0,
+                      '&:hover': { background: 'transparent' },
+                      color: GREEN,
+                      '&.Mui-checked': {
+                        color: GREEN,
+                      },
+                      '& .MuiSvgIcon-root': { fontSize: 40 },
+                      '.Mui-focusVisible &': {
+                        outline: '2px auto rgba(19,124,189,.6)',
+                        outlineOffset: 2,
+                      },
+                    }}
+                    onClick={() => {
+                      setFieldValue('finished', !values.finished);
+                      if (values.finished) {
+                        setFieldValue('endDateHidden', values.endDate);
+                        setFieldValue('endTimeHidden', values.endTime);
+                        setFieldValue('endDate', '');
+                        setFieldValue('endTime', '');
+                      } else {
+                        setFieldValue('endDate', values.endDateHidden);
+                        setFieldValue('endTime', values.endTimeHidden);
+                      }
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    width: '16px',
+                    background:
+                      !isFormValid || isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN,
+                    border: `solid 1px ${
+                      isSaving || !isFormValid
+                        ? SUPER_LIGHT_SILVER
+                        : LIGHT_GREEN
+                    }`,
+                  }}
+                />
                 <Box
                   sx={{
                     display: 'flex',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Field } from 'formik';
 import FormControl from '@mui/material/FormControl';
-import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers';
+import { TimePicker as MuiTimePicker } from '@mui/x-date-pickers/TimePicker';
 import helperTextHandler from '../../sections/@dashboard/Form/helperTextHandler';
 import { Box } from '@mui/material';
 
@@ -17,12 +17,10 @@ type DatePickerProps = {
   multiline?: boolean;
   rows?: number;
   inputBackground?: string;
-  timezone: string;
   initialFocused?: boolean;
 };
 
-export const DatePicker = ({
-  timezone,
+export const TimePicker = ({
   label,
   name,
   startAdornment,
@@ -45,7 +43,11 @@ export const DatePicker = ({
         const helperText = helperTextHandler(meta);
         const error = !!meta.touched && !!meta.error;
         return (
-          <FormControl size="small" sx={{ width: '100%', mb: 1 }} error={error}>
+          <FormControl
+            size="small"
+            sx={{ width: '100%', mb: 1 }}
+            error={!!meta.touched && !!meta.error}
+          >
             <Box
               sx={{
                 display: 'flex',
@@ -53,7 +55,14 @@ export const DatePicker = ({
                 justifyContent: 'center',
               }}
             >
-              <MuiDatePicker
+              <MuiTimePicker
+                focused={
+                  !!(
+                    meta.initialValue !== meta.value &&
+                    meta.value &&
+                    !meta.error
+                  )
+                }
                 slotProps={{
                   textField: {
                     background: 'white',
@@ -67,8 +76,6 @@ export const DatePicker = ({
                 label={label}
                 variant="filled"
                 size="small"
-                allowClear={true}
-                timezone={timezone}
                 allowSameDateSelection={true}
                 {...field}
                 value={field.value || null}
@@ -101,4 +108,4 @@ export const DatePicker = ({
   );
 };
 
-export default DatePicker;
+export default TimePicker;
