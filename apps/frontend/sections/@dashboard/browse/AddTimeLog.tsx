@@ -17,7 +17,7 @@ import {
 import { DateTime } from 'luxon';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -60,7 +60,7 @@ export default function AddTimeLog({
         background: 'white',
         borderRadius: '8px',
         '& input': {
-          color: darkHexColor,
+          color: error ? '#FF4842' : darkHexColor,
           backgroundColor: 'white',
           borderRadius: '6px',
         },
@@ -101,6 +101,7 @@ export default function AddTimeLog({
     StyledTextField = styled(TextField)(getTextFieldProps(false, false));
   };
   setStyledTextField(isSaving, startingColor.hex);
+  const [finished, setFinished] = useState(false);
 
   if (!isEditing.createNew) {
     return (
@@ -152,19 +153,72 @@ export default function AddTimeLog({
     );
   }
 
-  const validationSchema = yup.object().shape({
-    categoryId: yup.string().required('Category is required').min(1),
-    startDate: yup.string().required('Start date is required').min(1),
-    startTime: yup.string().required('Start time is required').min(1),
-    endDate: yup.string().required('End date is required').min(1),
-    endTime: yup.string().required('End time is required').min(1),
-  });
+  const getValidationSchema = (finished) => {
+    const activeCategories = categories.filter((category) => category.active);
+    const startDateAndTimeSchema = yup.object().shape({
+      startDate: yup.string().required('Start date is required').min(1),
+      startTime: yup.string().required('Start time is required').min(1),
+    });
+    const notFinishedSchema = startDateAndTimeSchema.concat(
+      yup.object().shape({
+        categoryId: yup.string().test(
+          'Category',
+          ({ value }) => {
+            if (!value) {
+              return 'Category is required';
+            }
+            if (
+              !!value &&
+              activeCategories.find(
+                (activeCategory) => activeCategory.id === value
+              )
+            ) {
+              return 'You cannot create unfinished timelog with already active category';
+            }
+            return '';
+          },
+          (value) => {
+            if (!value) {
+              return false;
+            }
+            return (
+              !value ||
+              (!value &&
+                activeCategories.find(
+                  (activeCategory) => activeCategory.id === value
+                ))
+            );
+          }
+        ),
+      })
+    );
+    const finishedSchema = startDateAndTimeSchema.concat(
+      yup.object().shape({
+        categoryId: yup.string().required('Category is required').min(1),
+        endDate: yup.string().required('End date is required').min(1),
+        endTime: yup.string().required('End time is required').min(1),
+      })
+    );
+    if (finished) {
+      return finishedSchema;
+    }
+    return notFinishedSchema;
+  };
+
+  const validate = (
+    values,
+    props /* only available when using withFormik */
+  ) => {
+    console.log(values, props);
+    const errors = {};
+
+    return errors;
+  };
 
   return (
     <Formik
       initialValues={{
         ...data,
-        finished: false,
         categoryId: '',
         startDate: DateTime.now(),
         startTime: '',
@@ -176,10 +230,17 @@ export default function AddTimeLog({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
-      validationSchema={validationSchema}
+      validate={validate} //getValidationSchema(finished)}
     >
-      {({ handleSubmit, values, setFieldValue, touched }) => {
-        const isFormValid = validationSchema.isValidSync(values);
+      {({
+        handleSubmit,
+        values,
+        setFieldValue,
+        setErrors,
+        validateForm,
+        errors,
+      }) => {
+        const isFormValid = getValidationSchema(finished).isValidSync(values);
 
         const backgroundColor = getHexFromRGBAObject(
           getRgbaObjectFromHexString(
@@ -206,7 +267,7 @@ export default function AddTimeLog({
             categories.find((category) => category.id === values.categoryId)
               ?.color || startingColor.hex
           );
-        }, [values.categoryId]);
+        }, [values.categoryId, finished]);
 
         return (
           <Card>
@@ -235,7 +296,7 @@ export default function AddTimeLog({
                       }}
                     />
                   )}
-                  <Stack spacing={1}>
+                  <Stack spacing={1} key={values.categoryId}>
                     <Box>
                       <SelectWithSearch
                         key={darkHexColor}
@@ -244,7 +305,9 @@ export default function AddTimeLog({
                         options={categories.map((category) => {
                           return { label: category.name, value: category.id };
                         })}
-                        TextField={StyledTextField}
+                        TextField={styled(TextField)(
+                          getTextFieldProps(!!errors?.categoryId, false)
+                        )}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
@@ -274,7 +337,7 @@ export default function AddTimeLog({
                       />
                     </Box>
                     <Box sx={{ display: 'flex', gap: '10px' }}>
-                      {(isSaving || !values.finished) && (
+                      {(isSaving || !finished) && (
                         <Box
                           sx={{
                             width: 'calc(100% + 20px)',
@@ -288,22 +351,22 @@ export default function AddTimeLog({
                       )}
                       <DatePicker
                         name="endDate"
-                        label={values.finished ? 'End date' : 'Not finished'}
+                        label={finished ? 'End date' : 'Not finished'}
                         getTextFieldProps={getTextFieldProps}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
-                        disabled={isSaving || !values.finished}
+                        disabled={isSaving || !finished}
                         timezone={Timezones[user.timezone]}
                       />
                       <TimePicker
                         name="endTime"
-                        label={values.finished ? 'End time' : 'Not finished'}
+                        label={finished ? 'End time' : 'Not finished'}
                         getTextFieldProps={getTextFieldProps}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
-                        disabled={isSaving || !values.finished}
+                        disabled={isSaving || !finished}
                       />
                     </Box>
                   </Stack>
@@ -405,7 +468,7 @@ export default function AddTimeLog({
                   onClick={() => !isSaving && undefined}
                 >
                   <Checkbox
-                    checked={!!values.finished}
+                    checked={!!finished}
                     sx={{
                       position: 'relative',
                       top: '50%',
@@ -424,8 +487,8 @@ export default function AddTimeLog({
                       },
                     }}
                     onClick={() => {
-                      setFieldValue('finished', !values.finished);
-                      if (values.finished) {
+                      setFinished(!finished);
+                      if (finished) {
                         setFieldValue('endDateHidden', values.endDate);
                         setFieldValue('endTimeHidden', values.endTime);
                         setFieldValue('endDate', '');

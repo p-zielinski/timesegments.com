@@ -45,7 +45,7 @@ export const TimePicker = ({
         return (
           <FormControl
             size="small"
-            sx={{ width: '100%', mb: 1 }}
+            sx={{ width: '100%' }}
             error={!!meta.touched && !!meta.error}
           >
             <Box
@@ -86,19 +86,17 @@ export const TimePicker = ({
               />
               <Box
                 sx={{
-                  mt:
-                    helperText?.match(/optional/i) || helperText?.match(/dd\//i)
-                      ? 0
-                      : '-3px',
+                  mt: '6px',
                   ml: '4px',
-                  mb: helperText?.match(/optional/i) ? -0.3 : -1,
+                  mb: -1,
                   color: error ? '#FF4842' : helperTextColor,
-                  lineHeight: '1.5',
                   fontSize: '0.75rem',
                   fontFamily: `Public Sans,sans-serif`,
+                  minHeight: '14px',
+                  lineHeight: 0,
                 }}
               >
-                {helperText}
+                {!disabled && helperText}
               </Box>
             </Box>
           </FormControl>

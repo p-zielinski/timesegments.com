@@ -46,10 +46,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
       {({ field, meta, form }) => {
         return (
           <>
-            <FormControl
-              sx={{ width: '100%', mb: 2 }}
-              error={!!meta.touched && !!meta.error}
-            >
+            <FormControl sx={{ width: '100%', mb: 2 }} error={!!meta.error}>
               <Autocomplete
                 disablePortal
                 disableClearable
@@ -66,6 +63,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                   if (reason !== 'selectOption') {
                     form.setFieldTouched(name, true);
                   }
+                  form.validateField(name);
                 }}
                 // @ts-ignore
                 value={options.find((o) => o.value === field.value) || null}
@@ -75,7 +73,10 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                     {...params}
                     size="small"
                     autoComplete="nope"
-                    helperText={helperTextHandler(meta, helperText)}
+                    helperText={helperTextHandler(
+                      { ...meta, touched: true },
+                      helperText
+                    )}
                     focused={
                       !!(
                         meta.initialValue !== meta.value &&
@@ -98,7 +99,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                       },
                     }}
                     sx={{ mb: 1, background: 'white', borderRadius: '7px' }}
-                    error={!!(meta.touched && meta.error)}
+                    error={!!meta.error}
                     name={name}
                     id={`select-${label}`}
                     variant="outlined"
