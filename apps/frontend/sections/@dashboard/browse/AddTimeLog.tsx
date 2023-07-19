@@ -19,7 +19,7 @@ import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject
 import Iconify from '../../../components/iconify';
 import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
-import { Formik } from 'formik';
+import { Formik, FormikErrors } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
@@ -89,7 +89,7 @@ export default function AddTimeLog({
                 }),
           },
           '&:hover fieldset': {
-            borderColor: focused ? darkHexColor : hexColor,
+            borderColor: error ? '#FF4842' : focused ? darkHexColor : hexColor,
           },
           '&.Mui-focused fieldset': {
             borderColor: hexColor,
@@ -205,12 +205,47 @@ export default function AddTimeLog({
     return notFinishedSchema;
   };
 
-  const validate = (
-    values,
-    props /* only available when using withFormik */
-  ) => {
-    console.log(values, props);
-    const errors = {};
+  const validate = async ({
+    categoryId,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+  }) => {
+    const isDateTime = (object) => object instanceof DateTime;
+    const errors: FormikErrors<any> = {
+      categoryId: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+    };
+    if (!categoryId) {
+      errors.categoryId = 'Category is required';
+    }
+    const active = categories.find(
+      (category) => category.id === categoryId
+    ).active;
+    if (active && !finished) {
+      errors.categoryId =
+        'You cannot create unfinished timelog with already active category';
+    }
+    if (isDateTime(startDate)) {
+      const { year, month, day } = startDate.c;
+      console.log(year, month, day);
+    } else {
+    }
+    if (isDateTime(startTime)) {
+      const { hour, minute, second } = startTime.c;
+      console.log(hour, minute, second);
+    }
+    console.log({
+      categoryId,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+    });
 
     return errors;
   };
@@ -230,7 +265,7 @@ export default function AddTimeLog({
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(false);
       }}
-      validate={validate} //getValidationSchema(finished)}
+      validate={async (values) => await validate(values)} //getValidationSchema(finished)}
     >
       {({
         handleSubmit,
