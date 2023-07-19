@@ -52,6 +52,12 @@ export class TimeLogService {
         user: true,
       }
     );
+    if (categoryWithUser.active && !to) {
+      return {
+        success: false,
+        error: `Cannot create unfinished timelog with already active category`,
+      };
+    }
     if (!categoryWithUser || categoryWithUser?.user?.id !== user.id) {
       return {
         success: false,
@@ -64,6 +70,14 @@ export class TimeLogService {
     const endedAt = to
       ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
       : null;
+    if (!endedAt) {
+      await this.prisma.category.update({
+        data: { active: true },
+        where: {
+          id: categoryWithUser.id,
+        },
+      });
+    }
     const createdTimeLog = await this.prisma.timeLog.create({
       data: { userId: user.id, categoryId, startedAt, endedAt },
     });
