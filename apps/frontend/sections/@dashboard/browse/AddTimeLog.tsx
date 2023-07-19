@@ -428,9 +428,7 @@ export default function AddTimeLog({
                           : `solid 1px ${GREEN}`,
                       },
                   }}
-                  onClick={() => {
-                    !isSaving && handleSubmit();
-                  }}
+                  onClick={() => !isSaving && isFormValid && handleSubmit()}
                 >
                   <Box
                     sx={{
@@ -482,7 +480,7 @@ export default function AddTimeLog({
                       background: backgroundColor,
                     },
                   }}
-                  onClick={() => !isSaving && undefined}
+                  onClick={() => !isSaving && isFormValid && handleSubmit()}
                 >
                   <Checkbox
                     checked={!!finished}
