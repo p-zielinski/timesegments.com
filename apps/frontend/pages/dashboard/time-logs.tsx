@@ -104,6 +104,9 @@ export default function TimeLogs({
 
   const [isEditing, setIsEditing] = useState({});
 
+  const [controlValue, setControlValue] = useState(user.controlValue);
+  const [isSaving, setIsSaving] = useState(false);
+
   return (
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <DashboardLayout
@@ -214,6 +217,11 @@ export default function TimeLogs({
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
                 categories={categories}
+                controlValue={controlValue}
+                setControlValue={setControlValue}
+                disableHover={disableHover}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
               />
             </Grid>
           </Grid>

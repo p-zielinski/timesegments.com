@@ -1,9 +1,9 @@
 import React from 'react';
 import { Field } from 'formik';
 import FormControl from '@mui/material/FormControl';
-import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers';
 import helperTextHandler from '../../sections/@dashboard/Form/helperTextHandler';
 import { Box } from '@mui/material';
+import { DateTimePicker as MuiDateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 type DatePickerProps = {
   label?: string;
@@ -18,10 +18,9 @@ type DatePickerProps = {
   rows?: number;
   inputBackground?: string;
   timezone: string;
-  initialFocused?: boolean;
 };
 
-export const DatePicker = ({
+export const DateTimePicker = ({
   timezone,
   label,
   name,
@@ -34,14 +33,15 @@ export const DatePicker = ({
   },
   helperTextColor = '#888888',
   inputBackground = 'white',
-  initialFocused = false,
 }: DatePickerProps) => {
   return (
     <Field autoComplete="nope" name={name}>
       {({ field, meta, form }) => {
-        const focused =
-          initialFocused ||
-          !!(meta.initialValue !== meta.value && meta.value && !meta.error);
+        const focused = !!(
+          meta.initialValue !== meta.value &&
+          meta.value &&
+          !meta.error
+        );
         const helperText = helperTextHandler(meta);
         const error = !!meta.touched && !!meta.error;
         return (
@@ -53,11 +53,11 @@ export const DatePicker = ({
                 justifyContent: 'center',
               }}
             >
-              <MuiDatePicker
+              <MuiDateTimePicker
                 slotProps={{
                   textField: {
                     background: 'white',
-                    sx: getTextFieldProps(error, focused),
+                    sx: getTextFieldProps(error, error ? false : focused),
                     size: 'small',
                   },
                 }}
@@ -72,10 +72,14 @@ export const DatePicker = ({
                 allowSameDateSelection={true}
                 {...field}
                 value={field.value || null}
-                onChange={(value) => form.setFieldValue(field.name, value)}
+                onChange={(value) => {
+                  form.setFieldTouched(field.name, true);
+                  form.setFieldValue(field.name, value);
+                }}
                 InputProps={{
                   startAdornment: startAdornment,
                 }}
+                onClose={() => console.log(123)}
               />
               <Box
                 sx={{
@@ -99,4 +103,4 @@ export const DatePicker = ({
   );
 };
 
-export default DatePicker;
+export default DateTimePicker;

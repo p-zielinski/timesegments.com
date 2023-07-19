@@ -23,6 +23,11 @@ export default function BrowseTimeLogs({
   isEditing,
   setIsEditing,
   categories,
+  controlValue,
+  setControlValue,
+  disableHover,
+  isSaving,
+  setIsSaving,
 }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -35,6 +40,11 @@ export default function BrowseTimeLogs({
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
                 categories={categories}
+                controlValue={controlValue}
+                setControlValue={setControlValue}
+                disableHover={disableHover}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
               />
               {timeLogsWithinActiveDate
                 .sort((a, b) => b.startedAt - a.startedAt)

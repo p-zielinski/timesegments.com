@@ -14,20 +14,21 @@ import {
   RED,
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
-import { DateTime } from 'luxon';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
 import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
-import { Formik, FormikErrors } from 'formik';
+import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
-import DatePicker from '../../../components/form/DatePicker';
+import DateTimePicker from '../../../components/form/DateTimePicker';
 import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
 import { styled } from '@mui/material/styles';
 import { Timezones } from '@test1/shared';
-import { TimePicker } from '../../../components/form/TimePicker';
+import { DateTime } from 'luxon';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
+import { StatusCodes } from 'http-status-codes';
 
 export default function AddTimeLog({
   user,
@@ -156,8 +157,14 @@ export default function AddTimeLog({
   const getValidationSchema = (finished) => {
     const activeCategories = categories.filter((category) => category.active);
     const startDateAndTimeSchema = yup.object().shape({
-      startDate: yup.string().required('Start date is required').min(1),
-      startTime: yup.string().required('Start time is required').min(1),
+      startDateTime: yup
+        .date()
+        .nullable()
+        .transform((value) =>
+          value instanceof Date && !isNaN(value as any) ? value : null
+        )
+        .required('Valid start date time is required')
+        .max(yup.ref('now'), 'Start date time must be earlier than now'),
     });
     const notFinishedSchema = startDateAndTimeSchema.concat(
       yup.object().shape({
@@ -181,12 +188,11 @@ export default function AddTimeLog({
             if (!value) {
               return false;
             }
-            return (
-              !value ||
-              (!value &&
-                activeCategories.find(
-                  (activeCategory) => activeCategory.id === value
-                ))
+            return !(
+              !!value &&
+              activeCategories.find(
+                (activeCategory) => activeCategory.id === value
+              )
             );
           }
         ),
@@ -195,8 +201,17 @@ export default function AddTimeLog({
     const finishedSchema = startDateAndTimeSchema.concat(
       yup.object().shape({
         categoryId: yup.string().required('Category is required').min(1),
-        endDate: yup.string().required('End date is required').min(1),
-        endTime: yup.string().required('End time is required').min(1),
+        endDateTime: yup
+          .date()
+          .nullable()
+          .transform((value) =>
+            value instanceof Date && !isNaN(value as any) ? value : null
+          )
+          .required('Start date time is required')
+          .min(
+            yup.ref('startDateTime'),
+            'End date time must be later than start date time'
+          ),
       })
     );
     if (finished) {
@@ -205,75 +220,59 @@ export default function AddTimeLog({
     return notFinishedSchema;
   };
 
-  const validate = async ({
-    categoryId,
-    startDate,
-    startTime,
-    endDate,
-    endTime,
-  }) => {
-    const isDateTime = (object) => object instanceof DateTime;
-    const errors: FormikErrors<any> = {
-      categoryId: '',
-      startDate: '',
-      startTime: '',
-      endDate: '',
-      endTime: '',
-    };
-    if (!categoryId) {
-      errors.categoryId = 'Category is required';
-    }
-    const active = categories.find(
-      (category) => category.id === categoryId
-    ).active;
-    if (active && !finished) {
-      errors.categoryId =
-        'You cannot create unfinished timelog with already active category';
-    }
-    if (isDateTime(startDate)) {
-      const { year, month, day } = startDate.c;
-      console.log(year, month, day);
-    } else {
-    }
-    if (isDateTime(startTime)) {
-      const { hour, minute, second } = startTime.c;
-      console.log(hour, minute, second);
-    }
-    console.log({
-      categoryId,
-      startDate,
-      startTime,
-      endDate,
-      endTime,
+  const createTimeLog = async (
+    categoryId: string,
+    startDateTime: DateTime,
+    endDateTime?: DateTime
+  ) => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'time-log/create',
+      body: { categoryId, from: startDateTime.c, to: endDateTime?.c },
+      method: 'POST',
     });
-
-    return errors;
+    if (response.statusCode === StatusCodes.CREATED && response?.category) {
+      // setCategories([{ ...response.category }, ...categories]);
+      setIsEditing({});
+      console.log(response);
+      if (response.controlValue) {
+        setControlValue(response.controlValue);
+      }
+    } else if (response.statusCode === StatusCodes.CONFLICT) {
+      setControlValue(undefined);
+      return; //skip setting isSaving(false)
+    }
+    setIsSaving(false);
+    return;
   };
 
   return (
     <Formik
       initialValues={{
         ...data,
+        now: DateTime.now(),
         categoryId: '',
-        startDate: DateTime.now(),
-        startTime: '',
-        endDate: '',
-        endTime: '',
-        endDateHidden: '',
-        endTimeHidden: '',
+        startDateTime: '',
+        endDateTime: '',
+        endDateTimeHidden: '',
       }}
       onSubmit={async (values, { setSubmitting }) => {
+        await createTimeLog(
+          values.categoryId,
+          values.startDateTime,
+          values.endDateTime
+        );
         setSubmitting(false);
       }}
-      validate={async (values) => await validate(values)} //getValidationSchema(finished)}
+      validationSchema={getValidationSchema(finished)}
     >
       {({
         handleSubmit,
         values,
         setFieldValue,
-        setErrors,
-        validateForm,
         errors,
+        setErrors,
+        setFieldTouched,
       }) => {
         const isFormValid = getValidationSchema(finished).isValidSync(values);
 
@@ -302,6 +301,12 @@ export default function AddTimeLog({
             categories.find((category) => category.id === values.categoryId)
               ?.color || startingColor.hex
           );
+          if (!finished && values.endDateTime) {
+            setFieldValue('endDateTimeHidden', values.endDateTime);
+            setFieldValue('endDateTime', '');
+          } else if (values.endDateTimeHidden) {
+            setFieldValue('endDateTime', values.endDateTimeHidden);
+          }
         }, [values.categoryId, finished]);
 
         return (
@@ -318,7 +323,7 @@ export default function AddTimeLog({
                   borderBottom: '0px',
                 }}
               >
-                <Box sx={{ p: 1.5 }}>
+                <Box sx={{ p: 1.5, mt: 1 }}>
                   {isSaving && (
                     <Box
                       sx={{
@@ -349,28 +354,14 @@ export default function AddTimeLog({
                         disabled={isSaving}
                       />
                     </Box>
-                    <Box sx={{ display: 'flex', gap: '10px' }}>
-                      <DatePicker
-                        name="startDate"
-                        label="Start date"
-                        getTextFieldProps={getTextFieldProps}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
-                        timezone={Timezones[user.timezone]}
-                        initialFocused={true}
-                      />
-                      <TimePicker
-                        name="startTime"
-                        label="Start time"
-                        getTextFieldProps={getTextFieldProps}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
-                      />
-                    </Box>
+                    <DateTimePicker
+                      name="startDateTime"
+                      label="Start date time"
+                      getTextFieldProps={getTextFieldProps}
+                      helperTextColor={isSaving ? IS_SAVING_HEX : darkHexColor}
+                      disabled={isSaving}
+                      timezone={Timezones[user.timezone]}
+                    />
                     <Box sx={{ display: 'flex', gap: '10px' }}>
                       {(isSaving || !finished) && (
                         <Box
@@ -384,24 +375,15 @@ export default function AddTimeLog({
                           }}
                         />
                       )}
-                      <DatePicker
-                        name="endDate"
-                        label={finished ? 'End date' : 'Not finished'}
+                      <DateTimePicker
+                        name="endDateTime"
+                        label={finished ? 'End date time' : 'Not finished'}
                         getTextFieldProps={getTextFieldProps}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
                         disabled={isSaving || !finished}
                         timezone={Timezones[user.timezone]}
-                      />
-                      <TimePicker
-                        name="endTime"
-                        label={finished ? 'End time' : 'Not finished'}
-                        getTextFieldProps={getTextFieldProps}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving || !finished}
                       />
                     </Box>
                   </Stack>
@@ -523,15 +505,6 @@ export default function AddTimeLog({
                     }}
                     onClick={() => {
                       setFinished(!finished);
-                      if (finished) {
-                        setFieldValue('endDateHidden', values.endDate);
-                        setFieldValue('endTimeHidden', values.endTime);
-                        setFieldValue('endDate', '');
-                        setFieldValue('endTime', '');
-                      } else {
-                        setFieldValue('endDate', values.endDateHidden);
-                        setFieldValue('endTime', values.endTimeHidden);
-                      }
                     }}
                   />
                 </Box>
