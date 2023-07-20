@@ -16,7 +16,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -31,6 +31,7 @@ import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export default function AddTimeLog({
+  refreshTimeLogs,
   user,
   controlValue,
   setControlValue,
@@ -102,7 +103,6 @@ export default function AddTimeLog({
     StyledTextField = styled(TextField)(getTextFieldProps(false, false));
   };
   setStyledTextField(isSaving, startingColor.hex);
-  const [finished, setFinished] = useState(false);
 
   if (!isEditing.createNew) {
     return (
@@ -154,39 +154,27 @@ export default function AddTimeLog({
     );
   }
 
-  const getValidationSchema = (finished) => {
+  const getValidationSchema = () => {
     const activeCategories = categories.filter((category) => category.active);
-    const startDateAndTimeSchema = yup.object().shape({
-      startDateTime: yup
-        .date()
+    return yup.object().shape({
+      categoryId: yup
+        .string()
         .nullable()
-        .transform((value) =>
-          value instanceof Date && !isNaN(value as any) ? value : null
-        )
-        .required('Valid start date time is required')
-        .max(yup.ref('now'), 'Start date time must be earlier than now'),
-    });
-    const notFinishedSchema = startDateAndTimeSchema.concat(
-      yup.object().shape({
-        categoryId: yup.string().test(
+        .test(
           'Category',
           ({ value }) => {
             if (!value) {
               return 'Category is required';
             }
-            if (
-              !!value &&
-              activeCategories.find(
-                (activeCategory) => activeCategory.id === value
-              )
-            ) {
-              return 'You cannot create unfinished timelog with already active category';
-            }
-            return '';
+            return 'You cannot create unfinished timelog with already active category';
           },
-          (value) => {
+          (value, context) => {
             if (!value) {
               return false;
+            }
+            const { finished } = context.parent;
+            if (finished) {
+              return true;
             }
             return !(
               !!value &&
@@ -196,28 +184,83 @@ export default function AddTimeLog({
             );
           }
         ),
-      })
-    );
-    const finishedSchema = startDateAndTimeSchema.concat(
-      yup.object().shape({
-        categoryId: yup.string().required('Category is required').min(1),
-        endDateTime: yup
-          .date()
-          .nullable()
-          .transform((value) =>
-            value instanceof Date && !isNaN(value as any) ? value : null
-          )
-          .required('Start date time is required')
-          .min(
-            yup.ref('startDateTime'),
-            'End date time must be later than start date time'
-          ),
-      })
-    );
-    if (finished) {
-      return finishedSchema;
-    }
-    return notFinishedSchema;
+      startDateTime: yup
+        .string()
+        .nullable()
+        .test({
+          name: 'Start date time',
+          exclusive: false,
+          message: ({ value, originalValue }) => {
+            if (!value) {
+              return 'Start date time is required';
+            }
+            if (value === 'Invalid DateTime' || !originalValue?.ts) {
+              return 'Valid start date time is required';
+            }
+            if (
+              !originalValue?.ts ||
+              DateTime.now().ts - originalValue.ts < 0
+            ) {
+              return 'Start date time must be earlier than now';
+            }
+          },
+          test: (value) => {
+            if (!value || value === 'Invalid DateTime') {
+              return false;
+            }
+            const startDateTime = DateTime.fromISO(value, {
+              zone: Timezones[user.timezone],
+            });
+            return !(
+              !startDateTime.ts || DateTime.now().ts - startDateTime.ts < 0
+            );
+          },
+        }),
+      endDateTime: yup
+        .string()
+        .nullable()
+        .test({
+          name: 'Start date time',
+          exclusive: false,
+          message: ({ value, originalValue }) => {
+            if (!value) {
+              return 'Start date time is required';
+            }
+            if (value === 'Invalid DateTime' || !originalValue?.ts) {
+              return 'Valid start date time is required';
+            }
+            if (originalValue?.ts || DateTime.now().ts - originalValue.ts < 0) {
+              return 'End date time must be later than start date time';
+            }
+          },
+          test: (value, context) => {
+            const { finished, startDateTime: rawStartDateTime } =
+              context.parent;
+            if (!finished) {
+              return true;
+            }
+            if (!value || value === 'Invalid DateTime') {
+              return false;
+            }
+            const endDateTime = DateTime.fromISO(value, {
+              zone: Timezones[user.timezone],
+            });
+            if (!endDateTime.ts || DateTime.now().ts - endDateTime.ts <= 0) {
+              return false;
+            }
+            if (!rawStartDateTime || rawStartDateTime === 'Invalid DateTime') {
+              return true;
+            }
+            const startDateTime = DateTime.fromISO(rawStartDateTime, {
+              zone: Timezones[user.timezone],
+            });
+            if (!startDateTime?.ts) {
+              return true;
+            }
+            return endDateTime.ts - startDateTime.ts > 0;
+          },
+        }),
+    });
   };
 
   const createTimeLog = async (
@@ -231,10 +274,10 @@ export default function AddTimeLog({
       body: { categoryId, from: startDateTime.c, to: endDateTime?.c },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED && response?.category) {
+    if (response.statusCode === StatusCodes.CREATED && response?.timeLog) {
       // setCategories([{ ...response.category }, ...categories]);
+      refreshTimeLogs();
       setIsEditing({});
-      console.log(response);
       if (response.controlValue) {
         setControlValue(response.controlValue);
       }
@@ -250,7 +293,7 @@ export default function AddTimeLog({
     <Formik
       initialValues={{
         ...data,
-        now: DateTime.now(),
+        finished: false,
         categoryId: '',
         startDateTime: '',
         endDateTime: '',
@@ -264,7 +307,7 @@ export default function AddTimeLog({
         );
         setSubmitting(false);
       }}
-      validationSchema={getValidationSchema(finished)}
+      validationSchema={getValidationSchema}
     >
       {({
         handleSubmit,
@@ -274,7 +317,7 @@ export default function AddTimeLog({
         setErrors,
         setFieldTouched,
       }) => {
-        const isFormValid = getValidationSchema(finished).isValidSync(values);
+        const isFormValid = getValidationSchema().isValidSync(values);
 
         const backgroundColor = getHexFromRGBAObject(
           getRgbaObjectFromHexString(
@@ -301,13 +344,13 @@ export default function AddTimeLog({
             categories.find((category) => category.id === values.categoryId)
               ?.color || startingColor.hex
           );
-          if (!finished && values.endDateTime) {
+          if (!values.finished && values.endDateTime) {
             setFieldValue('endDateTimeHidden', values.endDateTime);
             setFieldValue('endDateTime', '');
-          } else if (values.endDateTimeHidden) {
+          } else if (values.finished && values.endDateTimeHidden) {
             setFieldValue('endDateTime', values.endDateTimeHidden);
           }
-        }, [values.categoryId, finished]);
+        }, [values.categoryId, values.finished]);
 
         return (
           <Card>
@@ -363,7 +406,7 @@ export default function AddTimeLog({
                       timezone={Timezones[user.timezone]}
                     />
                     <Box sx={{ display: 'flex', gap: '10px' }}>
-                      {(isSaving || !finished) && (
+                      {(isSaving || !values.finished) && (
                         <Box
                           sx={{
                             width: 'calc(100% + 20px)',
@@ -377,12 +420,14 @@ export default function AddTimeLog({
                       )}
                       <DateTimePicker
                         name="endDateTime"
-                        label={finished ? 'End date time' : 'Not finished'}
+                        label={
+                          values.finished ? 'End date time' : 'Not finished'
+                        }
                         getTextFieldProps={getTextFieldProps}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
-                        disabled={isSaving || !finished}
+                        disabled={isSaving || !values.finished}
                         timezone={Timezones[user.timezone]}
                       />
                     </Box>
@@ -483,7 +528,7 @@ export default function AddTimeLog({
                   onClick={() => !isSaving && isFormValid && handleSubmit()}
                 >
                   <Checkbox
-                    checked={!!finished}
+                    checked={!!values.finished}
                     sx={{
                       position: 'relative',
                       top: '50%',
@@ -502,7 +547,7 @@ export default function AddTimeLog({
                       },
                     }}
                     onClick={() => {
-                      setFinished(!finished);
+                      setFieldValue('finished', !values.finished);
                     }}
                   />
                 </Box>

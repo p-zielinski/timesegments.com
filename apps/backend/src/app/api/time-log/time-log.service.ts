@@ -70,6 +70,12 @@ export class TimeLogService {
     const endedAt = to
       ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
       : null;
+    if (endedAt?.ts && endedAt.ts <= startedAt.ts) {
+      return {
+        success: false,
+        error: `End date time must be later than start date time`,
+      };
+    }
     if (!endedAt) {
       await this.prisma.category.update({
         data: { active: true },

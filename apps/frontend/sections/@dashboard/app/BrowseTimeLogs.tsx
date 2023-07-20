@@ -17,6 +17,7 @@ import AddTimeLog from '../browse/AddTimeLog';
 // ----------------------------------------------------------------------
 
 export default function BrowseTimeLogs({
+  refreshTimeLogs,
   user,
   timeLogsWithinActiveDate,
   showDetails,
@@ -31,43 +32,42 @@ export default function BrowseTimeLogs({
 }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      {timeLogsWithinActiveDate?.length ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {showDetails ? (
-            <>
-              <AddTimeLog
-                user={user}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-                categories={categories}
-                controlValue={controlValue}
-                setControlValue={setControlValue}
-                disableHover={disableHover}
-                isSaving={isSaving}
-                setIsSaving={setIsSaving}
-              />
-              {timeLogsWithinActiveDate
-                .sort((a, b) => b.startedAt - a.startedAt)
-                .map((timeLogExtended) => (
-                  <DetailPeriod
-                    timeLogExtended={timeLogExtended}
-                    user={user}
-                    key={nanoid()}
-                    setIsEditing={setIsEditing}
-                  />
-                ))}
-            </>
-          ) : (
-            getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
-              (group) => (
-                <GroupedPeriod group={group} user={user} key={nanoid()} />
-              )
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {showDetails ? (
+          <>
+            <AddTimeLog
+              user={user}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              categories={categories}
+              controlValue={controlValue}
+              setControlValue={setControlValue}
+              disableHover={disableHover}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              refreshTimeLogs={refreshTimeLogs}
+            />
+            {timeLogsWithinActiveDate
+              .sort((a, b) => b.startedAt - a.startedAt)
+              .map((timeLogExtended) => (
+                <DetailPeriod
+                  timeLogExtended={timeLogExtended}
+                  user={user}
+                  key={nanoid()}
+                  setIsEditing={setIsEditing}
+                />
+              ))}
+          </>
+        ) : timeLogsWithinActiveDate?.length ? (
+          getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(
+            (group) => (
+              <GroupedPeriod group={group} user={user} key={nanoid()} />
             )
-          )}
-        </Box>
-      ) : (
-        <ShowNoData />
-      )}
+          )
+        ) : (
+          <ShowNoData />
+        )}
+      </Box>
     </Box>
   );
 }
