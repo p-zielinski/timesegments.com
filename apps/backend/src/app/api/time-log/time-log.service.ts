@@ -93,7 +93,8 @@ export class TimeLogService {
   public async findFromToTimeLogsEnrichedWithCategories(
     user: User,
     fromRaw: FromToDate,
-    toRaw: FromToDate
+    toRaw: FromToDate,
+    alreadyKnownCategories: string[] = []
   ) {
     //TODO LIMIT IT TO MAX 32 DAYS
     const findFromToTimeLogsResult = await this.findFromToTimeLogs(
@@ -106,15 +107,20 @@ export class TimeLogService {
       return { ...findFromToTimeLogsResult, categories: [] };
     }
     const { timeLogs } = findFromToTimeLogsResult;
-    const allCategoriesIdsFoundInTimeLogs = new Set();
+    const missingCategories = new Set();
     timeLogs.forEach((timeLog) => {
-      if (typeof timeLog.categoryId === 'string') {
-        allCategoriesIdsFoundInTimeLogs.add(timeLog.categoryId);
+      if (
+        typeof timeLog.categoryId === 'string' &&
+        !alreadyKnownCategories.includes(timeLog.categoryId)
+      ) {
+        missingCategories.add(timeLog.categoryId);
       }
     });
-    const categories = await this.categoryService.findManyIfInIdList([
-      ...allCategoriesIdsFoundInTimeLogs,
-    ] as string[]);
+    const categories = missingCategories.size
+      ? await this.categoryService.findManyIfInIdList([
+          ...missingCategories,
+        ] as string[])
+      : [];
     return { ...findFromToTimeLogsResult, categories };
   }
 

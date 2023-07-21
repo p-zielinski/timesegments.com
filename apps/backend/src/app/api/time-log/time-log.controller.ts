@@ -23,12 +23,13 @@ export class TimeLogController {
     @UserDecorator() user: User,
     @Body() fromToDatesDto: FromToDatesDto
   ) {
-    const { from, to } = fromToDatesDto;
+    const { from, to, alreadyKnownCategories } = fromToDatesDto;
     const findFromToTimeLogsResult =
       await this.timeLogService.findFromToTimeLogsEnrichedWithCategories(
         user,
         from,
-        to
+        to,
+        alreadyKnownCategories
       );
     if (findFromToTimeLogsResult.success === false) {
       throw new BadRequestException({

@@ -1,4 +1,10 @@
-import { IsDefined, IsNumber, ValidateNested } from 'class-validator';
+import {
+  IsDefined,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { FromToDate } from '@test1/shared';
 
@@ -22,4 +28,7 @@ export class FromToDatesDto {
   @ValidateNested({ each: true })
   @Type(() => Date)
   to: FromToDate;
+  @IsOptional()
+  @IsString({ each: true })
+  alreadyKnownCategories: string[];
 }
