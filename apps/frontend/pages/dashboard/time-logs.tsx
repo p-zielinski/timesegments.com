@@ -1,42 +1,32 @@
-import { Helmet } from 'react-helmet-async';
+import {Helmet} from 'react-helmet-async';
 // @mui
-import { Box, Card, Container, Grid, Typography } from '@mui/material';
+import {Box, Card, Container, Grid, Typography} from '@mui/material';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
-import React, { useEffect, useState } from 'react';
-import { Category, User } from '@prisma/client';
-import { DateTime } from 'luxon';
-import { MeExtendedOption, Timezones } from '@test1/shared';
+import React, {useEffect, useState} from 'react';
+import {Category, User} from '@prisma/client';
+import {DateTime} from 'luxon';
+import {MeExtendedOption, Timezones} from '@test1/shared';
 import {
   findTimeLogsWithinCurrentPeriod,
   TimeLogWithinCurrentPeriod,
   TimeLogWithinCurrentPeriodISO,
 } from '../../utils/findTimeLogsWithinCurrentPeriod';
-import {
-  TimeLogsWithinDate,
-  TimeLogsWithinDateISO,
-} from '../../types/timeLogsWithinDate';
-import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
-import {
-  GRAY,
-  LIGHT_ORANGE,
-  LIGHT_SILVER,
-  ORANGE,
-  SUPER_LIGHT_SILVER,
-  ULTRA_LIGHT_ORANGE,
-} from '../../consts/colors';
+import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
+import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
+import {GRAY, LIGHT_ORANGE, LIGHT_SILVER, ORANGE, SUPER_LIGHT_SILVER, ULTRA_LIGHT_ORANGE,} from '../../consts/colors';
 import Cookies from 'cookies';
-import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
-import { findOrFetchTimeLogsWithinActiveDate } from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
+import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
+import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
+import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
 import BrowseTimeLogs from '../../sections/@dashboard/app/BrowseTimeLogs';
-import { isMobile } from 'react-device-detect';
-import { getHexFromRGBAString } from '../../utils/colors/getHexFromRGBString';
-import { getRgbaObjectFromHexString } from '../../utils/colors/getRgbaObjectFromHexString';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import {isMobile} from 'react-device-detect';
+import {getHexFromRGBAString} from '../../utils/colors/getHexFromRGBString';
+import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterLuxon} from '@mui/x-date-pickers/AdapterLuxon';
 import Calendar from '../../sections/@dashboard/browse/Calendar';
 
 // ----------------------------------------------------------------------
@@ -60,6 +50,7 @@ export default function TimeLogs({
   }, [isMobile]);
 
   const [user, setUser] = useState<User>(serverSideFetchedUser);
+
   const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
     TimeLogsWithinDate[]
   >(
