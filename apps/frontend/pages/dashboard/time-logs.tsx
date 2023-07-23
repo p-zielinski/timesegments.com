@@ -1,6 +1,13 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
-import { Container, Grid } from '@mui/material';
+import {
+  Box,
+  Container,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
@@ -14,14 +21,21 @@ import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import { isMobile } from 'react-device-detect';
-import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
 import timezonePlugin from 'dayjs/plugin/timezone';
+import { Formik } from 'formik';
+import DatePicker from '../../components/form/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import { IS_SAVING_HEX } from '../../consts/colors';
+import { getRgbaObjectFromHexString } from '../../utils/colors/getRgbaObjectFromHexString';
+import { getHexFromRGBAObject } from '../../utils/colors/getHexFromRGBAObject';
+import { styled } from '@mui/material/styles';
+import { BpCheckbox } from '../../components/form/Checkbox';
 
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
-const { RangePicker } = DatePicker;
 
 // ----------------------------------------------------------------------
 
@@ -43,15 +57,15 @@ export default function TimeLogs({
   fetchedPeriods,
   randomSliderHexColor,
 }: Props) {
+  const now = DateTime.now()
+    .setZone(Timezones[serverSideFetchedUser.timezone])
+    .set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
   const [disableHover, setDisableHover] = useState<boolean>(true);
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
   const [user, setUser] = useState<User>(serverSideFetchedUser);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [activeDate, setActiveDate] = useState<DateTime>(
-    DateTime.now().setZone(Timezones[user.timezone])
-  );
   const [controlValue, setControlValue] = useState(user.controlValue);
   const [isEditing, setIsEditing] = useState({});
 
@@ -86,11 +100,72 @@ export default function TimeLogs({
   //   })();
   // }, [activeDate]);
 
-  const [today] = useState(dayjs().tz(Timezones[user.timezone]));
-  const [range, setRange] = useState([
-    dayjs('2015/01/01', 'YYYY/MM/DD'),
-    dayjs('2015/01/01', 'YYYY/MM/DD'),
-  ]);
+  const startingColor = {
+    hex: '#bf40b9',
+    rgb: { r: 191, g: 64, b: 185, a: 1 },
+  }; //getRandomRgbObjectForSliderPicker();
+
+  let getTextFieldProps: (error, focused, disabled) => Record<string, any>,
+    StyledTextField,
+    darkHexColor;
+  const setStyledTextField = (isSaving, hexColor) => {
+    darkHexColor = getHexFromRGBObject(
+      getColorShadeBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
+      )
+    );
+    getTextFieldProps = (error, focused, disabled = false) => {
+      return {
+        background: 'white',
+        borderRadius: '8px',
+        '& input': {
+          color: error ? '#FF4842' : darkHexColor,
+          backgroundColor: 'white',
+          borderRadius: '6px',
+        },
+        '& label.Mui-focused': {
+          color: darkHexColor,
+        },
+        '& label': {
+          color: error ? '#FF4842' : darkHexColor,
+          backgroundColor: 'rgba(255,255,255,.5)',
+          borderRadius: '6px',
+        },
+        '& .MuiInput-underline:after': {
+          borderBottomColor: hexColor,
+        },
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: isSaving
+              ? IS_SAVING_HEX
+              : error
+              ? '#FF4842'
+              : focused
+              ? darkHexColor
+              : getHexFromRGBAObject({
+                  ...getRgbaObjectFromHexString(hexColor),
+                  a: 0.3,
+                }),
+          },
+          '&:hover fieldset': {
+            borderColor: disabled
+              ? 'rgb(232,232,232)'
+              : error
+              ? '#FF4842'
+              : focused
+              ? darkHexColor
+              : hexColor,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: hexColor,
+            border: `1px solid ${darkHexColor}`,
+          },
+        },
+      };
+    };
+    StyledTextField = styled(TextField)(getTextFieldProps(false, false, false));
+  };
+  setStyledTextField(isSaving, startingColor.hex);
 
   return (
     <DashboardLayout
@@ -102,119 +177,224 @@ export default function TimeLogs({
       <Helmet>
         <title>Settings</title>
       </Helmet>
-      <Container sx={{ mt: -3 }}>
-        <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
-          <Grid item xs={1} sm={1} md={1}>
-            {JSON.stringify(today)}
-            {/*{JSON.stringify(dayjs.tz.guess())}*/}
-            <RangePicker
-              size={'large'}
-              value={range}
-              setValue={setRange}
-              format={'YYYY/MM/DD'}
-            />
-            {JSON.stringify(range)}
-            {/*<Card*/}
-            {/*  sx={{*/}
-            {/*    display: 'flex',*/}
-            {/*    flexDirection: 'row',*/}
-            {/*    justifyContent: 'space-between',*/}
-            {/*    color: isFetching && GRAY,*/}
-            {/*    mb: 2,*/}
-            {/*  }}*/}
-            {/*>*/}
-            {/*  <Box*/}
-            {/*    sx={{*/}
-            {/*      position: 'relative',*/}
-            {/*      cursor: !isFetching && showDetails && 'pointer',*/}
-            {/*      flex: 1,*/}
-            {/*      backgroundColor: !showDetails*/}
-            {/*        ? isFetching*/}
-            {/*          ? LIGHT_SILVER*/}
-            {/*          : LIGHT_ORANGE*/}
-            {/*        : isFetching*/}
-            {/*        ? SUPER_LIGHT_SILVER*/}
-            {/*        : ULTRA_LIGHT_ORANGE,*/}
-            {/*      border: `1px solid ${*/}
-            {/*        isFetching ? LIGHT_SILVER : LIGHT_ORANGE*/}
-            {/*      }`,*/}
-            {/*      borderTopLeftRadius: '12px',*/}
-            {/*      borderBottomLeftRadius: '12px',*/}
-            {/*    }}*/}
-            {/*    onClick={() =>*/}
-            {/*      !isFetching && showDetails && setShowDetails(false)*/}
-            {/*    }*/}
-            {/*  >*/}
-            {/*    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>*/}
-            {/*      Summary*/}
-            {/*    </Typography>*/}
-            {/*  </Box>*/}
-            {/*  <Box*/}
-            {/*    sx={{*/}
-            {/*      position: 'relative',*/}
-            {/*      cursor: !isFetching && !showDetails && 'pointer',*/}
-            {/*      flex: 1,*/}
-            {/*      backgroundColor: showDetails*/}
-            {/*        ? isFetching*/}
-            {/*          ? LIGHT_SILVER*/}
-            {/*          : LIGHT_ORANGE*/}
-            {/*        : isFetching*/}
-            {/*        ? SUPER_LIGHT_SILVER*/}
-            {/*        : ULTRA_LIGHT_ORANGE,*/}
-            {/*      border: `1px solid ${*/}
-            {/*        isFetching ? LIGHT_SILVER : LIGHT_ORANGE*/}
-            {/*      }`,*/}
-            {/*      borderTopRightRadius: '12px',*/}
-            {/*      borderBottomRightRadius: '12px',*/}
-            {/*    }}*/}
-            {/*    onClick={() =>*/}
-            {/*      !isFetching && !showDetails && setShowDetails(true)*/}
-            {/*    }*/}
-            {/*  >*/}
-            {/*    <Typography*/}
-            {/*      variant="subtitle2"*/}
-            {/*      noWrap*/}
-            {/*      sx={{ p: 1, lineHeight: 0.8 }}*/}
-            {/*      align="right"*/}
-            {/*    >*/}
-            {/*      Details*/}
-            {/*      <br />*/}
-            {/*      <span*/}
-            {/*        style={{*/}
-            {/*          fontWeight: 400,*/}
-            {/*          fontSize: 12,*/}
-            {/*          color: getHexFromRGBObject(*/}
-            {/*            getColorShadeBasedOnSliderPickerSchema(*/}
-            {/*              getRgbaObjectFromHexString(*/}
-            {/*                getHexFromRGBAString(ORANGE)*/}
-            {/*              )*/}
-            {/*            )*/}
-            {/*          ),*/}
-            {/*        }}*/}
-            {/*      >*/}
-            {/*        (edit data)*/}
-            {/*      </span>*/}
-            {/*    </Typography>*/}
-            {/*  </Box>*/}
-            {/*</Card>*/}
-            {/*<BrowseTimeLogs*/}
-            {/*  key={`timeLogs-${showDetails ? 'details' : 'summary'}`}*/}
-            {/*  refreshTimeLogs={refreshTimeLogs}*/}
-            {/*  user={user}*/}
-            {/*  timeLogsWithinActiveDate={timeLogsWithinActiveDate}*/}
-            {/*  showDetails={showDetails}*/}
-            {/*  isEditing={isEditing}*/}
-            {/*  setIsEditing={setIsEditing}*/}
-            {/*  categories={categories}*/}
-            {/*  controlValue={controlValue}*/}
-            {/*  setControlValue={setControlValue}*/}
-            {/*  disableHover={disableHover}*/}
-            {/*  isSaving={isSaving}*/}
-            {/*  setIsSaving={setIsSaving}*/}
-            {/*/>*/}
+      <LocalizationProvider dateAdapter={AdapterLuxon}>
+        <Container sx={{ mt: -3 }}>
+          <Grid container spacing={2} columns={1} sx={{ mt: -5 }}>
+            <Grid item xs={1} sm={1} md={1}>
+              <Formik
+                initialValues={{
+                  onlyOneDay: true,
+                  fromDate: now,
+                  toDate: now,
+                }}
+                onSubmit={async (values, { setSubmitting }) => {
+                  // await createTimeLog(
+                  //   values.categoryId,
+                  //   values.startDateTime,
+                  //   values.endDateTime
+                  // );
+                  setSubmitting(false);
+                }}
+                // validationSchema={getValidationSchema}
+              >
+                {({
+                  handleSubmit,
+                  values,
+                  setFieldValue,
+                  errors,
+                  setErrors,
+                  setFieldTouched,
+                }) => {
+                  // const isFormValid = getValidationSchema().isValidSync(values);
+                  return (
+                    <>
+                      <Box sx={{ display: 'flex' }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            flex: 1,
+                            gap: 1,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'row',
+                              mb: 0,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Box sx={{ display: 'flex' }}>
+                              <BpCheckbox
+                                onClick={() => {
+                                  if (!values.onlyOneDay) {
+                                    setFieldValue('toDate', values.fromDate);
+                                  }
+                                  setFieldValue(
+                                    'onlyOneDay',
+                                    !values.onlyOneDay
+                                  );
+                                }}
+                                checked={!!values.onlyOneDay}
+                              />
+                              <Stack
+                                sx={{
+                                  position: 'relative',
+                                  pt: 1.5,
+                                  pl: 0,
+                                  color: darkHexColor,
+                                }}
+                              >
+                                <Typography variant="subtitle2" noWrap>
+                                  View single day
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          </Box>
+                          <DatePicker
+                            timezone={Timezones[user.timezone]}
+                            label={'From Date'}
+                            name={'fromDate'}
+                            getTextFieldProps={getTextFieldProps}
+                            helperTextColor={
+                              isSaving ? IS_SAVING_HEX : darkHexColor
+                            }
+                            onChangeFnc={(value) => {
+                              if (values.onlyOneDay) {
+                                setFieldValue('toDate', value);
+                              }
+                            }}
+                            shouldDisableDate={(date) =>
+                              values.onlyOneDay
+                                ? false
+                                : date.ts > values.toDate.ts
+                            }
+                          />
+                          <DatePicker
+                            timezone={Timezones[user.timezone]}
+                            label={'To Date'}
+                            name={'toDate'}
+                            disabled={values.onlyOneDay}
+                            getTextFieldProps={getTextFieldProps}
+                            helperTextColor={
+                              isSaving ? IS_SAVING_HEX : darkHexColor
+                            }
+                            shouldDisableDate={(date) =>
+                              date.ts < values.fromDate.ts
+                            }
+                          />
+                        </Box>
+                      </Box>
+                    </>
+                  );
+                }}
+              </Formik>
+
+              {/*{JSON.stringify(dayjs.tz.guess())}*/}
+              {/*<Card*/}
+              {/*  sx={{*/}
+              {/*    display: 'flex',*/}
+              {/*    flexDirection: 'row',*/}
+              {/*    justifyContent: 'space-between',*/}
+              {/*    color: isFetching && GRAY,*/}
+              {/*    mb: 2,*/}
+              {/*  }}*/}
+              {/*>*/}
+              {/*  <Box*/}
+              {/*    sx={{*/}
+              {/*      position: 'relative',*/}
+              {/*      cursor: !isFetching && showDetails && 'pointer',*/}
+              {/*      flex: 1,*/}
+              {/*      backgroundColor: !showDetails*/}
+              {/*        ? isFetching*/}
+              {/*          ? LIGHT_SILVER*/}
+              {/*          : LIGHT_ORANGE*/}
+              {/*        : isFetching*/}
+              {/*        ? SUPER_LIGHT_SILVER*/}
+              {/*        : ULTRA_LIGHT_ORANGE,*/}
+              {/*      border: `1px solid ${*/}
+              {/*        isFetching ? LIGHT_SILVER : LIGHT_ORANGE*/}
+              {/*      }`,*/}
+              {/*      borderTopLeftRadius: '12px',*/}
+              {/*      borderBottomLeftRadius: '12px',*/}
+              {/*    }}*/}
+              {/*    onClick={() =>*/}
+              {/*      !isFetching && showDetails && setShowDetails(false)*/}
+              {/*    }*/}
+              {/*  >*/}
+              {/*    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>*/}
+              {/*      Summary*/}
+              {/*    </Typography>*/}
+              {/*  </Box>*/}
+              {/*  <Box*/}
+              {/*    sx={{*/}
+              {/*      position: 'relative',*/}
+              {/*      cursor: !isFetching && !showDetails && 'pointer',*/}
+              {/*      flex: 1,*/}
+              {/*      backgroundColor: showDetails*/}
+              {/*        ? isFetching*/}
+              {/*          ? LIGHT_SILVER*/}
+              {/*          : LIGHT_ORANGE*/}
+              {/*        : isFetching*/}
+              {/*        ? SUPER_LIGHT_SILVER*/}
+              {/*        : ULTRA_LIGHT_ORANGE,*/}
+              {/*      border: `1px solid ${*/}
+              {/*        isFetching ? LIGHT_SILVER : LIGHT_ORANGE*/}
+              {/*      }`,*/}
+              {/*      borderTopRightRadius: '12px',*/}
+              {/*      borderBottomRightRadius: '12px',*/}
+              {/*    }}*/}
+              {/*    onClick={() =>*/}
+              {/*      !isFetching && !showDetails && setShowDetails(true)*/}
+              {/*    }*/}
+              {/*  >*/}
+              {/*    <Typography*/}
+              {/*      variant="subtitle2"*/}
+              {/*      noWrap*/}
+              {/*      sx={{ p: 1, lineHeight: 0.8 }}*/}
+              {/*      align="right"*/}
+              {/*    >*/}
+              {/*      Details*/}
+              {/*      <br />*/}
+              {/*      <span*/}
+              {/*        style={{*/}
+              {/*          fontWeight: 400,*/}
+              {/*          fontSize: 12,*/}
+              {/*          color: getHexFromRGBObject(*/}
+              {/*            getColorShadeBasedOnSliderPickerSchema(*/}
+              {/*              getRgbaObjectFromHexString(*/}
+              {/*                getHexFromRGBAString(ORANGE)*/}
+              {/*              )*/}
+              {/*            )*/}
+              {/*          ),*/}
+              {/*        }}*/}
+              {/*      >*/}
+              {/*        (edit data)*/}
+              {/*      </span>*/}
+              {/*    </Typography>*/}
+              {/*  </Box>*/}
+              {/*</Card>*/}
+              {/*<BrowseTimeLogs*/}
+              {/*  key={`timeLogs-${showDetails ? 'details' : 'summary'}`}*/}
+              {/*  refreshTimeLogs={refreshTimeLogs}*/}
+              {/*  user={user}*/}
+              {/*  timeLogsWithinActiveDate={timeLogsWithinActiveDate}*/}
+              {/*  showDetails={showDetails}*/}
+              {/*  isEditing={isEditing}*/}
+              {/*  setIsEditing={setIsEditing}*/}
+              {/*  categories={categories}*/}
+              {/*  controlValue={controlValue}*/}
+              {/*  setControlValue={setControlValue}*/}
+              {/*  disableHover={disableHover}*/}
+              {/*  isSaving={isSaving}*/}
+              {/*  setIsSaving={setIsSaving}*/}
+              {/*/>*/}
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </LocalizationProvider>
     </DashboardLayout>
   );
 }
