@@ -57,6 +57,22 @@ export default function TimeLogs({
   fetchedPeriods,
   randomSliderHexColor,
 }: Props) {
+  const [categories, setCategories] = useState(new Map<string, Category>());
+  const [timeLogs, setTimeLogs] = useState(new Map<string, TimeLog>());
+  useEffect(() => {
+    const timeLogs = new Map<string, TimeLog>();
+    serverSideFetchedTimeLogs.forEach((timeLog) =>
+      timeLogs.set(timeLog.id, timeLog)
+    );
+    setTimeLogs(timeLogs);
+    const categories = new Map<string, Category>();
+    serverSideFetchedCategories.forEach((timeLog) =>
+      categories.set(timeLog.id, timeLog)
+    );
+    setCategories(categories);
+  }, []);
+  const [user, setUser] = useState<User>(serverSideFetchedUser);
+
   const now = DateTime.now()
     .setZone(Timezones[serverSideFetchedUser.timezone])
     .set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
@@ -64,9 +80,8 @@ export default function TimeLogs({
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
-  const [user, setUser] = useState<User>(serverSideFetchedUser);
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [controlValue, setControlValue] = useState(user.controlValue);
   const [isEditing, setIsEditing] = useState({});
 
   // const refreshTimeLogs = async () => {
@@ -100,10 +115,10 @@ export default function TimeLogs({
   //   })();
   // }, [activeDate]);
 
-  const startingColor = {
+  const datePickerColor = {
     hex: '#bf40b9',
     rgb: { r: 191, g: 64, b: 185, a: 1 },
-  }; //getRandomRgbObjectForSliderPicker();
+  };
 
   let getTextFieldProps: (error, focused, disabled) => Record<string, any>,
     StyledTextField,
@@ -165,7 +180,7 @@ export default function TimeLogs({
     };
     StyledTextField = styled(TextField)(getTextFieldProps(false, false, false));
   };
-  setStyledTextField(isSaving, startingColor.hex);
+  setStyledTextField(isSaving, datePickerColor.hex);
 
   return (
     <DashboardLayout
@@ -473,14 +488,9 @@ export const getServerSideProps = async ({ req, res }) => {
     );
     const response = await responseTimeLogs.json();
     (response?.timeLogs ?? []).forEach((timeLog) => timeLogs.push(timeLog));
-    //   fetchedTimeLogs.set(timeLog.id, timeLog)
-    // );
     (response?.categories ?? []).forEach((category) =>
       categories.push(category)
     );
-    //   .forEach((category) =>
-    //   categories.set(category.id, category)
-    // );
   } catch (e) {
     console.log(e);
   }

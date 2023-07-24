@@ -63,7 +63,6 @@ export class EmailService {
     await this.sendEmail(email.user, EmailType.EMAIL_CONFIRMATION);
     const token = await this.tokenService.generateToken(
       email.user.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60),
       userAgent
     );
     return {
@@ -71,7 +70,6 @@ export class EmailService {
       token: this.jwtService.sign({
         userId: email.user.id,
         tokenId: token.id,
-        expiresAt: token.expiresAt,
       }),
     };
   }
@@ -94,7 +92,6 @@ export class EmailService {
     await this.removeEmailRecordInDatabase(email.id);
     const token = await this.tokenService.generateToken(
       email.user.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60),
       userAgent
     );
     return {
@@ -102,7 +99,6 @@ export class EmailService {
       token: this.jwtService.sign({
         userId: email.user.id,
         tokenId: token.id,
-        expiresAt: token.expiresAt,
       }),
     };
   }

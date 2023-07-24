@@ -40,11 +40,7 @@ export class JwtAuthGuard implements CanActivate {
         console.log('missing token or user in database');
         return false;
       }
-      if (
-        token.expiresAt &&
-        token.expiresAt?.getTime() < new Date().getTime()
-      ) {
-        this.tokenService.deleteOne(token.id); //don't wait
+      if (!token.valid) {
         return false;
       }
       const tokenWithoutUserRelation = { ...token, user: undefined };

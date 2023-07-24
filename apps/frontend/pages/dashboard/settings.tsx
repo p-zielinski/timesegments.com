@@ -14,7 +14,6 @@ import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail';
-import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
 import {getBackgroundColor} from '../../utils/colors/getBackgroundColor';
 import {TimelineDot} from '@mui/lab';
 import Iconify from '../../components/iconify';
@@ -175,13 +174,6 @@ export default function Index({
             subtitle = user.email;
             successText = 'We sent you an email with further instructions';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.MANAGE_LOGIN_SESSIONS
-          ):
-            icon = 'tabler:lock-access';
-            successText = 'Action successfully executed';
-            break;
         }
         return {
           id: key,
@@ -333,25 +325,6 @@ export default function Index({
                       setIsSaving={setIsSaving}
                       setOpenedSettingOption={setOpenedSettingOption}
                       currentSettingOption={currentSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.MANAGE_LOGIN_SESSIONS
-                ) {
-                  return (
-                    <ManageLoginSessions
-                      currentTokenId={currentTokenId}
-                      key={`${controlValue}-${currentSettingOption}-active`}
-                      disableHover={disableHover}
-                      user={user}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      currentSettingOption={currentSettingOption}
-                      setOpenedSettingOption={setOpenedSettingOption}
                       setCompleted={setCompleted}
                     />
                   );

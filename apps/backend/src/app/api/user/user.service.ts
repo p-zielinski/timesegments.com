@@ -197,7 +197,6 @@ export class UserService {
       }
       const token = await this.tokenService.generateToken(
         newUser.id,
-        new Date(Date.now() + 3600 * 1000 * 24 * 60),
         data.userAgent
       );
       return {
@@ -205,7 +204,6 @@ export class UserService {
         token: this.jwtService.sign({
           userId: newUser.id,
           tokenId: token.id,
-          expiresAt: token.expiresAt,
         }),
         user: newUser,
       };
@@ -246,15 +244,15 @@ export class UserService {
     }
     const token = await this.tokenService.generateToken(
       requestedUser.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60),
       data.userAgent
     );
+    //don't wait
+    this.tokenService.updateManyValid(token.id, false);
     return {
       success: true,
       token: this.jwtService.sign({
         userId: requestedUser.id,
         tokenId: token.id,
-        expiresAt: token.expiresAt,
       }),
       user: requestedUser,
     };

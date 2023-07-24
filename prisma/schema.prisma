@@ -42,8 +42,8 @@ model Token {
   user          User        @relation(fields: [userId], references: [id])
   userId        String
   userAgent     String?
+  valid         Boolean     @default(true)
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
-  expiresAt     DateTime?   @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }
 
