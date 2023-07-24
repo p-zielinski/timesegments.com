@@ -3,10 +3,6 @@ import { PrismaService } from '../../prisma.service';
 import { Prisma, Token, User } from '@prisma/client';
 import { LoggerService } from '../../common/logger/loger.service';
 
-const isDate = (date: object) => {
-  return date instanceof Date && !isNaN(date.valueOf());
-};
-
 @Injectable()
 export class TokenService {
   constructor(
@@ -32,6 +28,14 @@ export class TokenService {
     return {
       success: true,
       message: `Token "${tokenId}" was deleted`,
+    };
+  }
+
+  async invalidateUsersTokensButOne(tokenId: string, user: User) {
+    await this.updateManyValid(user.id, tokenId, false);
+    return {
+      success: true,
+      message: `Other tokens were successfully deleted`,
     };
   }
 
@@ -83,9 +87,10 @@ export class TokenService {
     });
   }
 
-  async updateManyValid(skipTokenId: string, valid: boolean) {
+  async updateManyValid(userId, skipTokenId: string, valid: boolean) {
     return await this.prisma.token.updateMany({
       where: {
+        userId,
         id: {
           not: {
             equals: skipTokenId,

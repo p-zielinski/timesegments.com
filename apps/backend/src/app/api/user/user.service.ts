@@ -246,8 +246,6 @@ export class UserService {
       requestedUser.id,
       data.userAgent
     );
-    //don't wait
-    this.tokenService.updateManyValid(token.id, false);
     return {
       success: true,
       token: this.jwtService.sign({

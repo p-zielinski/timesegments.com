@@ -20,7 +20,8 @@ import Iconify from '../../components/iconify';
 import {SettingOption} from '../../enum/settingOption';
 import {findKeyOfValueInObject, Timezones} from '@test1/shared';
 import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo';
-import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail'; // ----------------------------------------------------------------------
+import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail';
+import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions'; // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -174,6 +175,13 @@ export default function Index({
             subtitle = user.email;
             successText = 'We sent you an email with further instructions';
             break;
+          case findKeyOfValueInObject(
+            SettingOption,
+            SettingOption.MANAGE_LOGIN_SESSIONS
+          ):
+            icon = 'tabler:lock-access';
+            successText = 'Action successfully executed';
+            break;
         }
         return {
           id: key,
@@ -325,6 +333,25 @@ export default function Index({
                       setIsSaving={setIsSaving}
                       setOpenedSettingOption={setOpenedSettingOption}
                       currentSettingOption={currentSettingOption}
+                      setCompleted={setCompleted}
+                    />
+                  );
+                }
+
+                if (
+                  isActive &&
+                  openedSettingOption === SettingOption.MANAGE_LOGIN_SESSIONS
+                ) {
+                  return (
+                    <ManageLoginSessions
+                      currentTokenId={currentTokenId}
+                      key={`${controlValue}-${currentSettingOption}-active`}
+                      disableHover={disableHover}
+                      user={user}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
+                      currentSettingOption={currentSettingOption}
+                      setOpenedSettingOption={setOpenedSettingOption}
                       setCompleted={setCompleted}
                     />
                   );
