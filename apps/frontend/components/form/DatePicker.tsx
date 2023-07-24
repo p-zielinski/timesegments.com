@@ -60,6 +60,7 @@ export const DatePicker = ({
               <MuiDatePicker
                 slotProps={{
                   textField: {
+                    readOnly: true,
                     background: 'white',
                     sx: getTextFieldProps(
                       error,
@@ -92,7 +93,6 @@ export const DatePicker = ({
                 InputProps={{
                   startAdornment: startAdornment,
                 }}
-                onClose={() => console.log(123)}
               />
               <Box
                 sx={{
