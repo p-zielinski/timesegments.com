@@ -13,11 +13,12 @@ import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
-import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
 import { UserService } from '../user/user.service';
-import { SetExpandSubcategoriesDto } from './dto/changeShowRecentNotes.dto';
+import { SetExpandCategoriesDto } from './dto/changeShowRecentNotes.dto';
+import { ControlValue } from '@test1/shared';
 
-@UseGuards(JwtAuthGuard, CheckControlValueGuard)
+@UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
 @Controller('category')
 export class CategoryController {
   constructor(
@@ -28,9 +29,9 @@ export class CategoryController {
   @Post('set-show-recent-notes')
   async handleRequestSetExpandSubcategories(
     @UserDecorator() user: User,
-    @Body() setExpandSubcategoriesDto: SetExpandSubcategoriesDto
+    @Body() setExpandCategoriesDto: SetExpandCategoriesDto
   ) {
-    const { categoryId, showRecentNotes } = setExpandSubcategoriesDto;
+    const { categoryId, showRecentNotes } = setExpandCategoriesDto;
     const updateCategoryStatus =
       await this.categoryService.updateCategoryShowRecentNotes(
         categoryId,
@@ -44,7 +45,10 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      categoriesControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.CATEGORIES
+      ),
     };
   }
 
@@ -66,7 +70,10 @@ export class CategoryController {
     }
     return {
       ...createCategoryStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      categoriesControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.CATEGORIES
+      ),
     };
   }
 
@@ -87,7 +94,7 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      ...(await this.userService.getNewTimeLogsAndCategoriesControlValue(user)),
     };
   }
 
@@ -110,7 +117,10 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      categoriesControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.CATEGORIES
+      ),
     };
   }
 
@@ -129,7 +139,10 @@ export class CategoryController {
     }
     return {
       ...setCategoryAsDeletedStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      categoriesControlValue: this.userService.getNewControlValue(
+        user,
+        ControlValue.CATEGORIES
+      ),
     };
   }
 }

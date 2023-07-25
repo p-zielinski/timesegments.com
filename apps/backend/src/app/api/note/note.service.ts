@@ -2,7 +2,7 @@ import { Injectable, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { LoggerService } from '../../common/logger/loger.service';
 import { Note, Prisma, User } from '@prisma/client';
-import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
 import { CategoryService } from '../category/category.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -61,7 +61,7 @@ export class NoteService {
     return { success: true, note };
   }
 
-  @UseGuards(CheckControlValueGuard)
+  @UseGuards(CheckUserControlValueGuard)
   async updateNote(noteId: string, text: string, user: User) {
     const noteWithUser = await this.findOne(noteId, {
       user: true,
@@ -88,7 +88,7 @@ export class NoteService {
     return { success: true, note: updatedNote };
   }
 
-  @UseGuards(CheckControlValueGuard)
+  @UseGuards(CheckUserControlValueGuard)
   async deleteNote(noteId: string, user: User) {
     const noteWithUser = await this.findOne(noteId, {
       user: true,

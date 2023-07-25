@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { DateTime } from 'luxon';
 import { Prisma, TimeLog, User } from '@prisma/client';
-import { asyncMap, FromToDate, FromToDateTime, Timezones } from '@test1/shared';
+import { asyncMap, FromToDateTime, Timezones } from '@test1/shared';
 import { uniqBy } from 'lodash';
 
 @Injectable()
@@ -92,15 +92,15 @@ export class TimeLogService {
 
   public async findFromToTimeLogsEnrichedWithCategories(
     user: User,
-    fromRaw: FromToDate,
-    toRaw: FromToDate,
+    from: number,
+    to: number,
     alreadyKnownCategories: string[] = []
   ) {
-    //TODO LIMIT IT TO MAX 32 DAYS
+    //TODO LIMIT IT TO MAX 366 DAYS
     const findFromToTimeLogsResult = await this.findFromToTimeLogs(
       user,
-      fromRaw,
-      toRaw
+      from,
+      to
     );
     const { success } = findFromToTimeLogsResult;
     if (!success || !findFromToTimeLogsResult.timeLogs) {
@@ -152,22 +152,16 @@ export class TimeLogService {
 
   public async findFromToTimeLogs(
     user: User,
-    fromRaw: FromToDate,
-    toRaw: FromToDate
+    from: number,
+    to: number
   ): Promise<
     { success: false; error: string } | { success: true; timeLogs: TimeLog[] }
   > {
     const activeCategoriesIds =
       await this.categoryService.getActiveCategoriesIds(user.id);
     const usersTimezone = Timezones[user.timezone];
-    const fromDateTime = DateTime.fromObject(
-      { ...fromRaw, hour: 0, minute: 0, second: 0 },
-      { zone: usersTimezone }
-    );
-    const toDateTime = DateTime.fromObject(
-      { ...toRaw, hour: 24, minute: 0, second: 0 },
-      { zone: usersTimezone }
-    );
+    const fromDateTime = DateTime.fromMillis(from, { zone: usersTimezone });
+    const toDateTime = DateTime.fromMillis(to, { zone: usersTimezone });
     const fromDateIso = fromDateTime.toISO();
     const toDateIso = toDateTime.toISO();
     if (!fromDateIso || !toDateIso) {

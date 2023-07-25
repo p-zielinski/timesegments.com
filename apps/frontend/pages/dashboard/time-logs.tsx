@@ -39,14 +39,16 @@ dayjs.extend(timezonePlugin);
 
 // ----------------------------------------------------------------------
 
+type DatePeriod = {
+  from: { year: number; month: number; day: number };
+  to: { year: number; month: number; day: number };
+}[];
+
 type Props = {
   timeLogs: TimeLog[];
   categories: Category[];
   randomSliderHexColor: string;
-  fetchedPeriods: {
-    from: { year: number; month: number; day: number };
-    to: { year: number; month: number; day: number };
-  }[];
+  fetchedPeriods: DatePeriod[];
   user: User;
 };
 
@@ -54,7 +56,7 @@ export default function TimeLogs({
   timeLogs: serverSideFetchedTimeLogs,
   categories: serverSideFetchedCategories,
   user: serverSideFetchedUser,
-  fetchedPeriods,
+  fetchedPeriods: fetchedPeriodsStartingValue,
   randomSliderHexColor,
 }: Props) {
   const [categories, setCategories] = useState(new Map<string, Category>());
@@ -81,8 +83,16 @@ export default function TimeLogs({
     setDisableHover(isMobile);
   }, [isMobile]);
 
+  const [timeLogsControlValue, setTimeLogsControlValue] = useState<
+    string | undefined
+  >(serverSideFetchedUser.timeLogsControlValue);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState({});
+  const [fetchedPeriods, setFetchedPeriods] = useState<DatePeriod[]>(
+    fetchedPeriodsStartingValue
+  );
+
+  const changePeriod = (fromTo: DatePeriod) => {};
 
   // const refreshTimeLogs = async () => {
   //   setIsFetching(true);
@@ -460,16 +470,11 @@ export const getServerSideProps = async ({ req, res }) => {
     maxAge: 1000 * 60 * 60 * 24 * 400,
   });
 
-  const timeLogs = []; //new Map<string, TimeLog>();
-  const now = DateTime.now().setZone(Timezones[user.timezone]);
-  const to = { year: now.year, month: now.month, day: now.day };
-  const sevenDaysAgo = now.minus({ days: 7 });
-  const from = {
-    year: sevenDaysAgo.year,
-    month: sevenDaysAgo.month,
-    day: sevenDaysAgo.day,
-  };
-  const fetchedPeriods = [{ from, to }];
+  const timeLogs = [];
+  const endOfDay = DateTime.now()
+    .setZone(Timezones[user.timezone])
+    .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
+  const beginningOfADaySevenDaysAgo = endOfDay.minus({ days: 8 });
   try {
     const responseTimeLogs = await fetch(
       process.env.NEXT_PUBLIC_API_URL + 'time-log/find-extended',
@@ -480,8 +485,8 @@ export const getServerSideProps = async ({ req, res }) => {
           authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
-          from,
-          to,
+          from: beginningOfADaySevenDaysAgo.ts,
+          to: endOfDay.ts,
           alreadyKnownCategories: Object.keys(categories), //getMapKeysAsSet(categories),
         }),
       }
@@ -494,6 +499,13 @@ export const getServerSideProps = async ({ req, res }) => {
   } catch (e) {
     console.log(e);
   }
+
+  const fetchedPeriods = [
+    {
+      from: beginningOfADaySevenDaysAgo.toUnixInteger(),
+      to: endOfDay.toUnixInteger(),
+    },
+  ];
 
   return {
     props: {

@@ -10,6 +10,7 @@ import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
   CategoriesSortOption,
+  ControlValue,
   EmailType,
   findKeyOfValueInObject,
   Limits,
@@ -98,10 +99,32 @@ export class UserService {
     );
   }
 
-  public getNewControlValue(user: User): string {
+  public async getNewTimeLogsAndCategoriesControlValue(
+    userId: string
+  ): Promise<{
+    timeLogsControlValue: string;
+    categoriesControlValue: string;
+  }> {
     const newControlValue = nanoid();
-    this.updateControlValue(user.id, newControlValue);
-    return newControlValue;
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        timeLogsControlValue: 't' + newControlValue,
+        categoriesControlValue: 'c' + newControlValue,
+      },
+    });
+    return {
+      timeLogsControlValue: updatedUser.timeLogsControlValue,
+      categoriesControlValue: updatedUser.categoriesControlValue,
+    };
+  }
+
+  public async getNewControlValue(
+    userId: string,
+    type: ControlValue
+  ): Promise<string> {
+    const newControlValue = nanoid();
+    return await this.updateTimeLogsControlValue(userId, newControlValue, type);
   }
 
   public async getMeExtended(
@@ -128,10 +151,16 @@ export class UserService {
     }
 
     if (extend.includes(MeExtendedOption.TODAYS_TIMELOGS)) {
-      const now = DateTime.now().setZone(Timezones[user.timezone]);
-      const today = { month: now.month, year: now.year, day: now.day };
+      const endOfDay = DateTime.now()
+        .setZone(Timezones[user.timezone])
+        .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
+      const beginningOfToday = endOfDay.minus({ days: 1 });
       const findFromToTimeLogsResult =
-        await this.timeLogService.findFromToTimeLogs(user, today, today);
+        await this.timeLogService.findFromToTimeLogs(
+          user,
+          beginningOfToday.ts,
+          endOfDay.ts
+        );
       if (findFromToTimeLogsResult.success === false) {
         this.loggerService.error(
           `Could not find today's time logs for user: ${user.id}`
@@ -263,11 +292,15 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data: { name, controlValue: nanoid() },
-        select: { name: true, controlValue: true },
+        data: { name, userControlValue: nanoid() },
+        select: { name: true, userControlValue: true },
       });
       if (updatedUser.name === name) {
-        return { success: true, name, controlValue: updatedUser.controlValue };
+        return {
+          success: true,
+          name,
+          controlValue: updatedUser.userControlValue,
+        };
       }
     } catch (error) {
       this.loggerService.error(error);
@@ -337,14 +370,14 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data: { timezone, controlValue: nanoid() },
-        select: { timezone: true, controlValue: true },
+        data: { timezone, userControlValue: nanoid() },
+        select: { timezone: true, userControlValue: true },
       });
       if (updatedUser.timezone === timezone) {
         return {
           success: true,
           timezone,
-          controlValue: updatedUser.controlValue,
+          userControlValue: updatedUser.userControlValue,
         };
       }
     } catch (error) {
@@ -413,8 +446,37 @@ export class UserService {
     });
   }
 
-  private async updateControlValue(userId: string, controlValue: string) {
-    await this.updateUser(userId, { controlValue });
+  private async updateTimeLogsControlValue(
+    userId: string,
+    controlValue: string,
+    type: ControlValue
+  ) {
+    switch (type) {
+      case ControlValue.USER:
+        return (
+          await this.updateUser(userId, {
+            userControlValue: controlValue,
+          })
+        ).userControlValue;
+      case ControlValue.TIME_LOGS:
+        return (
+          await this.updateUser(userId, {
+            timeLogsControlValue: controlValue,
+          })
+        ).timeLogsControlValue;
+      case ControlValue.CATEGORIES:
+        return (
+          await this.updateUser(userId, {
+            categoriesControlValue: controlValue,
+          })
+        ).categoriesControlValue;
+      case ControlValue.NOTES:
+        return (
+          await this.updateUser(userId, {
+            notesControlValue: controlValue,
+          })
+        ).notesControlValue;
+    }
   }
 
   public async findUserByEmail(email: string) {

@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { DeleteNoteDto } from './dto/delete.dto';
 import { UpdateNoteDto } from './dto/update.dto';
 import { UserService } from '../user/user.service';
+import { ControlValue } from '@test1/shared';
 
 @UseGuards(JwtAuthGuard)
 @Controller('note')
@@ -41,7 +42,10 @@ export class NoteController {
     }
     return {
       ...createNoteStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      notesControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.NOTES
+      ),
     };
   }
 
@@ -63,7 +67,10 @@ export class NoteController {
     }
     return {
       ...updateNoteStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      notesControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.NOTES
+      ),
     };
   }
 
@@ -81,7 +88,10 @@ export class NoteController {
     }
     return {
       ...deleteNoteStatus,
-      controlValue: this.userService.getNewControlValue(user),
+      notesControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.NOTES
+      ),
     };
   }
 

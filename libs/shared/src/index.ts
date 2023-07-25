@@ -5,6 +5,7 @@ export * from './lib/enums/meExtendedOption';
 export * from './lib/enums/timezones';
 export * from './lib/enums/emailType';
 export * from './lib/enums/emailStatus';
+export * from './lib/enums/controlValue';
 export * from './lib/types/user';
 export * from './lib/types/limits';
 export * from './lib/types/dates';

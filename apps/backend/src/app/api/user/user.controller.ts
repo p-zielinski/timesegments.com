@@ -14,7 +14,6 @@ import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
 import { MeExtendedOption } from '@test1/shared';
-import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
 import { RegisterDto } from './dto/register.dto';
 import { SetNameDto } from './dto/setName.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
@@ -24,16 +23,11 @@ import { CurrentTokenDecorator } from '../../common/param-decorators/currentToke
 import { SetSortingNotesDto } from './dto/setSortingNotes.dto';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories.dto';
 import { ChangeEmailAddressDto } from './dto/changeEmailAddress.dto';
+import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
-
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
-  @Post('check-control-value')
-  checkControlValue() {
-    return { success: true };
-  }
 
   @UseGuards(JwtAuthGuard)
   @Post('change-email-address')
@@ -143,7 +137,7 @@ export class UserController {
     return await this.userService.getMeExtended(user, extend);
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
   @Post('set-name')
   async handleRequestSetName(
     @UserDecorator() user: User,
@@ -198,7 +192,7 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
   @Post('change-timezone')
   async handleRequestChangeTimezone(
     @UserDecorator() user: User,
@@ -217,7 +211,7 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
   @Post('set-sorting-categories')
   async handleRequestSetSortingCategories(
     @UserDecorator() user: User,
@@ -234,7 +228,7 @@ export class UserController {
     return updateSortingCategoriesStatus;
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
+  @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
   @Post('set-sorting-notes')
   async handleRequestSetSortingNotes(
     @UserDecorator() user: User,

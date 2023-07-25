@@ -12,10 +12,15 @@ import { TimeLogService } from './time-log.service';
 import { FromToDatesDto } from './dto/fromToDates.dto';
 import { CreateTimeLogDto } from './dto/createTimeLog.dto';
 import { EditTimeLogDto } from './dto/editTimeLog.dto';
+import { UserService } from '../user/user.service';
+import { ControlValue } from '@test1/shared';
 
 @Controller('time-log')
 export class TimeLogController {
-  constructor(private timeLogService: TimeLogService) {}
+  constructor(
+    private timeLogService: TimeLogService,
+    private userService: UserService
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('find-extended')
@@ -78,6 +83,12 @@ export class TimeLogController {
         error: createTimeLogResult.error,
       });
     }
-    return createTimeLogResult;
+    return {
+      ...createTimeLogResult,
+      timeLogsControlValue: this.userService.getNewControlValue(
+        user.id,
+        ControlValue.TIME_LOGS
+      ),
+    };
   }
 }
