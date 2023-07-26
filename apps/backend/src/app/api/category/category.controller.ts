@@ -94,7 +94,9 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      ...(await this.userService.getNewTimeLogsAndCategoriesControlValue(user)),
+      ...(await this.userService.getNewTimeLogsAndCategoriesControlValue(
+        user.id
+      )),
     };
   }
 
@@ -140,7 +142,7 @@ export class CategoryController {
     return {
       ...setCategoryAsDeletedStatus,
       categoriesControlValue: this.userService.getNewControlValue(
-        user,
+        user.id,
         ControlValue.CATEGORIES
       ),
     };

@@ -1,6 +1,6 @@
 import {Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
+import {ControlValue, Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
@@ -47,19 +47,27 @@ type Props = {
 };
 
 export default function Index({
-  user: serverSideFetchedUser,
+  user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
   limits: serverSideFetchedLimits,
   notes: serverSideFetchedNotes,
   randomSliderHexColor: randomSliderHexColor,
   timeLogs: serverSideFetchedTimeLogs,
 }: Props) {
-  const [user, setUser] = useState<UserWithCategories>(serverSideFetchedUser);
+  const [user, setUser] = useState<UserWithCategories>(serverSideFetchedUserWithCategoriesAndCategoriesNotes);
   const [disableHover, setDisableHover] = useState<boolean>(true);
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
-  const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
-  const [controlValue, setControlValue] = useState(user?.controlValue);
+  const [controlValues, setControlValues] = useState(new Map<string,string>();
+  useEffect(()=> {
+    const newControlValuesMap = new Map()
+    newControlValuesMap.set(ControlValue.USER, user.userControlValue)
+    newControlValuesMap.set(ControlValue.CATEGORIES, user.categoriesControlValue)
+    newControlValuesMap.set(ControlValue.NOTES, user.notesControlValue)
+    newControlValuesMap.set(ControlValue.NOTES, user.notesControlValue)
+  },[])
+
+
   const [timeLogs, setTimeLogs] = useState(serverSideFetchedTimeLogs);
   const [activeDate, setActiveDate] = useState(
     getCurrentDate(Timezones[user.timezone])

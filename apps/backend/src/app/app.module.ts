@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, CacheStore, Module } from '@nestjs/common';
 
 import { AppService } from './app.service';
 import { UserService } from './api/user/user.service';
@@ -6,7 +6,7 @@ import { PrismaService } from './prisma.service';
 import { PrismaModule } from 'nestjs-prisma';
 import { PrismaClient } from '@prisma/client';
 import { UserController } from './api/user/user.controller';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ValidationSchema } from '../configs/validationSchema';
 import { JwtModule } from '@nestjs/jwt';
 import { TokenService } from './api/token/token.service';
@@ -20,6 +20,14 @@ import { NoteController } from './api/note/note.controller';
 import { NoteService } from './api/note/note.service';
 import { EmailService } from './api/email/email.service';
 import { EmailController } from './api/email/email.controller';
+import { redisStore } from 'cache-manager-redis-yet';
+import {
+  getRedisHost,
+  getRedisPassword,
+  getRedisPort,
+  getUserName,
+} from '../configs/redisConfig';
+import { ControlValueService } from './api/control-value/control-value.service';
 
 @Module({
   imports: [
@@ -32,6 +40,29 @@ import { EmailController } from './api/email/email.controller';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { noTimestamp: true },
+    }),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => {
+        const redisUrl = config.get('REDIS_URL');
+        const store = (await redisStore({
+          username: getUserName(redisUrl) || undefined,
+          password: getRedisPassword(redisUrl) || undefined,
+          socket: {
+            host: getRedisHost(redisUrl) || 'localhost',
+            port: getRedisPort(redisUrl) || 6379,
+            tls:
+              (getRedisHost(redisUrl) || 'localhost') !== 'localhost'
+                ? true
+                : undefined,
+          },
+        })) as CacheStore;
+        return {
+          store: store,
+          ttl: 1000 * 60 * 60 * 24 * 7, //milliseconds
+        };
+      },
+      inject: [ConfigService],
     }),
   ],
   controllers: [
@@ -53,6 +84,7 @@ import { EmailController } from './api/email/email.controller';
     TimeLogService,
     NoteService,
     EmailService,
+    ControlValueService,
   ],
 })
 export class AppModule {}
