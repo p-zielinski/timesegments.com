@@ -1,5 +1,5 @@
-import { CacheModule, CacheStore, Module } from '@nestjs/common';
-
+import { CacheStore, Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppService } from './app.service';
 import { UserService } from './api/user/user.service';
 import { PrismaService } from './prisma.service';
@@ -20,14 +20,14 @@ import { NoteController } from './api/note/note.controller';
 import { NoteService } from './api/note/note.service';
 import { EmailService } from './api/email/email.service';
 import { EmailController } from './api/email/email.controller';
-import { redisStore } from 'cache-manager-redis-yet';
+import { ControlValueService } from './api/control-value/control-value.service';
 import {
   getRedisHost,
   getRedisPassword,
   getRedisPort,
   getUserName,
 } from '../configs/redisConfig';
-import { ControlValueService } from './api/control-value/control-value.service';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
