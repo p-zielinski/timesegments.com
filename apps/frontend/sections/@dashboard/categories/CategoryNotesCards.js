@@ -8,8 +8,8 @@ import {Note} from '../notes/Note'; // -----------------------------------------
 
 export default function CategoryNotesCards({
   limits,
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   category,
   categories,
   setCategories,
@@ -39,8 +39,8 @@ export default function CategoryNotesCards({
         {isEditing?.createNewNote === category.id &&
           categoriesNotesLimit > currentCategoryNumberOfNotes && (
             <AddNote
-              controlValue={controlValue}
-              setControlValue={setControlValue}
+              controlValues={controlValues}
+              setControlValues={setControlValues}
               disableHover={disableHover}
               isSaving={isSaving}
               setIsSaving={setIsSaving}
@@ -57,8 +57,8 @@ export default function CategoryNotesCards({
               category={category}
               categories={categories}
               setCategories={setCategories}
-              controlValue={controlValue}
-              setControlValue={setControlValue}
+              controlValue={controlValues}
+              setControlValue={setControlValues}
               isSaving={isSaving}
               setIsSaving={setIsSaving}
               isEditing={isEditing}

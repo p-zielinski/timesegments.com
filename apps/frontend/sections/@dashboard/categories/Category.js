@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
@@ -16,18 +15,14 @@ import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 
 // ----------------------------------------------------------------------
 
-Category.propTypes = {
-  category: PropTypes.object,
-};
-
 export default function Category({
   limits,
   groupedTimeLogsWithDateSorted,
   user,
   timeLogs,
   setTimeLogs,
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   category,
   categories,
   setCategories,
@@ -93,7 +88,7 @@ export default function Category({
       body: {
         categoryId: category.id,
         showRecentNotes: !category.showRecentNotes,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
@@ -107,10 +102,10 @@ export default function Category({
         })
       );
       if (response.controlValue) {
-        setControlValue(response.controlValue);
+        setControlValues(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -121,7 +116,7 @@ export default function Category({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: { categoryId: category.id, controlValue },
+      body: { categoryId: category.id, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
@@ -134,7 +129,7 @@ export default function Category({
         })
       );
       if (response.controlValue) {
-        setControlValue(response.controlValue);
+        setControlValues(response.controlValue);
       }
       if (response.timeLog) {
         const responseTimeLogId = response.timeLog.id;
@@ -144,7 +139,7 @@ export default function Category({
         ]);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -154,8 +149,8 @@ export default function Category({
   if (isEditing.categoryId === category.id) {
     return (
       <EditCategory
-        controlValue={controlValue}
-        setControlValue={setControlValue}
+        controlValues={controlValues}
+        setControlValues={setControlValues}
         categories={categories}
         setCategories={setCategories}
         category={category}

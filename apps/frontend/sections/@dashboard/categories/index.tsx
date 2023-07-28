@@ -14,8 +14,8 @@ export default function Categories({
   timeLogs,
   setTimeLogs,
   user,
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   disableHover,
   categories,
   setCategories,
@@ -53,8 +53,8 @@ export default function Categories({
                 user={user}
                 categories={categories}
                 setCategories={setCategories}
-                controlValue={controlValue}
-                setControlValue={setControlValue}
+                controlValues={controlValues}
+                setControlValues={setControlValues}
                 isSaving={isSaving}
                 setIsSaving={setIsSaving}
               />
@@ -71,8 +71,8 @@ export default function Categories({
                 user={user}
                 timeLogs={timeLogs}
                 setTimeLogs={setTimeLogs}
-                controlValue={controlValue}
-                setControlValue={setControlValue}
+                controlValues={controlValues}
+                setControlValues={setControlValues}
                 disableHover={disableHover}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
@@ -84,8 +84,8 @@ export default function Categories({
               />
               <CategoryNotesCards
                 limits={limits}
-                controlValue={controlValue}
-                setControlValue={setControlValue}
+                controlValues={controlValues}
+                setControlValues={setControlValues}
                 disableHover={disableHover}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
@@ -102,8 +102,8 @@ export default function Categories({
         {categoriesLimit > categories.length && (
           <Grid key={'new category'} item xs={1} sm={1} md={1}>
             <AddCategory
-              controlValue={controlValue}
-              setControlValue={setControlValue}
+              controlValues={controlValues}
+              setControlValues={setControlValues}
               disableHover={disableHover}
               data={undefined}
               isEditing={isEditing}

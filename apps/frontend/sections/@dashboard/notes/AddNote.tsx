@@ -23,8 +23,8 @@ import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 
 export default function AddNew({
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   disableHover,
   isSaving,
   setIsSaving,
@@ -101,14 +101,14 @@ export default function AddNew({
           };
         })
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.controlValues) {
+        setControlValues(response.controlValue);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
+      setControlValues(undefined); //skip setting isSaving(false)
       return;
     }
     setIsSaving(false);

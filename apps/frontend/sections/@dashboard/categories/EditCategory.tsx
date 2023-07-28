@@ -22,8 +22,8 @@ import { StatusCodes } from 'http-status-codes';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 
 export default function EditCategory({
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   categories,
   setCategories,
   category,
@@ -87,7 +87,7 @@ export default function EditCategory({
       pathOrUrl: 'category/set-as-deleted',
       body: {
         categoryId: category.id,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
@@ -95,12 +95,12 @@ export default function EditCategory({
       setCategories(
         categories.filter((category_) => category_.id !== category.id)
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.controlValues) {
+        setControlValues(response.controlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -115,7 +115,7 @@ export default function EditCategory({
         categoryId: category.id,
         name: categoryName,
         color,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
@@ -130,10 +130,10 @@ export default function EditCategory({
       );
       setIsEditing({});
       if (response.controlValue) {
-        setControlValue(response.controlValue);
+        setControlValues(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

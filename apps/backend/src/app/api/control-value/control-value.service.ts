@@ -3,7 +3,6 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ControlValue } from '@test1/shared';
 import { nanoid } from 'nanoid';
-import { cloneDeep } from 'lodash';
 
 @Injectable()
 export class ControlValueService {
@@ -27,9 +26,14 @@ export class ControlValueService {
     userId: string,
     types: ControlValue[]
   ): Promise<Record<ControlValue, string>> {
-    const controlValues = cloneDeep(await this.getAllUserControlValues(userId));
-    types.forEach((type) => (controlValues[type] = nanoid()));
-    await this.cacheManager.set(userId, controlValues);
-    return controlValues as Record<ControlValue, string>;
+    const controlValues = await this.getAllUserControlValues(userId);
+    const newControlValue = Object.fromEntries(
+      types.map((value) => [value, nanoid()])
+    );
+    await this.cacheManager.set(userId, {
+      ...controlValues,
+      ...newControlValue,
+    });
+    return newControlValue as Record<ControlValue, string>;
   }
 }

@@ -23,8 +23,8 @@ import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
 export default function AddCategory({
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   disableHover,
   data = {},
   isEditing,
@@ -86,17 +86,17 @@ export default function AddCategory({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/create',
-      body: { name, color, controlValue },
+      body: { name, color, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories([{ ...response.category }, ...categories]);
       setIsEditing({});
       if (response.controlValue) {
-        setControlValue(response.controlValue);
+        setControlValues(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

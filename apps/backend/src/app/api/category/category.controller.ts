@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Post,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/createCategory.dto';
@@ -41,6 +42,11 @@ export class CategoryController {
     return updateCategoryStatus;
   }
 
+  @SetMetadata('checkControlValues', [
+    UserRole.ADMIN,
+    UserRole.INVESTMENT_MANAGER,
+  ])
+  @UseGuards(RolesGuard)
   @Post('create')
   async handleRequestCreateCategory(
     @UserDecorator() user: User,

@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import {CategoriesSortOption} from '@test1/shared';
+import {CategoriesSortOption, ControlValue} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
 import {Category, User} from '@prisma/client';
@@ -38,16 +38,16 @@ export default function SortCategories({
   user,
   categories,
   setCategories,
-  controlValue,
-  setControlValue,
+  controlValues,
+  setControlValues,
   isSaving,
   setIsSaving,
 }: {
   user: User;
   categories: Category[];
   setCategories: (categories: Category[]) => unknown;
-  controlValue: string;
-  setControlValue: (controlValue?: string) => void;
+  controlValues: Record<ControlValue, string>;
+  setControlValues: (controlValue?: Record<ControlValue, string>) => void;
   isSaving: boolean;
   setIsSaving: (isSaving?: boolean) => void;
 }) {
@@ -77,16 +77,16 @@ export default function SortCategories({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/set-sorting-categories',
-      body: { sortingCategories: option, controlValue },
+      body: { sortingCategories: option, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setSortOrder(option);
       if (response.controlValue) {
-        setControlValue(response.controlValue);
+        setControlValues(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

@@ -1,50 +1,16 @@
 import {Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {
-  ControlValue,
-  DatePeriod,
-  Limits,
-  MeExtendedOption,
-  Timezones,
-  UserWithCategories,
-  UserWithCategoriesAndNotes,
-} from '@test1/shared';
+import {ControlValue, DatePeriod, Limits, MeExtendedOption, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
-import {handleFetch} from '../../utils/fetchingData/handleFetch';
-import {StatusCodes} from 'http-status-codes';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog} from '@prisma/client';
-import {findTimeLogsWithinCurrentPeriod, TimeLogWithinCurrentPeriod,} from '../../utils/findTimeLogsWithinCurrentPeriod';
-import {DateTime} from 'luxon';
 import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
-import Categories from '../../sections/@dashboard/categories';
-import {getGroupedTimeLogsWithDateSorted} from '../../utils/mapper/getGroupedTimeLogsWithDateSorted';
-import {getCurrentDate} from '../../utils/getCurrentDate';
+import Categories from 'apps/frontend/sections/@dashboard/categories';
 // ---------------------------------------------------------------------
-
-const getTimeLogsWithinDatesFromIsoType = (timeLogsWithDatesISO) => {
-  return timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
-    return {
-      date: DateTime.fromObject(timeLogWithDatesISO.date),
-      timeLogsExtended: timeLogWithDatesISO.timeLogsExtended.map(
-        (timeLogExtended) => {
-          return {
-            ...timeLogExtended,
-            startedAt: DateTime.fromISO(timeLogExtended.startedAt),
-            endedAt: timeLogExtended.ended
-              ? DateTime.fromISO(timeLogExtended.endedAt)
-              : undefined,
-            isIsoString: false,
-          };
-        }
-      ),
-    };
-  }) as unknown as any;
-};
 
 type Props = {
   user: UserWithCategories;
@@ -77,7 +43,7 @@ export default function Index({
   );
   useEffect(() => {
     const newControlValuesMap = new Map();
-    Object(ControlValue).values.forEach((value) =>
+    Object.values(ControlValue).forEach((value) =>
       newControlValuesMap.set(value, serverSideFetchedControlValues?.[value])
     );
     setControlValues(newControlValuesMap);
@@ -88,58 +54,58 @@ export default function Index({
     serverSideFetchedPeriods
   );
 
-  const checkControlValue = async () => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'user/check-control-value',
-      body: {
-        controlValue,
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED) {
-      setIsSaving(false);
-      return;
-    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-      setUser(undefined);
-      if (refreshIntervalId) {
-        clearInterval(refreshIntervalId);
-        setRefreshIntervalId(undefined);
-      }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      return fetchExtendedUser();
-    }
-    setIsSaving(false);
-    return;
-  };
-
-  const fetchExtendedUser = async () => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'user/me-extended',
-      body: {
-        extend: [
-          MeExtendedOption.CATEGORIES,
-          MeExtendedOption.CATEGORIES_LIMIT,
-          MeExtendedOption.NOTES,
-        ],
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED && response?.user) {
-      setUser(response.user);
-      setCategories(response.user?.categories ?? []);
-      setControlValue(response.user?.controlValue);
-    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-      setUser(undefined);
-      if (refreshIntervalId) {
-        clearInterval(refreshIntervalId);
-        setRefreshIntervalId(undefined);
-      }
-    }
-    setIsSaving(false);
-    return;
-  };
+  // const checkControlValue = async () => {
+  //   setIsSaving(true);
+  //   const response = await handleFetch({
+  //     pathOrUrl: 'user/check-control-value',
+  //     body: {
+  //       controlValue,
+  //     },
+  //     method: 'POST',
+  //   });
+  //   if (response.statusCode === StatusCodes.CREATED) {
+  //     setIsSaving(false);
+  //     return;
+  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+  //     setUser(undefined);
+  //     if (refreshIntervalId) {
+  //       clearInterval(refreshIntervalId);
+  //       setRefreshIntervalId(undefined);
+  //     }
+  //   } else if (response.statusCode === StatusCodes.CONFLICT) {
+  //     return fetchExtendedUser();
+  //   }
+  //   setIsSaving(false);
+  //   return;
+  // };
+  //
+  // const fetchExtendedUser = async () => {
+  //   setIsSaving(true);
+  //   const response = await handleFetch({
+  //     pathOrUrl: 'user/me-extended',
+  //     body: {
+  //       extend: [
+  //         MeExtendedOption.CATEGORIES,
+  //         MeExtendedOption.CATEGORIES_LIMIT,
+  //         MeExtendedOption.NOTES,
+  //       ],
+  //     },
+  //     method: 'POST',
+  //   });
+  //   if (response.statusCode === StatusCodes.CREATED && response?.user) {
+  //     setUser(response.user);
+  //     setCategories(response.user?.categories ?? []);
+  //     setControlValue(response.user?.controlValue);
+  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+  //     setUser(undefined);
+  //     if (refreshIntervalId) {
+  //       clearInterval(refreshIntervalId);
+  //       setRefreshIntervalId(undefined);
+  //     }
+  //   }
+  //   setIsSaving(false);
+  //   return;
+  // };
 
   const limits: Limits = serverSideFetchedLimits;
 
@@ -152,39 +118,39 @@ export default function Index({
   const [groupedTimeLogsWithDateSorted, setGroupedTimeLogsWithDateSorted] =
     useState([]);
 
-  useEffect(() => {
-    if (timeLogs) {
-      const timeLogsWithinActiveDate = findTimeLogsWithinCurrentPeriod({
-        allTimeLogs: timeLogs,
-        userTimezone: Timezones[user.timezone],
-        fromDate: activeDate.c,
-        toDate: activeDate.c,
-        categories: user.categories,
-      }) as TimeLogWithinCurrentPeriod[];
+  // useEffect(() => {
+  //   if (timeLogs) {
+  //     const timeLogsWithinActiveDate = findTimeLogsWithinCurrentPeriod({
+  //       allTimeLogs: timeLogs,
+  //       userTimezone: Timezones[user.timezone],
+  //       fromDate: activeDate.c,
+  //       toDate: activeDate.c,
+  //       categories: user.categories,
+  //     }) as TimeLogWithinCurrentPeriod[];
+  //
+  //     setGroupedTimeLogsWithDateSorted(
+  //       getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
+  //     );
+  //   }
+  // }, [activeDate?.ts, timeLogs]);
+  //
+  // const checkActiveDateCorrectness = () => {
+  //   const currentDate = getCurrentDate(Timezones[user.timezone]);
+  //   if (currentDate.ts === activeDate.ts) {
+  //     return true;
+  //   }
+  //   setActiveDate(currentDate);
+  //   return false;
+  // };
 
-      setGroupedTimeLogsWithDateSorted(
-        getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
-      );
-    }
-  }, [activeDate?.ts, timeLogs]);
-
-  const checkActiveDateCorrectness = () => {
-    const currentDate = getCurrentDate(Timezones[user.timezone]);
-    if (currentDate.ts === activeDate.ts) {
-      return true;
-    }
-    setActiveDate(currentDate);
-    return false;
-  };
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      checkActiveDateCorrectness();
-    }, 1000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     checkActiveDateCorrectness();
+  //   }, 1000);
+  //   return () => {
+  //     clearInterval(intervalId);
+  //   };
+  // }, []);
 
   return (
     <DashboardLayout
@@ -201,8 +167,8 @@ export default function Index({
           categories={categories}
           setCategories={setCategories}
           limits={limits}
-          controlValue={controlValue}
-          setControlValue={setControlValue}
+          controlValues={controlValues}
+          setControlValues={setControlValues}
           user={user}
           isSaving={isSaving}
           setIsSaving={setIsSaving}
