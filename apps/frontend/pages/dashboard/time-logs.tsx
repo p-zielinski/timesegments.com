@@ -14,7 +14,7 @@ import DashboardLayout from '../../layouts/dashboard';
 import React, { useEffect, useState } from 'react';
 import { Category, TimeLog, User } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { MeExtendedOption, Timezones } from '@test1/shared';
+import { DatePeriod, MeExtendedOption, Timezones } from '@test1/shared';
 import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
 import Cookies from 'cookies';
 import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
@@ -38,11 +38,6 @@ dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
 
 // ----------------------------------------------------------------------
-
-type DatePeriod = {
-  from: { year: number; month: number; day: number };
-  to: { year: number; month: number; day: number };
-}[];
 
 type Props = {
   timeLogs: TimeLog[];

@@ -1,6 +1,14 @@
 import {Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {ControlValue, Limits, MeExtendedOption, Timezones, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
+import {
+  ControlValue,
+  DatePeriod,
+  Limits,
+  MeExtendedOption,
+  Timezones,
+  UserWithCategories,
+  UserWithCategoriesAndNotes,
+} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
@@ -44,6 +52,8 @@ type Props = {
   notes: Note[];
   timeLogs: TimeLog[];
   randomSliderHexColor: string;
+  controlValues: Record<ControlValue, string>;
+  fetchedPeriods: { from: number; to: number }[];
 };
 
 export default function Index({
@@ -52,48 +62,31 @@ export default function Index({
   notes: serverSideFetchedNotes,
   randomSliderHexColor: randomSliderHexColor,
   timeLogs: serverSideFetchedTimeLogs,
+  fetchedPeriods: serverSideFetchedPeriods,
+  controlValues: serverSideFetchedControlValues,
 }: Props) {
-  const [user, setUser] = useState<UserWithCategories>(serverSideFetchedUserWithCategoriesAndCategoriesNotes);
+  const [user, setUser] = useState<UserWithCategories>(
+    serverSideFetchedUserWithCategoriesAndCategoriesNotes
+  );
   const [disableHover, setDisableHover] = useState<boolean>(true);
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
-  const [controlValues, setControlValues] = useState(new Map<string,string>();
-  useEffect(()=> {
-    const newControlValuesMap = new Map()
-    newControlValuesMap.set(ControlValue.USER, user.userControlValue)
-    newControlValuesMap.set(ControlValue.CATEGORIES, user.categoriesControlValue)
-    newControlValuesMap.set(ControlValue.NOTES, user.notesControlValue)
-    newControlValuesMap.set(ControlValue.NOTES, user.notesControlValue)
-  },[])
-
+  const [controlValues, setControlValues] = useState(
+    new Map<ControlValue, string>()
+  );
+  useEffect(() => {
+    const newControlValuesMap = new Map();
+    Object(ControlValue).values.forEach((value) =>
+      newControlValuesMap.set(value, serverSideFetchedControlValues?.[value])
+    );
+    setControlValues(newControlValuesMap);
+  }, []);
 
   const [timeLogs, setTimeLogs] = useState(serverSideFetchedTimeLogs);
-  const [activeDate, setActiveDate] = useState(
-    getCurrentDate(Timezones[user.timezone])
+  const [fetchedPeriods, setFetchedPeriods] = useState<DatePeriod[]>(
+    serverSideFetchedPeriods
   );
-
-  useEffect(() => {
-    setControlValue(user?.controlValue);
-  }, [user?.controlValue]);
-
-  useEffect(() => {
-    if (user && !controlValue) {
-      fetchExtendedUser();
-    }
-    if (user) {
-      if (refreshIntervalId) {
-        clearInterval(refreshIntervalId);
-      }
-      const intervalId = setInterval(() => {
-        checkControlValue();
-      }, 2 * 60 * 1000);
-      setRefreshIntervalId(intervalId);
-    }
-    return () => {
-      clearInterval(refreshIntervalId);
-    };
-  }, [controlValue]);
 
   const checkControlValue = async () => {
     setIsSaving(true);
@@ -225,7 +218,9 @@ export const getServerSideProps = async ({ req, res }) => {
   const jwt_token = cookies.get('jwt_token');
   let userWithCategoriesAndCategoriesNotes: UserWithCategoriesAndNotes,
     limits: Limits,
-    timeLogs: TimeLog[];
+    timeLogs: TimeLog[],
+    controlValues: Record<ControlValue, string>,
+    fetchedPeriods: DatePeriod[];
 
   if (jwt_token) {
     try {
@@ -252,6 +247,8 @@ export const getServerSideProps = async ({ req, res }) => {
       userWithCategoriesAndCategoriesNotes = response.user;
       limits = response.limits;
       timeLogs = response.timeLogs;
+      controlValues = response.controlValues;
+      fetchedPeriods = response.fetchedPeriods;
     } catch (e) {
       console.log(e);
       cookies.set('jwt_token');
@@ -284,6 +281,8 @@ export const getServerSideProps = async ({ req, res }) => {
         )
       ),
       timeLogs: deleteUndefinedFromObject(timeLogs) || [],
+      fetchedPeriods,
+      controlValues,
     },
   };
 };

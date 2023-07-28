@@ -11,6 +11,7 @@ import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
   CategoriesSortOption,
   ControlValue,
+  DatePeriod,
   EmailType,
   findKeyOfValueInObject,
   Limits,
@@ -108,8 +109,10 @@ export class UserService {
     limits: Limits;
     timeLogs?: TimeLog[];
     controlValues: Record<ControlValue, string>;
+    fetchedPeriods: DatePeriod[];
   }> {
     let timeLogs;
+    const fetchedPeriods = [];
     const include: Prisma.UserInclude = {};
     if (extend.includes(MeExtendedOption.CATEGORIES)) {
       include.categories = {
@@ -141,6 +144,7 @@ export class UserService {
         );
       } else {
         timeLogs = findFromToTimeLogsResult?.timeLogs;
+        fetchedPeriods.push({ from: beginningOfToday.ts, to: endOfDay.ts });
       }
     }
 
@@ -168,6 +172,7 @@ export class UserService {
         : undefined,
       limits: Object.keys(limits).length ? limits : undefined,
       timeLogs,
+      fetchedPeriods,
     };
   }
 
