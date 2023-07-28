@@ -14,17 +14,12 @@ import { User } from '@prisma/client';
 import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
 import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
-import { UserService } from '../user/user.service';
 import { SetExpandCategoriesDto } from './dto/changeShowRecentNotes.dto';
-import { ControlValue } from '@test1/shared';
 
 @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
 @Controller('category')
 export class CategoryController {
-  constructor(
-    private categoryService: CategoryService,
-    private userService: UserService
-  ) {}
+  constructor(private categoryService: CategoryService) {}
 
   @Post('set-show-recent-notes')
   async handleRequestSetExpandSubcategories(
@@ -43,13 +38,7 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return {
-      ...updateCategoryStatus,
-      categoriesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.CATEGORIES
-      ),
-    };
+    return updateCategoryStatus;
   }
 
   @Post('create')
@@ -68,13 +57,7 @@ export class CategoryController {
         error: createCategoryStatus.error,
       });
     }
-    return {
-      ...createCategoryStatus,
-      categoriesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.CATEGORIES
-      ),
-    };
+    return createCategoryStatus;
   }
 
   @Post('set-active')
@@ -92,12 +75,7 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return {
-      ...updateCategoryStatus,
-      ...(await this.userService.getNewTimeLogsAndCategoriesControlValue(
-        user.id
-      )),
-    };
+    return updateCategoryStatus;
   }
 
   @Post('update')
@@ -117,13 +95,7 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return {
-      ...updateCategoryStatus,
-      categoriesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.CATEGORIES
-      ),
-    };
+    return updateCategoryStatus;
   }
 
   @Post('set-as-deleted')
@@ -139,12 +111,6 @@ export class CategoryController {
         error: setCategoryAsDeletedStatus.error,
       });
     }
-    return {
-      ...setCategoryAsDeletedStatus,
-      categoriesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.CATEGORIES
-      ),
-    };
+    return setCategoryAsDeletedStatus;
   }
 }

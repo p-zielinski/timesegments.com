@@ -3,20 +3,28 @@ import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Category, Prisma, TimeLog, User } from '@prisma/client';
 import { TimeLogService } from '../time-log/time-log.service';
+import { ControlValue } from '@test1/shared';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @Injectable()
 export class CategoryService {
   constructor(
     private prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly timeLogService: TimeLogService
+    private readonly timeLogService: TimeLogService,
+    private controlValueService: ControlValueService
   ) {}
 
   public async updateCategoryShowRecentNotes(
     categoryId: string,
     showRecentNotes: boolean,
     user: User
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    category?: Category;
+    controlValues?: Record<ControlValue, string>;
+  }> {
     const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
     });
@@ -42,14 +50,26 @@ export class CategoryService {
         error: `Could not update expandSubcategories`,
       };
     }
-    return { success: true, category: updatedCategory };
+    return {
+      success: true,
+      category: updatedCategory,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
   public async createCategory(
     user: User,
     name: string,
     color: string
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    category?: Category;
+    controlValues?: Record<ControlValue, string>;
+  }> {
     if (
       (await this.countUserCategories(user.id)) >
       this.configService.get<number>('MAX_NUMBER_OF_CATEGORIES_PER_USER')
@@ -68,14 +88,26 @@ export class CategoryService {
         error: `Could not create category`,
       };
     }
-    return { success: true, category };
+    return {
+      success: true,
+      category,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
   public async setCategoryActive(
     categoryId: string,
     user: User
   ): Promise<
-    | { success: true; category?: Category; timeLog: TimeLog }
+    | {
+        success: true;
+        category?: Category;
+        timeLog: TimeLog;
+        controlValues: Record<ControlValue, string>;
+      }
     | { success: false; error: string }
   > {
     const categoryWithUser = await this.findIfNotDeleted(categoryId, {
@@ -87,6 +119,10 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
+    const controlValues = await this.controlValueService.getNewControlValues(
+      user.id,
+      [ControlValue.CATEGORIES, ControlValue.TIME_LOGS]
+    );
     if (categoryWithUser.active === true) {
       return {
         success: true,
@@ -95,6 +131,7 @@ export class CategoryService {
           user.id,
           categoryWithUser.id
         ),
+        controlValues,
       };
     }
     return {
@@ -104,6 +141,7 @@ export class CategoryService {
         user.id,
         categoryWithUser.id
       ),
+      controlValues,
     };
   }
 
@@ -133,7 +171,14 @@ export class CategoryService {
       name,
       color
     );
-    return { success: true, category: updatedCategory };
+    return {
+      success: true,
+      category: updatedCategory,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
   async setCategoryAsDeleted(categoryId: string, user: User) {
@@ -153,7 +198,14 @@ export class CategoryService {
       };
     }
     const updatedCategory = await this.updateDeleted(categoryId, true);
-    return { success: true, category: updatedCategory };
+    return {
+      success: true,
+      category: updatedCategory,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
   public async findManyIfInIdList(categoriesIds: string[]) {

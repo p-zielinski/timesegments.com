@@ -14,14 +14,15 @@ import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { DeleteNoteDto } from './dto/delete.dto';
 import { UpdateNoteDto } from './dto/update.dto';
 import { UserService } from '../user/user.service';
-import { ControlValue } from '@test1/shared';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('note')
 export class NoteController {
   constructor(
     private noteService: NoteService,
-    private userService: UserService
+    private userService: UserService,
+    private controlValueService: ControlValueService
   ) {}
 
   @Post('create')
@@ -40,13 +41,7 @@ export class NoteController {
         error: createNoteStatus.error,
       });
     }
-    return {
-      ...createNoteStatus,
-      notesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.NOTES
-      ),
-    };
+    return createNoteStatus;
   }
 
   @Post('update')
@@ -65,13 +60,7 @@ export class NoteController {
         error: updateNoteStatus.error,
       });
     }
-    return {
-      ...updateNoteStatus,
-      notesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.NOTES
-      ),
-    };
+    return updateNoteStatus;
   }
 
   @Post('delete')
@@ -86,13 +75,7 @@ export class NoteController {
         error: deleteNoteStatus.error,
       });
     }
-    return {
-      ...deleteNoteStatus,
-      notesControlValue: this.userService.getNewControlValue(
-        user.id,
-        ControlValue.NOTES
-      ),
-    };
+    return deleteNoteStatus;
   }
 
   @Get('find-all')

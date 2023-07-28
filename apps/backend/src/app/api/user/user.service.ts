@@ -19,9 +19,9 @@ import {
   Timezones,
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
-import { nanoid } from 'nanoid';
 import { DateTime } from 'luxon';
 import { EmailService } from '../email/email.service';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @Injectable()
 export class UserService {
@@ -33,7 +33,8 @@ export class UserService {
     private readonly categoryService: CategoryService,
     private readonly timeLogService: TimeLogService,
     private loggerService: LoggerService,
-    private emailService: EmailService
+    private emailService: EmailService,
+    private controlValueService: ControlValueService
   ) {}
 
   public async changeEmailAddress(user: User, newEmail: string) {
@@ -99,34 +100,6 @@ export class UserService {
     );
   }
 
-  public async getNewTimeLogsAndCategoriesControlValue(
-    userId: string
-  ): Promise<{
-    timeLogsControlValue: string;
-    categoriesControlValue: string;
-  }> {
-    const newControlValue = nanoid();
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        timeLogsControlValue: 't' + newControlValue,
-        categoriesControlValue: 'c' + newControlValue,
-      },
-    });
-    return {
-      timeLogsControlValue: updatedUser.timeLogsControlValue,
-      categoriesControlValue: updatedUser.categoriesControlValue,
-    };
-  }
-
-  public async getNewControlValue(
-    userId: string,
-    type: ControlValue
-  ): Promise<string> {
-    const newControlValue = nanoid();
-    return await this.updateTimeLogsControlValue(userId, newControlValue, type);
-  }
-
   public async getMeExtended(
     user: User,
     extend: MeExtendedOption[]
@@ -134,6 +107,7 @@ export class UserService {
     user: User;
     limits: Limits;
     timeLogs?: TimeLog[];
+    controlValues: Record<ControlValue, string>;
   }> {
     let timeLogs;
     const include: Prisma.UserInclude = {};
@@ -183,6 +157,9 @@ export class UserService {
       );
     }
     return {
+      controlValues: await this.controlValueService.getAllUserControlValues(
+        user.id
+      ),
       user: extend.includes(MeExtendedOption.CATEGORIES)
         ? await this.prisma.user.findFirst({
             where: { id: user.id },
@@ -292,14 +269,16 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data: { name, userControlValue: nanoid() },
-        select: { name: true, userControlValue: true },
+        data: { name },
+        select: { name: true },
       });
       if (updatedUser.name === name) {
         return {
           success: true,
           name,
-          controlValue: updatedUser.userControlValue,
+          controlValues: this.controlValueService.getNewControlValues(user.id, [
+            ControlValue.USER,
+          ]),
         };
       }
     } catch (error) {
@@ -370,14 +349,16 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data: { timezone, userControlValue: nanoid() },
-        select: { timezone: true, userControlValue: true },
+        data: { timezone },
+        select: { timezone: true },
       });
       if (updatedUser.timezone === timezone) {
         return {
           success: true,
           timezone,
-          userControlValue: updatedUser.userControlValue,
+          controlValues: this.controlValueService.getNewControlValues(user.id, [
+            ControlValue.USER,
+          ]),
         };
       }
     } catch (error) {
@@ -427,7 +408,13 @@ export class UserService {
         select: { sortingNotes: true },
       });
       if (updatedUser.sortingNotes === sortingNotes) {
-        return { success: true, sortingNotes };
+        return {
+          success: true,
+          sortingNotes,
+          controlValues: this.controlValueService.getNewControlValues(user.id, [
+            ControlValue.NOTES,
+          ]),
+        };
       }
     } catch (error) {
       this.loggerService.error(error);
@@ -444,39 +431,6 @@ export class UserService {
       where: { id: userId },
       data,
     });
-  }
-
-  private async updateTimeLogsControlValue(
-    userId: string,
-    controlValue: string,
-    type: ControlValue
-  ) {
-    switch (type) {
-      case ControlValue.USER:
-        return (
-          await this.updateUser(userId, {
-            userControlValue: controlValue,
-          })
-        ).userControlValue;
-      case ControlValue.TIME_LOGS:
-        return (
-          await this.updateUser(userId, {
-            timeLogsControlValue: controlValue,
-          })
-        ).timeLogsControlValue;
-      case ControlValue.CATEGORIES:
-        return (
-          await this.updateUser(userId, {
-            categoriesControlValue: controlValue,
-          })
-        ).categoriesControlValue;
-      case ControlValue.NOTES:
-        return (
-          await this.updateUser(userId, {
-            notesControlValue: controlValue,
-          })
-        ).notesControlValue;
-    }
   }
 
   public async findUserByEmail(email: string) {

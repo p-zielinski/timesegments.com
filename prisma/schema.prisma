@@ -23,10 +23,6 @@ model User {
   timeLogs                  TimeLog[]
   createdAt                 DateTime              @default(now()) @db.Timestamptz(3)
   updatedAt                 DateTime              @updatedAt @db.Timestamptz(3)
-  userControlValue          String?
-  timeLogsControlValue      String?
-  categoriesControlValue    String?
-  notesControlValue         String?
 }
 
 model Email {

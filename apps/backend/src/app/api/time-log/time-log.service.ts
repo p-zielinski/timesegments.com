@@ -3,15 +3,22 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { DateTime } from 'luxon';
 import { Prisma, TimeLog, User } from '@prisma/client';
-import { asyncMap, FromToDateTime, Timezones } from '@test1/shared';
+import {
+  asyncMap,
+  ControlValue,
+  FromToDateTime,
+  Timezones,
+} from '@test1/shared';
 import { uniqBy } from 'lodash';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @Injectable()
 export class TimeLogService {
   constructor(
     private prisma: PrismaService,
     @Inject(forwardRef(() => CategoryService))
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private controlValueService: ControlValueService
   ) {}
 
   public async editTimeLog(
@@ -87,7 +94,13 @@ export class TimeLogService {
     const createdTimeLog = await this.prisma.timeLog.create({
       data: { userId: user.id, categoryId, startedAt, endedAt },
     });
-    return { success: true, timeLog: createdTimeLog };
+    return {
+      success: true,
+      timeLog: createdTimeLog,
+      controlValues: this.controlValueService.getNewControlValues(user.id, [
+        ControlValue.TIME_LOGS,
+      ]),
+    };
   }
 
   public async findFromToTimeLogsEnrichedWithCategories(
