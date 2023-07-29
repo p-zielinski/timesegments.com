@@ -53,10 +53,6 @@ export class CategoryService {
     return {
       success: true,
       category: updatedCategory,
-      controlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
     };
   }
 
@@ -91,10 +87,6 @@ export class CategoryService {
     return {
       success: true,
       category,
-      controlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
     };
   }
 
@@ -106,7 +98,6 @@ export class CategoryService {
         success: true;
         category?: Category;
         timeLog: TimeLog;
-        controlValues: Record<ControlValue, string>;
       }
     | { success: false; error: string }
   > {
@@ -119,10 +110,6 @@ export class CategoryService {
         error: `Category not found, bad request`,
       };
     }
-    const controlValues = await this.controlValueService.getNewControlValues(
-      user.id,
-      [ControlValue.CATEGORIES, ControlValue.TIME_LOGS]
-    );
     if (categoryWithUser.active === true) {
       return {
         success: true,
@@ -131,7 +118,6 @@ export class CategoryService {
           user.id,
           categoryWithUser.id
         ),
-        controlValues,
       };
     }
     return {
@@ -141,7 +127,6 @@ export class CategoryService {
         user.id,
         categoryWithUser.id
       ),
-      controlValues,
     };
   }
 
@@ -174,10 +159,6 @@ export class CategoryService {
     return {
       success: true,
       category: updatedCategory,
-      controlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
     };
   }
 
@@ -201,10 +182,6 @@ export class CategoryService {
     return {
       success: true,
       category: updatedCategory,
-      controlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
     };
   }
 

@@ -16,12 +16,20 @@ import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
 import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
 import { SetExpandCategoriesDto } from './dto/changeShowRecentNotes.dto';
+import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
+import { ControlValue } from '@test1/shared';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
 @Controller('category')
 export class CategoryController {
-  constructor(private categoryService: CategoryService) {}
+  constructor(
+    private categoryService: CategoryService,
+    private controlValueService: ControlValueService
+  ) {}
 
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
+  @UseGuards(ControlValuesGuard)
   @Post('set-show-recent-notes')
   async handleRequestSetExpandSubcategories(
     @UserDecorator() user: User,
@@ -39,14 +47,17 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return {
+      ...updateCategoryStatus,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
-  @SetMetadata('checkControlValues', [
-    UserRole.ADMIN,
-    UserRole.INVESTMENT_MANAGER,
-  ])
-  @UseGuards(RolesGuard)
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
+  @UseGuards(ControlValuesGuard)
   @Post('create')
   async handleRequestCreateCategory(
     @UserDecorator() user: User,
@@ -63,9 +74,20 @@ export class CategoryController {
         error: createCategoryStatus.error,
       });
     }
-    return createCategoryStatus;
+    return {
+      ...createCategoryStatus,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
+  @SetMetadata('typesOfControlValuesToCheck', [
+    ControlValue.CATEGORIES,
+    ControlValue.TIME_LOGS,
+  ])
+  @UseGuards(ControlValuesGuard)
   @Post('set-active')
   async handleRequestSetCategoryActive(
     @UserDecorator() user: User,
@@ -81,9 +103,17 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return {
+      ...updateCategoryStatus,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES, ControlValue.TIME_LOGS]
+      ),
+    };
   }
 
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
+  @UseGuards(ControlValuesGuard)
   @Post('update')
   async handleRequestUpdateCategory(
     @UserDecorator() user: User,
@@ -101,9 +131,17 @@ export class CategoryController {
         error: updateCategoryStatus.error,
       });
     }
-    return updateCategoryStatus;
+    return {
+      ...updateCategoryStatus,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
+  @UseGuards(ControlValuesGuard)
   @Post('set-as-deleted')
   async handleRequestSetCategoryAsDeleted(
     @UserDecorator() user: User,
@@ -117,6 +155,12 @@ export class CategoryController {
         error: setCategoryAsDeletedStatus.error,
       });
     }
-    return setCategoryAsDeletedStatus;
+    return {
+      ...setCategoryAsDeletedStatus,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.CATEGORIES]
+      ),
+    };
   }
 }
