@@ -281,9 +281,6 @@ export class UserService {
         return {
           success: true,
           name,
-          controlValues: this.controlValueService.getNewControlValues(user.id, [
-            ControlValue.USER,
-          ]),
         };
       }
     } catch (error) {

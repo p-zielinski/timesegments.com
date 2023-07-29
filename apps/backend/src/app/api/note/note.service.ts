@@ -6,7 +6,6 @@ import { CheckUserControlValueGuard } from '../../common/check-control-values/ch
 import { CategoryService } from '../category/category.service';
 import { ConfigService } from '@nestjs/config';
 import { ControlValue } from '@test1/shared';
-import { ControlValueService } from '../control-value/control-value.service';
 
 @Injectable()
 export class NoteService {
@@ -14,8 +13,7 @@ export class NoteService {
     private prisma: PrismaService,
     private loggerService: LoggerService,
     private categoryService: CategoryService,
-    private readonly configService: ConfigService,
-    private controlValueService: ControlValueService
+    private readonly configService: ConfigService
   ) {}
 
   async createNote(
@@ -69,10 +67,6 @@ export class NoteService {
     return {
       success: true,
       note,
-      controlValues: await this.controlValueService.getNewControlValues(
-        userId,
-        [categoryId ? ControlValue.CATEGORIES_NOTES : ControlValue.NOTES]
-      ),
     };
   }
 
@@ -110,14 +104,6 @@ export class NoteService {
     return {
       success: true,
       note: updatedNote,
-      controlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [
-          noteWithUserAndCategoryId.category?.id
-            ? ControlValue.CATEGORIES_NOTES
-            : ControlValue.NOTES,
-        ]
-      ),
     };
   }
 
@@ -148,14 +134,6 @@ export class NoteService {
     return {
       success: true,
       note: deletedNote,
-      controlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [
-          noteWithUserAndCategoryId.category?.id
-            ? ControlValue.CATEGORIES_NOTES
-            : ControlValue.NOTES,
-        ]
-      ),
     };
   }
 

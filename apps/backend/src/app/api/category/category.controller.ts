@@ -28,9 +28,9 @@ export class CategoryController {
     private controlValueService: ControlValueService
   ) {}
 
+  @Post('set-show-recent-notes')
   @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
   @UseGuards(ControlValuesGuard)
-  @Post('set-show-recent-notes')
   async handleRequestSetExpandSubcategories(
     @UserDecorator() user: User,
     @Body() setExpandCategoriesDto: SetExpandCategoriesDto
@@ -56,9 +56,9 @@ export class CategoryController {
     };
   }
 
+  @Post('create')
   @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
   @UseGuards(ControlValuesGuard)
-  @Post('create')
   async handleRequestCreateCategory(
     @UserDecorator() user: User,
     @Body() createCategoryDto: CreateCategoryDto
@@ -83,12 +83,12 @@ export class CategoryController {
     };
   }
 
+  @Post('set-active')
   @SetMetadata('typesOfControlValuesToCheck', [
     ControlValue.CATEGORIES,
     ControlValue.TIME_LOGS,
   ])
   @UseGuards(ControlValuesGuard)
-  @Post('set-active')
   async handleRequestSetCategoryActive(
     @UserDecorator() user: User,
     @Body() setCategoryActiveDto: SetCategoryActiveDto
@@ -112,9 +112,9 @@ export class CategoryController {
     };
   }
 
+  @Post('update')
   @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
   @UseGuards(ControlValuesGuard)
-  @Post('update')
   async handleRequestUpdateCategory(
     @UserDecorator() user: User,
     @Body() updateCategoryDto: UpdateCategoryDto
@@ -140,9 +140,9 @@ export class CategoryController {
     };
   }
 
+  @Post('set-as-deleted')
   @SetMetadata('typesOfControlValuesToCheck', [ControlValue.CATEGORIES])
   @UseGuards(ControlValuesGuard)
-  @Post('set-as-deleted')
   async handleRequestSetCategoryAsDeleted(
     @UserDecorator() user: User,
     @Body() setCategoryDeletedDto: SetCategoryDeletedDto

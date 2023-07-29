@@ -5,6 +5,7 @@ import {
   Get,
   Headers,
   Post,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { LoginOrRegisterDto } from './dto/login.dto';
@@ -13,7 +14,7 @@ import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
-import { MeExtendedOption } from '@test1/shared';
+import { ControlValue, MeExtendedOption } from '@test1/shared';
 import { RegisterDto } from './dto/register.dto';
 import { SetNameDto } from './dto/setName.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
@@ -24,13 +25,18 @@ import { SetSortingNotesDto } from './dto/setSortingNotes.dto';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories.dto';
 import { ChangeEmailAddressDto } from './dto/changeEmailAddress.dto';
 import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
+import { ControlValueService } from '../control-value/control-value.service';
+import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private controlValueService: ControlValueService
+  ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post('change-email-address')
+  @UseGuards(JwtAuthGuard)
   async changeEmailAddress(
     @UserDecorator() user: User,
     @Body() changeEmailAddressDto: ChangeEmailAddressDto
@@ -112,14 +118,14 @@ export class UserController {
     return { ...validatingResult, user, limits };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   async handleRequestGetMe(@UserDecorator() user: User) {
     return { user };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('me-with-current-token')
+  @UseGuards(JwtAuthGuard)
   async handleRequestGetMeWithCurrentToken(
     @UserDecorator() user: User,
     @CurrentTokenDecorator() currentToken: Token
@@ -127,8 +133,8 @@ export class UserController {
     return { user, currentToken };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('me-extended')
+  @UseGuards(JwtAuthGuard)
   async handleRequestMeExtended(
     @UserDecorator() user: User,
     @Body() meExtendedDto: MeExtendedDto
@@ -137,8 +143,9 @@ export class UserController {
     return await this.userService.getMeExtended(user, extend);
   }
 
-  @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
   @Post('set-name')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetName(
     @UserDecorator() user: User,
     @Body() setNameDto: SetNameDto
@@ -150,11 +157,17 @@ export class UserController {
         error: updateNameStatus.error,
       });
     }
-    return updateNameStatus;
+    return {
+      ...updateNameStatus,
+      controlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.USER]
+      ),
+    };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('change-password')
+  @UseGuards(JwtAuthGuard)
   async handleRequestChangePassword(
     @UserDecorator() user: User,
     @Body() changePasswordDto: ChangePasswordDto
@@ -173,8 +186,8 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('initialize-email-change')
+  @UseGuards(JwtAuthGuard)
   async handleRequestInitializeEmailChange(
     @UserDecorator() user: User,
     @Body() initializeEmailChangeDto: InitializeEmailChangeDto
@@ -192,8 +205,9 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
   @Post('change-timezone')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestChangeTimezone(
     @UserDecorator() user: User,
     @Body() changeTimezoneDto: ChangeTimezoneDto
