@@ -1,36 +1,41 @@
 import {Container} from '@mui/material'; // hooks
 import React, {useEffect, useState} from 'react';
-import {ControlValue, DatePeriod, Limits, MeExtendedOption, UserWithCategories, UserWithCategoriesAndNotes,} from '@test1/shared';
+import {ControlValue, Limits, MeExtendedOption, TimePeriod, UserWithCategories,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
 import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
+import JsCookies from 'js-cookie';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
-import {Category, Note, TimeLog} from '@prisma/client';
-import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
+import {Category, Note, TimeLog, User} from '@prisma/client';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
+import {handleFetch} from '../../utils/fetchingData/handleFetch';
+import {useRouter} from 'next/router';
 // ---------------------------------------------------------------------
 
 type Props = {
-  user: UserWithCategories;
-  limits: Limits;
+  user: User;
+  categories: Category[];
   notes: Note[];
   timeLogs: TimeLog[];
-  randomSliderHexColor: string;
-  controlValues: Record<ControlValue, string>;
   fetchedPeriods: { from: number; to: number }[];
+  limits: Limits;
+  controlValues: Record<ControlValue, string>;
+  randomSliderHexColor: string;
 };
 
 export default function Index({
   user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
-  limits: serverSideFetchedLimits,
+  categories: serverSideFetchedCategories,
   notes: serverSideFetchedNotes,
-  randomSliderHexColor: randomSliderHexColor,
   timeLogs: serverSideFetchedTimeLogs,
   fetchedPeriods: serverSideFetchedPeriods,
+  limits: serverSideFetchedLimits,
   controlValues: serverSideFetchedControlValues,
+  randomSliderHexColor: randomSliderHexColor,
 }: Props) {
+  const router = useRouter();
   const [user, setUser] = useState<UserWithCategories>(
     serverSideFetchedUserWithCategoriesAndCategoriesNotes
   );
@@ -38,21 +43,34 @@ export default function Index({
   useEffect(() => {
     setDisableHover(isMobile);
   }, [isMobile]);
-  const [controlValues, setControlValues] = useState(
-    new Map<ControlValue, string>()
-  );
-  useEffect(() => {
-    const newControlValuesMap = new Map();
-    Object.values(ControlValue).forEach((value) =>
-      newControlValuesMap.set(value, serverSideFetchedControlValues?.[value])
-    );
-    setControlValues(newControlValuesMap);
-  }, []);
-
+  const [controlValues, setControlValues] = useState<
+    Record<ControlValue, string>
+  >(serverSideFetchedControlValues);
   const [timeLogs, setTimeLogs] = useState(serverSideFetchedTimeLogs);
-  const [fetchedPeriods, setFetchedPeriods] = useState<DatePeriod[]>(
+  const [fetchedPeriods, setFetchedPeriods] = useState<TimePeriod[]>(
     serverSideFetchedPeriods
   );
+
+  const handleIncorrectControlValues = async (
+    typesOfControlValuesWithIncorrectValues: ControlValue[]
+  ) => {
+    const timeLogs: TimeLog[],
+      controlValues: Record<ControlValue, string>,
+      fetchedPeriods: TimePeriod[],
+      extend: MeExtendedOption[] = [];
+    try {
+      const response = await handleFetch({
+        pathOrUrl: 'user/me-extended',
+        body: { extend },
+        method: 'POST',
+      });
+      console.log(typesOfControlValuesWithIncorrectValues);
+    } catch (e) {
+      console.log(e);
+      JsCookies.remove('jwt_token');
+      return await router.push('/');
+    }
+  };
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -161,6 +179,7 @@ export default function Index({
     >
       <Container sx={{ mt: -5 }}>
         <Categories
+          handleIncorrectControlValues={handleIncorrectControlValues}
           groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
           timeLogs={timeLogs}
           setTimeLogs={setTimeLogs}
@@ -182,52 +201,7 @@ export default function Index({
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-  let userWithCategoriesAndCategoriesNotes: UserWithCategoriesAndNotes,
-    limits: Limits,
-    timeLogs: TimeLog[],
-    controlValues: Record<ControlValue, string>,
-    fetchedPeriods: DatePeriod[];
-
-  if (jwt_token) {
-    try {
-      const responseUser = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
-        {
-          method: 'POST',
-          headers: {
-            'Content-type': 'application/json',
-            authorization: `Bearer ${jwt_token}`,
-          },
-          body: JSON.stringify({
-            extend: [
-              MeExtendedOption.CATEGORIES,
-              MeExtendedOption.CATEGORIES_NOTES,
-              MeExtendedOption.CATEGORIES_LIMIT,
-              MeExtendedOption.NOTES_PER_CATEGORY_LIMIT,
-              MeExtendedOption.TODAYS_TIMELOGS,
-            ],
-          }),
-        }
-      );
-      const response = await responseUser.json();
-      userWithCategoriesAndCategoriesNotes = response.user;
-      limits = response.limits;
-      timeLogs = response.timeLogs;
-      controlValues = response.controlValues;
-      fetchedPeriods = response.fetchedPeriods;
-    } catch (e) {
-      console.log(e);
-      cookies.set('jwt_token');
-    }
-    cookies.set('jwt_token', jwt_token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: false,
-      maxAge: 1000 * 60 * 60 * 24 * 400,
-    });
-  }
-
-  if (!userWithCategoriesAndCategoriesNotes) {
+  if (!jwt_token) {
     return {
       redirect: {
         permanent: false,
@@ -236,19 +210,77 @@ export const getServerSideProps = async ({ req, res }) => {
     };
   }
 
-  return {
-    props: {
-      user: userWithCategoriesAndCategoriesNotes ?? null,
-      limits: limits ?? null,
-      randomSliderHexColor: getHexFromRGBObject(
-        getColorShadeBasedOnSliderPickerSchema(
-          getRandomRgbObjectForSliderPicker().rgb,
-          'very bright'
-        )
-      ),
-      timeLogs: deleteUndefinedFromObject(timeLogs) || [],
+  try {
+    const responseUser = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          authorization: `Bearer ${jwt_token}`,
+        },
+        body: JSON.stringify({
+          extend: [
+            MeExtendedOption.CATEGORIES,
+            MeExtendedOption.CATEGORIES_NOTES,
+            MeExtendedOption.LIMITS,
+            MeExtendedOption.TODAYS_TIMELOGS,
+          ],
+        }),
+      }
+    );
+    const response = await responseUser.json();
+
+    const {
+      user,
+      categories,
+      notes,
+      timeLogs,
       fetchedPeriods,
+      limits,
       controlValues,
-    },
-  };
+    }: {
+      user: User;
+      categories: Category[];
+      notes: Note[];
+      timeLogs: TimeLog[];
+      fetchedPeriods: TimePeriod[];
+      limits: Limits;
+      controlValues: Record<ControlValue, string>;
+    } = response;
+
+    cookies.set('jwt_token', jwt_token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: false,
+      maxAge: 1000 * 60 * 60 * 24 * 400,
+    });
+
+    return {
+      props: {
+        user,
+        categories,
+        notes,
+        timeLogs,
+        fetchedPeriods,
+        limits,
+        controlValues,
+        randomSliderHexColor: getHexFromRGBObject(
+          getColorShadeBasedOnSliderPickerSchema(
+            getRandomRgbObjectForSliderPicker().rgb,
+            'very bright'
+          )
+        ),
+      },
+    };
+  } catch (e) {
+    console.log(e);
+    cookies.set('jwt_token');
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/',
+      },
+    };
+  }
 };

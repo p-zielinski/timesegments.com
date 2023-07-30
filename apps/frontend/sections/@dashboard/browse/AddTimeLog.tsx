@@ -278,7 +278,7 @@ export default function AddTimeLog({
       // setCategories([{ ...response.category }, ...categories]);
       refreshTimeLogs();
       setIsEditing({});
-      if (response.controlValue) {
+      if (response.controlValues) {
         setControlValue(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {

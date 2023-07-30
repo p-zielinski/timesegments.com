@@ -35,6 +35,7 @@ const SORT_BY_OPTIONS = [
 ];
 
 export default function SortCategories({
+  handleIncorrectControlValues,
   user,
   categories,
   setCategories,
@@ -50,6 +51,9 @@ export default function SortCategories({
   setControlValues: (controlValue?: Record<ControlValue, string>) => void;
   isSaving: boolean;
   setIsSaving: (isSaving?: boolean) => void;
+  handleIncorrectControlValues: (
+    typesOfControlValuesWithIncorrectValues: Record<ControlValue, string>
+  ) => unknown;
 }) {
   const [sortOrder, setSortOrder] = useState(
     (user.sortingCategories as CategoriesSortOption) ??
@@ -82,11 +86,16 @@ export default function SortCategories({
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setSortOrder(option);
-      if (response.controlValue) {
-        setControlValues(response.controlValue);
+      if (response.controlValues) {
+        setControlValues({ ...controlValues, ...response.controlValues });
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

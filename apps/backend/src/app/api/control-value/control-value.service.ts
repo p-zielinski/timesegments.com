@@ -28,7 +28,7 @@ export class ControlValueService {
   ): Promise<Record<ControlValue, string>> {
     const controlValues = await this.getAllUserControlValues(userId);
     const newControlValue = Object.fromEntries(
-      types.map((value) => [value, nanoid()])
+      types.map((controlValueType) => [controlValueType, nanoid()])
     );
     await this.cacheManager.set(userId, {
       ...controlValues,

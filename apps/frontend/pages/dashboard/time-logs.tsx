@@ -14,7 +14,7 @@ import DashboardLayout from '../../layouts/dashboard';
 import React, { useEffect, useState } from 'react';
 import { Category, TimeLog, User } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { DatePeriod, MeExtendedOption, Timezones } from '@test1/shared';
+import { MeExtendedOption, TimePeriod, Timezones } from '@test1/shared';
 import { deleteUndefinedFromObject } from '../../utils/deleteUndefinedFromObject';
 import Cookies from 'cookies';
 import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
@@ -43,7 +43,7 @@ type Props = {
   timeLogs: TimeLog[];
   categories: Category[];
   randomSliderHexColor: string;
-  fetchedPeriods: DatePeriod[];
+  fetchedPeriods: TimePeriod[];
   user: User;
 };
 
@@ -83,11 +83,11 @@ export default function TimeLogs({
   >(serverSideFetchedUser.timeLogsControlValue);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState({});
-  const [fetchedPeriods, setFetchedPeriods] = useState<DatePeriod[]>(
+  const [fetchedPeriods, setFetchedPeriods] = useState<TimePeriod[]>(
     fetchedPeriodsStartingValue
   );
 
-  const changePeriod = (fromTo: DatePeriod) => {};
+  const changePeriod = (fromTo: TimePeriod) => {};
 
   // const refreshTimeLogs = async () => {
   //   setIsFetching(true);

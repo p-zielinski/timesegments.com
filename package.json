@@ -84,7 +84,8 @@
     "tslib": "^2.3.0",
     "yup": "^0.32.11",
     "yup-password": "^0.2.2",
-    "zeptomail": "^3.0.4"
+    "zeptomail": "^3.0.4",
+    "zustand": "^4.3.9"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.14.5",

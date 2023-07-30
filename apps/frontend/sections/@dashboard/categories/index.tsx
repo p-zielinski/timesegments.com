@@ -10,6 +10,7 @@ import CategoryNotesCards from './CategoryNotesCards';
 // ----------------------------------------------------------------------
 
 export default function Categories({
+  handleIncorrectControlValues,
   groupedTimeLogsWithDateSorted,
   timeLogs,
   setTimeLogs,
@@ -50,6 +51,7 @@ export default function Categories({
               sx={{ mt: -1, mb: -1 }}
             >
               <SortCategories
+                handleIncorrectControlValues={handleIncorrectControlValues}
                 user={user}
                 categories={categories}
                 setCategories={setCategories}

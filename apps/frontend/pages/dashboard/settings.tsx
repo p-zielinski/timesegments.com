@@ -51,7 +51,7 @@ export default function Index({
 
   const [disableHover, setDisableHover] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [controlValue, setControlValue] = useState(user?.controlValue);
+  const [controlValues, setControlValues] = useState(user?.controlValues);
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
 
   const fetchMe = async () => {
@@ -62,7 +62,7 @@ export default function Index({
     });
     if (response.statusCode === StatusCodes.OK && response?.user) {
       setUser(response.user);
-      setControlValue(response.user?.controlValue);
+      setControlValues(response.user?.controlValues);
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       setUser(undefined);
       if (refreshIntervalId) {

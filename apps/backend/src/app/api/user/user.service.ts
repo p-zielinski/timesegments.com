@@ -7,15 +7,22 @@ import { checkHashedString } from '../../common/checkHashedString';
 import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
 import { TimeLogService } from '../time-log/time-log.service';
-import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
+import {
+  Category,
+  Note,
+  Prisma,
+  TimeLog,
+  Timezone,
+  User,
+} from '@prisma/client';
 import {
   CategoriesSortOption,
-  DatePeriod,
   EmailType,
   findKeyOfValueInObject,
   Limits,
   MeExtendedOption,
   NotesSortOption,
+  TimePeriod,
   Timezones,
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
@@ -103,25 +110,15 @@ export class UserService {
     extend: MeExtendedOption[]
   ): Promise<{
     user: User;
-    limits: Limits;
+    categories?: Category[];
+    notes?: Note[];
+    limits?: Limits;
     timeLogs?: TimeLog[];
-    fetchedPeriods: DatePeriod[];
+    fetchedPeriods?: TimePeriod[];
   }> {
     const fetchedPeriods = [],
       timeLogs = [],
       include: Prisma.UserInclude = {};
-    if (extend.includes(MeExtendedOption.CATEGORIES)) {
-      include.categories = {
-        where: { deleted: false },
-        include: extend.includes(MeExtendedOption.CATEGORIES_NOTES)
-          ? { notes: true }
-          : undefined,
-      };
-    }
-
-    if (extend.includes(MeExtendedOption.NOTES)) {
-      include.notes = true; //to be changed
-    }
 
     if (extend.includes(MeExtendedOption.TODAYS_TIMELOGS)) {
       const endOfDay = DateTime.now()
@@ -146,28 +143,57 @@ export class UserService {
       }
     }
 
-    const limits: { categoriesLimit?: number; categoriesNotesLimit?: number } =
-      {};
-    if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
-      limits.categoriesLimit = this.configService.get<number>(
-        'MAX_NUMBER_OF_CATEGORIES_PER_USER'
-      );
+    if (extend.includes(MeExtendedOption.CATEGORIES)) {
+      include.categories = {
+        where: { deleted: false },
+        include: extend.includes(MeExtendedOption.CATEGORIES_NOTES)
+          ? { notes: { where: { NOT: { categoryId: null } } } }
+          : undefined,
+      };
     }
-    if (extend.includes(MeExtendedOption.NOTES_PER_CATEGORY_LIMIT)) {
-      limits.categoriesNotesLimit = this.configService.get<number>(
-        'MAX_NUMBER_OF_NOTES_PER_CATEGORY'
-      );
+
+    if (!extend.includes(MeExtendedOption.CATEGORIES)) {
+      if (
+        extend.includes(MeExtendedOption.CATEGORIES_NOTES) &&
+        extend.includes(MeExtendedOption.NOTES)
+      ) {
+        include.notes = true;
+      } else if (extend.includes(MeExtendedOption.NOTES)) {
+        include.notes = { where: { categoryId: null } };
+      } else if (extend.includes(MeExtendedOption.CATEGORIES_NOTES)) {
+        include.notes = { where: { NOT: { categoryId: null } } };
+      }
     }
+
+    const userWithNotesAndCategoriesAndCategoriesNotes = Object.keys(include)
+      .length
+      ? await this.prisma.user.findFirst({
+          where: { id: user.id },
+          include,
+        })
+      : user;
+
+    const { categories, notes } = extractCategoriesAndNotesFromExtendedUser(
+      userWithNotesAndCategoriesAndCategoriesNotes
+    );
+
     return {
-      user: extend.includes(MeExtendedOption.CATEGORIES)
-        ? await this.prisma.user.findFirst({
-            where: { id: user.id },
-            include,
-          })
+      user,
+      categories: extend.includes(MeExtendedOption.CATEGORIES)
+        ? categories
         : undefined,
-      limits: Object.keys(limits).length ? limits : undefined,
-      timeLogs,
-      fetchedPeriods: fetchedPeriods.length > 0 ? fetchedPeriods : undefined,
+      notes:
+        extend.includes(MeExtendedOption.NOTES) ||
+        extend.includes(MeExtendedOption.CATEGORIES_NOTES)
+          ? notes
+          : undefined,
+      limits: getLimits(extend, this.configService),
+      timeLogs: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
+        ? timeLogs
+        : undefined,
+      fetchedPeriods: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
+        ? fetchedPeriods
+        : undefined,
     };
   }
 
@@ -428,3 +454,34 @@ export class UserService {
     return await this.prisma.user.findFirst({ where: { email } });
   }
 }
+
+const getLimits = (
+  meExtendedOptions: MeExtendedOption[],
+  configService: ConfigService
+) => {
+  if (!meExtendedOptions.includes(MeExtendedOption.LIMITS)) {
+    return undefined;
+  }
+  return {
+    categoriesLimit: configService.get<number>(
+      'MAX_NUMBER_OF_CATEGORIES_PER_USER'
+    ),
+    categoriesNotesLimit: configService.get<number>(
+      'MAX_NUMBER_OF_NOTES_PER_CATEGORY'
+    ),
+    notesLimit: configService.get<number>('MAX_NUMBER_OF_NOTES_PER_USER'),
+  };
+};
+
+const extractCategoriesAndNotesFromExtendedUser = (userExtended) => {
+  const categoriesWithNotes = userExtended.categories;
+  const notes = [
+    ...(userExtended.notes || []),
+    ...(userExtended.categories.notes || []),
+  ];
+  const categories = categoriesWithNotes.map((category) => {
+    delete category.notes;
+    return category;
+  });
+  return { categories, notes };
+};

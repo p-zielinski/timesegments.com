@@ -51,14 +51,9 @@ export class ControlValuesGuard implements CanActivate {
     throw new HttpException(
       {
         error: `Control values were incorrect.`,
-        controlValues: Object.fromEntries(
-          typesOfControlValuesWithIncorrectValues.map((controlValueType) => [
-            controlValueType,
-            userControlValues[controlValueType],
-          ])
-        ),
+        typesOfControlValuesWithIncorrectValues,
       },
-      HttpStatus.UNAUTHORIZED
+      HttpStatus.CONFLICT
     );
   }
 }
