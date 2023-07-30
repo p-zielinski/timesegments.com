@@ -107,9 +107,9 @@ export class UserService {
     timeLogs?: TimeLog[];
     fetchedPeriods: DatePeriod[];
   }> {
-    let timeLogs;
-    const fetchedPeriods = [];
-    const include: Prisma.UserInclude = {};
+    const fetchedPeriods = [],
+      timeLogs = [],
+      include: Prisma.UserInclude = {};
     if (extend.includes(MeExtendedOption.CATEGORIES)) {
       include.categories = {
         where: { deleted: false },
@@ -139,7 +139,9 @@ export class UserService {
           `Could not find today's time logs for user: ${user.id}`
         );
       } else {
-        timeLogs = findFromToTimeLogsResult?.timeLogs;
+        findFromToTimeLogsResult?.timeLogs.forEach((timeLog) =>
+          timeLogs.push(timeLog)
+        );
         fetchedPeriods.push({ from: beginningOfToday.ts, to: endOfDay.ts });
       }
     }
@@ -165,7 +167,7 @@ export class UserService {
         : undefined,
       limits: Object.keys(limits).length ? limits : undefined,
       timeLogs,
-      fetchedPeriods,
+      fetchedPeriods: fetchedPeriods.length > 0 ? fetchedPeriods : undefined,
     };
   }
 
