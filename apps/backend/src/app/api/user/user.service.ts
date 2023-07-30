@@ -10,7 +10,6 @@ import { TimeLogService } from '../time-log/time-log.service';
 import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
 import {
   CategoriesSortOption,
-  ControlValue,
   DatePeriod,
   EmailType,
   findKeyOfValueInObject,
@@ -22,7 +21,6 @@ import {
 import { LoggerService } from '../../common/logger/loger.service';
 import { DateTime } from 'luxon';
 import { EmailService } from '../email/email.service';
-import { ControlValueService } from '../control-value/control-value.service';
 
 @Injectable()
 export class UserService {
@@ -34,8 +32,7 @@ export class UserService {
     private readonly categoryService: CategoryService,
     private readonly timeLogService: TimeLogService,
     private loggerService: LoggerService,
-    private emailService: EmailService,
-    private controlValueService: ControlValueService
+    private emailService: EmailService
   ) {}
 
   public async changeEmailAddress(user: User, newEmail: string) {
@@ -108,7 +105,6 @@ export class UserService {
     user: User;
     limits: Limits;
     timeLogs?: TimeLog[];
-    controlValues: Record<ControlValue, string>;
     fetchedPeriods: DatePeriod[];
   }> {
     let timeLogs;
@@ -161,9 +157,6 @@ export class UserService {
       );
     }
     return {
-      controlValues: await this.controlValueService.getAllUserControlValues(
-        user.id
-      ),
       user: extend.includes(MeExtendedOption.CATEGORIES)
         ? await this.prisma.user.findFirst({
             where: { id: user.id },
@@ -358,9 +351,6 @@ export class UserService {
         return {
           success: true,
           timezone,
-          controlValues: this.controlValueService.getNewControlValues(user.id, [
-            ControlValue.USER,
-          ]),
         };
       }
     } catch (error) {
@@ -413,9 +403,6 @@ export class UserService {
         return {
           success: true,
           sortingNotes,
-          controlValues: this.controlValueService.getNewControlValues(user.id, [
-            ControlValue.NOTES,
-          ]),
         };
       }
     } catch (error) {

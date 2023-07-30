@@ -7,8 +7,8 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app/app.module';
-import { RemovePasswordKeyFromResponse } from './app/common/interceptor/removePasswordKeyFromResponse.interceptor';
-import { RemoveSuccessKeyFromResponse } from './app/common/interceptor/removeSuccessKeyFromResponse.interceptor';
+import { RemovePasswordKeyFromResponse } from './app/common/interceptor/removePasswordKeyInResponse';
+import { RemoveSuccessKeyFromResponse } from './app/common/interceptor/removeSuccessKeyInResponse.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
