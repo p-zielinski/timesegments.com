@@ -2,38 +2,47 @@ import { create } from 'zustand';
 import { Category, Note, TimeLog, User } from '@prisma/client';
 import { ControlValue, Limits, TimePeriod } from '@test1/shared';
 
-export interface Store {
+interface StoreProps {
   user: User;
-  setUser: (user: User) => void;
   categories: Category[];
-  setCategories: (categories: Category[]) => void;
   notes: Note[];
-  setNotes: (notes: Note[]) => void;
   timeLogs: TimeLog[];
-  setTimeLogs: (timeLogs: TimeLog[]) => void;
   fetchedPeriods: TimePeriod[];
-  setFetchedPeriods: (fetchedPeriods: TimePeriod[]) => void;
   limits: Limits;
-  setLimits: (limits: Limits) => void;
   controlValues: Record<ControlValue, string>;
+}
+
+interface BearState extends StoreProps {
+  setUser: (user: User) => void;
+  setCategories: (categories: Category[]) => void;
+  setNotes: (notes: Note[]) => void;
+  setTimeLogs: (timeLogs: TimeLog[]) => void;
+  setFetchedPeriods: (fetchedPeriods: TimePeriod[]) => void;
+  setLimits: (limits: Limits) => void;
   setControlValues: (controlValues: Record<ControlValue, string>) => void;
 }
 
-export const useStore = create<Store>()((set) => ({
-  user: undefined,
-  setUser: (user) => set((state) => ({ ...state, user })),
-  categories: [],
-  setCategories: (categories) => set((state) => ({ ...state, categories })),
-  notes: [],
-  setNotes: (notes) => set((state) => ({ ...state, notes })),
-  timeLogs: [],
-  setTimeLogs: (timeLogs) => set((state) => ({ ...state, timeLogs })),
-  fetchedPeriods: [],
-  setFetchedPeriods: (fetchedPeriods) =>
-    set((state) => ({ ...state, fetchedPeriods })),
-  limits: undefined,
-  setLimits: (limits) => set((state) => ({ ...state, limits })),
-  controlValues: undefined,
-  setControlValues: (controlValues) =>
-    set((state) => ({ ...state, controlValues })),
-}));
+export const createStore = (initProps?: Partial<StoreProps>) => {
+  const DEFAULT_PROPS: StoreProps = {
+    user: undefined,
+    categories: undefined,
+    notes: undefined,
+    timeLogs: undefined,
+    fetchedPeriods: undefined,
+    limits: undefined,
+    controlValues: undefined,
+  };
+  return create<BearState>()((set) => ({
+    ...DEFAULT_PROPS,
+    ...initProps,
+    setUser: (user) => set((state) => ({ ...state, user })),
+    setCategories: (categories) => set((state) => ({ ...state, categories })),
+    setNotes: (notes) => set((state) => ({ ...state, notes })),
+    setTimeLogs: (timeLogs) => set((state) => ({ ...state, timeLogs })),
+    setFetchedPeriods: (fetchedPeriods) =>
+      set((state) => ({ ...state, fetchedPeriods })),
+    setLimits: (limits) => set((state) => ({ ...state, limits })),
+    setControlValues: (controlValues) =>
+      set((state) => ({ ...state, controlValues })),
+  }));
+};
