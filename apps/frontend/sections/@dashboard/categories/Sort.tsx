@@ -3,12 +3,13 @@ import {useEffect, useState} from 'react';
 import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
-import {CategoriesSortOption, ControlValue} from '@test1/shared';
+import {CategoriesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
-import {Category, User} from '@prisma/client';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
+import {StoreApi, UseBoundStore} from 'zustand/esm';
+import {State} from '../../../hooks/useStore';
 
 // ----------------------------------------------------------------------
 
@@ -35,26 +36,21 @@ const SORT_BY_OPTIONS = [
 ];
 
 export default function SortCategories({
-  handleIncorrectControlValues,
-  user,
-  categories,
-  setCategories,
-  controlValues,
-  setControlValues,
-  isSaving,
-  setIsSaving,
+  useStore,
 }: {
-  user: User;
-  categories: Category[];
-  setCategories: (categories: Category[]) => unknown;
-  controlValues: Record<ControlValue, string>;
-  setControlValues: (controlValue?: Record<ControlValue, string>) => void;
-  isSaving: boolean;
-  setIsSaving: (isSaving?: boolean) => void;
-  handleIncorrectControlValues: (
-    typesOfControlValuesWithIncorrectValues: Record<ControlValue, string>
-  ) => unknown;
+  useStore: UseBoundStore<StoreApi<State>>;
 }) {
+  const {
+    isSaving,
+    setIsSaving,
+    user,
+    categories,
+    setCategories,
+    controlValues,
+    setControlValues,
+    handleIncorrectControlValues,
+  } = useStore();
+
   const [sortOrder, setSortOrder] = useState(
     (user.sortingCategories as CategoriesSortOption) ??
       CategoriesSortOption.NEWEST

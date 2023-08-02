@@ -1,17 +1,14 @@
 import {Container} from '@mui/material'; // hooks
-import React, {useEffect, useState} from 'react';
-import {ControlValue, Limits, MeExtendedOption, TimePeriod, UserWithCategories,} from '@test1/shared';
+import React from 'react';
+import {ControlValue, Limits, MeExtendedOption, TimePeriod,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
-import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
-import JsCookies from 'js-cookie';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog, User} from '@prisma/client';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
-import {handleFetch} from '../../utils/fetchingData/handleFetch';
-import {useRouter} from 'next/router';
+import {createStore} from '../../hooks/useStore';
 // ---------------------------------------------------------------------
 
 type Props = {
@@ -35,42 +32,15 @@ export default function Index({
   controlValues: serverSideFetchedControlValues,
   randomSliderHexColor: randomSliderHexColor,
 }: Props) {
-  const router = useRouter();
-  const [user, setUser] = useState<UserWithCategories>(
-    serverSideFetchedUserWithCategoriesAndCategoriesNotes
-  );
-  const [disableHover, setDisableHover] = useState<boolean>(true);
-  useEffect(() => {
-    setDisableHover(isMobile);
-  }, [isMobile]);
-  const [controlValues, setControlValues] = useState<
-    Record<ControlValue, string>
-  >(serverSideFetchedControlValues);
-  const [timeLogs, setTimeLogs] = useState(serverSideFetchedTimeLogs);
-  const [fetchedPeriods, setFetchedPeriods] = useState<TimePeriod[]>(
-    serverSideFetchedPeriods
-  );
-
-  const handleIncorrectControlValues = async (
-    typesOfControlValuesWithIncorrectValues: ControlValue[]
-  ) => {
-    const timeLogs: TimeLog[],
-      controlValues: Record<ControlValue, string>,
-      fetchedPeriods: TimePeriod[],
-      extend: MeExtendedOption[] = [];
-    try {
-      const response = await handleFetch({
-        pathOrUrl: 'user/me-extended',
-        body: { extend },
-        method: 'POST',
-      });
-      console.log(typesOfControlValuesWithIncorrectValues);
-    } catch (e) {
-      console.log(e);
-      JsCookies.remove('jwt_token');
-      return await router.push('/');
-    }
-  };
+  const useStore = createStore({
+    user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
+    categories: serverSideFetchedCategories,
+    notes: serverSideFetchedNotes,
+    timeLogs: serverSideFetchedTimeLogs,
+    fetchedPeriods: serverSideFetchedPeriods,
+    limits: serverSideFetchedLimits,
+    controlValues: serverSideFetchedControlValues,
+  });
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -125,17 +95,6 @@ export default function Index({
   //   return;
   // };
 
-  const limits: Limits = serverSideFetchedLimits;
-
-  //Categories page states
-  const [categories, setCategories] = useState<Category[]>(
-    user?.categories || []
-  );
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-
-  const [groupedTimeLogsWithDateSorted, setGroupedTimeLogsWithDateSorted] =
-    useState([]);
-
   // useEffect(() => {
   //   if (timeLogs) {
   //     const timeLogsWithinActiveDate = findTimeLogsWithinCurrentPeriod({
@@ -172,27 +131,12 @@ export default function Index({
 
   return (
     <DashboardLayout
-      user={user}
-      setUser={setUser}
+      useStore={useStore}
       title={'Active Categories'}
       randomSliderHexColor={randomSliderHexColor}
     >
       <Container sx={{ mt: -5 }}>
-        <Categories
-          handleIncorrectControlValues={handleIncorrectControlValues}
-          groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
-          timeLogs={timeLogs}
-          setTimeLogs={setTimeLogs}
-          categories={categories}
-          setCategories={setCategories}
-          limits={limits}
-          controlValues={controlValues}
-          setControlValues={setControlValues}
-          user={user}
-          isSaving={isSaving}
-          setIsSaving={setIsSaving}
-          disableHover={disableHover}
-        />
+        <Categories useStore={useStore} />
       </Container>
     </DashboardLayout>
   );

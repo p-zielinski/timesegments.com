@@ -9,21 +9,9 @@ import CategoryNotesCards from './CategoryNotesCards';
 
 // ----------------------------------------------------------------------
 
-export default function Categories({
-  handleIncorrectControlValues,
-  groupedTimeLogsWithDateSorted,
-  timeLogs,
-  setTimeLogs,
-  user,
-  controlValues,
-  setControlValues,
-  disableHover,
-  categories,
-  setCategories,
-  isSaving,
-  setIsSaving,
-  limits,
-}) {
+export default function Categories({ useStore }) {
+  const { limits, categories } = useStore();
+
   const categoriesLimit = limits?.categoriesLimit || 5;
 
   const [isEditing, setIsEditing] = useState({
@@ -50,16 +38,7 @@ export default function Categories({
               flexShrink={0}
               sx={{ mt: -1, mb: -1 }}
             >
-              <SortCategories
-                handleIncorrectControlValues={handleIncorrectControlValues}
-                user={user}
-                categories={categories}
-                setCategories={setCategories}
-                controlValues={controlValues}
-                setControlValues={setControlValues}
-                isSaving={isSaving}
-                setIsSaving={setIsSaving}
-              />
+              <SortCategories useStore={useStore} />
             </Stack>
           </Stack>
         </Grid>
@@ -67,55 +46,14 @@ export default function Categories({
         {categories.map((category) => (
           <Grid key={category.id} item xs={1} sm={1} md={1}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Category
-                limits={limits}
-                groupedTimeLogsWithDateSorted={groupedTimeLogsWithDateSorted}
-                user={user}
-                timeLogs={timeLogs}
-                setTimeLogs={setTimeLogs}
-                controlValues={controlValues}
-                setControlValues={setControlValues}
-                disableHover={disableHover}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-                category={category}
-                categories={categories}
-                setCategories={setCategories}
-                isSaving={isSaving}
-                setIsSaving={setIsSaving}
-              />
-              <CategoryNotesCards
-                limits={limits}
-                controlValues={controlValues}
-                setControlValues={setControlValues}
-                disableHover={disableHover}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-                category={category}
-                categories={categories}
-                setCategories={setCategories}
-                isSaving={isSaving}
-                setIsSaving={setIsSaving}
-                user={user}
-              />
+              <Category useStore={useStore} />
+              <CategoryNotesCards useStore={useStore} />
             </Box>
           </Grid>
         ))}
         {categoriesLimit > categories.length && (
           <Grid key={'new category'} item xs={1} sm={1} md={1}>
-            <AddCategory
-              controlValues={controlValues}
-              setControlValues={setControlValues}
-              disableHover={disableHover}
-              data={undefined}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              categories={categories}
-              setCategories={setCategories}
-              category={undefined}
-            />
+            <AddCategory useStore={useStore} />
           </Grid>
         )}
       </Grid>

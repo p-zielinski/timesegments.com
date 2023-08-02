@@ -37,10 +37,11 @@ Nav.propTypes = {
 export default function Nav({
   openNav,
   onCloseNav,
-  user,
-  setUser,
+  useStore,
   randomSliderHexColor,
 }) {
+  const { user, setUser } = useStore();
+
   const router = useRouter();
 
   const isDesktop = useResponsive('up', 'lg');
