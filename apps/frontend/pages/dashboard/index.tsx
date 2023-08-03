@@ -9,6 +9,8 @@ import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog, User} from '@prisma/client';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
 import {createStore} from '../../hooks/useStore';
+import {useRouter} from 'next/router';
+import {isMobile} from 'react-device-detect';
 // ---------------------------------------------------------------------
 
 type Props = {
@@ -32,7 +34,11 @@ export default function Index({
   controlValues: serverSideFetchedControlValues,
   randomSliderHexColor: randomSliderHexColor,
 }: Props) {
+  // console.log(isMobile);
   const useStore = createStore({
+    disableHover: isMobile,
+    router: useRouter(),
+    isEditing: {},
     user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
     categories: serverSideFetchedCategories,
     notes: serverSideFetchedNotes,

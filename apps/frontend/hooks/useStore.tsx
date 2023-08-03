@@ -3,9 +3,11 @@ import { Category, Note, TimeLog, User } from '@prisma/client';
 import { ControlValue, Limits, TimePeriod } from '@test1/shared';
 import { handleFetch } from '../utils/fetchingData/handleFetch';
 import JsCookies from 'js-cookie';
-import { router } from 'next/client';
+import { NextRouter } from 'next/router';
 
 export interface StoreProps {
+  disableHover: boolean;
+  router: NextRouter;
   isEditing: Record<string, any>;
   isSaving: boolean;
   user: User;
@@ -34,6 +36,8 @@ export interface State extends StoreProps {
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
+    disableHover: false,
+    router: undefined,
     isEditing: undefined,
     isSaving: false,
     user: undefined,
@@ -44,6 +48,12 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     limits: undefined,
     controlValues: undefined,
   };
+  if (!initProps.router) {
+    throw 'Router was not initialized';
+  }
+  if (typeof initProps.disableHover === 'undefined') {
+    throw 'DisableHover was not set';
+  }
   return create<State>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
@@ -71,6 +81,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
       } catch (e) {
         console.log(e);
         JsCookies.remove('jwt_token');
+        const { router } = get();
         return await router.push('/');
       }
     },

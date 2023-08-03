@@ -31,7 +31,7 @@ export default function EditCategory({ useStore, category }) {
     setIsEditing,
     isSaving,
     setIsSaving,
-  } = useStore;
+  } = useStore();
   const [staticCategory] = useState(category);
 
   const validationSchema = yup.object().shape({

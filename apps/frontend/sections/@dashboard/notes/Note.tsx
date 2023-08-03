@@ -23,7 +23,7 @@ export const Note = ({ category, useStore }) => {
     disableHover,
     note,
     user,
-  } = useStore;
+  } = useStore();
 
   const tomorrow = DateTime.now()
     .setZone(Timezones[user.timezone])

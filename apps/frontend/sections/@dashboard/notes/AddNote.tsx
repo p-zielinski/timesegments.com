@@ -32,7 +32,7 @@ export default function AddNew({ category, useStore }) {
     setIsEditing,
     categories,
     setCategories,
-  } = useStore;
+  } = useStore();
   const router = useRouter();
 
   const color = category?.color

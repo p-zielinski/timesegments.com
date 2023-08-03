@@ -7,7 +7,7 @@ import {Note} from '../notes/Note'; // -----------------------------------------
 // ----------------------------------------------------------------------
 
 export default function CategoryNotesCards({ category, useStore }) {
-  const { limits, isEditing } = useStore;
+  const { limits, isEditing } = useStore();
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
 

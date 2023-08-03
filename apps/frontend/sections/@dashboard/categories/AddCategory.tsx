@@ -33,7 +33,7 @@ export default function AddCategory({ useStore }) {
     setIsSaving,
     categories,
     setCategories,
-  } = useStore;
+  } = useStore();
   const startingColor = getRandomRgbObjectForSliderPicker();
 
   let StyledTextField, darkHexColor;

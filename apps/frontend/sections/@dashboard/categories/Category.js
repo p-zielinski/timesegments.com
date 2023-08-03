@@ -3,11 +3,10 @@ import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import {getDuration, Timezones} from '@test1/shared';
-import {DateTime} from 'luxon';
+import {getDuration} from '@test1/shared';
 import {TimelineDot} from '@mui/lab';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
@@ -17,6 +16,8 @@ import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 
 export default function Category({ category, useStore }) {
   const {
+    setIsEditing,
+    disableHover,
     isSaving,
     setIsSaving,
     categories,
@@ -29,7 +30,7 @@ export default function Category({ category, useStore }) {
     setControlValues,
     timeLogs,
     setTimeLogs,
-  } = useStore;
+  } = useStore();
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
@@ -40,45 +41,45 @@ export default function Category({ category, useStore }) {
 
   const hideDuration = category.active && isEditing.categoryId === category.id;
 
-  useEffect(() => {
-    const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
-      (groupedTimeLogWithDateSorted) =>
-        groupedTimeLogWithDateSorted.category?.id === category?.id
-    );
-
-    if (!currentGroupedTimeLog) {
-      return;
-    }
-    if (!currentGroupedTimeLog.notFinishedPeriod) {
-      return setTotalPeriodInMs(
-        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
-      );
-    }
-    const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-      if (hideDuration) {
-        return;
-      }
-      const now = DateTime.now().setZone(Timezones[user.timezone]);
-      const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
-        ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
-        : 0;
-      if (isNaN(unfinishedPeriodDuration)) {
-        return console.log(`unfinishedPeriodDuration is NaN`);
-      }
-      const totalPeriodDuration =
-        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
-        unfinishedPeriodDuration;
-      if (totalPeriodDuration > 0) {
-        setTotalPeriodInMs(totalPeriodDuration);
-      }
-    };
-    setTotalPeriodInMsWithUnfinishedTimeLog();
-    const intervalIdLocal = setInterval(
-      () => setTotalPeriodInMsWithUnfinishedTimeLog(),
-      1000
-    );
-    return () => clearInterval(intervalIdLocal);
-  }, [groupedTimeLogsWithDateSorted, isEditing]);
+  // useEffect(() => {
+  //   const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
+  //     (groupedTimeLogWithDateSorted) =>
+  //       groupedTimeLogWithDateSorted.category?.id === category?.id
+  //   );
+  //
+  //   if (!currentGroupedTimeLog) {
+  //     return;
+  //   }
+  //   if (!currentGroupedTimeLog.notFinishedPeriod) {
+  //     return setTotalPeriodInMs(
+  //       currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
+  //     );
+  //   }
+  //   const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+  //     if (hideDuration) {
+  //       return;
+  //     }
+  //     const now = DateTime.now().setZone(Timezones[user.timezone]);
+  //     const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
+  //       ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
+  //       : 0;
+  //     if (isNaN(unfinishedPeriodDuration)) {
+  //       return console.log(`unfinishedPeriodDuration is NaN`);
+  //     }
+  //     const totalPeriodDuration =
+  //       currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
+  //       unfinishedPeriodDuration;
+  //     if (totalPeriodDuration > 0) {
+  //       setTotalPeriodInMs(totalPeriodDuration);
+  //     }
+  //   };
+  //   setTotalPeriodInMsWithUnfinishedTimeLog();
+  //   const intervalIdLocal = setInterval(
+  //     () => setTotalPeriodInMsWithUnfinishedTimeLog(),
+  //     1000
+  //   );
+  //   return () => clearInterval(intervalIdLocal);
+  // }, [groupedTimeLogsWithDateSorted, isEditing]);
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);
