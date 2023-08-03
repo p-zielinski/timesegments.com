@@ -28,6 +28,9 @@ export interface State extends StoreProps {
   setTimeLogs: (timeLogs: TimeLog[]) => void;
   setFetchedPeriods: (fetchedPeriods: TimePeriod[]) => void;
   setLimits: (limits: Limits) => void;
+  setPartialControlValues: (
+    partialControlValues: Record<ControlValue, string>
+  ) => void;
   setControlValues: (controlValues: Record<ControlValue, string>) => void;
   handleIncorrectControlValues: (
     typesOfControlValuesWithIncorrectValues: ControlValue[]
@@ -38,7 +41,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
     disableHover: false,
     router: undefined,
-    isEditing: undefined,
+    isEditing: {},
     isSaving: false,
     user: undefined,
     categories: [],
@@ -68,6 +71,11 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     setLimits: (limits) => set((state) => ({ ...state, limits })),
     setControlValues: (controlValues) =>
       set((state) => ({ ...state, controlValues })),
+    setPartialControlValues: (controlValues) =>
+      set((state) => ({
+        ...state,
+        controlValues: { ...state.controlValues, ...controlValues },
+      })),
     handleIncorrectControlValues: async (
       typesOfControlValuesWithIncorrectValues: ControlValue[]
     ) => {

@@ -49,7 +49,7 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.CATEGORIES]
       ),
@@ -76,7 +76,7 @@ export class CategoryController {
     }
     return {
       ...createCategoryStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.CATEGORIES]
       ),
@@ -105,7 +105,7 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.CATEGORIES, ControlValue.TIME_LOGS]
       ),
@@ -133,7 +133,7 @@ export class CategoryController {
     }
     return {
       ...updateCategoryStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.CATEGORIES]
       ),
@@ -157,7 +157,7 @@ export class CategoryController {
     }
     return {
       ...setCategoryAsDeletedStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.CATEGORIES]
       ),

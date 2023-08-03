@@ -48,7 +48,7 @@ export class NoteController {
     }
     return {
       ...createNoteStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.NOTES]
       ),
@@ -75,7 +75,7 @@ export class NoteController {
     }
     return {
       ...updateNoteStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.NOTES]
       ),
@@ -98,7 +98,7 @@ export class NoteController {
     }
     return {
       ...deleteNoteStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.NOTES]
       ),

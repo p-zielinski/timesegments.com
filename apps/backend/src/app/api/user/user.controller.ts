@@ -120,9 +120,8 @@ export class UserController {
     const { extend } = meExtendedDto;
     return {
       ...(await this.userService.getMeExtended(user, extend)),
-      controlValues: await this.controlValueService.getAllUserControlValues(
-        user.id
-      ),
+      partialControlValues:
+        await this.controlValueService.getAllUserControlValues(user.id),
     };
   }
 
@@ -142,7 +141,7 @@ export class UserController {
     }
     return {
       ...updateNameStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.USER]
       ),
@@ -208,7 +207,7 @@ export class UserController {
     }
     return {
       ...changePasswordStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.USER]
       ),
@@ -232,7 +231,7 @@ export class UserController {
     }
     return {
       ...updateSortingCategoriesStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.USER]
       ),
@@ -256,7 +255,7 @@ export class UserController {
     }
     return {
       ...updateSortingCategoriesStatus,
-      controlValues: await this.controlValueService.getNewControlValues(
+      partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
         [ControlValue.USER]
       ),

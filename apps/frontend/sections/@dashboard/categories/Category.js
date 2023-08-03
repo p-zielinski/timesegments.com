@@ -27,7 +27,7 @@ export default function Category({ category, useStore }) {
     isEditing,
     user,
     controlValues,
-    setControlValues,
+    setPartialControlValues,
     timeLogs,
     setTimeLogs,
   } = useStore();
@@ -40,46 +40,6 @@ export default function Category({ category, useStore }) {
   );
 
   const hideDuration = category.active && isEditing.categoryId === category.id;
-
-  // useEffect(() => {
-  //   const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
-  //     (groupedTimeLogWithDateSorted) =>
-  //       groupedTimeLogWithDateSorted.category?.id === category?.id
-  //   );
-  //
-  //   if (!currentGroupedTimeLog) {
-  //     return;
-  //   }
-  //   if (!currentGroupedTimeLog.notFinishedPeriod) {
-  //     return setTotalPeriodInMs(
-  //       currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
-  //     );
-  //   }
-  //   const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-  //     if (hideDuration) {
-  //       return;
-  //     }
-  //     const now = DateTime.now().setZone(Timezones[user.timezone]);
-  //     const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
-  //       ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
-  //       : 0;
-  //     if (isNaN(unfinishedPeriodDuration)) {
-  //       return console.log(`unfinishedPeriodDuration is NaN`);
-  //     }
-  //     const totalPeriodDuration =
-  //       currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
-  //       unfinishedPeriodDuration;
-  //     if (totalPeriodDuration > 0) {
-  //       setTotalPeriodInMs(totalPeriodDuration);
-  //     }
-  //   };
-  //   setTotalPeriodInMsWithUnfinishedTimeLog();
-  //   const intervalIdLocal = setInterval(
-  //     () => setTotalPeriodInMsWithUnfinishedTimeLog(),
-  //     1000
-  //   );
-  //   return () => clearInterval(intervalIdLocal);
-  // }, [groupedTimeLogsWithDateSorted, isEditing]);
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);
