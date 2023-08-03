@@ -10,20 +10,21 @@ import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRand
 import EditNote from './EditNote';
 import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
 
-export const Note = ({
-  category,
-  categories,
-  setCategories,
-  controlValue,
-  setControlValue,
-  isSaving,
-  setIsSaving,
-  isEditing,
-  setIsEditing,
-  disableHover,
-  note,
-  user,
-}) => {
+export const Note = ({ category, useStore }) => {
+  const {
+    categories,
+    setCategories,
+    controlValue,
+    setControlValue,
+    isSaving,
+    setIsSaving,
+    isEditing,
+    setIsEditing,
+    disableHover,
+    note,
+    user,
+  } = useStore;
+
   const tomorrow = DateTime.now()
     .setZone(Timezones[user.timezone])
     .plus({ days: 1 });

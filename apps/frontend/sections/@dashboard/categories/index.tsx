@@ -1,11 +1,11 @@
 // @mui
 import {Box, Grid, Stack} from '@mui/material';
 import Category from './Category';
-import React, {useState} from 'react';
+import React from 'react';
 import AddCategory from './AddCategory';
 import SortCategories from './Sort';
 import {Helmet} from 'react-helmet-async';
-import CategoryNotesCards from './CategoryNotesCards';
+import CategoryNotesCards from './CategoryNotesCards'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -13,11 +13,6 @@ export default function Categories({ useStore }) {
   const { limits, categories } = useStore();
 
   const categoriesLimit = limits?.categoriesLimit || 5;
-
-  const [isEditing, setIsEditing] = useState({
-    categoryId: undefined,
-    createNew: undefined,
-  });
 
   return (
     <>
@@ -46,8 +41,8 @@ export default function Categories({ useStore }) {
         {categories.map((category) => (
           <Grid key={category.id} item xs={1} sm={1} md={1}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Category useStore={useStore} />
-              <CategoryNotesCards useStore={useStore} />
+              <Category category={category} useStore={useStore} />
+              <CategoryNotesCards category={category} useStore={useStore} />
             </Box>
           </Grid>
         ))}

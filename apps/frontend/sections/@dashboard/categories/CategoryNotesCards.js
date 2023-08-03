@@ -6,20 +6,8 @@ import {Note} from '../notes/Note'; // -----------------------------------------
 
 // ----------------------------------------------------------------------
 
-export default function CategoryNotesCards({
-  limits,
-  controlValues,
-  setControlValues,
-  category,
-  categories,
-  setCategories,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  disableHover,
-  user,
-}) {
+export default function CategoryNotesCards({ category, useStore }) {
+  const { limits, isEditing } = useStore;
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
 
@@ -38,35 +26,11 @@ export default function CategoryNotesCards({
       >
         {isEditing?.createNewNote === category.id &&
           categoriesNotesLimit > currentCategoryNumberOfNotes && (
-            <AddNote
-              controlValues={controlValues}
-              setControlValues={setControlValues}
-              disableHover={disableHover}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              setIsEditing={setIsEditing}
-              category={category}
-              categories={categories}
-              setCategories={setCategories}
-            />
+            <AddNote useStore={useStore} category={category} />
           )}
         {category.showRecentNotes &&
           (category.notes || []).map((note) => (
-            <Note
-              key={note.id}
-              category={category}
-              categories={categories}
-              setCategories={setCategories}
-              controlValue={controlValues}
-              setControlValue={setControlValues}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              disableHover={disableHover}
-              note={note}
-              user={user}
-            />
+            <Note key={note.id} useStore={useStore} />
           ))}
       </Box>
     </Box>

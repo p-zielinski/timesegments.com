@@ -22,17 +22,17 @@ import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
 
-export default function AddNew({
-  controlValues,
-  setControlValues,
-  disableHover,
-  isSaving,
-  setIsSaving,
-  setIsEditing,
-  category,
-  categories,
-  setCategories,
-}) {
+export default function AddNew({ category, useStore }) {
+  const {
+    controlValues,
+    setControlValues,
+    disableHover,
+    isSaving,
+    setIsSaving,
+    setIsEditing,
+    categories,
+    setCategories,
+  } = useStore;
   const router = useRouter();
 
   const color = category?.color

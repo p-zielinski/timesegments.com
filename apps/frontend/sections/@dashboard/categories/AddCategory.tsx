@@ -22,25 +22,19 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 
-export default function AddCategory({
-  controlValues,
-  setControlValues,
-  disableHover,
-  data = {},
-  isEditing,
-  setIsEditing,
-  category,
-  isSaving,
-  setIsSaving,
-  categories,
-  setCategories,
-}) {
-  const startingColor = category?.color
-    ? {
-        hex: category.color,
-        rgb: getRgbaObjectFromHexString(category.color),
-      }
-    : getRandomRgbObjectForSliderPicker();
+export default function AddCategory({ useStore }) {
+  const {
+    controlValues,
+    setControlValues,
+    disableHover,
+    isEditing,
+    setIsEditing,
+    isSaving,
+    setIsSaving,
+    categories,
+    setCategories,
+  } = useStore;
+  const startingColor = getRandomRgbObjectForSliderPicker();
 
   let StyledTextField, darkHexColor;
   const setStyledTextField = (isSaving, hexColor) => {
@@ -178,7 +172,6 @@ export default function AddCategory({
   return (
     <Formik
       initialValues={{
-        ...data,
         categoryName: '',
         color: startingColor,
       }}

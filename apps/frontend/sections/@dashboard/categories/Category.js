@@ -15,23 +15,22 @@ import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 
 // ----------------------------------------------------------------------
 
-export default function Category({
-  limits,
-  groupedTimeLogsWithDateSorted,
-  user,
-  timeLogs,
-  setTimeLogs,
-  controlValues,
-  setControlValues,
-  category,
-  categories,
-  setCategories,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  disableHover,
-}) {
+export default function Category({ category, useStore }) {
+  const {
+    isSaving,
+    setIsSaving,
+    categories,
+    setCategories,
+    limits,
+    groupedTimeLogsWithDateSorted,
+    isEditing,
+    user,
+    controlValues,
+    setControlValues,
+    timeLogs,
+    setTimeLogs,
+  } = useStore;
+
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
 
@@ -147,19 +146,7 @@ export default function Category({
   };
 
   if (isEditing.categoryId === category.id) {
-    return (
-      <EditCategory
-        controlValues={controlValues}
-        setControlValues={setControlValues}
-        categories={categories}
-        setCategories={setCategories}
-        category={category}
-        isEditing={isEditing}
-        setIsEditing={setIsEditing}
-        isSaving={isSaving}
-        setIsSaving={setIsSaving}
-      />
-    );
+    return <EditCategory category={category} useStore={useStore} />;
   }
 
   const duration = getDuration(totalPeriodInMs);

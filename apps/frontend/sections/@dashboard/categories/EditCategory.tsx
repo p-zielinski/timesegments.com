@@ -21,18 +21,18 @@ import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 
-export default function EditCategory({
-  controlValues,
-  setControlValues,
-  categories,
-  setCategories,
-  category,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-}) {
-  const [staticCategory, setStaticCategory] = useState(category);
+export default function EditCategory({ useStore, category }) {
+  const {
+    controlValues,
+    setControlValues,
+    categories,
+    setCategories,
+    isEditing,
+    setIsEditing,
+    isSaving,
+    setIsSaving,
+  } = useStore;
+  const [staticCategory] = useState(category);
 
   const validationSchema = yup.object().shape({
     categoryName: yup
