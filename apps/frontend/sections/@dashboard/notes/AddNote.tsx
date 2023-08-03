@@ -24,14 +24,14 @@ import { useRouter } from 'next/router';
 
 export default function AddNew({ category, useStore }) {
   const {
-    controlValues,
-    setControlValues,
+    setPartialControlValues,
     disableHover,
     isSaving,
     setIsSaving,
     setIsEditing,
     categories,
     setCategories,
+    handleIncorrectControlValues,
   } = useStore();
   const router = useRouter();
 
@@ -101,15 +101,20 @@ export default function AddNew({ category, useStore }) {
           };
         })
       );
-      if (response.controlValues) {
-        setControlValues(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined); //skip setting isSaving(false)
-      return;
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

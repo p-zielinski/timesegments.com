@@ -477,7 +477,7 @@ const extractCategoriesAndNotesFromExtendedUser = (userExtended) => {
   const categoriesWithNotes = userExtended.categories;
   const notes = [
     ...(userExtended.notes || []),
-    ...(userExtended.categories.notes || []),
+    ...(userExtended.categories?.notes || []),
   ];
   const categories = categoriesWithNotes.map((category) => {
     delete category.notes;

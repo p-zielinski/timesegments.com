@@ -120,8 +120,9 @@ export class UserController {
     const { extend } = meExtendedDto;
     return {
       ...(await this.userService.getMeExtended(user, extend)),
-      partialControlValues:
-        await this.controlValueService.getAllUserControlValues(user.id),
+      controlValues: await this.controlValueService.getAllUserControlValues(
+        user.id
+      ),
     };
   }
 

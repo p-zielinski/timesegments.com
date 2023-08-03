@@ -246,7 +246,7 @@ export class TimeLogService {
 
     return {
       success: true,
-      timeLogs: result ? [result] : undefined,
+      timeLogs: result ? [result] : [],
     };
   }
 

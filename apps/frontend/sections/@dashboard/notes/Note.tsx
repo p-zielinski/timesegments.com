@@ -4,46 +4,19 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import React from 'react';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
-import { useRouter } from 'next/router';
 import parse from 'html-react-parser';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import EditNote from './EditNote';
 import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
 
 export const Note = ({ category, useStore }) => {
-  const {
-    categories,
-    setCategories,
-    controlValue,
-    setControlValue,
-    isSaving,
-    setIsSaving,
-    isEditing,
-    setIsEditing,
-    disableHover,
-    note,
-    user,
-  } = useStore();
+  const { isSaving, isEditing, setIsEditing, disableHover, note, user } =
+    useStore();
 
   const tomorrow = DateTime.now()
     .setZone(Timezones[user.timezone])
     .plus({ days: 1 });
-  const endOfDate = DateTime.fromObject(
-    {
-      month: tomorrow.month,
-      year: tomorrow.year,
-      day: tomorrow.day,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    },
-    { zone: Timezones[user.timezone] }
-  );
-  const router = useRouter();
   const updated = note.updatedAt !== note.createdAt;
-  const createdAt = DateTime.fromISO(note.createdAt, {
-    zone: Timezones[user.timezone],
-  });
   const createdAtLocale = DateTime.fromISO(note.createdAt, {
     zone: Timezones[user.timezone],
   }).toLocaleString(
@@ -80,20 +53,7 @@ export const Note = ({ category, useStore }) => {
     : getRandomRgbObjectForSliderPicker();
 
   if (isEditing.noteId === note.id) {
-    return (
-      <EditNote
-        note={note}
-        controlValue={controlValue}
-        setControlValue={setControlValue}
-        disableHover={disableHover}
-        isSaving={isSaving}
-        setIsSaving={setIsSaving}
-        setIsEditing={setIsEditing}
-        category={category}
-        categories={categories}
-        setCategories={setCategories}
-      />
-    );
+    return <EditNote useStore={useStore} category={category} />;
   }
 
   return (

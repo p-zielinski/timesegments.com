@@ -20,21 +20,21 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
-import { useRouter } from 'next/router';
 
-export default function EditNote({
-  note,
-  controlValue,
-  setControlValue,
-  disableHover,
-  isSaving,
-  setIsSaving,
-  setIsEditing,
-  category,
-  categories,
-  setCategories,
-}) {
-  const router = useRouter();
+export default function EditNote({ category, useStore }) {
+  const {
+    router,
+    note,
+    controlValue,
+    setPartialControlValues,
+    disableHover,
+    isSaving,
+    setIsSaving,
+    setIsEditing,
+    categories,
+    setCategories,
+    handleIncorrectControlValues,
+  } = useStore();
 
   const color = category?.color
     ? {
@@ -107,15 +107,20 @@ export default function EditNote({
           };
         })
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -145,15 +150,20 @@ export default function EditNote({
           };
         })
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
