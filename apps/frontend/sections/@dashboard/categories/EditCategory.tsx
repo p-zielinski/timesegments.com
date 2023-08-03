@@ -24,13 +24,13 @@ import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 export default function EditCategory({ useStore, category }) {
   const {
     controlValues,
-    setControlValues,
+    setPartialControlValues,
     categories,
     setCategories,
-    isEditing,
     setIsEditing,
     isSaving,
     setIsSaving,
+    handleIncorrectControlValues,
   } = useStore();
   const [staticCategory] = useState(category);
 
@@ -95,12 +95,17 @@ export default function EditCategory({ useStore, category }) {
       setCategories(
         categories.filter((category_) => category_.id !== category.id)
       );
-      if (response.controlValues) {
-        setControlValues(response.controlValues);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -129,12 +134,16 @@ export default function EditCategory({ useStore, category }) {
         })
       );
       setIsEditing({});
-      if (response.controlValue) {
-        setControlValues(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined);
-      return; //skip setting isSaving(false)
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
     }
     setIsSaving(false);
     return;

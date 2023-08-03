@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { LoginOrRegisterDto } from './dto/login.dto';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';

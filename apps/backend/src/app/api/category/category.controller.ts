@@ -9,18 +9,17 @@ import {
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
 import { UpdateCategoryDto } from './dto/updateCategoryDto';
-import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { SetCategoryActiveDto } from './dto/setCategoryActive.dto';
 import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
-import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
 import { SetExpandCategoriesDto } from './dto/changeShowRecentNotes.dto';
 import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
 import { ControlValue } from '@test1/shared';
 import { ControlValueService } from '../control-value/control-value.service';
 
-@UseGuards(JwtAuthGuard, CheckUserControlValueGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('category')
 export class CategoryController {
   constructor(

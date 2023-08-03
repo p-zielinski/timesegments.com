@@ -11,7 +11,7 @@ import { NoteService } from './note.service';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
 import { CreateNoteDto } from './dto/create.dto';
-import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { DeleteNoteDto } from './dto/delete.dto';
 import { UpdateNoteDto } from './dto/update.dto';
 import { UserService } from '../user/user.service';

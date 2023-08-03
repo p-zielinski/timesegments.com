@@ -9,7 +9,7 @@ import {
 import { TokenService } from './token.service';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
-import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
 import { RevokeSingleTokenDto } from './dto/revokeSingleToken.dto';
 

@@ -25,11 +25,11 @@ export default function Category({ category, useStore }) {
     limits,
     groupedTimeLogsWithDateSorted,
     isEditing,
-    user,
     controlValues,
     setPartialControlValues,
     timeLogs,
     setTimeLogs,
+    handleIncorrectControlValues,
   } = useStore();
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
@@ -61,11 +61,16 @@ export default function Category({ category, useStore }) {
           return { ...category };
         })
       );
-      if (response.controlValue) {
-        setControlValues(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -88,8 +93,8 @@ export default function Category({ category, useStore }) {
           return { ...category };
         })
       );
-      if (response.controlValue) {
-        setControlValues(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       if (response.timeLog) {
         const responseTimeLogId = response.timeLog.id;
@@ -98,8 +103,13 @@ export default function Category({ category, useStore }) {
           response.timeLog,
         ]);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

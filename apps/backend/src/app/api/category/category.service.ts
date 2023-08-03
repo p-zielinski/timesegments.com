@@ -4,15 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { Category, Prisma, TimeLog, User } from '@prisma/client';
 import { TimeLogService } from '../time-log/time-log.service';
 import { ControlValue } from '@test1/shared';
-import { ControlValueService } from '../control-value/control-value.service';
 
 @Injectable()
 export class CategoryService {
   constructor(
     private prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly timeLogService: TimeLogService,
-    private controlValueService: ControlValueService
+    private readonly timeLogService: TimeLogService
   ) {}
 
   public async updateCategoryShowRecentNotes(

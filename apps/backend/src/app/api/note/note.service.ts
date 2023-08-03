@@ -1,8 +1,7 @@
-import { Injectable, UseGuards } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { LoggerService } from '../../common/logger/loger.service';
 import { Note, Prisma, User } from '@prisma/client';
-import { CheckUserControlValueGuard } from '../../common/check-control-values/checkUserControlValue.guard';
 import { CategoryService } from '../category/category.service';
 import { ConfigService } from '@nestjs/config';
 import { ControlValue } from '@test1/shared';
@@ -70,7 +69,6 @@ export class NoteService {
     };
   }
 
-  @UseGuards(CheckUserControlValueGuard)
   async updateNote(noteId: string, text: string, user: User) {
     const noteWithUserAndCategoryId = await this.findOne(noteId, {
       user: true,
@@ -107,7 +105,6 @@ export class NoteService {
     };
   }
 
-  @UseGuards(CheckUserControlValueGuard)
   async deleteNote(noteId: string, user: User) {
     const noteWithUserAndCategoryId = await this.findOne(noteId, {
       user: true,
