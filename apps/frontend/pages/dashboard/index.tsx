@@ -1,6 +1,6 @@
 import {Container} from '@mui/material'; // hooks
-import React from 'react';
-import {ControlValue, Limits, MeExtendedOption, TimePeriod,} from '@test1/shared';
+import React, {useEffect} from 'react';
+import {ControlValue, Limits, MeExtendedOption, Timezones,} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -11,6 +11,7 @@ import Categories from 'apps/frontend/sections/@dashboard/categories';
 import {createStore} from '../../hooks/useStore';
 import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
+import {DateTime} from 'luxon';
 // ---------------------------------------------------------------------
 
 type Props = {
@@ -18,7 +19,7 @@ type Props = {
   categories: Category[];
   notes: Note[];
   timeLogs: TimeLog[];
-  fetchedPeriods: { from: number; to: number }[];
+  fetchedFrom: number;
   limits: Limits;
   controlValues: Record<ControlValue, string>;
   randomSliderHexColor: string;
@@ -29,7 +30,7 @@ export default function Index({
   categories: serverSideFetchedCategories,
   notes: serverSideFetchedNotes,
   timeLogs: serverSideFetchedTimeLogs,
-  fetchedPeriods: serverSideFetchedPeriods,
+  fetchedFrom: serverSideFetchedFrom,
   limits: serverSideFetchedLimits,
   controlValues: serverSideFetchedControlValues,
   randomSliderHexColor: randomSliderHexColor,
@@ -41,10 +42,12 @@ export default function Index({
     categories: serverSideFetchedCategories,
     notes: serverSideFetchedNotes,
     timeLogs: serverSideFetchedTimeLogs,
-    fetchedPeriods: serverSideFetchedPeriods,
+    fetchedFrom: serverSideFetchedFrom,
     limits: serverSideFetchedLimits,
     controlValues: serverSideFetchedControlValues,
   });
+
+  const { timeLogs, user } = useStore();
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -133,45 +136,60 @@ export default function Index({
   //   };
   // }, []);
 
-  // useEffect(() => {
-  //   const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
-  //     (groupedTimeLogWithDateSorted) =>
-  //       groupedTimeLogWithDateSorted.category?.id === category?.id
-  //   );
-  //
-  //   if (!currentGroupedTimeLog) {
-  //     return;
-  //   }
-  //   if (!currentGroupedTimeLog.notFinishedPeriod) {
-  //     return setTotalPeriodInMs(
-  //       currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
-  //     );
-  //   }
-  //   const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-  //     if (hideDuration) {
-  //       return;
-  //     }
-  //     const now = DateTime.now().setZone(Timezones[user.timezone]);
-  //     const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
-  //       ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
-  //       : 0;
-  //     if (isNaN(unfinishedPeriodDuration)) {
-  //       return console.log(`unfinishedPeriodDuration is NaN`);
-  //     }
-  //     const totalPeriodDuration =
-  //       currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
-  //       unfinishedPeriodDuration;
-  //     if (totalPeriodDuration > 0) {
-  //       setTotalPeriodInMs(totalPeriodDuration);
-  //     }
-  //   };
-  //   setTotalPeriodInMsWithUnfinishedTimeLog();
-  //   const intervalIdLocal = setInterval(
-  //     () => setTotalPeriodInMsWithUnfinishedTimeLog(),
-  //     1000
-  //   );
-  //   return () => clearInterval(intervalIdLocal);
-  // }, [groupedTimeLogsWithDateSorted, isEditing]);
+  useEffect(() => {
+    const x = () => {
+      const endOfDay = DateTime.now()
+        .setZone(Timezones[user.timezone])
+        .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
+      const beginningOfToday = endOfDay.minus({ days: 1 });
+      console.log(`from ${beginningOfToday.ts} to ${endOfDay.ts}`);
+    };
+
+    console.log(x());
+    console.log(
+      timeLogs.forEach((tL) => {
+        console.log(new Date(tL.startedAt).getTime());
+        console.log(DateTime.fromISO(tL.startedAt).ts);
+      })
+    );
+    // const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
+    //   (groupedTimeLogWithDateSorted) =>
+    //     groupedTimeLogWithDateSorted.category?.id === category?.id
+    // );
+    //
+    // if (!currentGroupedTimeLog) {
+    //   return;
+    // }
+    // if (!currentGroupedTimeLog.notFinishedPeriod) {
+    //   return setTotalPeriodInMs(
+    //     currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
+    //   );
+    // }
+    // const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
+    //   if (hideDuration) {
+    //     return;
+    //   }
+    //   const now = DateTime.now().setZone(Timezones[user.timezone]);
+    //   const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
+    //     ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
+    //     : 0;
+    //   if (isNaN(unfinishedPeriodDuration)) {
+    //     return console.log(`unfinishedPeriodDuration is NaN`);
+    //   }
+    //   const totalPeriodDuration =
+    //     currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
+    //     unfinishedPeriodDuration;
+    //   if (totalPeriodDuration > 0) {
+    //     setTotalPeriodInMs(totalPeriodDuration);
+    //   }
+    // };
+    // setTotalPeriodInMsWithUnfinishedTimeLog();
+    // const intervalIdLocal = setInterval(
+    //   () => setTotalPeriodInMsWithUnfinishedTimeLog(),
+    //   1000
+    // );
+    // return () => clearInterval(intervalIdLocal);
+  }, [timeLogs, user.timezone]);
 
   return (
     <DashboardLayout
@@ -224,7 +242,7 @@ export const getServerSideProps = async ({ req, res }) => {
       categories,
       notes,
       timeLogs,
-      fetchedPeriods,
+      fetchedFrom,
       limits,
       controlValues,
     }: {
@@ -232,7 +250,7 @@ export const getServerSideProps = async ({ req, res }) => {
       categories: Category[];
       notes: Note[];
       timeLogs: TimeLog[];
-      fetchedPeriods: TimePeriod[];
+      fetchedFrom: number;
       limits: Limits;
       controlValues: Record<ControlValue, string>;
     } = response;
@@ -250,7 +268,7 @@ export const getServerSideProps = async ({ req, res }) => {
         categories,
         notes,
         timeLogs,
-        fetchedPeriods,
+        fetchedFrom,
         limits,
         controlValues,
         randomSliderHexColor: getHexFromRGBObject(

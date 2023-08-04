@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Category, Note, TimeLog, User } from '@prisma/client';
-import { ControlValue, Limits, TimePeriod } from '@test1/shared';
+import { ControlValue, Limits } from '@test1/shared';
 import { handleFetch } from '../utils/fetchingData/handleFetch';
 import JsCookies from 'js-cookie';
 import { NextRouter } from 'next/router';
@@ -14,7 +14,7 @@ export interface StoreProps {
   categories: Category[];
   notes: Note[];
   timeLogs: TimeLog[];
-  fetchedPeriods: TimePeriod[];
+  fetchedFrom: number;
   limits: Limits;
   controlValues: Record<ControlValue, string>;
 }
@@ -26,7 +26,7 @@ export interface State extends StoreProps {
   setCategories: (categories: Category[]) => void;
   setNotes: (notes: Note[]) => void;
   setTimeLogs: (timeLogs: TimeLog[]) => void;
-  setFetchedPeriods: (fetchedPeriods: TimePeriod[]) => void;
+  setFetchedFrom: (fetchedFrom: number) => void;
   setLimits: (limits: Limits) => void;
   setPartialControlValues: (
     partialControlValues: Record<ControlValue, string>
@@ -47,7 +47,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     categories: [],
     notes: [],
     timeLogs: [],
-    fetchedPeriods: [],
+    fetchedFrom: undefined,
     limits: undefined,
     controlValues: undefined,
   };
@@ -66,7 +66,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     setCategories: (categories) => set((state) => ({ ...state, categories })),
     setNotes: (notes) => set((state) => ({ ...state, notes })),
     setTimeLogs: (timeLogs) => set((state) => ({ ...state, timeLogs })),
-    setFetchedPeriods: (fetchedPeriods) =>
+    setFetchedFrom: (fetchedPeriods) =>
       set((state) => ({ ...state, fetchedPeriods })),
     setLimits: (limits) => set((state) => ({ ...state, limits })),
     setControlValues: (controlValues) =>

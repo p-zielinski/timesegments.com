@@ -22,7 +22,6 @@ import {
   Limits,
   MeExtendedOption,
   NotesSortOption,
-  TimePeriod,
   Timezones,
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
@@ -114,11 +113,11 @@ export class UserService {
     notes?: Note[];
     limits?: Limits;
     timeLogs?: TimeLog[];
-    fetchedPeriods?: TimePeriod[];
+    fetchedFrom?: number;
   }> {
-    const fetchedPeriods = [],
-      timeLogs = [],
+    const timeLogs = [],
       include: Prisma.UserInclude = {};
+    let fetchedFrom = undefined;
 
     if (extend.includes(MeExtendedOption.TODAYS_TIMELOGS)) {
       const endOfDay = DateTime.now()
@@ -139,7 +138,7 @@ export class UserService {
         findFromToTimeLogsResult?.timeLogs.forEach((timeLog) =>
           timeLogs.push(timeLog)
         );
-        fetchedPeriods.push({ from: beginningOfToday.ts, to: endOfDay.ts });
+        fetchedFrom = beginningOfToday.ts;
       }
     }
 
@@ -191,8 +190,8 @@ export class UserService {
       timeLogs: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
         ? timeLogs
         : undefined,
-      fetchedPeriods: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
-        ? fetchedPeriods
+      fetchedFrom: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
+        ? fetchedFrom
         : undefined,
     };
   }
