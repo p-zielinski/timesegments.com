@@ -6,6 +6,7 @@ import JsCookies from 'js-cookie';
 import { NextRouter } from 'next/router';
 
 export interface StoreProps {
+  groupedTimeLogPeriods: Map<string, number>;
   disableHover: boolean;
   router: NextRouter;
   isEditing: Record<string, any>;
@@ -20,6 +21,9 @@ export interface StoreProps {
 }
 
 export interface State extends StoreProps {
+  setGroupedTimeLogPeriods: (
+    groupedTimeLogPeriods: Map<string, number>
+  ) => void;
   setIsEditing: (isEditing: Record<string, any>) => void;
   setIsSaving: (isSaving: boolean) => void;
   setUser: (user: User) => void;
@@ -39,6 +43,7 @@ export interface State extends StoreProps {
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
+    groupedTimeLogPeriods: new Map<string, number>(),
     disableHover: false,
     router: undefined,
     isEditing: {},
@@ -60,6 +65,8 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
   return create<State>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    setGroupedTimeLogPeriods: (groupedTimeLogPeriods) =>
+      set((state) => ({ ...state, groupedTimeLogPeriods })),
     setIsEditing: (isEditing) => set((state) => ({ ...state, isEditing })),
     setIsSaving: (isSaving) => set((state) => ({ ...state, isSaving })),
     setUser: (user) => set((state) => ({ ...state, user })),

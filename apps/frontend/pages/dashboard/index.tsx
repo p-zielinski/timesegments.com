@@ -12,6 +12,7 @@ import {createStore} from '../../hooks/useStore';
 import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
 import {DateTime} from 'luxon';
+import {calculateTimeLogDurationDuringDesiredTimePeriod} from '../../helperFunctions/calculateTimeLogDurationDuringDesiredTimePeriod';
 // ---------------------------------------------------------------------
 
 type Props = {
@@ -142,16 +143,22 @@ export default function Index({
         .setZone(Timezones[user.timezone])
         .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
       const beginningOfToday = endOfDay.minus({ days: 1 });
-      console.log(`from ${beginningOfToday.ts} to ${endOfDay.ts}`);
+      const desiredPeriod = { from: beginningOfToday.ts, to: endOfDay.ts };
+      const groupedTimeLogPeriods = new Map<string, number>();
+      timeLogs.forEach((timeLog) => {
+        const duration = calculateTimeLogDurationDuringDesiredTimePeriod(
+          desiredPeriod,
+          {
+            from: new Date(timeLog.startedAt).getTime(),
+            to: new Date(timeLog.endedAt).getTime(),
+          }
+        );
+        groupedTimeLogPeriods.set(
+          timeLog.id,
+          duration + groupedTimeLogPeriods.get(timeLog.id) || 0
+        );
+      });
     };
-
-    console.log(x());
-    console.log(
-      timeLogs.forEach((tL) => {
-        console.log(new Date(tL.startedAt).getTime());
-        console.log(DateTime.fromISO(tL.startedAt).ts);
-      })
-    );
     // const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
     //   (groupedTimeLogWithDateSorted) =>
     //     groupedTimeLogWithDateSorted.category?.id === category?.id
