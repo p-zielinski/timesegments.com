@@ -1,25 +1,25 @@
 export const calculateTimeLogDurationDuringDesiredTimePeriod = (
-  desiredPeriod,
-  timeLogPeriod
+  desiredPeriod: { from: number; to: number },
+  timeLogPeriod: { from: number; to: number }
 ) => {
   let nf, nt;
-  if (timeLogPeriod.f < desiredPeriod.f) {
-    nf = desiredPeriod.f;
+  if (timeLogPeriod.from < desiredPeriod.from) {
+    nf = desiredPeriod.from;
   } else if (
-    timeLogPeriod.f >= desiredPeriod.f &&
-    timeLogPeriod.f <= desiredPeriod.t
+    timeLogPeriod.from >= desiredPeriod.from &&
+    timeLogPeriod.from <= desiredPeriod.to
   ) {
-    nf = timeLogPeriod.f;
+    nf = timeLogPeriod.from;
   } else {
     return 0;
   }
-  if (timeLogPeriod.t > desiredPeriod.t) {
-    nt = desiredPeriod.t;
+  if (timeLogPeriod.to > desiredPeriod.to) {
+    nt = desiredPeriod.to;
   } else if (
-    timeLogPeriod.t >= desiredPeriod.f &&
-    timeLogPeriod.t <= desiredPeriod.t
+    timeLogPeriod.to >= desiredPeriod.from &&
+    timeLogPeriod.to <= desiredPeriod.to
   ) {
-    nt = timeLogPeriod.t;
+    nt = timeLogPeriod.to;
   } else {
     return 0;
   }

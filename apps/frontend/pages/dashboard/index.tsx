@@ -1,6 +1,6 @@
 import {Container} from '@mui/material'; // hooks
 import React, {useEffect} from 'react';
-import {ControlValue, Limits, MeExtendedOption, Timezones,} from '@test1/shared';
+import {ControlValue, Limits, MeExtendedOption} from '@test1/shared';
 import DashboardLayout from '../../layouts/dashboard';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -11,8 +11,7 @@ import Categories from 'apps/frontend/sections/@dashboard/categories';
 import {createStore} from '../../hooks/useStore';
 import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
-import {DateTime} from 'luxon';
-import {calculateTimeLogDurationDuringDesiredTimePeriod} from '../../helperFunctions/calculateTimeLogDurationDuringDesiredTimePeriod';
+import {createGroupedTimeLogPeriods} from '../../helperFunctions/createGroupedTimeLogPeriods';
 // ---------------------------------------------------------------------
 
 type Props = {
@@ -138,27 +137,7 @@ export default function Index({
   // }, []);
 
   useEffect(() => {
-    const x = () => {
-      const endOfDay = DateTime.now()
-        .setZone(Timezones[user.timezone])
-        .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
-      const beginningOfToday = endOfDay.minus({ days: 1 });
-      const desiredPeriod = { from: beginningOfToday.ts, to: endOfDay.ts };
-      const groupedTimeLogPeriods = new Map<string, number>();
-      timeLogs.forEach((timeLog) => {
-        const duration = calculateTimeLogDurationDuringDesiredTimePeriod(
-          desiredPeriod,
-          {
-            from: new Date(timeLog.startedAt).getTime(),
-            to: new Date(timeLog.endedAt).getTime(),
-          }
-        );
-        groupedTimeLogPeriods.set(
-          timeLog.id,
-          duration + groupedTimeLogPeriods.get(timeLog.id) || 0
-        );
-      });
-    };
+    console.log(createGroupedTimeLogPeriods(user, timeLogs));
     // const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
     //   (groupedTimeLogWithDateSorted) =>
     //     groupedTimeLogWithDateSorted.category?.id === category?.id
