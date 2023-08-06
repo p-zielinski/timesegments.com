@@ -36,6 +36,10 @@ export default function Index({
   randomSliderHexColor: randomSliderHexColor,
 }: Props) {
   const useStore = createStore({
+    groupedTimeLogPeriods: createGroupedTimeLogPeriods(
+      serverSideFetchedUserWithCategoriesAndCategoriesNotes,
+      serverSideFetchedTimeLogs
+    ),
     disableHover: isMobile,
     router: useRouter(),
     user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
@@ -47,7 +51,7 @@ export default function Index({
     controlValues: serverSideFetchedControlValues,
   });
 
-  const { timeLogs, user } = useStore();
+  const { timeLogs, user, setGroupedTimeLogPeriods } = useStore();
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -137,44 +141,11 @@ export default function Index({
   // }, []);
 
   useEffect(() => {
-    console.log(createGroupedTimeLogPeriods(user, timeLogs));
-    // const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
-    //   (groupedTimeLogWithDateSorted) =>
-    //     groupedTimeLogWithDateSorted.category?.id === category?.id
-    // );
-    //
-    // if (!currentGroupedTimeLog) {
-    //   return;
-    // }
-    // if (!currentGroupedTimeLog.notFinishedPeriod) {
-    //   return setTotalPeriodInMs(
-    //     currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
-    //   );
-    // }
-    // const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-    //   if (hideDuration) {
-    //     return;
-    //   }
-    //   const now = DateTime.now().setZone(Timezones[user.timezone]);
-    //   const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
-    //     ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
-    //     : 0;
-    //   if (isNaN(unfinishedPeriodDuration)) {
-    //     return console.log(`unfinishedPeriodDuration is NaN`);
-    //   }
-    //   const totalPeriodDuration =
-    //     currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
-    //     unfinishedPeriodDuration;
-    //   if (totalPeriodDuration > 0) {
-    //     setTotalPeriodInMs(totalPeriodDuration);
-    //   }
-    // };
-    // setTotalPeriodInMsWithUnfinishedTimeLog();
-    // const intervalIdLocal = setInterval(
-    //   () => setTotalPeriodInMsWithUnfinishedTimeLog(),
-    //   1000
-    // );
-    // return () => clearInterval(intervalIdLocal);
+    setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
+    const intervalIdLocal = setInterval(() => {
+      setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
+    }, 1000);
+    return () => clearInterval(intervalIdLocal);
   }, [timeLogs, user.timezone]);
 
   return (

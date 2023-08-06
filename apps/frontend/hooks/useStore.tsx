@@ -68,8 +68,8 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     ...initProps,
     setGroupedTimeLogPeriods: (groupedTimeLogPeriods) =>
       set((state) => ({ ...state, groupedTimeLogPeriods })),
-    getGroupedTimeLogPeriod: (timeLogId) =>
-      get().groupedTimeLogPeriods?.get?.(timeLogId) || 0,
+    getGroupedTimeLogPeriod: (categoryId) =>
+      get().groupedTimeLogPeriods.get?.(categoryId) || 0,
     setIsEditing: (isEditing) => set((state) => ({ ...state, isEditing })),
     setIsSaving: (isSaving) => set((state) => ({ ...state, isSaving })),
     setUser: (user) => set((state) => ({ ...state, user })),

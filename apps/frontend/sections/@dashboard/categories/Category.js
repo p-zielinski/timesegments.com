@@ -3,7 +3,7 @@ import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 import {getDuration} from '@test1/shared';
@@ -23,23 +23,26 @@ export default function Category({ category, useStore }) {
     categories,
     setCategories,
     limits,
-    groupedTimeLogsWithDateSorted,
     isEditing,
     controlValues,
     setPartialControlValues,
     timeLogs,
     setTimeLogs,
     handleIncorrectControlValues,
+    getGroupedTimeLogPeriod,
+    groupedTimeLogPeriods,
   } = useStore();
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
 
-  const [totalPeriodInMs, setTotalPeriodInMs] = useState(
-    groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
-  );
+  const [totalPeriodInMs] = useState(getGroupedTimeLogPeriod(category.id));
 
   const hideDuration = category.active && isEditing.categoryId === category.id;
+
+  useEffect(() => {
+    console.log(1, totalPeriodInMs);
+  }, [groupedTimeLogPeriods.get(category.id)]);
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);
@@ -181,6 +184,7 @@ export default function Category({ category, useStore }) {
           </Typography>
           <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
             <Typography
+              key={totalPeriodInMs}
               variant="caption"
               sx={{ color: 'text.secondary', mb: 0 }}
             >

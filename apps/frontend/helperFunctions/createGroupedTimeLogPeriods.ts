@@ -2,6 +2,7 @@ import { TimeLog, User } from '@prisma/client';
 import { Timezones } from '@test1/shared';
 import { calculateTimeLogDurationDuringDesiredTimePeriod } from './calculateTimeLogDurationDuringDesiredTimePeriod';
 import { DateTime } from 'luxon';
+import { cloneDeep } from 'lodash';
 
 export const createGroupedTimeLogPeriods = (
   user: User,
@@ -16,16 +17,16 @@ export const createGroupedTimeLogPeriods = (
   timeLogs.forEach((timeLog) => {
     const duration = calculateTimeLogDurationDuringDesiredTimePeriod(
       desiredPeriod,
-      {
+      cloneDeep({
         from: new Date(timeLog.startedAt).getTime(),
         to: timeLog.endedAt
           ? new Date(timeLog.endedAt).getTime()
           : new Date().getTime(),
-      }
+      })
     );
     groupedTimeLogPeriods.set(
-      timeLog.id,
-      duration + (groupedTimeLogPeriods.get(timeLog.id) || 0)
+      timeLog.categoryId,
+      duration + (groupedTimeLogPeriods.get(timeLog.categoryId) || 0)
     );
   });
   return groupedTimeLogPeriods;
