@@ -24,6 +24,7 @@ export interface State extends StoreProps {
   setGroupedTimeLogPeriods: (
     groupedTimeLogPeriods: Map<string, number>
   ) => void;
+  getGroupedTimeLogPeriod: (timeLogId: string) => number;
   setIsEditing: (isEditing: Record<string, any>) => void;
   setIsSaving: (isSaving: boolean) => void;
   setUser: (user: User) => void;
@@ -67,6 +68,8 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     ...initProps,
     setGroupedTimeLogPeriods: (groupedTimeLogPeriods) =>
       set((state) => ({ ...state, groupedTimeLogPeriods })),
+    getGroupedTimeLogPeriod: (timeLogId) =>
+      get().groupedTimeLogPeriods?.get?.(timeLogId) || 0,
     setIsEditing: (isEditing) => set((state) => ({ ...state, isEditing })),
     setIsSaving: (isSaving) => set((state) => ({ ...state, isSaving })),
     setUser: (user) => set((state) => ({ ...state, user })),
