@@ -50,14 +50,7 @@ export default function Index({
     })
   ).current;
 
-  const {
-    timeLogs,
-    user,
-    setGroupedTimeLogPeriods,
-    key,
-    setKey,
-    groupedTimeLogPeriods,
-  } = useStore(store);
+  const { timeLogs, user, setGroupedTimeLogPeriods } = useStore(store);
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
