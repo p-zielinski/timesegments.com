@@ -1,13 +1,16 @@
 // @mui
 import {Box} from '@mui/material'; // utils
-import React from 'react';
+import React, {useContext} from 'react';
 import AddNote from '../notes/AddNote';
-import {Note} from '../notes/Note'; // ----------------------------------------------------------------------
+import {Note} from '../notes/Note';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
-export default function CategoryNotesCards({ category, useStore }) {
-  const { limits, isEditing } = useStore();
+export default function CategoryNotesCards({ category }) {
+  const store = useContext(StoreContext);
+  const { limits, isEditing } = useStore(store);
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
 

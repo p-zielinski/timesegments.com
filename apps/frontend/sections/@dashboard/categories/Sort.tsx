@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 // @mui
 import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
@@ -8,8 +8,8 @@ import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import {StoreApi, UseBoundStore} from 'zustand/esm';
-import {State} from '../../../hooks/useStore';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand';
 
 // ----------------------------------------------------------------------
 
@@ -35,11 +35,8 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function SortCategories({
-  useStore,
-}: {
-  useStore: UseBoundStore<StoreApi<State>>;
-}) {
+export default function SortCategories() {
+  const store = useContext(StoreContext);
   const {
     isSaving,
     setIsSaving,
@@ -49,7 +46,7 @@ export default function SortCategories({
     controlValues,
     setControlValues,
     handleIncorrectControlValues,
-  } = useStore();
+  } = useStore(store);
 
   const [sortOrder, setSortOrder] = useState(
     (user.sortingCategories as CategoriesSortOption) ??

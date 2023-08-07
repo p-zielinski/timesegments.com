@@ -3,7 +3,7 @@ import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
 import {getDuration} from '@test1/shared';
@@ -11,10 +11,13 @@ import {TimelineDot} from '@mui/lab';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand';
 
 // ----------------------------------------------------------------------
 
-export default function Category({ category, useStore }) {
+export default function Category({ category }) {
+  const store = useContext(StoreContext);
   const {
     setIsEditing,
     disableHover,
@@ -31,7 +34,7 @@ export default function Category({ category, useStore }) {
     handleIncorrectControlValues,
     getGroupedTimeLogPeriod,
     groupedTimeLogPeriods,
-  } = useStore();
+  } = useStore(store);
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
@@ -120,7 +123,7 @@ export default function Category({ category, useStore }) {
   };
 
   if (isEditing.categoryId === category.id) {
-    return <EditCategory category={category} useStore={useStore} />;
+    return <EditCategory category={category} />;
   }
 
   const duration = getDuration(totalPeriodInMs);

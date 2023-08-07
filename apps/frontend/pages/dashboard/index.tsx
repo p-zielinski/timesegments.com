@@ -1,18 +1,20 @@
 import {Container} from '@mui/material'; // hooks
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {ControlValue, Limits, MeExtendedOption} from '@test1/shared';
-import DashboardLayout from '../../layouts/dashboard';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
 import {Category, Note, TimeLog, User} from '@prisma/client';
-import Categories from 'apps/frontend/sections/@dashboard/categories';
-import {createStore} from '../../hooks/useStore';
+import {createStore, StoreContext} from '../../hooks/useStore';
 import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
 import {createGroupedTimeLogPeriods} from '../../helperFunctions/createGroupedTimeLogPeriods';
-// ---------------------------------------------------------------------
+import {useStore} from 'zustand';
+import DashboardLayout from '../../layouts/dashboard';
+import Categories from 'apps/frontend/sections/@dashboard/categories';
+import {nanoid} from 'nanoid';
+// --------------------------------------------------------------------
 
 type Props = {
   user: User;
@@ -35,23 +37,28 @@ export default function Index({
   controlValues: serverSideFetchedControlValues,
   randomSliderHexColor: randomSliderHexColor,
 }: Props) {
-  const useStore = createStore({
-    groupedTimeLogPeriods: createGroupedTimeLogPeriods(
-      serverSideFetchedUserWithCategoriesAndCategoriesNotes,
-      serverSideFetchedTimeLogs
-    ),
-    disableHover: isMobile,
-    router: useRouter(),
-    user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
-    categories: serverSideFetchedCategories,
-    notes: serverSideFetchedNotes,
-    timeLogs: serverSideFetchedTimeLogs,
-    fetchedFrom: serverSideFetchedFrom,
-    limits: serverSideFetchedLimits,
-    controlValues: serverSideFetchedControlValues,
-  });
+  const store = useRef(
+    createStore({
+      disableHover: isMobile,
+      router: useRouter(),
+      user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
+      categories: serverSideFetchedCategories,
+      notes: serverSideFetchedNotes,
+      timeLogs: serverSideFetchedTimeLogs,
+      fetchedFrom: serverSideFetchedFrom,
+      limits: serverSideFetchedLimits,
+      controlValues: serverSideFetchedControlValues,
+    })
+  ).current;
 
-  const { timeLogs, user, setGroupedTimeLogPeriods } = useStore();
+  const {
+    timeLogs,
+    user,
+    setGroupedTimeLogPeriods,
+    key,
+    setKey,
+    groupedTimeLogPeriods,
+  } = useStore(store);
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -142,6 +149,7 @@ export default function Index({
 
   useEffect(() => {
     setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
+    console.log(123, groupedTimeLogPeriods);
     const intervalIdLocal = setInterval(() => {
       setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
     }, 1000);
@@ -149,15 +157,17 @@ export default function Index({
   }, [timeLogs, user.timezone]);
 
   return (
-    <DashboardLayout
-      useStore={useStore}
-      title={'Active Categories'}
-      randomSliderHexColor={randomSliderHexColor}
-    >
-      <Container sx={{ mt: -5 }}>
-        <Categories useStore={useStore} />
-      </Container>
-    </DashboardLayout>
+    <StoreContext.Provider value={store}>
+      <DashboardLayout
+        title={'Active Categories'}
+        randomSliderHexColor={randomSliderHexColor}
+      >
+        <Container sx={{ mt: -5 }}>
+          <Categories />
+          <div onClick={() => setKey(nanoid())}> aa{key}</div>
+        </Container>
+      </DashboardLayout>
+    </StoreContext.Provider>
   );
 }
 

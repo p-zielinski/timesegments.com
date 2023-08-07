@@ -10,7 +10,7 @@ import {
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../components/form/Text';
@@ -20,8 +20,11 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function EditCategory({ useStore, category }) {
+export default function EditCategory({ category }) {
+  const store = useContext(StoreContext);
   const {
     controlValues,
     setPartialControlValues,
@@ -31,7 +34,7 @@ export default function EditCategory({ useStore, category }) {
     isSaving,
     setIsSaving,
     handleIncorrectControlValues,
-  } = useStore();
+  } = useStore(store);
   const [staticCategory] = useState(category);
 
   const validationSchema = yup.object().shape({
@@ -128,7 +131,7 @@ export default function EditCategory({ useStore, category }) {
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category, notes: category?.notes };
+            return { ...response.category, notes: undefined }; //category?.notes
           }
           return { ...category, active: false };
         })

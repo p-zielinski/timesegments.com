@@ -3,8 +3,6 @@ import {styled} from '@mui/material/styles'; //
 import Header from './header';
 import Nav from './nav';
 import {DashboardPageState} from '../../enum/DashboardPageState';
-import {StoreApi, UseBoundStore} from 'zustand';
-import {State} from '../../hooks/useStore';
 
 // ----------------------------------------------------------------------
 
@@ -34,12 +32,10 @@ const Main = styled('div')(({ theme }) => ({
 
 export default function DashboardLayout({
   children,
-  useStore,
   title,
   randomSliderHexColor,
 }: {
   children: any;
-  useStore: UseBoundStore<StoreApi<State>>;
   title?: string;
   currentPageState?: DashboardPageState;
   setCurrentPageState?: (dashboardPageState: DashboardPageState) => void;
@@ -54,7 +50,6 @@ export default function DashboardLayout({
       <Nav
         openNav={open}
         onCloseNav={() => setOpen(false)}
-        useStore={useStore}
         randomSliderHexColor={randomSliderHexColor}
       />
 

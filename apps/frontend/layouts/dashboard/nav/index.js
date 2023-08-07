@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import {useEffect} from 'react';
+import {useContext, useEffect} from 'react';
 // @mui
 import {alpha, styled} from '@mui/material/styles';
 import {Box, Drawer, Link, Typography} from '@mui/material';
@@ -14,6 +14,8 @@ import navConfig from './config';
 import {useRouter} from 'next/router';
 import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
+import {useStore} from 'zustand';
+import {StoreContext} from '../../../hooks/useStore';
 
 // ----------------------------------------------------------------------
 
@@ -34,13 +36,9 @@ Nav.propTypes = {
   onCloseNav: PropTypes.func,
 };
 
-export default function Nav({
-  openNav,
-  onCloseNav,
-  useStore,
-  randomSliderHexColor,
-}) {
-  const { user, setUser } = useStore();
+export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
+  const store = useContext(StoreContext);
+  const { user, setUser } = useStore(store);
 
   const router = useRouter();
 

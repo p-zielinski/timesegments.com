@@ -10,7 +10,7 @@ import {
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
@@ -21,8 +21,11 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function AddCategory({ useStore }) {
+export default function AddCategory() {
+  const store = useContext(StoreContext);
   const {
     controlValues,
     setControlValues,
@@ -33,7 +36,7 @@ export default function AddCategory({ useStore }) {
     setIsSaving,
     categories,
     setCategories,
-  } = useStore();
+  } = useStore(store);
   const startingColor = getRandomRgbObjectForSliderPicker();
 
   let StyledTextField, darkHexColor;

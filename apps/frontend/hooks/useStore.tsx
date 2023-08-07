@@ -4,8 +4,13 @@ import { ControlValue, Limits } from '@test1/shared';
 import { handleFetch } from '../utils/fetchingData/handleFetch';
 import JsCookies from 'js-cookie';
 import { NextRouter } from 'next/router';
+import { createContext } from 'react';
+
+export const StoreContext = createContext<Store | null>(null);
+type Store = ReturnType<typeof createStore>;
 
 export interface StoreProps {
+  key: string;
   groupedTimeLogPeriods: Map<string, number>;
   disableHover: boolean;
   router: NextRouter;
@@ -21,6 +26,7 @@ export interface StoreProps {
 }
 
 export interface State extends StoreProps {
+  setKey: (key: string) => void;
   setGroupedTimeLogPeriods: (
     groupedTimeLogPeriods: Map<string, number>
   ) => void;
@@ -44,6 +50,7 @@ export interface State extends StoreProps {
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
+    key: 'undefined',
     groupedTimeLogPeriods: new Map<string, number>(),
     disableHover: false,
     router: undefined,
@@ -66,24 +73,22 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
   return create<State>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    setKey: (key) => set((state) => ({ key })),
     setGroupedTimeLogPeriods: (groupedTimeLogPeriods) =>
-      set((state) => ({ ...state, groupedTimeLogPeriods })),
+      set((state) => ({ groupedTimeLogPeriods })),
     getGroupedTimeLogPeriod: (categoryId) =>
       get().groupedTimeLogPeriods.get?.(categoryId) || 0,
-    setIsEditing: (isEditing) => set((state) => ({ ...state, isEditing })),
-    setIsSaving: (isSaving) => set((state) => ({ ...state, isSaving })),
-    setUser: (user) => set((state) => ({ ...state, user })),
-    setCategories: (categories) => set((state) => ({ ...state, categories })),
-    setNotes: (notes) => set((state) => ({ ...state, notes })),
-    setTimeLogs: (timeLogs) => set((state) => ({ ...state, timeLogs })),
-    setFetchedFrom: (fetchedPeriods) =>
-      set((state) => ({ ...state, fetchedPeriods })),
-    setLimits: (limits) => set((state) => ({ ...state, limits })),
-    setControlValues: (controlValues) =>
-      set((state) => ({ ...state, controlValues })),
+    setIsEditing: (isEditing) => set((state) => ({ isEditing })),
+    setIsSaving: (isSaving) => set((state) => ({ isSaving })),
+    setUser: (user) => set((state) => ({ user })),
+    setCategories: (categories) => set((state) => ({ categories })),
+    setNotes: (notes) => set((state) => ({ notes })),
+    setTimeLogs: (timeLogs) => set((state) => ({ timeLogs })),
+    setFetchedFrom: (fetchedFrom) => set((state) => ({ fetchedFrom })),
+    setLimits: (limits) => set((state) => ({ limits })),
+    setControlValues: (controlValues) => set((state) => ({ controlValues })),
     setPartialControlValues: (controlValues) =>
       set((state) => ({
-        ...state,
         controlValues: { ...state.controlValues, ...controlValues },
       })),
     handleIncorrectControlValues: async (
