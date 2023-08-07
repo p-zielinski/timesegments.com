@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
@@ -21,8 +21,11 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function AddNew({ category, useStore }) {
+export default function AddNew({ category }) {
+  const store = useContext(StoreContext);
   const {
     setPartialControlValues,
     disableHover,
@@ -32,7 +35,7 @@ export default function AddNew({ category, useStore }) {
     categories,
     setCategories,
     handleIncorrectControlValues,
-  } = useStore();
+  } = useStore(store);
   const router = useRouter();
 
   const color = category?.color
