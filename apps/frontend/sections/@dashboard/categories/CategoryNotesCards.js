@@ -10,12 +10,15 @@ import {useStore} from 'zustand'; // -------------------------------------------
 
 export default function CategoryNotesCards({ category }) {
   const store = useContext(StoreContext);
-  const { limits, isEditing } = useStore(store);
+  const { limits, isEditing, notes } = useStore(store);
+  const categoryNotes = notes.filter(
+    (note) => note?.categoryId === category.id
+  );
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
 
   return (isEditing?.createNewNote === category.id ||
-    (category.showRecentNotes && category.notes?.length)) > 0 ? (
+    (category.showRecentNotes && categoryNotes?.length)) > 0 ? (
     <Box sx={{ display: 'flex', flexDirection: 'row', m: 0 }}>
       <Box sx={{ minWidth: '10%', m: 0 }} />
       <Box
@@ -32,7 +35,7 @@ export default function CategoryNotesCards({ category }) {
             <AddNote useStore={useStore} category={category} />
           )}
         {category.showRecentNotes &&
-          (category.notes || []).map((note) => (
+          (categoryNotes || []).map((note) => (
             <Note key={note.id} useStore={useStore} />
           ))}
       </Box>

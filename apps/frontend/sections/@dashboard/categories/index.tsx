@@ -15,7 +15,7 @@ import {useStore} from 'zustand';
 
 export default function Categories() {
   const store = useContext(StoreContext);
-  const { limits, categories } = useStore(store);
+  const { limits, categories, isSaving } = useStore(store);
 
   const categoriesLimit = limits?.categoriesLimit || 5;
 
@@ -24,7 +24,17 @@ export default function Categories() {
       <Helmet>
         <title>Categories</title>
       </Helmet>
-      <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
+      <Grid
+        container
+        spacing={2}
+        columns={1}
+        sx={{
+          mt: 1,
+          filter: isSaving
+            ? `saturate(.3) brightness(1.2) contrast(.85)`
+            : undefined,
+        }}
+      >
         <Grid key={'sort-categories'} item xs={1} sm={1} md={1}>
           <Stack
             direction="row"

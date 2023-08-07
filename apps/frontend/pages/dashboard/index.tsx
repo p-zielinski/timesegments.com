@@ -9,8 +9,6 @@ import {Category, Note, TimeLog, User} from '@prisma/client';
 import {createStore, StoreContext} from '../../hooks/useStore';
 import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
-import {useStore} from 'zustand';
-// import DashboardLayout from '../../layouts/dashboard';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
 import dynamic from 'next/dynamic';
 // --------------------------------------------------------------------
@@ -53,9 +51,6 @@ export default function Index({
       controlValues: serverSideFetchedControlValues,
     })
   ).current;
-
-  const { timeLogs, user, setGroupedTimeLogPeriods, isEditing } =
-    useStore(store);
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -215,6 +210,8 @@ export const getServerSideProps = async ({ req, res }) => {
       sameSite: false,
       maxAge: 1000 * 60 * 60 * 24 * 400,
     });
+
+    console.log(notes);
 
     return {
       props: {
