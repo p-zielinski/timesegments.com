@@ -211,8 +211,6 @@ export const getServerSideProps = async ({ req, res }) => {
       maxAge: 1000 * 60 * 60 * 24 * 400,
     });
 
-    console.log(notes);
-
     return {
       props: {
         user,

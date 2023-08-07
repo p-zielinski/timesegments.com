@@ -1,17 +1,20 @@
 import { Box, Typography } from '@mui/material';
 import Iconify from '../../../components/iconify';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
-import React from 'react';
+import React, { useContext } from 'react';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
 import parse from 'html-react-parser';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import EditNote from './EditNote';
 import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export const Note = ({ category, useStore }) => {
-  const { isSaving, isEditing, setIsEditing, disableHover, note, user } =
-    useStore();
+export const Note = ({ category, note }) => {
+  const store = useContext(StoreContext);
+  const { isSaving, isEditing, setIsEditing, disableHover, user } =
+    useStore(store);
 
   const tomorrow = DateTime.now()
     .setZone(Timezones[user.timezone])
@@ -53,7 +56,7 @@ export const Note = ({ category, useStore }) => {
     : getRandomRgbObjectForSliderPicker();
 
   if (isEditing.noteId === note.id) {
-    return <EditNote useStore={useStore} category={category} />;
+    return <EditNote category={category} note={note} />;
   }
 
   return (

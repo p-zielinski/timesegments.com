@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
@@ -20,12 +20,14 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
-export default function EditNote({ category, useStore }) {
+export default function EditNote({ category, note }) {
+  const store = useContext(StoreContext);
   const {
     router,
-    note,
-    controlValue,
+    controlValues,
     setPartialControlValues,
     disableHover,
     isSaving,
@@ -34,7 +36,7 @@ export default function EditNote({ category, useStore }) {
     categories,
     setCategories,
     handleIncorrectControlValues,
-  } = useStore();
+  } = useStore(store);
 
   const color = category?.color
     ? {
@@ -132,7 +134,7 @@ export default function EditNote({ category, useStore }) {
       pathOrUrl: 'note/delete',
       body: {
         noteId,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });

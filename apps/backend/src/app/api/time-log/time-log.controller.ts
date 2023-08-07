@@ -41,7 +41,13 @@ export class TimeLogController {
         error: findFromToTimeLogsResult.error,
       });
     }
-    return findFromToTimeLogsResult;
+    return {
+      ...findFromToTimeLogsResult,
+      partialControlValues:
+        await this.controlValueService.getPartialControlValues(user.id, [
+          ControlValue.TIME_LOGS,
+        ]),
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,7 +72,7 @@ export class TimeLogController {
       ...editTimeLogResult,
       partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
-        [ControlValue.NOTES]
+        [ControlValue.TIME_LOGS]
       ),
     };
   }
@@ -93,7 +99,7 @@ export class TimeLogController {
       ...createTimeLogResult,
       partialControlValues: await this.controlValueService.getNewControlValues(
         user.id,
-        [ControlValue.NOTES]
+        [ControlValue.TIME_LOGS]
       ),
     };
   }

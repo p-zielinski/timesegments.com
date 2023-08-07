@@ -1,10 +1,16 @@
 import { create } from 'zustand';
 import { Category, Note, TimeLog, User } from '@prisma/client';
-import { ControlValue, Limits } from '@test1/shared';
+import {
+  ControlValue,
+  Limits,
+  MeExtendedOption,
+  Timezones,
+} from '@test1/shared';
 import { handleFetch } from '../utils/fetchingData/handleFetch';
 import JsCookies from 'js-cookie';
 import { NextRouter } from 'next/router';
 import { createContext } from 'react';
+import { DateTime } from 'luxon';
 
 export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
@@ -80,13 +86,110 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     handleIncorrectControlValues: async (
       typesOfControlValuesWithIncorrectValues: ControlValue[]
     ) => {
+      const extend: MeExtendedOption[] = [];
+      if (
+        typesOfControlValuesWithIncorrectValues.includes(
+          ControlValue.CATEGORIES
+        )
+      ) {
+        extend.push(MeExtendedOption.CATEGORIES);
+      }
+      if (
+        typesOfControlValuesWithIncorrectValues.includes(ControlValue.TIME_LOGS)
+      ) {
+        extend.push(MeExtendedOption.TODAYS_TIMELOGS);
+      }
+      if (
+        typesOfControlValuesWithIncorrectValues.includes(ControlValue.NOTES)
+      ) {
+        extend.push(MeExtendedOption.CATEGORIES_NOTES);
+      }
       try {
         const response = await handleFetch({
           pathOrUrl: 'user/me-extended',
-          body: { extend: [] },
+          body: { extend },
           method: 'POST',
         });
-        console.log(typesOfControlValuesWithIncorrectValues);
+        const {
+          user,
+          categories,
+          notes,
+          timeLogs,
+          fetchedFrom,
+          limits,
+          controlValues,
+        }: {
+          user: User;
+          categories?: Category[];
+          notes?: Note[];
+          timeLogs?: TimeLog[];
+          fetchedFrom?: number;
+          limits: Limits;
+          controlValues: Record<ControlValue, string>;
+        } = response;
+        const storedUser = get().user;
+        const storedFetchedFrom = get().fetchedFrom;
+        const setState = {
+          isSaving: false,
+          user,
+        };
+        const overrideControlValues = {};
+        if (
+          storedUser.timezone !== user.timezone &&
+          !extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
+        ) {
+          const newDesiredFetchedFrom = DateTime.now()
+            .setZone(Timezones[user.timezone])
+            .set({ hour: 24, minute: 0, second: 0, millisecond: 0 })
+            .minus({ days: 1 }).ts;
+          if (newDesiredFetchedFrom < storedFetchedFrom) {
+            const response = await handleFetch({
+              pathOrUrl: 'time-log/find-extended',
+              body: {
+                from: newDesiredFetchedFrom,
+                to: storedFetchedFrom,
+                alreadyKnownCategories: get().categories.map(
+                  (category) => category.id
+                ),
+              },
+              method: 'POST',
+            });
+            if (response.partialControlValues?.[ControlValue.TIME_LOGS]) {
+              overrideControlValues[ControlValue.TIME_LOGS] =
+                response.partialControlValues[ControlValue.TIME_LOGS];
+            }
+            if (Array.isArray(response.timeLogs)) {
+              const oldTimeLogs = get().timeLogs.filter(
+                (timeLog) =>
+                  !response.timeLogs
+                    .map((timeLog) => timeLog.id)
+                    .includes(timeLog.id)
+              );
+              setState['timeLogs'] = [...oldTimeLogs, ...response.timeLogs];
+            }
+          }
+        }
+        if (Array.isArray(categories)) {
+          setState['categories'] = categories;
+        }
+        if (Array.isArray(notes)) {
+          setState['notes'] = notes;
+        }
+        if (Array.isArray(timeLogs)) {
+          setState['timeLogs'] = timeLogs;
+        }
+        if (Number.isInteger(fetchedFrom)) {
+          setState['fetchedFrom'] = fetchedFrom;
+        }
+        if (limits instanceof Object) {
+          setState['limits'] = limits;
+        }
+        setState['controlValues'] = {
+          ...(get().controlValues || {}),
+          ...(controlValues || {}),
+          ...overrideControlValues,
+        };
+        return set(() => setState);
       } catch (e) {
         console.log(e);
         JsCookies.remove('jwt_token');

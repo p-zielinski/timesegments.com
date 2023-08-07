@@ -36,4 +36,18 @@ export class ControlValueService {
     });
     return newControlValue as Record<ControlValue, string>;
   }
+
+  public async getPartialControlValues(
+    userId: string,
+    types: ControlValue[]
+  ): Promise<Record<ControlValue, string>> {
+    const controlValues = await this.getAllUserControlValues(userId);
+    const partialControlValue = {};
+    types.forEach(
+      (controlValueType) =>
+        (partialControlValue[controlValueType] =
+          controlValues[controlValueType])
+    );
+    return partialControlValue as Record<ControlValue, string>;
+  }
 }

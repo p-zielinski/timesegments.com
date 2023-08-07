@@ -32,11 +32,11 @@ export default function CategoryNotesCards({ category }) {
       >
         {isEditing?.createNewNote === category.id &&
           categoriesNotesLimit > currentCategoryNumberOfNotes && (
-            <AddNote useStore={useStore} category={category} />
+            <AddNote category={category} />
           )}
         {category.showRecentNotes &&
           (categoryNotes || []).map((note) => (
-            <Note key={note.id} useStore={useStore} />
+            <Note key={note.id} note={note} category={category} />
           ))}
       </Box>
     </Box>
