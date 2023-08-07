@@ -13,7 +13,7 @@ export const createGroupedTimeLogPeriods = (
     .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
   const beginningOfToday = endOfDay.minus({ days: 1 });
   const desiredPeriod = { from: beginningOfToday.ts, to: endOfDay.ts };
-  const groupedTimeLogPeriods = new Map<string, number>();
+  const groupedTimeLogPeriods: Record<string, number> = {};
   timeLogs.forEach((timeLog) => {
     const duration = calculateTimeLogDurationDuringDesiredTimePeriod(
       desiredPeriod,
@@ -24,10 +24,8 @@ export const createGroupedTimeLogPeriods = (
           : new Date().getTime(),
       })
     );
-    groupedTimeLogPeriods.set(
-      timeLog.categoryId,
-      duration + (groupedTimeLogPeriods.get(timeLog.categoryId) || 0)
-    );
+    groupedTimeLogPeriods[timeLog.categoryId] =
+      duration + (groupedTimeLogPeriods?.[timeLog.categoryId] || 0);
   });
   return groupedTimeLogPeriods;
 };

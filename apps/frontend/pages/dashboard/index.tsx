@@ -13,7 +13,6 @@ import {createGroupedTimeLogPeriods} from '../../helperFunctions/createGroupedTi
 import {useStore} from 'zustand';
 import DashboardLayout from '../../layouts/dashboard';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
-import {nanoid} from 'nanoid';
 // --------------------------------------------------------------------
 
 type Props = {
@@ -149,7 +148,6 @@ export default function Index({
 
   useEffect(() => {
     setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
-    console.log(123, groupedTimeLogPeriods);
     const intervalIdLocal = setInterval(() => {
       setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
     }, 1000);
@@ -164,7 +162,6 @@ export default function Index({
       >
         <Container sx={{ mt: -5 }}>
           <Categories />
-          <div onClick={() => setKey(nanoid())}> aa{key}</div>
         </Container>
       </DashboardLayout>
     </StoreContext.Provider>

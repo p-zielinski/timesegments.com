@@ -11,7 +11,7 @@ type Store = ReturnType<typeof createStore>;
 
 export interface StoreProps {
   key: string;
-  groupedTimeLogPeriods: Map<string, number>;
+  groupedTimeLogPeriods: Record<string, number>;
   disableHover: boolean;
   router: NextRouter;
   isEditing: Record<string, any>;
@@ -28,7 +28,7 @@ export interface StoreProps {
 export interface State extends StoreProps {
   setKey: (key: string) => void;
   setGroupedTimeLogPeriods: (
-    groupedTimeLogPeriods: Map<string, number>
+    groupedTimeLogPeriods: Record<string, number>
   ) => void;
   getGroupedTimeLogPeriod: (timeLogId: string) => number;
   setIsEditing: (isEditing: Record<string, any>) => void;
@@ -51,7 +51,7 @@ export interface State extends StoreProps {
 export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
     key: 'undefined',
-    groupedTimeLogPeriods: new Map<string, number>(),
+    groupedTimeLogPeriods: {},
     disableHover: false,
     router: undefined,
     isEditing: {},
@@ -75,9 +75,9 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     ...initProps,
     setKey: (key) => set(() => ({ key })),
     setGroupedTimeLogPeriods: (groupedTimeLogPeriods) =>
-      set((state) => ({ groupedTimeLogPeriods })),
+      set(() => ({ groupedTimeLogPeriods })),
     getGroupedTimeLogPeriod: (categoryId) =>
-      get().groupedTimeLogPeriods.get?.(categoryId) || 0,
+      get().groupedTimeLogPeriods?.[categoryId] || 0,
     setIsEditing: (isEditing) => set(() => ({ isEditing })),
     setIsSaving: (isSaving) => set(() => ({ isSaving })),
     setUser: (user) => set(() => ({ user })),

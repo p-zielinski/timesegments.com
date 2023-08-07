@@ -15,7 +15,7 @@ import {useStore} from 'zustand';
 
 export default function Categories() {
   const store = useContext(StoreContext);
-  const { limits, categories, key, groupedTimeLogPeriods } = useStore(store);
+  const { limits, categories } = useStore(store);
 
   const categoriesLimit = limits?.categoriesLimit || 5;
 
@@ -25,7 +25,6 @@ export default function Categories() {
         <title>Categories</title>
       </Helmet>
       <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
-        {JSON.stringify(groupedTimeLogPeriods)}
         <Grid key={'sort-categories'} item xs={1} sm={1} md={1}>
           <Stack
             direction="row"
