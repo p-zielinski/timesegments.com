@@ -37,10 +37,8 @@ export default function Category({ category }) {
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
-
   const totalPeriodInMs = getGroupedTimeLogPeriod(category.id);
-
-  const hideDuration = category.active && isEditing.categoryId === category.id;
+  const hideDuration = Object.keys(isEditing).length > 0;
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);
@@ -184,11 +182,23 @@ export default function Category({ category }) {
             <Typography
               key={totalPeriodInMs}
               variant="caption"
-              sx={{ color: 'text.secondary', mb: 0 }}
+              sx={{
+                color: 'text.secondary',
+                mb: 0,
+              }}
             >
-              Duration today:
-              <br />
-              {duration}
+              {!hideDuration ? (
+                <>
+                  Duration today:
+                  <br />
+                  {duration}
+                </>
+              ) : (
+                <>
+                  <br />
+                  <br />
+                </>
+              )}
             </Typography>
           </Box>
         </Box>

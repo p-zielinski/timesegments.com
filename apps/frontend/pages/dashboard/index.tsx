@@ -50,7 +50,8 @@ export default function Index({
     })
   ).current;
 
-  const { timeLogs, user, setGroupedTimeLogPeriods } = useStore(store);
+  const { timeLogs, user, setGroupedTimeLogPeriods, isEditing } =
+    useStore(store);
 
   // const checkControlValue = async () => {
   //   setIsSaving(true);
@@ -140,12 +141,15 @@ export default function Index({
   // }, []);
 
   useEffect(() => {
+    if (Object.keys(isEditing).length > 0) {
+      return;
+    }
     setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
     const intervalIdLocal = setInterval(() => {
       setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
     }, 1000);
     return () => clearInterval(intervalIdLocal);
-  }, [timeLogs, user.timezone]);
+  }, [timeLogs, user.timezone, isEditing]);
 
   return (
     <StoreContext.Provider value={store}>
