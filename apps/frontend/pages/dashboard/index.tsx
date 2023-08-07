@@ -1,5 +1,5 @@
 import {Container} from '@mui/material'; // hooks
-import React, {useEffect, useRef} from 'react';
+import React, {useRef} from 'react';
 import {ControlValue, Limits, MeExtendedOption} from '@test1/shared';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -9,11 +9,15 @@ import {Category, Note, TimeLog, User} from '@prisma/client';
 import {createStore, StoreContext} from '../../hooks/useStore';
 import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
-import {createGroupedTimeLogPeriods} from '../../helperFunctions/createGroupedTimeLogPeriods';
 import {useStore} from 'zustand';
-import DashboardLayout from '../../layouts/dashboard';
+// import DashboardLayout from '../../layouts/dashboard';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
+import dynamic from 'next/dynamic';
 // --------------------------------------------------------------------
+
+const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
+  ssr: false,
+});
 
 type Props = {
   user: User;
@@ -139,17 +143,6 @@ export default function Index({
   //     clearInterval(intervalId);
   //   };
   // }, []);
-
-  useEffect(() => {
-    if (Object.keys(isEditing).length > 0) {
-      return;
-    }
-    setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
-    const intervalIdLocal = setInterval(() => {
-      setGroupedTimeLogPeriods(createGroupedTimeLogPeriods(user, timeLogs));
-    }, 1000);
-    return () => clearInterval(intervalIdLocal);
-  }, [timeLogs, user.timezone, isEditing]);
 
   return (
     <StoreContext.Provider value={store}>

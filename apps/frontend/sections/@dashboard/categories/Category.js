@@ -1,24 +1,26 @@
 // @mui
-import {Box, Typography} from '@mui/material'; // utils
+import { Box, Typography } from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
-import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
+import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import React, {useContext} from 'react';
-import {handleFetch} from '../../../utils/fetchingData/handleFetch';
-import {StatusCodes} from 'http-status-codes';
-import {getDuration} from '@test1/shared';
-import {TimelineDot} from '@mui/lab';
-import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
-import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
-import {StoreContext} from '../../../hooks/useStore';
-import {useStore} from 'zustand';
+import React, { useContext, useEffect, useState } from 'react';
+import { handleFetch } from '../../../utils/fetchingData/handleFetch';
+import { StatusCodes } from 'http-status-codes';
+import { getDuration } from '@test1/shared';
+import { TimelineDot } from '@mui/lab';
+import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
+import { createGroupedTimeLogPeriod } from '../../../helperFunctions/createGroupedTimeLogPeriod';
 
 // ----------------------------------------------------------------------
 
 export default function Category({ category }) {
   const store = useContext(StoreContext);
   const {
+    user,
     setIsEditing,
     disableHover,
     isSaving,
@@ -32,13 +34,29 @@ export default function Category({ category }) {
     timeLogs,
     setTimeLogs,
     handleIncorrectControlValues,
-    getGroupedTimeLogPeriod,
   } = useStore(store);
+
+  const [totalPeriodInMs, setTotalPeriodInMs] = useState(
+    createGroupedTimeLogPeriod(user, timeLogs, category.id)
+  );
+
+  useEffect(() => {
+    const hideDuration =
+      category.active && isEditing.categoryId === category.id;
+    if (hideDuration) {
+      return;
+    }
+    setTotalPeriodInMs(createGroupedTimeLogPeriod(user, timeLogs, category.id));
+    const intervalIdLocal = setInterval(() => {
+      setTotalPeriodInMs(
+        createGroupedTimeLogPeriod(user, timeLogs, category.id)
+      );
+    }, 1000);
+    return () => clearInterval(intervalIdLocal);
+  }, [category, timeLogs, user.timezone, isEditing]);
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
   const currentCategoryNumberOfNotes = (category.notes || []).length;
-  const totalPeriodInMs = getGroupedTimeLogPeriod(category.id);
-  const hideDuration = Object.keys(isEditing).length > 0;
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);
@@ -187,18 +205,9 @@ export default function Category({ category }) {
                 mb: 0,
               }}
             >
-              {!hideDuration ? (
-                <>
-                  Duration today:
-                  <br />
-                  {duration}
-                </>
-              ) : (
-                <>
-                  <br />
-                  <br />
-                </>
-              )}
+              Duration today:
+              <br />
+              {duration}
             </Typography>
           </Box>
         </Box>
