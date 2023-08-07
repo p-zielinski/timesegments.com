@@ -73,20 +73,20 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
   return create<State>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    setKey: (key) => set((state) => ({ key })),
+    setKey: (key) => set(() => ({ key })),
     setGroupedTimeLogPeriods: (groupedTimeLogPeriods) =>
       set((state) => ({ groupedTimeLogPeriods })),
     getGroupedTimeLogPeriod: (categoryId) =>
       get().groupedTimeLogPeriods.get?.(categoryId) || 0,
-    setIsEditing: (isEditing) => set((state) => ({ isEditing })),
-    setIsSaving: (isSaving) => set((state) => ({ isSaving })),
-    setUser: (user) => set((state) => ({ user })),
+    setIsEditing: (isEditing) => set(() => ({ isEditing })),
+    setIsSaving: (isSaving) => set(() => ({ isSaving })),
+    setUser: (user) => set(() => ({ user })),
     setCategories: (categories) => set((state) => ({ categories })),
-    setNotes: (notes) => set((state) => ({ notes })),
-    setTimeLogs: (timeLogs) => set((state) => ({ timeLogs })),
-    setFetchedFrom: (fetchedFrom) => set((state) => ({ fetchedFrom })),
-    setLimits: (limits) => set((state) => ({ limits })),
-    setControlValues: (controlValues) => set((state) => ({ controlValues })),
+    setNotes: (notes) => set(() => ({ notes })),
+    setTimeLogs: (timeLogs) => set(() => ({ timeLogs })),
+    setFetchedFrom: (fetchedFrom) => set(() => ({ fetchedFrom })),
+    setLimits: (limits) => set(() => ({ limits })),
+    setControlValues: (controlValues) => set(() => ({ controlValues })),
     setPartialControlValues: (controlValues) =>
       set((state) => ({
         controlValues: { ...state.controlValues, ...controlValues },
