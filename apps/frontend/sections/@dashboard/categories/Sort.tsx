@@ -44,8 +44,8 @@ export default function SortCategories() {
     categories,
     setCategories,
     controlValues,
-    setControlValues,
     handleIncorrectControlValues,
+    setPartialControlValues,
   } = useStore(store);
 
   const [sortOrder, setSortOrder] = useState(
@@ -79,8 +79,8 @@ export default function SortCategories() {
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setSortOrder(option);
-      if (response.controlValues) {
-        setControlValues({ ...controlValues, ...response.controlValues });
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
     } else if (
       response.statusCode === StatusCodes.CONFLICT &&

@@ -32,9 +32,9 @@ export default function AddNew({ category }) {
     isSaving,
     setIsSaving,
     setIsEditing,
-    categories,
-    setCategories,
     handleIncorrectControlValues,
+    addNote,
+    controlValues,
   } = useStore(store);
   const router = useRouter();
 
@@ -89,21 +89,11 @@ export default function AddNew({ category }) {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'note/create',
-      body: { text, categoryId },
+      body: { text, categoryId, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: [response.note, ...(category.notes || [])],
-          };
-        })
-      );
+      addNote(response.note);
       if (response.partialControlValues) {
         setPartialControlValues(response.partialControlValues);
       }

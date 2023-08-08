@@ -1,19 +1,19 @@
 // @mui
-import { Box, Typography } from '@mui/material'; // utils
+import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
-import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
+import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import React, { useContext, useEffect, useState } from 'react';
-import { handleFetch } from '../../../utils/fetchingData/handleFetch';
-import { StatusCodes } from 'http-status-codes';
-import { getDuration } from '@test1/shared';
-import { TimelineDot } from '@mui/lab';
-import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
-import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
-import { StoreContext } from '../../../hooks/useStore';
-import { useStore } from 'zustand';
-import { createGroupedTimeLogPeriod } from '../../../helperFunctions/createGroupedTimeLogPeriod';
+import React, {useContext, useEffect, useState} from 'react';
+import {handleFetch} from '../../../utils/fetchingData/handleFetch';
+import {StatusCodes} from 'http-status-codes';
+import {getDuration} from '@test1/shared';
+import {TimelineDot} from '@mui/lab';
+import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
+import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand';
+import {createGroupedTimeLogPeriod} from '../../../helperFunctions/createGroupedTimeLogPeriod';
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ export default function Category({ category }) {
     timeLogs,
     setTimeLogs,
     handleIncorrectControlValues,
+    notes,
   } = useStore(store);
 
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
@@ -56,7 +57,11 @@ export default function Category({ category }) {
   }, [category, timeLogs, user.timezone, isEditing]);
 
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
-  const currentCategoryNumberOfNotes = (category.notes || []).length;
+
+  const categoryNotes = notes.filter(
+    (note) => note?.categoryId === category.id
+  );
+  const currentCategoryNumberOfNotes = (categoryNotes || []).length;
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);

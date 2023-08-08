@@ -15,7 +15,7 @@ export default function CategoryNotesCards({ category }) {
     (note) => note?.categoryId === category.id
   );
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
-  const currentCategoryNumberOfNotes = (category.notes || []).length;
+  const currentCategoryNumberOfNotes = (categoryNotes || []).length;
 
   return (isEditing?.createNewNote === category.id ||
     (category.showRecentNotes && categoryNotes?.length)) > 0 ? (

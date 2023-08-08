@@ -27,7 +27,6 @@ export default function EditNote({ category, note }) {
   const store = useContext(StoreContext);
   const {
     router,
-    controlValues,
     setPartialControlValues,
     disableHover,
     isSaving,
@@ -36,6 +35,9 @@ export default function EditNote({ category, note }) {
     categories,
     setCategories,
     handleIncorrectControlValues,
+    controlValues,
+    notes,
+    setNotes,
   } = useStore(store);
 
   const color = category?.color
@@ -89,26 +91,14 @@ export default function EditNote({ category, note }) {
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'note/update',
-      body: { text, noteId },
+      body: { text, noteId, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: (category.notes || []).map((note_) => {
-              if (note_.id !== response.note?.id) {
-                return note_;
-              }
-              return response.note;
-            }),
-          };
-        })
-      );
+      setNotes([
+        ...notes.filter((note) => note.id !== response.note.id),
+        response.note,
+      ]);
       if (response.partialControlValues) {
         setPartialControlValues(response.partialControlValues);
       }

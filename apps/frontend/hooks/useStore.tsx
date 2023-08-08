@@ -30,6 +30,7 @@ export interface StoreProps {
 }
 
 export interface State extends StoreProps {
+  addNote: (note: Note) => void;
   setIsEditing: (isEditing: Record<string, any>) => void;
   setIsSaving: (isSaving: boolean) => void;
   setUser: (user: User) => void;
@@ -70,6 +71,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
   return create<State>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    addNote: (note) => set(() => ({ notes: [...get().notes, note] })),
     setIsEditing: (isEditing) => set(() => ({ isEditing })),
     setIsSaving: (isSaving) => set(() => ({ isSaving })),
     setUser: (user) => set(() => ({ user })),
