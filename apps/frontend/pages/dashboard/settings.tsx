@@ -1,13 +1,11 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {Box, Container, Grid, Typography} from '@mui/material'; // components
 import DashboardLayout from '../../layouts/dashboard';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {User} from '@prisma/client';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
 import {isMobile} from 'react-device-detect';
-import {handleFetch} from '../../utils/fetchingData/handleFetch';
-import {StatusCodes} from 'http-status-codes';
 import SetName from '../../sections/@dashboard/settings/SetName';
 import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';
 import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
@@ -18,10 +16,13 @@ import {getBackgroundColor} from '../../utils/colors/getBackgroundColor';
 import {TimelineDot} from '@mui/lab';
 import Iconify from '../../components/iconify';
 import {SettingOption} from '../../enum/settingOption';
-import {findKeyOfValueInObject, Timezones} from '@test1/shared';
+import {ControlValue, findKeyOfValueInObject, MeExtendedOption, Timezones,} from '@test1/shared';
 import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo';
 import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail';
-import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions'; // ----------------------------------------------------------------------
+import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
+import {createStore, StoreContext} from '../../hooks/useStore';
+import {useRouter} from 'next/router';
+import {useStore} from 'zustand'; // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -38,88 +39,95 @@ type Props = {
   user: User;
   currentTokenId: string;
   randomSliderHexColor: string;
+  controlValues: Record<ControlValue, string>;
 };
 
 export default function Index({
   user: serverSideFetchedUser,
+  controlValues: serverSideFetchedControlValues,
   currentTokenId,
   randomSliderHexColor,
 }: Props) {
-  const [user, setUser] = useState<User>(serverSideFetchedUser);
+  const store = useRef(
+    createStore({
+      currentTokenId,
+      disableHover: isMobile,
+      router: useRouter(),
+      user: serverSideFetchedUser,
+      controlValues: serverSideFetchedControlValues,
+    })
+  ).current;
+  const { user, controlValues, disableHover, isSaving } = useStore(store);
   const [openedSettingOption, setOpenedSettingOption] =
     useState<SettingOption>(undefined);
-
-  const [disableHover, setDisableHover] = useState<boolean>(true);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [controlValues, setControlValues] = useState(user?.controlValues);
   const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
 
-  const fetchMe = async () => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'user/me',
-      method: 'GET',
-    });
-    if (response.statusCode === StatusCodes.OK && response?.user) {
-      setUser(response.user);
-      setControlValues(response.user?.controlValues);
-    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-      setUser(undefined);
-      if (refreshIntervalId) {
-        clearInterval(refreshIntervalId);
-        setRefreshIntervalId(undefined);
-      }
-    }
-    setIsSaving(false);
-    return;
-  };
-
-  const checkControlValue = async () => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'user/check-control-value',
-      body: {
-        controlValue,
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED) {
-      setIsSaving(false);
-      return;
-    } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-      setUser(undefined);
-      if (refreshIntervalId) {
-        clearInterval(refreshIntervalId);
-        setRefreshIntervalId(undefined);
-      }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      return fetchMe();
-    }
-    setIsSaving(false);
-    return;
-  };
-
-  useEffect(() => {
-    if (user && !controlValue) {
-      fetchMe();
-    }
-    if (user) {
-      if (refreshIntervalId) {
-        clearInterval(refreshIntervalId);
-      }
-      const intervalId = setInterval(() => {
-        checkControlValue();
-      }, 3 * 60 * 1000);
-      setRefreshIntervalId(intervalId);
-    }
-    return () => {
-      clearInterval(refreshIntervalId);
-    };
-  }, [controlValue]);
-
-  useEffect(() => {
-    setDisableHover(isMobile);
-  }, [isMobile]);
+  // const fetchMe = async () => {
+  //   setIsSaving(true);
+  //   const response = await handleFetch({
+  //     pathOrUrl: 'user/me',
+  //     method: 'GET',
+  //   });
+  //   if (response.statusCode === StatusCodes.OK && response?.user) {
+  //     setUser(response.user);
+  //     setControlValues(response.user?.controlValues);
+  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+  //     setUser(undefined);
+  //     if (refreshIntervalId) {
+  //       clearInterval(refreshIntervalId);
+  //       setRefreshIntervalId(undefined);
+  //     }
+  //   }
+  //   setIsSaving(false);
+  //   return;
+  // };
+  //
+  // const checkControlValue = async () => {
+  //   setIsSaving(true);
+  //   const response = await handleFetch({
+  //     pathOrUrl: 'user/check-control-value',
+  //     body: {
+  //       controlValue,
+  //     },
+  //     method: 'POST',
+  //   });
+  //   if (response.statusCode === StatusCodes.CREATED) {
+  //     setIsSaving(false);
+  //     return;
+  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
+  //     setUser(undefined);
+  //     if (refreshIntervalId) {
+  //       clearInterval(refreshIntervalId);
+  //       setRefreshIntervalId(undefined);
+  //     }
+  //   } else if (response.statusCode === StatusCodes.CONFLICT) {
+  //     return fetchMe();
+  //   }
+  //   setIsSaving(false);
+  //   return;
+  // };
+  //
+  // useEffect(() => {
+  //   if (user && !controlValue) {
+  //     fetchMe();
+  //   }
+  //   if (user) {
+  //     if (refreshIntervalId) {
+  //       clearInterval(refreshIntervalId);
+  //     }
+  //     const intervalId = setInterval(() => {
+  //       checkControlValue();
+  //     }, 3 * 60 * 1000);
+  //     setRefreshIntervalId(intervalId);
+  //   }
+  //   return () => {
+  //     clearInterval(refreshIntervalId);
+  //   };
+  // }, [controlValue]);
+  //
+  // useEffect(() => {
+  //   setDisableHover(isMobile);
+  // }, [isMobile]);
 
   const getAllSettingOptions = (user) => {
     return Object.keys(SettingOption)
@@ -208,281 +216,228 @@ export default function Index({
   }, [openedSettingOption]);
 
   return (
-    <DashboardLayout
-      user={user}
-      setUser={setUser}
-      title={'Settings'}
-      randomSliderHexColor={randomSliderHexColor}
-    >
-      <Helmet>
-        <title>Dashboard</title>
-      </Helmet>
-      <Container sx={{ minHeight: 'calc(100vh - 200px)', mt: -5 }}>
-        <Grid container spacing={2} columns={1}>
-          <Grid item xs={1} sm={1} md={1}>
-            <Box
-              sx={{
-                gap: 2,
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              {allSettingOptions.map((currentSettingOption) => {
-                const isActive =
-                  openedSettingOption === currentSettingOption.name;
+    <StoreContext.Provider value={store}>
+      <DashboardLayout
+        title={'Settings'}
+        randomSliderHexColor={randomSliderHexColor}
+      >
+        <Helmet>
+          <title>Dashboard</title>
+        </Helmet>
+        <Container sx={{ minHeight: 'calc(100vh - 200px)', mt: -5 }}>
+          <Grid container spacing={2} columns={1}>
+            <Grid item xs={1} sm={1} md={1}>
+              <Box
+                sx={{
+                  gap: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {allSettingOptions.map((currentSettingOption) => {
+                  const isActive =
+                    openedSettingOption === currentSettingOption.name;
 
-                if (isActive && completed) {
+                  if (isActive && completed) {
+                    return (
+                      <ShowCompletedInfoSettings
+                        key={`completed${currentSettingOption.id}`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.CONFIRM_EMAIL
+                  ) {
+                    return (
+                      <ConfirmEmail
+                        key={`${currentSettingOption}-active`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                        setCompleted={setCompleted}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.CHANGE_EMAIL
+                  ) {
+                    return (
+                      <ChangeEmail
+                        key={`${currentSettingOption}-active`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                        setCompleted={setCompleted}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.SET_NAME
+                  ) {
+                    return (
+                      <SetName
+                        key={`${controlValues.User}-${currentSettingOption}-active`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                        setCompleted={setCompleted}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.CHANGE_TIMEZONE
+                  ) {
+                    return (
+                      <ChangeTimezone
+                        key={`${user.timezone}-${controlValues.User}-${currentSettingOption}-active`}
+                        currentSettingOption={currentSettingOption}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        setCompleted={setCompleted}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.CHANGE_PASSWORD
+                  ) {
+                    return (
+                      <ChangePassword
+                        key={`${currentSettingOption}-active`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                        setCompleted={setCompleted}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.MANAGE_LOGIN_SESSIONS
+                  ) {
+                    return (
+                      <ManageLoginSessions
+                        key={`${controlValues.User}-${currentSettingOption}-active`}
+                        currentSettingOption={currentSettingOption}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        setCompleted={setCompleted}
+                      />
+                    );
+                  }
+
                   return (
-                    <ShowCompletedInfoSettings
-                      key={`completed${currentSettingOption.id}`}
-                      isSaving={isSaving}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      currentSettingOption={currentSettingOption}
-                      disableHover={disableHover}
-                    ></ShowCompletedInfoSettings>
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.CONFIRM_EMAIL
-                ) {
-                  return (
-                    <ConfirmEmail
-                      key={`${currentSettingOption}-active`}
-                      user={user}
-                      disableHover={disableHover}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      currentSettingOption={currentSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.CHANGE_EMAIL
-                ) {
-                  return (
-                    <ChangeEmail
-                      key={`${currentSettingOption}-active`}
-                      user={user}
-                      disableHover={disableHover}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      currentSettingOption={currentSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.SET_NAME
-                ) {
-                  return (
-                    <SetName
-                      key={`${controlValue}-${currentSettingOption}-active`}
-                      controlValue={controlValue}
-                      setControlValue={setControlValue}
-                      disableHover={disableHover}
-                      user={user}
-                      setUser={setUser}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      currentSettingOption={currentSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.CHANGE_TIMEZONE
-                ) {
-                  return (
-                    <ChangeTimezone
-                      key={`${controlValue}-${currentSettingOption}-active`}
-                      controlValue={controlValue}
-                      setControlValue={setControlValue}
-                      disableHover={disableHover}
-                      user={user}
-                      setUser={setUser}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      currentSettingOption={currentSettingOption}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.CHANGE_PASSWORD
-                ) {
-                  return (
-                    <ChangePassword
-                      key={`${currentSettingOption}-active`}
-                      disableHover={disableHover}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      currentSettingOption={currentSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                if (
-                  isActive &&
-                  openedSettingOption === SettingOption.MANAGE_LOGIN_SESSIONS
-                ) {
-                  return (
-                    <ManageLoginSessions
-                      currentTokenId={currentTokenId}
-                      key={`${controlValue}-${currentSettingOption}-active`}
-                      disableHover={disableHover}
-                      user={user}
-                      isSaving={isSaving}
-                      setIsSaving={setIsSaving}
-                      currentSettingOption={currentSettingOption}
-                      setOpenedSettingOption={setOpenedSettingOption}
-                      setCompleted={setCompleted}
-                    />
-                  );
-                }
-
-                return (
-                  <Box
-                    key={`${currentSettingOption.id}_not_selected`}
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      background: getBackgroundColor(
-                        0.2,
-                        currentSettingOption.color.hex
-                      ),
-                      borderRadius: '10px',
-                      border: `solid 1px ${getBackgroundColor(
-                        0.2,
-                        currentSettingOption.color.hex
-                      )}`,
-                      pl: 0,
-                      m: 0,
-                      pr: 1.5,
-                      minHeight: '52px',
-                      '&:hover': !disableHover &&
-                        !isSaving && {
-                          cursor: 'pointer',
-                          border: `solid 1px ${getBackgroundColor(
-                            1,
-                            currentSettingOption.color.hex
-                          )}`,
-                        },
-                    }}
-                    onClick={() =>
-                      !isSaving &&
-                      setOpenedSettingOption(currentSettingOption.name)
-                    }
-                  >
                     <Box
+                      key={`${currentSettingOption.id}_not_selected`}
                       sx={{
                         display: 'flex',
-                        justifyContent: 'flex-start',
-                        alignContent: 'flex-start',
-                        gap: '10px',
-                        flex: 1,
+                        justifyContent: 'space-between',
+                        background: getBackgroundColor(
+                          0.2,
+                          currentSettingOption.color.hex
+                        ),
+                        borderRadius: '10px',
+                        border: `solid 1px ${getBackgroundColor(
+                          0.2,
+                          currentSettingOption.color.hex
+                        )}`,
+                        pl: 0,
+                        m: 0,
+                        pr: 1.5,
+                        minHeight: '52px',
+                        '&:hover': !disableHover &&
+                          !isSaving && {
+                            cursor: 'pointer',
+                            border: `solid 1px ${getBackgroundColor(
+                              1,
+                              currentSettingOption.color.hex
+                            )}`,
+                          },
                       }}
+                      onClick={() =>
+                        !isSaving &&
+                        setOpenedSettingOption(currentSettingOption.name)
+                      }
                     >
-                      <Box sx={{ marginLeft: '10px' }}>
-                        <TimelineDot
-                          sx={{
-                            background: currentSettingOption.color.hex,
-                            mb: 0,
-                          }}
-                        />
-                      </Box>
-                      <Box sx={{ margin: '6px', marginLeft: 0 }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ color: isSaving ? '#637381' : undefined }}
-                        >
-                          {currentSettingOption.name}
-                        </Typography>
-                        <Box
-                          sx={{ display: 'flex', direction: 'column', mb: 0 }}
-                        >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'flex-start',
+                          alignContent: 'flex-start',
+                          gap: '10px',
+                          flex: 1,
+                        }}
+                      >
+                        <Box sx={{ marginLeft: '10px' }}>
+                          <TimelineDot
+                            sx={{
+                              background: currentSettingOption.color.hex,
+                              mb: 0,
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ margin: '6px', marginLeft: 0 }}>
                           <Typography
-                            variant="caption"
-                            sx={{ color: 'text.secondary', mb: 0 }}
+                            variant="subtitle2"
+                            sx={{ color: isSaving ? '#637381' : undefined }}
                           >
-                            {currentSettingOption.subtitle}
+                            {currentSettingOption.name}
                           </Typography>
+                          <Box
+                            sx={{ display: 'flex', direction: 'column', mb: 0 }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{ color: 'text.secondary', mb: 0 }}
+                            >
+                              {currentSettingOption.subtitle}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', mr: '-12px' }}>
+                        <Box
+                          sx={{
+                            pl: '5px',
+                            pr: '5px',
+                          }}
+                          onClick={() => !isSaving && null}
+                        >
+                          <Iconify
+                            icon={currentSettingOption.icon}
+                            width={40}
+                            sx={{
+                              color: currentSettingOption.iconColor,
+                              position: 'relative',
+                              top: '50%',
+                              left: '40%',
+                              transform: 'translate(-40%, -50%)',
+                            }}
+                          />
                         </Box>
                       </Box>
                     </Box>
-                    <Box sx={{ display: 'flex', mr: '-12px' }}>
-                      <Box
-                        sx={{
-                          pl: '5px',
-                          pr: '5px',
-                        }}
-                        onClick={() => !isSaving && null}
-                      >
-                        <Iconify
-                          icon={currentSettingOption.icon}
-                          width={40}
-                          sx={{
-                            color: currentSettingOption.iconColor,
-                            position: 'relative',
-                            top: '50%',
-                            left: '40%',
-                            transform: 'translate(-40%, -50%)',
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
+                  );
+                })}
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
-    </DashboardLayout>
+        </Container>
+      </DashboardLayout>
+    </StoreContext.Provider>
   );
 }
 
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-
-  let user, currentTokenId;
-  try {
-    const responseUser = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + 'user/me-with-current-token',
-      {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-          authorization: `Bearer ${jwt_token}`,
-        },
-      }
-    );
-    const jsonResponse = await responseUser.json();
-    user = jsonResponse.user;
-    currentTokenId = jsonResponse.currentToken?.id;
-  } catch (e) {
-    console.log(e);
-    cookies.set('jwt_token');
-  }
-
-  if (!user) {
+  if (!jwt_token) {
     return {
       redirect: {
         permanent: false,
@@ -491,23 +446,61 @@ export const getServerSideProps = async ({ req, res }) => {
     };
   }
 
-  cookies.set('jwt_token', jwt_token, {
-    httpOnly: false,
-    secure: false,
-    sameSite: false,
-    maxAge: 1000 * 60 * 60 * 24 * 400,
-  });
+  try {
+    const responseUser = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          authorization: `Bearer ${jwt_token}`,
+        },
+        body: JSON.stringify({
+          extend: [MeExtendedOption.CURRENT_TOKEN],
+        }),
+      }
+    );
+    const response = await responseUser.json();
+    const { user, currentToken, controlValues } = response;
 
-  return {
-    props: {
-      user: user,
-      currentTokenId,
-      randomSliderHexColor: getHexFromRGBObject(
-        getColorShadeBasedOnSliderPickerSchema(
-          getRandomRgbObjectForSliderPicker().rgb,
-          'very bright'
-        )
-      ),
-    },
-  };
+    if (!user) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+      };
+    }
+
+    const currentTokenId = currentToken?.id || null;
+
+    cookies.set('jwt_token', jwt_token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: false,
+      maxAge: 1000 * 60 * 60 * 24 * 400,
+    });
+
+    return {
+      props: {
+        user: user,
+        currentTokenId,
+        controlValues,
+        randomSliderHexColor: getHexFromRGBObject(
+          getColorShadeBasedOnSliderPickerSchema(
+            getRandomRgbObjectForSliderPicker().rgb,
+            'very bright'
+          )
+        ),
+      },
+    };
+  } catch (e) {
+    cookies.set('jwt_token');
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/',
+      },
+    };
+  }
 };

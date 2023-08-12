@@ -4,4 +4,5 @@ export enum MeExtendedOption {
   LIMITS = 'limits',
   NOTES = 'notes',
   TODAYS_TIMELOGS = 'todaysTimeLogs',
+  CURRENT_TOKEN = 'currentToken',
 }

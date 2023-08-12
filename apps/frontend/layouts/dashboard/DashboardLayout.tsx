@@ -2,7 +2,6 @@ import {useState} from 'react'; // @mui
 import {styled} from '@mui/material/styles'; //
 import Header from './header';
 import Nav from './nav';
-import {DashboardPageState} from '../../enum/DashboardPageState';
 
 // ----------------------------------------------------------------------
 
@@ -37,8 +36,6 @@ export default function DashboardLayout({
 }: {
   children: any;
   title?: string;
-  currentPageState?: DashboardPageState;
-  setCurrentPageState?: (dashboardPageState: DashboardPageState) => void;
   randomSliderHexColor: string;
 }) {
   const [open, setOpen] = useState(false);

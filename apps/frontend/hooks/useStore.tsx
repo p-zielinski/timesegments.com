@@ -16,6 +16,7 @@ export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
 
 export interface StoreProps {
+  currentTokenId: string;
   disableHover: boolean;
   router: NextRouter;
   isEditing: Record<string, any>;
@@ -50,6 +51,7 @@ export interface State extends StoreProps {
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
+    currentTokenId: undefined,
     disableHover: false,
     router: undefined,
     isEditing: {},

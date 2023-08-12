@@ -36,7 +36,7 @@ export default function Index({
   fetchedFrom: serverSideFetchedFrom,
   limits: serverSideFetchedLimits,
   controlValues: serverSideFetchedControlValues,
-  randomSliderHexColor: randomSliderHexColor,
+  randomSliderHexColor,
 }: Props) {
   const store = useRef(
     createStore({
@@ -203,6 +203,15 @@ export const getServerSideProps = async ({ req, res }) => {
       limits: Limits;
       controlValues: Record<ControlValue, string>;
     } = response;
+
+    if (!user) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+      };
+    }
 
     cookies.set('jwt_token', jwt_token, {
       httpOnly: false,

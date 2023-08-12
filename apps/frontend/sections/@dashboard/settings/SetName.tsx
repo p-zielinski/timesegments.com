@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../components/form/Text';
@@ -19,19 +19,25 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
 export default function SetName({
-  controlValue,
-  setControlValue,
-  disableHover,
-  user,
-  isSaving,
-  setIsSaving,
   currentSettingOption,
-  setUser,
   setOpenedSettingOption,
   setCompleted,
 }) {
+  const store = useContext(StoreContext);
+  const {
+    controlValues,
+    setPartialControlValues,
+    disableHover,
+    user,
+    isSaving,
+    setIsSaving,
+    setUser,
+    handleIncorrectControlValues,
+  } = useStore(store);
   const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
@@ -72,17 +78,22 @@ export default function SetName({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/set-name',
-      body: { name, controlValue },
+      body: { name, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setUser({ ...user, name });
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setCompleted(true);
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

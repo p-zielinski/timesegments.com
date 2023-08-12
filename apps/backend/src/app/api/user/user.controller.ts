@@ -102,24 +102,16 @@ export class UserController {
     return { user };
   }
 
-  @Get('me-with-current-token')
-  @UseGuards(JwtAuthGuard)
-  async handleRequestGetMeWithCurrentToken(
-    @UserDecorator() user: User,
-    @CurrentTokenDecorator() currentToken: Token
-  ) {
-    return { user, currentToken };
-  }
-
   @Post('me-extended')
   @UseGuards(JwtAuthGuard)
   async handleRequestMeExtended(
     @UserDecorator() user: User,
+    @CurrentTokenDecorator() currentToken: Token,
     @Body() meExtendedDto: MeExtendedDto
   ) {
     const { extend } = meExtendedDto;
     return {
-      ...(await this.userService.getMeExtended(user, extend)),
+      ...(await this.userService.getMeExtended(user, extend, currentToken)),
       controlValues: await this.controlValueService.getAllUserControlValues(
         user.id
       ),

@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -21,6 +21,8 @@ import InputText from '../../../components/form/Text';
 import { StatusCodes } from 'http-status-codes';
 import YupPassword from 'yup-password';
 import { equalTo } from '../../../utils/yupCustomMethods';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
 YupPassword(yup); // extend yup
 yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
@@ -28,13 +30,12 @@ yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
 );
 
 export default function ChangePassword({
-  disableHover,
-  isSaving,
-  setIsSaving,
   setOpenedSettingOption,
   currentSettingOption,
   setCompleted,
 }) {
+  const store = useContext(StoreContext);
+  const { disableHover, isSaving, setIsSaving } = useStore(store);
   const { color } = currentSettingOption;
 
   let StyledTextField, darkHexColor;

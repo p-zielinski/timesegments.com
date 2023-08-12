@@ -8,7 +8,7 @@ import {
   SUPER_LIGHT_SILVER,
 } from '../../../consts/colors';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import * as yup from 'yup';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
@@ -20,16 +20,17 @@ import emailRegexp from '../../../regex/email';
 import { Formik } from 'formik';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import InputText from '../../../components/form/Text';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
 export default function ChangeEmail({
-  user,
-  disableHover,
-  isSaving,
-  setIsSaving,
   setOpenedSettingOption,
   currentSettingOption,
   setCompleted,
 }) {
+  const store = useContext(StoreContext);
+  const { user, disableHover, isSaving, setIsSaving } = useStore(store);
+
   const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {

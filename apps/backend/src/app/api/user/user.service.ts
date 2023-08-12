@@ -13,6 +13,7 @@ import {
   Prisma,
   TimeLog,
   Timezone,
+  Token,
   User,
 } from '@prisma/client';
 import {
@@ -106,7 +107,8 @@ export class UserService {
 
   public async getMeExtended(
     user: User,
-    extend: MeExtendedOption[]
+    extend: MeExtendedOption[],
+    currentToken: Token
   ): Promise<{
     user: User;
     categories?: Category[];
@@ -114,6 +116,7 @@ export class UserService {
     limits?: Limits;
     timeLogs?: TimeLog[];
     fetchedFrom?: number;
+    currentToken?: Token;
   }> {
     const timeLogs = [],
       include: Prisma.UserInclude = {};
@@ -177,6 +180,9 @@ export class UserService {
     );
 
     return {
+      currentToken: extend.includes(MeExtendedOption.CURRENT_TOKEN)
+        ? currentToken
+        : undefined,
       user,
       categories: extend.includes(MeExtendedOption.CATEGORIES)
         ? categories
