@@ -1,13 +1,17 @@
 // @mui
 import {Box, Grid, Stack} from '@mui/material';
 import Category from './Category';
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import AddCategory from './AddCategory';
 import SortCategories from './Sort';
 import {Helmet} from 'react-helmet-async';
 import CategoryNotesCards from './CategoryNotesCards';
 import {StoreContext} from '../../../hooks/useStore';
 import {useStore} from 'zustand';
+import {handleFetch} from '../../../utils/fetchingData/handleFetch';
+import {StatusCodes} from 'http-status-codes';
+import {isObject} from 'lodash';
+import {ControlValue} from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -15,7 +19,52 @@ import {useStore} from 'zustand';
 
 export default function Categories() {
   const store = useContext(StoreContext);
-  const { limits, categories, isSaving } = useStore(store);
+  const {
+    limits,
+    categories,
+    isSaving,
+    setIsSaving,
+    handleIncorrectControlValues,
+    controlValues,
+  } = useStore(store);
+
+  const checkControlValues = async () => {
+    const response = await handleFetch({
+      pathOrUrl: 'user/me-extended',
+      body: {
+        extend: [],
+      },
+      method: 'POST',
+    });
+    if (
+      isSaving ||
+      response.statusCode !== StatusCodes.CREATED ||
+      !isObject(response.controlValues)
+    ) {
+      return;
+    }
+    const newControlValues: ControlValue[] = response.controlValues;
+    const typesOfControlValuesWithIncorrectValues: ControlValue[] = [];
+    Object.keys(controlValues).forEach((key: ControlValue) => {
+      if (controlValues[key] !== newControlValues[key]) {
+        typesOfControlValuesWithIncorrectValues.push(key);
+      }
+    });
+    if (typesOfControlValuesWithIncorrectValues.length > 0) {
+      setIsSaving(true);
+      handleIncorrectControlValues(typesOfControlValuesWithIncorrectValues);
+    }
+    return;
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkControlValues();
+    }, 2 * 60 * 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [controlValues]);
 
   const categoriesLimit = limits?.categoriesLimit || 5;
 

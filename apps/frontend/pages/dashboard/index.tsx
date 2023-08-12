@@ -52,30 +52,6 @@ export default function Index({
     })
   ).current;
 
-  // const checkControlValue = async () => {
-  //   setIsSaving(true);
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/check-control-value',
-  //     body: {
-  //       controlValue,
-  //     },
-  //     method: 'POST',
-  //   });
-  //   if (response.statusCode === StatusCodes.CREATED) {
-  //     setIsSaving(false);
-  //     return;
-  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-  //     setUser(undefined);
-  //     if (refreshIntervalId) {
-  //       clearInterval(refreshIntervalId);
-  //       setRefreshIntervalId(undefined);
-  //     }
-  //   } else if (response.statusCode === StatusCodes.CONFLICT) {
-  //     return fetchExtendedUser();
-  //   }
-  //   setIsSaving(false);
-  //   return;
-  // };
   //
   // const fetchExtendedUser = async () => {
   //   setIsSaving(true);
@@ -131,12 +107,7 @@ export default function Index({
   // };
 
   // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     checkActiveDateCorrectness();
-  //   }, 1000);
-  //   return () => {
-  //     clearInterval(intervalId);
-  //   };
+
   // }, []);
 
   return (
