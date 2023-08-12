@@ -4,6 +4,7 @@ import {
   ControlValue,
   Limits,
   MeExtendedOption,
+  TimePeriod,
   Timezones,
 } from '@test1/shared';
 import { handleFetch } from '../utils/fetchingData/handleFetch';
@@ -18,6 +19,7 @@ export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
 
 export interface StoreProps {
+  fetchedPeriods: TimePeriod[];
   currentTokenId: string;
   disableHover: boolean;
   router: NextRouter;
@@ -54,6 +56,7 @@ export interface State extends StoreProps {
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
   const DEFAULT_PROPS: StoreProps = {
+    fetchedPeriods: [],
     currentTokenId: undefined,
     disableHover: false,
     router: undefined,
