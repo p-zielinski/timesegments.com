@@ -1,5 +1,5 @@
 import {Container} from '@mui/material'; // hooks
-import React, {useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {ControlValue, Limits, MeExtendedOption} from '@test1/shared';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -11,6 +11,7 @@ import {useRouter} from 'next/router';
 import {isMobile} from 'react-device-detect';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
 import dynamic from 'next/dynamic';
+import {useStore} from 'zustand';
 // --------------------------------------------------------------------
 
 const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
@@ -52,63 +53,16 @@ export default function Index({
     })
   ).current;
 
-  //
-  // const fetchExtendedUser = async () => {
-  //   setIsSaving(true);
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/me-extended',
-  //     body: {
-  //       extend: [
-  //         MeExtendedOption.CATEGORIES,
-  //         MeExtendedOption.CATEGORIES_LIMIT,
-  //         MeExtendedOption.NOTES,
-  //       ],
-  //     },
-  //     method: 'POST',
-  //   });
-  //   if (response.statusCode === StatusCodes.CREATED && response?.user) {
-  //     setUser(response.user);
-  //     setCategories(response.user?.categories ?? []);
-  //     setControlValue(response.user?.controlValue);
-  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-  //     setUser(undefined);
-  //     if (refreshIntervalId) {
-  //       clearInterval(refreshIntervalId);
-  //       setRefreshIntervalId(undefined);
-  //     }
-  //   }
-  //   setIsSaving(false);
-  //   return;
-  // };
+  const { controlValues, checkControlValues } = useStore(store);
 
-  // useEffect(() => {
-  //   if (timeLogs) {
-  //     const timeLogsWithinActiveDate = findTimeLogsWithinCurrentPeriod({
-  //       allTimeLogs: timeLogs,
-  //       userTimezone: Timezones[user.timezone],
-  //       fromDate: activeDate.c,
-  //       toDate: activeDate.c,
-  //       categories: user.categories,
-  //     }) as TimeLogWithinCurrentPeriod[];
-  //
-  //     setGroupedTimeLogsWithDateSorted(
-  //       getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate)
-  //     );
-  //   }
-  // }, [activeDate?.ts, timeLogs]);
-  //
-  // const checkActiveDateCorrectness = () => {
-  //   const currentDate = getCurrentDate(Timezones[user.timezone]);
-  //   if (currentDate.ts === activeDate.ts) {
-  //     return true;
-  //   }
-  //   setActiveDate(currentDate);
-  //   return false;
-  // };
-
-  // useEffect(() => {
-
-  // }, []);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkControlValues();
+    }, 2 * 60 * 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [controlValues]);
 
   return (
     <StoreContext.Provider value={store}>

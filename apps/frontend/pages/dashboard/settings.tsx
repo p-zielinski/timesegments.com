@@ -57,77 +57,19 @@ export default function Index({
       controlValues: serverSideFetchedControlValues,
     })
   ).current;
-  const { user, controlValues, disableHover, isSaving } = useStore(store);
+  const { user, controlValues, disableHover, isSaving, checkControlValues } =
+    useStore(store);
   const [openedSettingOption, setOpenedSettingOption] =
     useState<SettingOption>(undefined);
-  const [refreshIntervalId, setRefreshIntervalId] = useState(undefined);
 
-  // const fetchMe = async () => {
-  //   setIsSaving(true);
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/me',
-  //     method: 'GET',
-  //   });
-  //   if (response.statusCode === StatusCodes.OK && response?.user) {
-  //     setUser(response.user);
-  //     setControlValues(response.user?.controlValues);
-  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-  //     setUser(undefined);
-  //     if (refreshIntervalId) {
-  //       clearInterval(refreshIntervalId);
-  //       setRefreshIntervalId(undefined);
-  //     }
-  //   }
-  //   setIsSaving(false);
-  //   return;
-  // };
-  //
-  // const checkControlValue = async () => {
-  //   setIsSaving(true);
-  //   const response = await handleFetch({
-  //     pathOrUrl: 'user/check-control-value',
-  //     body: {
-  //       controlValue,
-  //     },
-  //     method: 'POST',
-  //   });
-  //   if (response.statusCode === StatusCodes.CREATED) {
-  //     setIsSaving(false);
-  //     return;
-  //   } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
-  //     setUser(undefined);
-  //     if (refreshIntervalId) {
-  //       clearInterval(refreshIntervalId);
-  //       setRefreshIntervalId(undefined);
-  //     }
-  //   } else if (response.statusCode === StatusCodes.CONFLICT) {
-  //     return fetchMe();
-  //   }
-  //   setIsSaving(false);
-  //   return;
-  // };
-  //
-  // useEffect(() => {
-  //   if (user && !controlValue) {
-  //     fetchMe();
-  //   }
-  //   if (user) {
-  //     if (refreshIntervalId) {
-  //       clearInterval(refreshIntervalId);
-  //     }
-  //     const intervalId = setInterval(() => {
-  //       checkControlValue();
-  //     }, 3 * 60 * 1000);
-  //     setRefreshIntervalId(intervalId);
-  //   }
-  //   return () => {
-  //     clearInterval(refreshIntervalId);
-  //   };
-  // }, [controlValue]);
-  //
-  // useEffect(() => {
-  //   setDisableHover(isMobile);
-  // }, [isMobile]);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkControlValues();
+    }, 2 * 60 * 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [controlValues]);
 
   const getAllSettingOptions = (user) => {
     return Object.keys(SettingOption)

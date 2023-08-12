@@ -48,8 +48,8 @@ export interface State extends StoreProps {
   setControlValues: (controlValues: Record<ControlValue, string>) => void;
   handleIncorrectControlValues: (
     typesOfControlValuesWithIncorrectValues: ControlValue[]
-  ) => Promise<void>;
-  checkControlValues: () => Promise<void>;
+  ) => void;
+  checkControlValues: () => void;
 }
 
 export const createStore = (initProps?: Partial<StoreProps>) => {

@@ -1,7 +1,7 @@
 // @mui
 import {Box, Grid, Stack} from '@mui/material';
 import Category from './Category';
-import React, {useContext, useEffect} from 'react';
+import React, {useContext} from 'react';
 import AddCategory from './AddCategory';
 import SortCategories from './Sort';
 import {Helmet} from 'react-helmet-async';
@@ -15,23 +15,8 @@ import {useStore} from 'zustand';
 
 export default function Categories() {
   const store = useContext(StoreContext);
-  const {
-    limits,
-    categories,
-    isSaving,
-    setIsSaving,
-    controlValues,
-    checkControlValues,
-  } = useStore(store);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      checkControlValues();
-    }, 2 * 60 * 1000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [controlValues]);
+  const { limits, categories, isSaving, controlValues, checkControlValues } =
+    useStore(store);
 
   const categoriesLimit = limits?.categoriesLimit || 5;
 
