@@ -8,10 +8,6 @@ import {Helmet} from 'react-helmet-async';
 import CategoryNotesCards from './CategoryNotesCards';
 import {StoreContext} from '../../../hooks/useStore';
 import {useStore} from 'zustand';
-import {handleFetch} from '../../../utils/fetchingData/handleFetch';
-import {StatusCodes} from 'http-status-codes';
-import {isObject} from 'lodash';
-import {ControlValue} from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -24,38 +20,9 @@ export default function Categories() {
     categories,
     isSaving,
     setIsSaving,
-    handleIncorrectControlValues,
     controlValues,
+    checkControlValues,
   } = useStore(store);
-
-  const checkControlValues = async () => {
-    const response = await handleFetch({
-      pathOrUrl: 'user/me-extended',
-      body: {
-        extend: [],
-      },
-      method: 'POST',
-    });
-    if (
-      isSaving ||
-      response.statusCode !== StatusCodes.CREATED ||
-      !isObject(response.controlValues)
-    ) {
-      return;
-    }
-    const newControlValues: ControlValue[] = response.controlValues;
-    const typesOfControlValuesWithIncorrectValues: ControlValue[] = [];
-    Object.keys(controlValues).forEach((key: ControlValue) => {
-      if (controlValues[key] !== newControlValues[key]) {
-        typesOfControlValuesWithIncorrectValues.push(key);
-      }
-    });
-    if (typesOfControlValuesWithIncorrectValues.length > 0) {
-      setIsSaving(true);
-      handleIncorrectControlValues(typesOfControlValuesWithIncorrectValues);
-    }
-    return;
-  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {

@@ -11,6 +11,8 @@ import JsCookies from 'js-cookie';
 import { NextRouter } from 'next/router';
 import { createContext } from 'react';
 import { DateTime } from 'luxon';
+import { StatusCodes } from 'http-status-codes';
+import { isObject } from 'lodash';
 
 export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
@@ -46,7 +48,8 @@ export interface State extends StoreProps {
   setControlValues: (controlValues: Record<ControlValue, string>) => void;
   handleIncorrectControlValues: (
     typesOfControlValuesWithIncorrectValues: ControlValue[]
-  ) => void;
+  ) => Promise<void>;
+  checkControlValues: () => Promise<void>;
 }
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
@@ -200,6 +203,40 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
         const { router } = get();
         return await router.push('/');
       }
+    },
+    checkControlValues: async () => {
+      const {
+        isSaving,
+        setIsSaving,
+        controlValues,
+        handleIncorrectControlValues,
+      } = get();
+      const response = await handleFetch({
+        pathOrUrl: 'user/me-extended',
+        body: {
+          extend: [],
+        },
+        method: 'POST',
+      });
+      if (
+        isSaving ||
+        response.statusCode !== StatusCodes.CREATED ||
+        !isObject(response.controlValues)
+      ) {
+        return;
+      }
+      const newControlValues: ControlValue[] = response.controlValues;
+      const typesOfControlValuesWithIncorrectValues: ControlValue[] = [];
+      Object.keys(controlValues).forEach((key: ControlValue) => {
+        if (controlValues[key] !== newControlValues[key]) {
+          typesOfControlValuesWithIncorrectValues.push(key);
+        }
+      });
+      if (typesOfControlValuesWithIncorrectValues.length > 0) {
+        setIsSaving(true);
+        handleIncorrectControlValues(typesOfControlValuesWithIncorrectValues);
+      }
+      return;
     },
   }));
 };
