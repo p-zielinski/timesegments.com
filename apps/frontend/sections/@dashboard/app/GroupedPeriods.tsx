@@ -99,28 +99,19 @@ export default function GroupedPeriods({}) {
 
   return (
     <>
-      {isSaving ? (
-        'loading'
-      ) : (
-        <>
-          {categoriesDurationDuringDesiredTimePeriod
-            .sort(
-              (categoryIdAndDuration1, categoryIdAndDuration2) =>
-                categoryIdAndDuration1.duration -
-                categoryIdAndDuration2.duration
-            )
-            .map((categoryIdNotFinishedStateAndDuration) => (
-              <GroupedPeriod
-                categoryIdNotFinishedStateAndDuration={
-                  categoryIdNotFinishedStateAndDuration
-                }
-              />
-            ))}
-          {categoriesDurationDuringDesiredTimePeriod.length === 0 && (
-            <ShowNoData />
-          )}
-        </>
-      )}
+      {categoriesDurationDuringDesiredTimePeriod
+        .sort(
+          (categoryIdAndDuration1, categoryIdAndDuration2) =>
+            categoryIdAndDuration1.duration - categoryIdAndDuration2.duration
+        )
+        .map((categoryIdNotFinishedStateAndDuration) => (
+          <GroupedPeriod
+            categoryIdNotFinishedStateAndDuration={
+              categoryIdNotFinishedStateAndDuration
+            }
+          />
+        ))}
+      {categoriesDurationDuringDesiredTimePeriod.length === 0 && <ShowNoData />}
     </>
   );
 }
