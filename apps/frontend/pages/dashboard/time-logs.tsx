@@ -100,16 +100,8 @@ export default function TimeLogs({
       showTimeLogsTo: beginningOfADay.ts + 1000 * 60 * 60 * 24,
     })
   ).current;
-  const {
-    user,
-    controlValues,
-    disableHover,
-    isSaving,
-    checkControlValues,
-    timeLogs,
-    setShowTimeLogsFrom,
-    setShowTimeLogsTo,
-  } = useStore(store);
+  const { user, isSaving, timeLogs, setShowTimeLogsFrom, setShowTimeLogsTo } =
+    useStore(store);
 
   const datePickerColor = {
     hex: '#bf40b9',
@@ -298,9 +290,9 @@ export default function TimeLogs({
                               shouldDisableDate={(date) =>
                                 date.ts < values.fromDate.ts
                               }
-                              onChangeFnc={(value) =>
-                                setShowTimeLogsTo(value.set({ hour: 24 }))
-                              }
+                              onChangeFnc={(value) => {
+                                setShowTimeLogsTo(value.set({ hour: 24 }));
+                              }}
                             />
                           </Box>
                         </Box>

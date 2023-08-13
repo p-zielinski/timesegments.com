@@ -11,7 +11,8 @@ import ShowNoData from '../browse/ShowNoData';
 
 export default function GroupedPeriods({}) {
   const store = useContext(StoreContext);
-  const { timeLogs, showTimeLogsFrom, showTimeLogsTo } = useStore(store);
+  const { timeLogs, showTimeLogsFrom, showTimeLogsTo, isSaving, setIsSaving } =
+    useStore(store);
 
   const getCategoriesDurationDuringDesiredTimePeriod = (
     timeLogs,
@@ -77,6 +78,13 @@ export default function GroupedPeriods({}) {
   );
 
   useEffect(() => {
+    setCategoriesDurationDuringDesiredTimePeriod(
+      getCategoriesDurationDuringDesiredTimePeriod(
+        timeLogs,
+        showTimeLogsFrom,
+        showTimeLogsTo
+      )
+    );
     const intervalIdLocal = setInterval(() => {
       setCategoriesDurationDuringDesiredTimePeriod(
         getCategoriesDurationDuringDesiredTimePeriod(
@@ -91,19 +99,28 @@ export default function GroupedPeriods({}) {
 
   return (
     <>
-      {categoriesDurationDuringDesiredTimePeriod
-        .sort(
-          (categoryIdAndDuration1, categoryIdAndDuration2) =>
-            categoryIdAndDuration1.duration - categoryIdAndDuration2.duration
-        )
-        .map((categoryIdNotFinishedStateAndDuration) => (
-          <GroupedPeriod
-            categoryIdNotFinishedStateAndDuration={
-              categoryIdNotFinishedStateAndDuration
-            }
-          />
-        ))}
-      {categoriesDurationDuringDesiredTimePeriod.length === 0 && <ShowNoData />}
+      {isSaving ? (
+        'loading'
+      ) : (
+        <>
+          {categoriesDurationDuringDesiredTimePeriod
+            .sort(
+              (categoryIdAndDuration1, categoryIdAndDuration2) =>
+                categoryIdAndDuration1.duration -
+                categoryIdAndDuration2.duration
+            )
+            .map((categoryIdNotFinishedStateAndDuration) => (
+              <GroupedPeriod
+                categoryIdNotFinishedStateAndDuration={
+                  categoryIdNotFinishedStateAndDuration
+                }
+              />
+            ))}
+          {categoriesDurationDuringDesiredTimePeriod.length === 0 && (
+            <ShowNoData />
+          )}
+        </>
+      )}
     </>
   );
 }
