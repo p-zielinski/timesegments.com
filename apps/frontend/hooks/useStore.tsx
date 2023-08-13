@@ -89,8 +89,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     setIsEditing: (isEditing) => set(() => ({ isEditing })),
     setIsSaving: (isSaving) => set(() => ({ isSaving })),
     setUser: (user) => set(() => ({ user })),
-    setCategories: (categories) =>
-      set(() => ({ categories: uniqBy(categories, 'id') })),
+    setCategories: (categories) => set(() => ({ categories })),
     setNotes: (notes) => set(() => ({ notes: uniqBy(notes, 'id') })),
     setTimeLogs: (timeLogs) =>
       set(() => ({ timeLogs: uniqBy(timeLogs, 'id') })),

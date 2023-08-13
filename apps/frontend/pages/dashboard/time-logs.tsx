@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async';
 // @mui
 import {
   Box,
+  Card,
   Container,
   Grid,
   Stack,
@@ -11,7 +12,7 @@ import {
 // components
 // sections
 import DashboardLayout from '../../layouts/dashboard';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Category, TimeLog, User } from '@prisma/client';
 import { DateTime } from 'luxon';
 import {
@@ -32,7 +33,15 @@ import { Formik } from 'formik';
 import DatePicker from '../../components/form/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
-import { IS_SAVING_HEX } from '../../consts/colors';
+import {
+  GRAY,
+  IS_SAVING_HEX,
+  LIGHT_ORANGE,
+  LIGHT_SILVER,
+  ORANGE,
+  SUPER_LIGHT_SILVER,
+  ULTRA_LIGHT_ORANGE,
+} from '../../consts/colors';
 import { getRgbaObjectFromHexString } from '../../utils/colors/getRgbaObjectFromHexString';
 import { getHexFromRGBAObject } from '../../utils/colors/getHexFromRGBAObject';
 import { styled } from '@mui/material/styles';
@@ -40,6 +49,8 @@ import { BpCheckbox } from '../../components/form/Checkbox';
 import { createStore, StoreContext } from '../../hooks/useStore';
 import { useRouter } from 'next/router';
 import { useStore } from 'zustand';
+import { getHexFromRGBAString } from 'apps/frontend/utils/colors/getHexFromRGBString';
+import BrowseTimeLogs from '../../sections/@dashboard/app/BrowseTimeLogs';
 
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
@@ -166,6 +177,8 @@ export default function TimeLogs({
     StyledTextField = styled(TextField)(getTextFieldProps(false, false, false));
   };
   setStyledTextField(isSaving, datePickerColor.hex);
+
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <StoreContext.Provider value={store}>
@@ -295,94 +308,97 @@ export default function TimeLogs({
                     );
                   }}
                 </Formik>
-
-                {/*{JSON.stringify(dayjs.tz.guess())}*/}
-                {/*<Card*/}
-                {/*  sx={{*/}
-                {/*    display: 'flex',*/}
-                {/*    flexDirection: 'row',*/}
-                {/*    justifyContent: 'space-between',*/}
-                {/*    color: isFetching && GRAY,*/}
-                {/*    mb: 2,*/}
-                {/*  }}*/}
-                {/*>*/}
-                {/*  <Box*/}
-                {/*    sx={{*/}
-                {/*      position: 'relative',*/}
-                {/*      cursor: !isFetching && showDetails && 'pointer',*/}
-                {/*      flex: 1,*/}
-                {/*      backgroundColor: !showDetails*/}
-                {/*        ? isFetching*/}
-                {/*          ? LIGHT_SILVER*/}
-                {/*          : LIGHT_ORANGE*/}
-                {/*        : isFetching*/}
-                {/*        ? SUPER_LIGHT_SILVER*/}
-                {/*        : ULTRA_LIGHT_ORANGE,*/}
-                {/*      border: `1px solid ${*/}
-                {/*        isFetching ? LIGHT_SILVER : LIGHT_ORANGE*/}
-                {/*      }`,*/}
-                {/*      borderTopLeftRadius: '12px',*/}
-                {/*      borderBottomLeftRadius: '12px',*/}
-                {/*    }}*/}
-                {/*    onClick={() =>*/}
-                {/*      !isFetching && showDetails && setShowDetails(false)*/}
-                {/*    }*/}
-                {/*  >*/}
-                {/*    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>*/}
-                {/*      Summary*/}
-                {/*    </Typography>*/}
-                {/*  </Box>*/}
-                {/*  <Box*/}
-                {/*    sx={{*/}
-                {/*      position: 'relative',*/}
-                {/*      cursor: !isFetching && !showDetails && 'pointer',*/}
-                {/*      flex: 1,*/}
-                {/*      backgroundColor: showDetails*/}
-                {/*        ? isFetching*/}
-                {/*          ? LIGHT_SILVER*/}
-                {/*          : LIGHT_ORANGE*/}
-                {/*        : isFetching*/}
-                {/*        ? SUPER_LIGHT_SILVER*/}
-                {/*        : ULTRA_LIGHT_ORANGE,*/}
-                {/*      border: `1px solid ${*/}
-                {/*        isFetching ? LIGHT_SILVER : LIGHT_ORANGE*/}
-                {/*      }`,*/}
-                {/*      borderTopRightRadius: '12px',*/}
-                {/*      borderBottomRightRadius: '12px',*/}
-                {/*    }}*/}
-                {/*    onClick={() =>*/}
-                {/*      !isFetching && !showDetails && setShowDetails(true)*/}
-                {/*    }*/}
-                {/*  >*/}
-                {/*    <Typography*/}
-                {/*      variant="subtitle2"*/}
-                {/*      noWrap*/}
-                {/*      sx={{ p: 1, lineHeight: 0.8 }}*/}
-                {/*      align="right"*/}
-                {/*    >*/}
-                {/*      Details*/}
-                {/*      <br />*/}
-                {/*      <span*/}
-                {/*        style={{*/}
-                {/*          fontWeight: 400,*/}
-                {/*          fontSize: 12,*/}
-                {/*          color: getHexFromRGBObject(*/}
-                {/*            getColorShadeBasedOnSliderPickerSchema(*/}
-                {/*              getRgbaObjectFromHexString(*/}
-                {/*                getHexFromRGBAString(ORANGE)*/}
-                {/*              )*/}
-                {/*            )*/}
-                {/*          ),*/}
-                {/*        }}*/}
-                {/*      >*/}
-                {/*        (edit data)*/}
-                {/*      </span>*/}
-                {/*    </Typography>*/}
-                {/*  </Box>*/}
-                {/*</Card>*/}
-                {/*<BrowseTimeLogs*/}
-                {/*  key={timeLogs.map((timeLog) => timeLog.id).join('-')}*/}
-                {/*/>*/}
+                <Card
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    color: isSaving && GRAY,
+                    mb: 2,
+                    mt: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      cursor: !isSaving && showDetails && 'pointer',
+                      flex: 1,
+                      backgroundColor: !showDetails
+                        ? isSaving
+                          ? LIGHT_SILVER
+                          : LIGHT_ORANGE
+                        : isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : ULTRA_LIGHT_ORANGE,
+                      border: `1px solid ${
+                        isSaving ? LIGHT_SILVER : LIGHT_ORANGE
+                      }`,
+                      borderTopLeftRadius: '12px',
+                      borderBottomLeftRadius: '12px',
+                    }}
+                    onClick={() =>
+                      !isSaving && showDetails && setShowDetails(false)
+                    }
+                  >
+                    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>
+                      Summary
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      cursor: !isSaving && !showDetails && 'pointer',
+                      flex: 1,
+                      backgroundColor: showDetails
+                        ? isSaving
+                          ? LIGHT_SILVER
+                          : LIGHT_ORANGE
+                        : isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : ULTRA_LIGHT_ORANGE,
+                      border: `1px solid ${
+                        isSaving ? LIGHT_SILVER : LIGHT_ORANGE
+                      }`,
+                      borderTopRightRadius: '12px',
+                      borderBottomRightRadius: '12px',
+                    }}
+                    onClick={() =>
+                      !isSaving && !showDetails && setShowDetails(true)
+                    }
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      noWrap
+                      sx={{ p: 1, lineHeight: 0.8 }}
+                      align="right"
+                    >
+                      Details
+                      <br />
+                      <span
+                        style={{
+                          fontWeight: 400,
+                          fontSize: 12,
+                          color: getHexFromRGBObject(
+                            getColorShadeBasedOnSliderPickerSchema(
+                              getRgbaObjectFromHexString(
+                                getHexFromRGBAString(ORANGE)
+                              )
+                            )
+                          ),
+                        }}
+                      >
+                        (edit data)
+                      </span>
+                    </Typography>
+                  </Box>
+                </Card>
+                <BrowseTimeLogs
+                  key={
+                    timeLogs.map((timeLog) => timeLog.id).join('-') +
+                    showDetails.toString()
+                  }
+                  showDetails={showDetails}
+                />
               </Grid>
             </Grid>
           </Container>

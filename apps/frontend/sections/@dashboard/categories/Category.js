@@ -47,7 +47,6 @@ export default function Category({ category }) {
     if (hideDuration) {
       return;
     }
-    setTotalPeriodInMs(createGroupedTimeLogPeriod(user, timeLogs, category.id));
     const intervalIdLocal = setInterval(() => {
       setTotalPeriodInMs(
         createGroupedTimeLogPeriod(user, timeLogs, category.id)
