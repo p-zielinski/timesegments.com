@@ -54,6 +54,8 @@ export interface State extends StoreProps {
     typesOfControlValuesWithIncorrectValues: ControlValue[]
   ) => void;
   checkControlValues: () => void;
+  setShowTimeLogsFrom: (showTimeLogsFrom: number) => void;
+  setShowTimeLogsTo: (showTimeLogsTo: number) => void;
 }
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
@@ -97,6 +99,9 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
       set((state) => ({
         controlValues: { ...state.controlValues, ...controlValues },
       })),
+    setShowTimeLogsFrom: (showTimeLogsFrom) =>
+      set(() => ({ showTimeLogsFrom })),
+    setShowTimeLogsTo: (showTimeLogsTo) => set(() => ({ showTimeLogsTo })),
     handleIncorrectControlValues: async (
       typesOfControlValuesWithIncorrectValues: ControlValue[]
     ) => {

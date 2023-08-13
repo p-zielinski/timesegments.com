@@ -76,7 +76,6 @@ export default function TimeLogs({
     second: 0,
     millisecond: 0,
   });
-
   const store = useRef(
     createStore({
       timeLogs: serverSideFetchedTimeLogs,
@@ -97,6 +96,8 @@ export default function TimeLogs({
     isSaving,
     checkControlValues,
     timeLogs,
+    setShowTimeLogsFrom,
+    setShowTimeLogsTo,
   } = useStore(store);
 
   const datePickerColor = {
@@ -260,8 +261,10 @@ export default function TimeLogs({
                                 isSaving ? IS_SAVING_HEX : darkHexColor
                               }
                               onChangeFnc={(value) => {
+                                setShowTimeLogsFrom(value.ts);
                                 if (values.onlyOneDay) {
                                   setFieldValue('toDate', value);
+                                  setShowTimeLogsTo(value.set({ hour: 24 }));
                                 }
                               }}
                               shouldDisableDate={(date) =>
@@ -282,9 +285,11 @@ export default function TimeLogs({
                               shouldDisableDate={(date) =>
                                 date.ts < values.fromDate.ts
                               }
+                              onChangeFnc={(value) =>
+                                setShowTimeLogsTo(value.set({ hour: 24 }))
+                              }
                             />
                           </Box>
-                          {console.log(values)}
                         </Box>
                       </>
                     );
