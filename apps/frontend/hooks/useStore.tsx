@@ -13,7 +13,7 @@ import { NextRouter } from 'next/router';
 import { createContext } from 'react';
 import { DateTime } from 'luxon';
 import { StatusCodes } from 'http-status-codes';
-import { isObject } from 'lodash';
+import { isObject, uniqBy } from 'lodash';
 
 export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
@@ -89,9 +89,11 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     setIsEditing: (isEditing) => set(() => ({ isEditing })),
     setIsSaving: (isSaving) => set(() => ({ isSaving })),
     setUser: (user) => set(() => ({ user })),
-    setCategories: (categories) => set((state) => ({ categories })),
-    setNotes: (notes) => set(() => ({ notes })),
-    setTimeLogs: (timeLogs) => set(() => ({ timeLogs })),
+    setCategories: (categories) =>
+      set(() => ({ categories: uniqBy(categories, 'id') })),
+    setNotes: (notes) => set(() => ({ notes: uniqBy(notes, 'id') })),
+    setTimeLogs: (timeLogs) =>
+      set(() => ({ timeLogs: uniqBy(timeLogs, 'id') })),
     setFetchedFrom: (fetchedFrom) => set(() => ({ fetchedFrom })),
     setLimits: (limits) => set(() => ({ limits })),
     setControlValues: (controlValues) => set(() => ({ controlValues })),
