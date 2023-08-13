@@ -72,6 +72,7 @@ export default function TimeLogs({
 }: Props) {
   const store = useRef(
     createStore({
+      timeLogs: serverSideFetchedTimeLogs,
       disableHover: isMobile,
       router: useRouter(),
       user: serverSideFetchedUser,
@@ -80,8 +81,14 @@ export default function TimeLogs({
       fetchedPeriods: fetchedPeriodsStartingValue,
     })
   ).current;
-  const { user, controlValues, disableHover, isSaving, checkControlValues } =
-    useStore(store);
+  const {
+    user,
+    controlValues,
+    disableHover,
+    isSaving,
+    checkControlValues,
+    timeLogs,
+  } = useStore(store);
 
   const datePickerColor = {
     hex: '#bf40b9',
@@ -166,8 +173,18 @@ export default function TimeLogs({
                 <Formik
                   initialValues={{
                     onlyOneDay: true,
-                    fromDate: DateTime.now(),
-                    toDate: DateTime.now(),
+                    fromDate: DateTime.now().set({
+                      hour: 0,
+                      minute: 0,
+                      second: 0,
+                      millisecond: 0,
+                    }),
+                    toDate: DateTime.now().set({
+                      hour: 0,
+                      minute: 0,
+                      second: 0,
+                      millisecond: 0,
+                    }),
                   }}
                   onSubmit={async (values, { setSubmitting }) => {
                     // await createTimeLog(
@@ -268,6 +285,7 @@ export default function TimeLogs({
                               }
                             />
                           </Box>
+                          {console.log(values)}
                         </Box>
                       </>
                     );
@@ -359,19 +377,7 @@ export default function TimeLogs({
                 {/*  </Box>*/}
                 {/*</Card>*/}
                 {/*<BrowseTimeLogs*/}
-                {/*  key={`timeLogs-${showDetails ? 'details' : 'summary'}`}*/}
-                {/*  refreshTimeLogs={refreshTimeLogs}*/}
-                {/*  user={user}*/}
-                {/*  timeLogsWithinActiveDate={timeLogsWithinActiveDate}*/}
-                {/*  showDetails={showDetails}*/}
-                {/*  isEditing={isEditing}*/}
-                {/*  setIsEditing={setIsEditing}*/}
-                {/*  categories={categories}*/}
-                {/*  controlValue={controlValue}*/}
-                {/*  setControlValue={setControlValue}*/}
-                {/*  disableHover={disableHover}*/}
-                {/*  isSaving={isSaving}*/}
-                {/*  setIsSaving={setIsSaving}*/}
+                {/*  key={timeLogs.map((timeLog) => timeLog.id).join('-')}*/}
                 {/*/>*/}
               </Grid>
             </Grid>

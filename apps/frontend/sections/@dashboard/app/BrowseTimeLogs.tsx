@@ -3,7 +3,7 @@ import {Box, Typography} from '@mui/material';
 import {TimelineDot} from '@mui/lab';
 import {nanoid} from 'nanoid'; // utils
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {DateTime} from 'luxon';
 import {getDuration, Timezones} from '@test1/shared';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
@@ -13,23 +13,42 @@ import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
 import Iconify from '../../../components/iconify';
 import ShowNoData from '../browse/ShowNoData';
 import AddTimeLog from '../browse/AddTimeLog';
+import {createGroupedTimeLogPeriod} from '../../../helperFunctions/createGroupedTimeLogPeriod';
+import {useStore} from 'zustand';
+import {StoreContext} from '../../../hooks/useStore';
 // utils
 // ----------------------------------------------------------------------
 
-export default function BrowseTimeLogs({
-  refreshTimeLogs,
-  user,
-  timeLogsWithinActiveDate,
-  showDetails,
-  isEditing,
-  setIsEditing,
-  categories,
-  controlValue,
-  setControlValue,
-  disableHover,
-  isSaving,
-  setIsSaving,
-}) {
+export default function BrowseTimeLogs() {
+  const store = useContext(StoreContext);
+  const {
+    user,
+    setIsEditing,
+    disableHover,
+    isSaving,
+    setIsSaving,
+    categories,
+    setCategories,
+    limits,
+    isEditing,
+    controlValues,
+    setPartialControlValues,
+    timeLogs,
+    setTimeLogs,
+    handleIncorrectControlValues,
+    notes,
+  } = useStore(store);
+
+  useEffect(() => {
+    setTotalPeriodInMs(createGroupedTimeLogPeriod(user, timeLogs, category.id));
+    const intervalIdLocal = setInterval(() => {
+      setTotalPeriodInMs(
+        createGroupedTimeLogPeriod(user, timeLogs, category.id)
+      );
+    }, 1000);
+    return () => clearInterval(intervalIdLocal);
+  }, [category, timeLogs, user.timezone, isEditing]);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
