@@ -129,19 +129,7 @@ export default function EditNote({ category, note }) {
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: (category.notes || []).filter(
-              (note_) => note_.id !== response.note?.id
-            ),
-          };
-        })
-      );
+      setNotes(notes.filter((note) => note.id !== response.note.id));
       if (response.partialControlValues) {
         setPartialControlValues(response.partialControlValues);
       }
