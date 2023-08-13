@@ -70,6 +70,13 @@ export default function TimeLogs({
   fetchedPeriods: fetchedPeriodsStartingValue,
   randomSliderHexColor,
 }: Props) {
+  const beginningOfADay = DateTime.now().set({
+    hour: 0,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+  });
+
   const store = useRef(
     createStore({
       timeLogs: serverSideFetchedTimeLogs,
@@ -79,6 +86,8 @@ export default function TimeLogs({
       controlValues: serverSideFetchedControlValues,
       categories: serverSideFetchedCategories,
       fetchedPeriods: fetchedPeriodsStartingValue,
+      showTimeLogsFrom: beginningOfADay.ts,
+      showTimeLogsTo: beginningOfADay.ts + 1000 * 60 * 60 * 24,
     })
   ).current;
   const {
@@ -173,18 +182,8 @@ export default function TimeLogs({
                 <Formik
                   initialValues={{
                     onlyOneDay: true,
-                    fromDate: DateTime.now().set({
-                      hour: 0,
-                      minute: 0,
-                      second: 0,
-                      millisecond: 0,
-                    }),
-                    toDate: DateTime.now().set({
-                      hour: 0,
-                      minute: 0,
-                      second: 0,
-                      millisecond: 0,
-                    }),
+                    fromDate: beginningOfADay,
+                    toDate: beginningOfADay,
                   }}
                   onSubmit={async (values, { setSubmitting }) => {
                     // await createTimeLog(

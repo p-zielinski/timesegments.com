@@ -32,6 +32,8 @@ export interface StoreProps {
   fetchedFrom: number;
   limits: Limits;
   controlValues: Record<ControlValue, string>;
+  showTimeLogsFrom: number;
+  showTimeLogsTo: number;
 }
 
 export interface State extends StoreProps {
@@ -69,6 +71,8 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     fetchedFrom: undefined,
     limits: undefined,
     controlValues: undefined,
+    showTimeLogsFrom: undefined,
+    showTimeLogsTo: undefined,
   };
   if (!initProps.router) {
     throw 'Router was not initialized';
