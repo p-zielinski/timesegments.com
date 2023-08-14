@@ -3,10 +3,6 @@ import { PrismaService } from '../../prisma.service';
 import { Prisma, Token, User } from '@prisma/client';
 import { LoggerService } from '../../common/logger/loger.service';
 
-const isDate = (date: object) => {
-  return date instanceof Date && !isNaN(date.valueOf());
-};
-
 @Injectable()
 export class TokenService {
   constructor(
@@ -14,21 +10,7 @@ export class TokenService {
     private loggerService: LoggerService
   ) {}
 
-  async deleteUsersTokensButOne(tokenId: string, user: User) {
-    const tokens = await this.findUsersTokens(user.id);
-    const tokensToDelete = tokens
-      .map((token) => token.id)
-      .filter((_tokenId) => _tokenId !== tokenId);
-    if (tokensToDelete.length > 0) {
-      await this.deleteMany(tokensToDelete);
-    }
-    return {
-      success: true,
-      message: `Other tokens were successfully deleted`,
-    };
-  }
-
-  async deleteSingleToken(tokenId: string, user: User) {
+  async invalidateSingleToken(tokenId: string, user: User) {
     const token = await this.findOne(tokenId, { user: true });
     if (!token || token?.user?.id !== user.id) {
       return {
@@ -36,11 +18,11 @@ export class TokenService {
         error: `Token not found, bad request`,
       };
     }
-    const deleteResult = await this.deleteOne(tokenId);
-    if (!deleteResult?.id) {
+    const invalidateTokenResult = await this.updateValid(tokenId, false);
+    if (!invalidateTokenResult?.id) {
       return {
         success: false,
-        error: `Could not delete token`,
+        error: `Could not invalidate token`,
       };
     }
     return {
@@ -49,19 +31,19 @@ export class TokenService {
     };
   }
 
-  async generateToken(
-    userId: string,
-    expiresAt: string | Date,
-    userAgent: string
-  ): Promise<Token> {
-    if (!!expiresAt && typeof expiresAt !== 'string' && !isDate(expiresAt)) {
-      throw new HttpException({}, HttpStatus.BAD_REQUEST);
-    }
+  async invalidateUsersTokensButOne(tokenId: string, user: User) {
+    await this.updateManyValid(user.id, tokenId, false);
+    return {
+      success: true,
+      message: `Other tokens were successfully deleted`,
+    };
+  }
+
+  async generateToken(userId: string, userAgent: string): Promise<Token> {
     try {
       const token = await this.prisma.token.create({
         data: {
           userId: userId,
-          expiresAt: expiresAt,
           userAgent,
         },
       });
@@ -95,6 +77,27 @@ export class TokenService {
   async deleteMany(tokenIds: string[]): Promise<{ count?: number }> {
     return await this.prisma.token.deleteMany({
       where: { id: { in: tokenIds } },
+    });
+  }
+
+  async updateValid(tokenId: string, valid: boolean) {
+    return await this.prisma.token.update({
+      where: { id: tokenId },
+      data: { valid },
+    });
+  }
+
+  async updateManyValid(userId, skipTokenId: string, valid: boolean) {
+    return await this.prisma.token.updateMany({
+      where: {
+        userId,
+        id: {
+          not: {
+            equals: skipTokenId,
+          },
+        },
+      },
+      data: { valid },
     });
   }
 }

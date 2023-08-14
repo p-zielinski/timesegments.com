@@ -5,38 +5,38 @@ import {
   Get,
   Headers,
   Post,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { LoginOrRegisterDto } from './dto/login.dto';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
 import { MeExtendedDto } from './dto/meExtendedDto';
-import { MeExtendedOption } from '@test1/shared';
-import { CheckControlValueGuard } from '../../common/check-control-value/checkControlValue.guard';
+import { ControlValue } from '@test1/shared';
 import { RegisterDto } from './dto/register.dto';
 import { SetNameDto } from './dto/setName.dto';
 import { ChangePasswordDto } from './dto/changePassword.dto';
 import { ChangeTimezoneDto } from './dto/changeTimezone.dto';
-import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
 import { SetSortingNotesDto } from './dto/setSortingNotes.dto';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories.dto';
 import { ChangeEmailAddressDto } from './dto/changeEmailAddress.dto';
+import { ControlValueService } from '../control-value/control-value.service';
+import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
+import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private controlValueService: ControlValueService
+  ) {}
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
-  @Post('check-control-value')
-  checkControlValue() {
-    return { success: true };
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Post('change-email-address')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async changeEmailAddress(
     @UserDecorator() user: User,
     @Body() changeEmailAddressDto: ChangeEmailAddressDto
@@ -59,6 +59,11 @@ export class UserController {
     @Body() registerDto: RegisterDto,
     @Headers('User-Agent') userAgent: string
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new BadRequestException({
+        error: 'Registration is disabled',
+      });
+    }
     const { email, password, timezone } = registerDto;
     const registeringResult = await this.userService.createNewUser(
       { email, plainPassword: password, timezone, userAgent },
@@ -69,20 +74,7 @@ export class UserController {
         error: registeringResult.error,
       });
     }
-    const { limits } = await this.userService.getMeExtended(
-      registeringResult.user,
-      [
-        MeExtendedOption.CATEGORIES,
-        MeExtendedOption.CATEGORIES_LIMIT,
-        MeExtendedOption.NOTES,
-        MeExtendedOption.TODAYS_TIMELOGS,
-      ]
-    );
-    return {
-      ...registeringResult,
-      user: { ...registeringResult.user, categories: [] },
-      limits,
-    };
+    return registeringResult;
   }
 
   @Post('login')
@@ -101,45 +93,34 @@ export class UserController {
         error: validatingResult.error,
       });
     }
-    const { user, limits } = await this.userService.getMeExtended(
-      validatingResult.user,
-      [
-        MeExtendedOption.CATEGORIES,
-        MeExtendedOption.CATEGORIES_LIMIT,
-        MeExtendedOption.NOTES,
-        MeExtendedOption.TODAYS_TIMELOGS,
-      ]
-    );
-    return { ...validatingResult, user, limits };
+    return validatingResult;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   async handleRequestGetMe(@UserDecorator() user: User) {
     return { user };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('me-with-current-token')
-  async handleRequestGetMeWithCurrentToken(
-    @UserDecorator() user: User,
-    @CurrentTokenDecorator() currentToken: Token
-  ) {
-    return { user, currentToken };
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Post('me-extended')
+  @UseGuards(JwtAuthGuard)
   async handleRequestMeExtended(
     @UserDecorator() user: User,
+    @CurrentTokenDecorator() currentToken: Token,
     @Body() meExtendedDto: MeExtendedDto
   ) {
     const { extend } = meExtendedDto;
-    return await this.userService.getMeExtended(user, extend);
+    return {
+      ...(await this.userService.getMeExtended(user, extend, currentToken)),
+      controlValues: await this.controlValueService.getAllUserControlValues(
+        user.id
+      ),
+    };
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('set-name')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetName(
     @UserDecorator() user: User,
     @Body() setNameDto: SetNameDto
@@ -151,11 +132,17 @@ export class UserController {
         error: updateNameStatus.error,
       });
     }
-    return updateNameStatus;
+    return {
+      ...updateNameStatus,
+      partialControlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.USER]
+      ),
+    };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('change-password')
+  @UseGuards(JwtAuthGuard)
   async handleRequestChangePassword(
     @UserDecorator() user: User,
     @Body() changePasswordDto: ChangePasswordDto
@@ -174,8 +161,9 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('initialize-email-change')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestInitializeEmailChange(
     @UserDecorator() user: User,
     @Body() initializeEmailChangeDto: InitializeEmailChangeDto
@@ -193,8 +181,9 @@ export class UserController {
     return changePasswordStatus;
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('change-timezone')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestChangeTimezone(
     @UserDecorator() user: User,
     @Body() changeTimezoneDto: ChangeTimezoneDto
@@ -209,11 +198,18 @@ export class UserController {
         error: changePasswordStatus.error,
       });
     }
-    return changePasswordStatus;
+    return {
+      ...changePasswordStatus,
+      partialControlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.USER]
+      ),
+    };
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('set-sorting-categories')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetSortingCategories(
     @UserDecorator() user: User,
     @Body() setSortingCategoriesDto: SetSortingCategoriesDto
@@ -226,11 +222,18 @@ export class UserController {
         error: updateSortingCategoriesStatus.error,
       });
     }
-    return updateSortingCategoriesStatus;
+    return {
+      ...updateSortingCategoriesStatus,
+      partialControlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.USER]
+      ),
+    };
   }
 
-  @UseGuards(JwtAuthGuard, CheckControlValueGuard)
   @Post('set-sorting-notes')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetSortingNotes(
     @UserDecorator() user: User,
     @Body() setSortingNotesDto: SetSortingNotesDto
@@ -243,6 +246,12 @@ export class UserController {
         error: updateSortingCategoriesStatus.error,
       });
     }
-    return updateSortingCategoriesStatus;
+    return {
+      ...updateSortingCategoriesStatus,
+      partialControlValues: await this.controlValueService.getNewControlValues(
+        user.id,
+        [ControlValue.USER]
+      ),
+    };
   }
 }

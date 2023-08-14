@@ -1,3 +1,62 @@
+:root {
+  --dots-color: rgb(40, 40, 30)
+}
+
+.gooey {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 142px;
+  height: 40px;
+  margin: -20px 0 0 -71px;
+  background: white;
+  filter: contrast(20);
+}
+
+.dot {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 12px;
+  left: 15px;
+  filter: blur(4px);
+  background: var(--dots-color);
+  border-radius: 50%;
+  transform: translateX(0);
+  animation: dot 2.8s infinite;
+}
+
+.dot-span {
+  display: block;
+  float: left;
+  width: 16px;
+  height: 16px;
+  margin-left: 16px;
+  filter: blur(4px);
+  background: var(--dots-color);
+  border-radius: 50%;
+}
+
+.dots {
+  transform: translateX(0);
+  margin-top: 12px;
+  margin-left: 31px;
+  animation: dots 2.8s infinite;
+}
+
+@keyframes dot {
+  50% {
+    transform: translateX(96px);
+  }
+}
+
+@keyframes dots {
+  50% {
+    transform: translateX(-31px);
+  }
+}
+
+
 html {
   -webkit-text-size-adjust: 100%;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
@@ -61,19 +120,6 @@ pre {
   Liberation Mono, Courier New, monospace;
   overflow: scroll;
   padding: 0.5rem 0.75rem;
-}
-
-.custom-loader {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: radial-gradient(farthest-side, #766DF4 94%, #0000) top/8px 8px no-repeat,
-  conic-gradient(#0000 30%, #766DF4);
-  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
-  animation: s3 1s infinite linear;
-  position: absolute;
-  top: calc(50% - 70px);
-  left: calc(50% - 70px);
 }
 
 @keyframes s3 {

@@ -1,30 +1,24 @@
 // @mui
 import {Box} from '@mui/material'; // utils
-import React from 'react';
+import React, {useContext} from 'react';
 import AddNote from '../notes/AddNote';
-import {Note} from '../notes/Note'; // ----------------------------------------------------------------------
+import {Note} from '../notes/Note';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
-export default function CategoryNotesCards({
-  limits,
-  controlValue,
-  setControlValue,
-  category,
-  categories,
-  setCategories,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  disableHover,
-  user,
-}) {
+export default function CategoryNotesCards({ category }) {
+  const store = useContext(StoreContext);
+  const { limits, isEditing, notes } = useStore(store);
+  const categoryNotes = notes.filter(
+    (note) => note?.categoryId === category.id
+  );
   const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
-  const currentCategoryNumberOfNotes = (category.notes || []).length;
+  const currentCategoryNumberOfNotes = (categoryNotes || []).length;
 
   return (isEditing?.createNewNote === category.id ||
-    (category.showRecentNotes && category.notes?.length)) > 0 ? (
+    (category.showRecentNotes && categoryNotes?.length)) > 0 ? (
     <Box sx={{ display: 'flex', flexDirection: 'row', m: 0 }}>
       <Box sx={{ minWidth: '10%', m: 0 }} />
       <Box
@@ -38,35 +32,11 @@ export default function CategoryNotesCards({
       >
         {isEditing?.createNewNote === category.id &&
           categoriesNotesLimit > currentCategoryNumberOfNotes && (
-            <AddNote
-              controlValue={controlValue}
-              setControlValue={setControlValue}
-              disableHover={disableHover}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              setIsEditing={setIsEditing}
-              category={category}
-              categories={categories}
-              setCategories={setCategories}
-            />
+            <AddNote category={category} />
           )}
         {category.showRecentNotes &&
-          (category.notes || []).map((note) => (
-            <Note
-              key={note.id}
-              category={category}
-              categories={categories}
-              setCategories={setCategories}
-              controlValue={controlValue}
-              setControlValue={setControlValue}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              disableHover={disableHover}
-              note={note}
-              user={user}
-            />
+          (categoryNotes || []).map((note) => (
+            <Note key={note.id} note={note} category={category} />
           ))}
       </Box>
     </Box>

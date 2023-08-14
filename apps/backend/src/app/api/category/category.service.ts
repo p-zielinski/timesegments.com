@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { Category, Prisma, TimeLog, User } from '@prisma/client';
 import { TimeLogService } from '../time-log/time-log.service';
+import { ControlValue } from '@test1/shared';
 
 @Injectable()
 export class CategoryService {
@@ -16,7 +17,12 @@ export class CategoryService {
     categoryId: string,
     showRecentNotes: boolean,
     user: User
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    category?: Category;
+    controlValues?: Record<ControlValue, string>;
+  }> {
     const categoryWithUser = await this.findIfNotDeleted(categoryId, {
       user: true,
     });
@@ -42,14 +48,22 @@ export class CategoryService {
         error: `Could not update expandSubcategories`,
       };
     }
-    return { success: true, category: updatedCategory };
+    return {
+      success: true,
+      category: updatedCategory,
+    };
   }
 
   public async createCategory(
     user: User,
     name: string,
     color: string
-  ): Promise<{ success: boolean; error?: string; category?: Category }> {
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    category?: Category;
+    controlValues?: Record<ControlValue, string>;
+  }> {
     if (
       (await this.countUserCategories(user.id)) >
       this.configService.get<number>('MAX_NUMBER_OF_CATEGORIES_PER_USER')
@@ -68,14 +82,21 @@ export class CategoryService {
         error: `Could not create category`,
       };
     }
-    return { success: true, category };
+    return {
+      success: true,
+      category,
+    };
   }
 
   public async setCategoryActive(
     categoryId: string,
     user: User
   ): Promise<
-    | { success: true; category?: Category; timeLog: TimeLog }
+    | {
+        success: true;
+        category?: Category;
+        timeLog: TimeLog;
+      }
     | { success: false; error: string }
   > {
     const categoryWithUser = await this.findIfNotDeleted(categoryId, {
@@ -133,7 +154,10 @@ export class CategoryService {
       name,
       color
     );
-    return { success: true, category: updatedCategory };
+    return {
+      success: true,
+      category: updatedCategory,
+    };
   }
 
   async setCategoryAsDeleted(categoryId: string, user: User) {
@@ -153,7 +177,10 @@ export class CategoryService {
       };
     }
     const updatedCategory = await this.updateDeleted(categoryId, true);
-    return { success: true, category: updatedCategory };
+    return {
+      success: true,
+      category: updatedCategory,
+    };
   }
 
   public async findManyIfInIdList(categoriesIds: string[]) {

@@ -9,23 +9,23 @@ import {
   ULTRA_LIGHT_RED,
 } from '../../../consts/colors';
 import Iconify from '../../../components/iconify';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
 import { getColorShadeBasedOnSliderPickerSchema } from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
 export default function ConfirmEmail({
-  user,
-  disableHover,
-  isSaving,
-  setIsSaving,
   setOpenedSettingOption,
   currentSettingOption,
   setCompleted,
 }) {
+  const store = useContext(StoreContext);
+  const { disableHover, isSaving, setIsSaving } = useStore(store);
   const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {

@@ -9,9 +9,9 @@ import {
 import { TokenService } from './token.service';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { Token, User } from '@prisma/client';
-import { RevokeSingleTokenDto } from './dto/revokeSingleToken.dto';
-import { JwtAuthGuard } from '../../common/auth/jwtAuth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { CurrentTokenDecorator } from '../../common/param-decorators/currentTokenDecorator';
+import { RevokeSingleTokenDto } from './dto/revokeSingleToken.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('token')
@@ -28,10 +28,8 @@ export class TokenController {
     @UserDecorator() user: User,
     @CurrentTokenDecorator() currentToken: Token
   ) {
-    const revokeSingleTokenStatus = await this.tokenService.deleteSingleToken(
-      currentToken.id,
-      user
-    );
+    const revokeSingleTokenStatus =
+      await this.tokenService.invalidateSingleToken(currentToken.id, user);
     if (!revokeSingleTokenStatus.success) {
       throw new BadRequestException({
         error: revokeSingleTokenStatus.error,
@@ -46,10 +44,8 @@ export class TokenController {
     @Body() revokeSingleTokenDto: RevokeSingleTokenDto
   ) {
     const { tokenId } = revokeSingleTokenDto;
-    const revokeSingleTokenStatus = await this.tokenService.deleteSingleToken(
-      tokenId,
-      user
-    );
+    const revokeSingleTokenStatus =
+      await this.tokenService.invalidateSingleToken(tokenId, user);
     if (!revokeSingleTokenStatus.success) {
       throw new BadRequestException({
         error: revokeSingleTokenStatus.error,
@@ -64,7 +60,7 @@ export class TokenController {
     @CurrentTokenDecorator() token: Token
   ) {
     const revokeSingleTokenStatus =
-      await this.tokenService.deleteUsersTokensButOne(token.id, user);
+      await this.tokenService.invalidateUsersTokensButOne(token.id, user);
     return { message: revokeSingleTokenStatus.message };
   }
 }

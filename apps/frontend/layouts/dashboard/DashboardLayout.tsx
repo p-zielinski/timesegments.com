@@ -1,9 +1,7 @@
-import {Dispatch, SetStateAction, useState} from 'react'; // @mui
+import {useState} from 'react'; // @mui
 import {styled} from '@mui/material/styles'; //
 import Header from './header';
 import Nav from './nav';
-import {DashboardPageState} from '../../enum/DashboardPageState';
-import {Category, User} from '@prisma/client'; // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
@@ -33,17 +31,11 @@ const Main = styled('div')(({ theme }) => ({
 
 export default function DashboardLayout({
   children,
-  user,
-  setUser,
   title,
   randomSliderHexColor,
 }: {
   children: any;
-  user: User;
-  setUser?: Dispatch<SetStateAction<User & { categories: Category[] }>>;
   title?: string;
-  currentPageState?: DashboardPageState;
-  setCurrentPageState?: (dashboardPageState: DashboardPageState) => void;
   randomSliderHexColor: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -55,8 +47,6 @@ export default function DashboardLayout({
       <Nav
         openNav={open}
         onCloseNav={() => setOpen(false)}
-        user={user}
-        setUser={setUser}
         randomSliderHexColor={randomSliderHexColor}
       />
 

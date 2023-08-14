@@ -1,23 +1,21 @@
+import { Duration } from 'luxon';
+
 export const getDuration = (totalPeriodInMs: number) => {
   if (!totalPeriodInMs) {
     return `0 seconds`;
   }
-  const periodInSecondsTotal = Math.floor(totalPeriodInMs / 1000);
-  const periodInMinutesTotal = Math.floor(periodInSecondsTotal / 60);
-  const durationHours = Math.floor(periodInMinutesTotal / 60);
-  const durationMinutes = periodInMinutesTotal % 60;
-  const durationSeconds = periodInSecondsTotal % 60;
-
-  const hours = durationHours
-    ? `${durationHours} hour${durationHours !== 1 ? 's' : ''}`
-    : undefined;
-  const minutes = durationMinutes
-    ? `${durationMinutes} minute${durationMinutes !== 1 ? 's' : ''}`
-    : undefined;
-  const seconds =
-    durationSeconds || (!hours && !minutes)
-      ? `${durationSeconds} second${durationSeconds !== 1 ? 's' : ''}`
-      : undefined;
-
-  return [hours, minutes, seconds].filter((text) => text).join(' ');
+  const durationObject = Duration.fromMillis(totalPeriodInMs)
+    .shiftToAll()
+    .toObject();
+  delete durationObject.milliseconds;
+  let durationString = '';
+  Object.entries(durationObject).forEach(([key, value]) => {
+    if (!value) {
+      return;
+    }
+    durationString += ` ${value} ${
+      value !== 1 ? key : key.slice(0, key.length - 1)
+    }`;
+  });
+  return durationString;
 };

@@ -10,7 +10,7 @@ import {
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { InputText } from '../../../components/form/Text';
@@ -20,19 +20,22 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function EditCategory({
-  controlValue,
-  setControlValue,
-  categories,
-  setCategories,
-  category,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-}) {
-  const [staticCategory, setStaticCategory] = useState(category);
+export default function EditCategory({ category }) {
+  const store = useContext(StoreContext);
+  const {
+    controlValues,
+    setPartialControlValues,
+    categories,
+    setCategories,
+    setIsEditing,
+    isSaving,
+    setIsSaving,
+    handleIncorrectControlValues,
+  } = useStore(store);
+  const [staticCategory] = useState(category);
 
   const validationSchema = yup.object().shape({
     categoryName: yup
@@ -87,7 +90,7 @@ export default function EditCategory({
       pathOrUrl: 'category/set-as-deleted',
       body: {
         categoryId: category.id,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
@@ -95,12 +98,17 @@ export default function EditCategory({
       setCategories(
         categories.filter((category_) => category_.id !== category.id)
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -115,7 +123,7 @@ export default function EditCategory({
         categoryId: category.id,
         name: categoryName,
         color,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
@@ -123,18 +131,22 @@ export default function EditCategory({
       setCategories(
         categories.map((category) => {
           if (category.id === response.category?.id) {
-            return { ...response.category, notes: category?.notes };
+            return { ...response.category, notes: undefined }; //category?.notes
           }
           return { ...category, active: false };
         })
       );
       setIsEditing({});
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
-      return; //skip setting isSaving(false)
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
     }
     setIsSaving(false);
     return;

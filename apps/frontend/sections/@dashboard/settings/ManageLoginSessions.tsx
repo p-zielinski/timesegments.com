@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -24,17 +24,17 @@ import { DateTime } from 'luxon';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
 export default function ManageLoginSessions({
-  currentTokenId,
-  disableHover,
-  user,
-  isSaving,
-  setIsSaving,
   setOpenedSettingOption,
   currentSettingOption,
   setCompleted,
 }) {
+  const store = useContext(StoreContext);
+  const { currentTokenId, disableHover, user, isSaving, setIsSaving } =
+    useStore(store);
   const [userTokens, setUserTokens] = useState<Token[]>([]);
   const [userTokensFetched, setUserTokensFetched] = useState(false);
 
@@ -62,7 +62,7 @@ export default function ManageLoginSessions({
 
   const getLoginSessionOptions = (tokens: Token[]) => {
     return tokens.map((token) => {
-      const createdAtString = DateTime.fromISO(token.createdAt, {
+      const createdAtString = DateTime.fromISO(token.createdAt.toString(), {
         zone: Timezones[user.timezone],
       }).toLocaleString({
         year: 'numeric',
@@ -147,7 +147,7 @@ export default function ManageLoginSessions({
   };
 
   const validationSchema = yup.object().shape({
-    loginSession: yup.string().required(),
+    loginSession: yup.string().required('Login session is required field'),
   });
 
   return (

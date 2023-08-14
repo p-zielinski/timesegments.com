@@ -8,22 +8,21 @@ datasource db {
 }
 
 model User {
-  id                String                @id @default(cuid())
-  email             String                @unique
-  emailConfirmed    Boolean               @default(false)
-  emails            Email[]
-  password          String
-  name              String?
-  tokens            Token[]
-  notes             Note[]
-  sortingNotes      NotesSortOption       @default(BY_DATE)
-  categories        Category[]
-  sortingCategories CategoriesSortOption  @default(NEWEST)
-  timezone          Timezone
-  timeLogs          TimeLog[]
-  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
-  updatedAt         DateTime              @updatedAt @db.Timestamptz(3)
-  controlValue      String                @default("new user")
+  id                        String                @id @default(cuid())
+  email                     String                @unique
+  emailConfirmed            Boolean               @default(false)
+  emails                    Email[]
+  password                  String
+  name                      String?
+  tokens                    Token[]
+  notes                     Note[]
+  sortingNotes              NotesSortOption       @default(BY_DATE)
+  categories                Category[]
+  sortingCategories         CategoriesSortOption  @default(NEWEST)
+  timezone                  Timezone
+  timeLogs                  TimeLog[]
+  createdAt                 DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt                 DateTime              @updatedAt @db.Timestamptz(3)
 }
 
 model Email {
@@ -42,8 +41,8 @@ model Token {
   user          User        @relation(fields: [userId], references: [id])
   userId        String
   userAgent     String?
+  valid         Boolean     @default(true)
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
-  expiresAt     DateTime?   @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
 }
 

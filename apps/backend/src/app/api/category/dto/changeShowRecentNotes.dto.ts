@@ -1,6 +1,6 @@
 import { IsBoolean, IsString } from 'class-validator';
 
-export class SetExpandSubcategoriesDto {
+export class SetExpandCategoriesDto {
   @IsString()
   categoryId: string;
   @IsBoolean()

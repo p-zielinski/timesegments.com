@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
@@ -21,18 +21,21 @@ import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
 import { useRouter } from 'next/router';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function AddNew({
-  controlValue,
-  setControlValue,
-  disableHover,
-  isSaving,
-  setIsSaving,
-  setIsEditing,
-  category,
-  categories,
-  setCategories,
-}) {
+export default function AddNew({ category }) {
+  const store = useContext(StoreContext);
+  const {
+    setPartialControlValues,
+    disableHover,
+    isSaving,
+    setIsSaving,
+    setIsEditing,
+    handleIncorrectControlValues,
+    addNote,
+    controlValues,
+  } = useStore(store);
   const router = useRouter();
 
   const color = category?.color
@@ -86,30 +89,25 @@ export default function AddNew({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'note/create',
-      body: { text, categoryId },
+      body: { text, categoryId, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: [response.note, ...(category.notes || [])],
-          };
-        })
-      );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      addNote(response.note);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

@@ -33,7 +33,6 @@ export default function Email({ randomSliderColor }: Props) {
   const [error, setError] = useState<string>(undefined);
 
   const handleEmailRequestValidation = async (query) => {
-    console.log(query);
     setIsValidating(true);
     const response = await handleFetch({
       pathOrUrl: 'email/validate-email',

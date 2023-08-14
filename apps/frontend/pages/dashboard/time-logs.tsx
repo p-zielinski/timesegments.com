@@ -1,600 +1,424 @@
-import {Helmet} from 'react-helmet-async';
+import { Helmet } from 'react-helmet-async';
 // @mui
-import {useTheme} from '@mui/material/styles';
-import {Box, Card, Container, Grid, Typography} from '@mui/material';
-import dynamic from 'next/dynamic';
+import {
+  Box,
+  Card,
+  Container,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 // components
 // sections
-import DashboardLayout from '../../layouts/dashboard';
-import React, {useEffect, useState} from 'react';
-import {User} from '@prisma/client';
-import {DateTime} from 'luxon';
-import {Timezones} from '@test1/shared';
+import React, { useRef, useState } from 'react';
+import { Category, TimeLog, User } from '@prisma/client';
+import { DateTime } from 'luxon';
 import {
-  findTimeLogsWithinCurrentPeriod,
-  TimeLogWithinCurrentPeriod,
-  TimeLogWithinCurrentPeriodISO,
-} from '../../utils/findTimeLogsWithinCurrentPeriod';
-import {TimeLogsWithinDate, TimeLogsWithinDateISO,} from '../../types/timeLogsWithinDate';
-import {deleteUndefinedFromObject} from '../../utils/deleteUndefinedFromObject';
-import {deleteIfValueIsFalseFromObject} from '../../utils/deleteIfValueIsFalseFromObject';
-import {
-  BLUE,
-  GRAY,
-  GREEN,
-  IS_SAVING_HEX,
-  LIGHT_BLUE,
-  LIGHT_GREEN,
-  LIGHT_RED,
-  LIGHT_SILVER,
-  RED,
-  SUPER_LIGHT_SILVER,
-  ULTRA_LIGHT_BLUE,
-  ULTRA_LIGHT_GREEN,
-  ULTRA_LIGHT_RED,
-} from '../../consts/colors';
+  ControlValue,
+  MeExtendedOption,
+  TimePeriod,
+  Timezones,
+} from '@test1/shared';
 import Cookies from 'cookies';
-import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
-import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
-import {findOrFetchTimeLogsWithinActiveDate} from '../../utils/fetchingData/findOrFetchTimeLogsWithinActiveDate';
-import AppOrderTimeline from '../../sections/@dashboard/app/AppOrderTimeline';
-import {getCurrentDate, getRelativeDate} from '../../utils/getCurrentDate';
-import {isMobile} from 'react-device-detect';
-import {getHexFromRGBAString} from '../../utils/colors/getHexFromRGBString';
-import {getRgbaObjectFromHexString} from '../../utils/colors/getRgbaObjectFromHexString';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {AdapterLuxon} from '@mui/x-date-pickers/AdapterLuxon';
-import Calendar from 'apps/frontend/sections/@dashboard/browse/Calendar';
+import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
+import { isMobile } from 'react-device-detect';
+import dayjs from 'dayjs';
+import utcPlugin from 'dayjs/plugin/utc';
+import timezonePlugin from 'dayjs/plugin/timezone';
+import { Formik } from 'formik';
+import DatePicker from '../../components/form/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
+import {
+  GRAY,
+  IS_SAVING_HEX,
+  LIGHT_ORANGE,
+  LIGHT_SILVER,
+  ORANGE,
+  SUPER_LIGHT_SILVER,
+  ULTRA_LIGHT_ORANGE,
+} from '../../consts/colors';
+import { getRgbaObjectFromHexString } from '../../utils/colors/getRgbaObjectFromHexString';
+import { getHexFromRGBAObject } from '../../utils/colors/getHexFromRGBAObject';
+import { styled } from '@mui/material/styles';
+import { BpCheckbox } from '../../components/form/Checkbox';
+import { createStore, StoreContext } from '../../hooks/useStore';
+import { useRouter } from 'next/router';
+import { useStore } from 'zustand';
+import { getHexFromRGBAString } from 'apps/frontend/utils/colors/getHexFromRGBString';
+import dynamic from 'next/dynamic';
+import BrowseTimeLogs from '../../sections/@dashboard/app/BrowseTimeLogs';
 
-// const Calendar = dynamic(
-//   () => import('../../sections/@dashboard/browse/Calendar'),
-//   { ssr: false }
-// );
+const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
+  ssr: false,
+});
 
-const AppNewsUpdate = dynamic(
-  () => import('../../sections/@dashboard/app/AppNewsUpdate'),
-  { ssr: false }
-);
-
-const AppCurrentVisits = dynamic(
-  () => import('../../sections/@dashboard/app/AppCurrentVisits'),
-  { ssr: false }
-);
-const AppWebsiteVisits = dynamic(
-  () => import('../../sections/@dashboard/app/AppWebsiteVisits'),
-  { ssr: false }
-);
-const AppTrafficBySite = dynamic(
-  () => import('../../sections/@dashboard/app/AppTrafficBySite'),
-  { ssr: false }
-);
-const AppWidgetSummary = dynamic(
-  () => import('../../sections/@dashboard/app/AppWidgetSummary'),
-  { ssr: false }
-);
-const AppCurrentSubject = dynamic(
-  () => import('../../sections/@dashboard/app/AppCurrentSubject'),
-  { ssr: false }
-);
-const AppConversionRates = dynamic(
-  () => import('../../sections/@dashboard/app/AppConversionRates'),
-  { ssr: false }
-);
-const AppTasks = dynamic(
-  () => import('../../sections/@dashboard/app/AppTasks'),
-  { ssr: false }
-);
+dayjs.extend(utcPlugin);
+dayjs.extend(timezonePlugin);
 
 // ----------------------------------------------------------------------
 
+//user: user,
+//         timeLogs,
+//         categories: [...userCategories, ...timeLogsCategories],
+//         controlValues,
+//         fetchedPeriods,
+//         randomSliderHexColor:
+
 type Props = {
   user: User;
-  timeLogsWithDatesISO: TimeLogsWithinDateISO[];
+  categories: Category[];
+  timeLogs: TimeLog[];
+  controlValues: Record<ControlValue, string>;
+  fetchedPeriods: TimePeriod[];
   randomSliderHexColor: string;
 };
 
 export default function TimeLogs({
   user: serverSideFetchedUser,
-  timeLogsWithDatesISO,
+  controlValues: serverSideFetchedControlValues,
+  timeLogs: serverSideFetchedTimeLogs,
+  categories: serverSideFetchedCategories,
+  fetchedPeriods: fetchedPeriodsStartingValue,
   randomSliderHexColor,
 }: Props) {
-  const [disableHover, setDisableHover] = useState<boolean>(true);
-  useEffect(() => {
-    setDisableHover(isMobile);
-  }, [isMobile]);
-
-  const [user, setUser] = useState<User>(serverSideFetchedUser);
-  const [timeLogsWithinDates, setTimeLogsWithinDates] = useState<
-    TimeLogsWithinDate[]
-  >(
-    timeLogsWithDatesISO.map((timeLogWithDatesISO) => {
-      return {
-        date: DateTime.fromObject(timeLogWithDatesISO.date),
-        timeLogsExtended: timeLogWithDatesISO.timeLogsExtended.map(
-          (timeLogExtended) => {
-            return {
-              ...timeLogExtended,
-              startedAt: DateTime.fromISO(timeLogExtended.startedAt),
-              endedAt: timeLogExtended.ended
-                ? DateTime.fromISO(timeLogExtended.endedAt)
-                : undefined,
-              isIsoString: false,
-            };
-          }
-        ),
-      };
-    }) as unknown as any
-  );
-  const [isFetching, setIsFetching] = useState(false);
-  const [activeDate, setActiveDate] = useState<DateTime>(
-    DateTime.now().setZone(Timezones[user.timezone]).set({
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-      milliseconds: 0,
+  const beginningOfADay = DateTime.now().set({
+    hour: 0,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+  });
+  //beginningOfADay.toMillis()
+  const store = useRef(
+    createStore({
+      timeLogs: serverSideFetchedTimeLogs,
+      disableHover: isMobile,
+      router: useRouter(),
+      user: serverSideFetchedUser,
+      controlValues: serverSideFetchedControlValues,
+      categories: serverSideFetchedCategories,
+      fetchedPeriods: fetchedPeriodsStartingValue,
+      showTimeLogsFrom: beginningOfADay.toMillis(),
+      showTimeLogsTo: beginningOfADay.toMillis() + 1000 * 60 * 60 * 24,
     })
-  );
+  ).current;
+  const { user, isSaving, timeLogs, setShowTimeLogsFrom, setShowTimeLogsTo } =
+    useStore(store);
+
+  const datePickerColor = {
+    hex: '#bf40b9',
+    rgb: { r: 191, g: 64, b: 185, a: 1 },
+  };
+
+  let getTextFieldProps: (error, focused, disabled) => Record<string, any>,
+    StyledTextField,
+    darkHexColor;
+  const setStyledTextField = (isSaving, hexColor) => {
+    darkHexColor = getHexFromRGBObject(
+      getColorShadeBasedOnSliderPickerSchema(
+        getRgbaObjectFromHexString(isSaving ? IS_SAVING_HEX : hexColor)
+      )
+    );
+    getTextFieldProps = (error, focused, disabled = false) => {
+      return {
+        background: 'white',
+        borderRadius: '8px',
+        '& input': {
+          color: error ? '#FF4842' : darkHexColor,
+          backgroundColor: 'white',
+          borderRadius: '6px',
+        },
+        '& label.Mui-focused': {
+          color: darkHexColor,
+        },
+        '& label': {
+          color: error ? '#FF4842' : darkHexColor,
+          backgroundColor: 'rgba(255,255,255,.5)',
+          borderRadius: '6px',
+        },
+        '& .MuiInput-underline:after': {
+          borderBottomColor: hexColor,
+        },
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: isSaving
+              ? IS_SAVING_HEX
+              : error
+              ? '#FF4842'
+              : focused
+              ? darkHexColor
+              : getHexFromRGBAObject({
+                  ...getRgbaObjectFromHexString(hexColor),
+                  a: 0.3,
+                }),
+          },
+          '&:hover fieldset': {
+            borderColor: disabled
+              ? 'rgb(232,232,232)'
+              : error
+              ? '#FF4842'
+              : focused
+              ? darkHexColor
+              : hexColor,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: hexColor,
+            border: `1px solid ${darkHexColor}`,
+          },
+        },
+      };
+    };
+    StyledTextField = styled(TextField)(getTextFieldProps(false, false, false));
+  };
+  setStyledTextField(isSaving, datePickerColor.hex);
+
   const [showDetails, setShowDetails] = useState(false);
 
-  const changeDay = (numberOfDays: number) => {
-    if (numberOfDays === 0) {
-      return;
-    }
-    if (numberOfDays > 0) {
-      return setActiveDate(activeDate.plus({ days: numberOfDays }));
-    } else {
-      return setActiveDate(activeDate.minus({ days: -numberOfDays }));
-    }
-  };
-
-  const changeMonth = (numberOfMonths: number) => {
-    if (numberOfMonths === 0) {
-      return;
-    }
-    if (numberOfMonths > 0) {
-      return setActiveDate(activeDate.plus({ months: numberOfMonths }));
-    }
-    return setActiveDate(activeDate.plus({ months: numberOfMonths }));
-  };
-
-  const [timeLogsWithinActiveDate, setTimeLogsWithinActiveDate] = useState<
-    TimeLogWithinCurrentPeriod[]
-  >([]);
-
-  useEffect(() => {
-    (async () => {
-      setIsFetching(true);
-      setTitle(getTitle(activeDate));
-      await setTimeLogsWithinActiveDate(
-        await findOrFetchTimeLogsWithinActiveDate(
-          activeDate.c,
-          timeLogsWithinDates,
-          activeDate,
-          setTimeLogsWithinDates,
-          user
-        )
-      );
-      setIsFetching(false);
-    })();
-  }, [activeDate]);
-
-  const getTitle = (activeDate: DateTime) => {
-    const daysDifference = deleteIfValueIsFalseFromObject(
-      DateTime.now()
-        .setZone(Timezones[user.timezone])
-        .set({
-          hours: 0,
-          minutes: 0,
-          seconds: 0,
-          milliseconds: 0,
-        })
-        .diff(activeDate, ['years', 'months', 'days'])
-        .toObject()
-    );
-    const mapDaysDifferenceToText = (daysDifference: {
-      years?: number;
-      months?: number;
-      days?: number;
-    }) => {
-      if (Object.keys(daysDifference).length === 0) {
-        return '(Today)';
-      }
-      const years = daysDifference.years
-        ? `${daysDifference.years} year${daysDifference.years !== 1 ? 's' : ''}`
-        : undefined;
-
-      const months = daysDifference.months
-        ? `${daysDifference.months} month${
-            daysDifference.months !== 1 ? 's' : ''
-          }`
-        : undefined;
-
-      const days = daysDifference.days
-        ? `${daysDifference.days} day${daysDifference.days !== 1 ? 's' : ''}`
-        : undefined;
-
-      return `(${[years, months, days]
-        .filter((text) => !!text)
-        .join(' ')} ago)`;
-    };
-
-    return `${activeDate.toLocaleString(
-      {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      },
-      { locale: 'en' }
-    )} ${mapDaysDifferenceToText(daysDifference)}`;
-  };
-
-  const [title, setTitle] = useState(undefined);
-
-  const theme = useTheme();
-
-  const previousDatesButtonSxA = (isDisabled) => {
-    return {
-      position: 'relative',
-      backgroundColor: isDisabled ? SUPER_LIGHT_SILVER : ULTRA_LIGHT_BLUE,
-      border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_BLUE}`,
-      borderRight: 'none',
-      borderLeft: 'none',
-      color: isDisabled ? IS_SAVING_HEX : BLUE,
-      textTransform: 'capitalize',
-    };
-  };
-
-  const previousDatesButtonSx = (isDisabled) => {
-    return {
-      position: 'relative',
-      flex: 1,
-      backgroundColor: isDisabled ? SUPER_LIGHT_SILVER : ULTRA_LIGHT_RED,
-      border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_RED}`,
-      borderTopLeftRadius: '12px',
-      borderBottomLeftRadius: '12px',
-      borderRight: 'none',
-      cursor: isDisabled ? 'auto' : 'pointer',
-      color: isDisabled ? IS_SAVING_HEX : RED,
-      textTransform: 'capitalize',
-      '&:hover': !disableHover &&
-        !isDisabled && {
-          borderColor: disableHover ? LIGHT_RED : RED,
-          color: RED,
-          background: !disableHover && ULTRA_LIGHT_RED,
-        },
-    };
-  };
-
-  const futureDatesButtonSx = (isDisabled) => {
-    return {
-      position: 'relative',
-      flex: 1,
-      backgroundColor: isDisabled ? SUPER_LIGHT_SILVER : ULTRA_LIGHT_GREEN,
-      border: `1px solid ${isDisabled ? LIGHT_SILVER : LIGHT_GREEN}`,
-      borderTopRightRadius: '12px',
-      borderBottomRightRadius: '12px',
-      borderLeft: 'none',
-      cursor: isDisabled ? 'auto' : 'pointer',
-      color: isDisabled ? IS_SAVING_HEX : GREEN,
-      textTransform: 'capitalize',
-      '&:hover': !disableHover &&
-        !isDisabled && {
-          borderColor: disableHover ? LIGHT_GREEN : GREEN,
-          color: GREEN,
-          background: !disableHover && ULTRA_LIGHT_GREEN,
-        },
-    };
-  };
-
-  const canSelectFutureDate = () => {
-    const currentDate = getCurrentDate(Timezones[user.timezone]);
-    return currentDate.ts <= activeDate.ts;
-  };
-
-  const canSelect7DaysInTheFutureDate = () => {
-    const date7DaysAgo = getRelativeDate(Timezones[user.timezone], -7);
-    return date7DaysAgo.ts < activeDate.ts;
-  };
-
-  const canSelectAMonthInTheFutureDate = () => {
-    const dateAMonthAgo = getRelativeDate(Timezones[user.timezone], 0, -1);
-    return dateAMonthAgo.ts < activeDate.ts;
-  };
-
   return (
-    <LocalizationProvider dateAdapter={AdapterLuxon}>
+    <StoreContext.Provider value={store}>
       <DashboardLayout
-        user={user}
-        setUser={setUser}
-        title={'Dashboard'}
+        title={'Time Logs'}
         randomSliderHexColor={randomSliderHexColor}
       >
         <Helmet>
-          <title>Settings</title>
+          <title>Time Logs</title>
         </Helmet>
-        <Container sx={{ mt: -3 }}>
-          <Grid container spacing={2} columns={1} sx={{ mt: 1 }}>
-            <Grid item xs={1} sm={1} md={1}>
-              <Calendar
-                activeDate={activeDate}
-                setActiveDate={setActiveDate}
-                disabled={isFetching}
-              />
-              {/*  <Box*/}
-              {/*    sx={previousDatesButtonSx(isFetching, 0)}*/}
-              {/*    onClick={() =>*/}
-              {/*      !isFetching && showDetails && setShowDetails(false)*/}
-              {/*    }*/}
-              {/*  >*/}
-              {/*    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>*/}
-              {/*      -1 Day*/}
-              {/*    </Typography>*/}
-              {/*  </Box>*/}
-              {/*  <Box*/}
-              {/*    sx={{*/}
-              {/*      position: 'relative',*/}
-              {/*      cursor: !isFetching && !showDetails && 'pointer',*/}
-              {/*      flex: 1,*/}
-              {/*      backgroundColor: showDetails*/}
-              {/*        ? isFetching*/}
-              {/*          ? LIGHT_SILVER*/}
-              {/*          : LIGHT_GREEN*/}
-              {/*        : isFetching*/}
-              {/*        ? SUPER_LIGHT_SILVER*/}
-              {/*        : ULTRA_LIGHT_GREEN,*/}
-              {/*      border: `1px solid ${*/}
-              {/*        isFetching ? LIGHT_SILVER : LIGHT_GREEN*/}
-              {/*      }`,*/}
-              {/*      borderTopRightRadius: '12px',*/}
-              {/*      borderBottomRightRadius: '12px',*/}
-              {/*    }}*/}
-              {/*    onClick={() =>*/}
-              {/*      !isFetching && !showDetails && setShowDetails(true)*/}
-              {/*    }*/}
-              {/*  >*/}
-              {/*    <Typography*/}
-              {/*      variant="subtitle2"*/}
-              {/*      noWrap*/}
-              {/*      sx={{ p: 1 }}*/}
-              {/*      align="right"*/}
-              {/*    >*/}
-              {/*      +1 Day*/}
-              {/*    </Typography>*/}
-              {/*  </Box>*/}
-              {/*</Card>*/}
-              <Card
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  color: isFetching && GRAY,
-                  mb: 2,
-                }}
-              >
-                <Box
-                  sx={{
-                    position: 'relative',
-                    cursor: !isFetching && showDetails && 'pointer',
-                    flex: 1,
-                    backgroundColor: !showDetails
-                      ? isFetching
-                        ? LIGHT_SILVER
-                        : LIGHT_GREEN
-                      : isFetching
-                      ? SUPER_LIGHT_SILVER
-                      : ULTRA_LIGHT_GREEN,
-                    border: `1px solid ${
-                      isFetching ? LIGHT_SILVER : LIGHT_GREEN
-                    }`,
-                    borderTopLeftRadius: '12px',
-                    borderBottomLeftRadius: '12px',
+        <LocalizationProvider dateAdapter={AdapterLuxon}>
+          <Container sx={{ mt: -3 }}>
+            <Grid container spacing={2} columns={1} sx={{ mt: -5 }}>
+              <Grid item xs={1} sm={1} md={1}>
+                <Formik
+                  initialValues={{
+                    showOnlyOneDay: true,
+                    fromDate: beginningOfADay,
+                    toDate: beginningOfADay,
                   }}
-                  onClick={() =>
-                    !isFetching && showDetails && setShowDetails(false)
-                  }
-                >
-                  <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>
-                    Summary
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    position: 'relative',
-                    cursor: !isFetching && !showDetails && 'pointer',
-                    flex: 1,
-                    backgroundColor: showDetails
-                      ? isFetching
-                        ? LIGHT_SILVER
-                        : LIGHT_GREEN
-                      : isFetching
-                      ? SUPER_LIGHT_SILVER
-                      : ULTRA_LIGHT_GREEN,
-                    border: `1px solid ${
-                      isFetching ? LIGHT_SILVER : LIGHT_GREEN
-                    }`,
-                    borderTopRightRadius: '12px',
-                    borderBottomRightRadius: '12px',
+                  onSubmit={async (values, { setSubmitting }) => {
+                    // await createTimeLog(
+                    //   values.categoryId,
+                    //   values.startDateTime,
+                    //   values.endDateTime
+                    // );
+                    setSubmitting(false);
                   }}
-                  onClick={() =>
-                    !isFetching && !showDetails && setShowDetails(true)
-                  }
+                  // validationSchema={getValidationSchema}
                 >
-                  <Typography
-                    variant="subtitle2"
-                    noWrap
-                    sx={{ p: 1, lineHeight: 0.8 }}
-                    align="right"
+                  {({
+                    handleSubmit,
+                    values,
+                    setFieldValue,
+                    errors,
+                    setErrors,
+                    setFieldTouched,
+                  }) => {
+                    // const isFormValid = getValidationSchema().isValidSync(values);
+                    return (
+                      <>
+                        <Box sx={{ display: 'flex' }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              flex: 1,
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                mb: 0,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Box sx={{ display: 'flex' }}>
+                                <BpCheckbox
+                                  onClick={() => {
+                                    if (!values.showOnlyOneDay) {
+                                      const { fromDate } = values;
+                                      setFieldValue('toDate', fromDate);
+                                      setShowTimeLogsTo(
+                                        fromDate
+                                          .set({
+                                            hour: 24,
+                                          })
+                                          .toMillis()
+                                      );
+                                    }
+                                    setFieldValue(
+                                      'showOnlyOneDay',
+                                      !values.showOnlyOneDay
+                                    );
+                                  }}
+                                  checked={!!values.showOnlyOneDay}
+                                />
+                                <Stack
+                                  sx={{
+                                    position: 'relative',
+                                    pt: 1.5,
+                                    pl: 0,
+                                    color: darkHexColor,
+                                  }}
+                                >
+                                  <Typography variant="subtitle2" noWrap>
+                                    View single day
+                                  </Typography>
+                                </Stack>
+                              </Box>
+                            </Box>
+                            <DatePicker
+                              timezone={Timezones[user.timezone]}
+                              label={'From Date'}
+                              name={'fromDate'}
+                              getTextFieldProps={getTextFieldProps}
+                              helperTextColor={
+                                isSaving ? IS_SAVING_HEX : darkHexColor
+                              }
+                              onChangeFnc={(value) => {
+                                setShowTimeLogsFrom(value.toMillis());
+                                if (values.showOnlyOneDay) {
+                                  setFieldValue('toDate', value);
+                                  setShowTimeLogsTo(
+                                    value.set({ hour: 24 }).toMillis()
+                                  );
+                                }
+                              }}
+                              shouldDisableDate={(date) =>
+                                values.showOnlyOneDay
+                                  ? false
+                                  : date.toMillis() > values.toDate.toMillis()
+                              }
+                            />
+                            <DatePicker
+                              timezone={Timezones[user.timezone]}
+                              label={'To Date'}
+                              name={'toDate'}
+                              disabled={values.showOnlyOneDay}
+                              getTextFieldProps={getTextFieldProps}
+                              helperTextColor={
+                                isSaving ? IS_SAVING_HEX : darkHexColor
+                              }
+                              shouldDisableDate={(date) =>
+                                date.toMillis() < values.fromDate.toMillis()
+                              }
+                              onChangeFnc={(value) => {
+                                setShowTimeLogsTo(value.set({ hour: 24 }));
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      </>
+                    );
+                  }}
+                </Formik>
+                <Card
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    color: isSaving && GRAY,
+                    mb: 2,
+                    mt: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      cursor: !isSaving && showDetails && 'pointer',
+                      flex: 1,
+                      backgroundColor: !showDetails
+                        ? isSaving
+                          ? LIGHT_SILVER
+                          : LIGHT_ORANGE
+                        : isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : ULTRA_LIGHT_ORANGE,
+                      border: `1px solid ${
+                        isSaving ? LIGHT_SILVER : LIGHT_ORANGE
+                      }`,
+                      borderTopLeftRadius: '12px',
+                      borderBottomLeftRadius: '12px',
+                    }}
+                    onClick={() =>
+                      !isSaving && showDetails && setShowDetails(false)
+                    }
                   >
-                    Details
-                    <br />
-                    <span
-                      style={{
-                        fontWeight: 400,
-                        fontSize: 12,
-                        color: getHexFromRGBObject(
-                          getColorShadeBasedOnSliderPickerSchema(
-                            getRgbaObjectFromHexString(
-                              getHexFromRGBAString(GREEN)
-                            )
-                          )
-                        ),
-                      }}
+                    <Typography variant="subtitle2" noWrap sx={{ p: 1 }}>
+                      Summary
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      cursor: !isSaving && !showDetails && 'pointer',
+                      flex: 1,
+                      backgroundColor: showDetails
+                        ? isSaving
+                          ? LIGHT_SILVER
+                          : LIGHT_ORANGE
+                        : isSaving
+                        ? SUPER_LIGHT_SILVER
+                        : ULTRA_LIGHT_ORANGE,
+                      border: `1px solid ${
+                        isSaving ? LIGHT_SILVER : LIGHT_ORANGE
+                      }`,
+                      borderTopRightRadius: '12px',
+                      borderBottomRightRadius: '12px',
+                    }}
+                    onClick={() =>
+                      !isSaving && !showDetails && setShowDetails(true)
+                    }
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      noWrap
+                      sx={{ p: 1, lineHeight: 0.8 }}
+                      align="right"
                     >
-                      (edit data)
-                    </span>
-                  </Typography>
-                </Box>
-              </Card>
-              <AppOrderTimeline
-                key={'timeLogs'}
-                user={user}
-                timeLogsWithinActiveDate={timeLogsWithinActiveDate}
-                showDetails={showDetails}
-              />
+                      Details
+                      <br />
+                      <span
+                        style={{
+                          fontWeight: 400,
+                          fontSize: 12,
+                          color: getHexFromRGBObject(
+                            getColorShadeBasedOnSliderPickerSchema(
+                              getRgbaObjectFromHexString(
+                                getHexFromRGBAString(ORANGE)
+                              )
+                            )
+                          ),
+                        }}
+                      >
+                        (edit data)
+                      </span>
+                    </Typography>
+                  </Box>
+                </Card>
+                <BrowseTimeLogs
+                  key={
+                    timeLogs.map((timeLog) => timeLog.id).join('-') +
+                    showDetails.toString()
+                  }
+                  showDetails={showDetails}
+                />
+              </Grid>
             </Grid>
-
-            {/*<Grid item xs={12} md={6} lg={8}>*/}
-            {/*  <AppWebsiteVisits*/}
-            {/*    title="Website Visits"*/}
-            {/*    subheader="(+43%) than last year"*/}
-            {/*    chartLabels={[*/}
-            {/*      '01/01/2003',*/}
-            {/*      '02/01/2003',*/}
-            {/*      '03/01/2003',*/}
-            {/*      '04/01/2003',*/}
-            {/*      '05/01/2003',*/}
-            {/*      '06/01/2003',*/}
-            {/*      '07/01/2003',*/}
-            {/*      '08/01/2003',*/}
-            {/*      '09/01/2003',*/}
-            {/*      '10/01/2003',*/}
-            {/*      '11/01/2003',*/}
-            {/*    ]}*/}
-            {/*    chartData={[*/}
-            {/*      {*/}
-            {/*        name: 'Team A',*/}
-            {/*        type: 'column',*/}
-            {/*        fill: 'solid',*/}
-            {/*        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],*/}
-            {/*      },*/}
-            {/*      {*/}
-            {/*        name: 'Team B',*/}
-            {/*        type: 'area',*/}
-            {/*        fill: 'gradient',*/}
-            {/*        data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],*/}
-            {/*      },*/}
-            {/*      {*/}
-            {/*        name: 'Team C',*/}
-            {/*        type: 'line',*/}
-            {/*        fill: 'solid',*/}
-            {/*        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],*/}
-            {/*      },*/}
-            {/*    ]}*/}
-            {/*  />*/}
-            {/*</Grid>*/}
-
-            {/*<Grid item xs={12} md={6} lg={4}>*/}
-            {/*  <AppCurrentVisits*/}
-            {/*    title="Current Visits"*/}
-            {/*    chartData={[*/}
-            {/*      { label: 'America', value: 4344 },*/}
-            {/*      { label: 'Asia', value: 5435 },*/}
-            {/*      { label: 'Europe', value: 1443 },*/}
-            {/*      { label: 'Africa', value: 4443 },*/}
-            {/*    ]}*/}
-            {/*    chartColors={[*/}
-            {/*      theme.palette.primary.main,*/}
-            {/*      theme.palette.info.main,*/}
-            {/*      theme.palette.warning.main,*/}
-            {/*      theme.palette.error.main,*/}
-            {/*    ]}*/}
-            {/*  />*/}
-            {/*</Grid>*/}
-
-            {/*<Grid item xs={12} md={6} lg={8}>*/}
-            {/*  <AppConversionRates*/}
-            {/*    title="Conversion Rates"*/}
-            {/*    subheader="(+43%) than last year"*/}
-            {/*    chartData={[*/}
-            {/*      { label: 'Italy', value: 400 },*/}
-            {/*      { label: 'Japan', value: 430 },*/}
-            {/*      { label: 'China', value: 448 },*/}
-            {/*      { label: 'Canada', value: 470 },*/}
-            {/*      { label: 'France', value: 540 },*/}
-            {/*      { label: 'Germany', value: 580 },*/}
-            {/*      { label: 'South Korea', value: 690 },*/}
-            {/*      { label: 'Netherlands', value: 1100 },*/}
-            {/*      { label: 'United States', value: 1200 },*/}
-            {/*      { label: 'United Kingdom', value: 1380 },*/}
-            {/*    ]}*/}
-            {/*  />*/}
-            {/*</Grid>*/}
-
-            {/*<Grid item xs={12} md={6} lg={4}>*/}
-            {/*  <AppCurrentSubject*/}
-            {/*    title="Current Subject"*/}
-            {/*    chartLabels={[*/}
-            {/*      'English',*/}
-            {/*      'History',*/}
-            {/*      'Physics',*/}
-            {/*      'Geography',*/}
-            {/*      'Chinese',*/}
-            {/*      'Math',*/}
-            {/*    ]}*/}
-            {/*    chartData={[*/}
-            {/*      { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },*/}
-            {/*      { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },*/}
-            {/*      { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },*/}
-            {/*    ]}*/}
-            {/*    chartColors={[...Array(6)].map(*/}
-            {/*      () => theme.palette.text.secondary*/}
-            {/*    )}*/}
-            {/*  />*/}
-            {/*</Grid>*/}
-
-            {/*<Grid item xs={12} md={6} lg={8}>*/}
-            {/*  <AppNewsUpdate*/}
-            {/*    title="News Update"*/}
-            {/*    list={[...Array(5)].map((_, index) => ({*/}
-            {/*      id: faker.datatype.uuid(),*/}
-            {/*      title: faker.name.jobTitle(),*/}
-            {/*      description: faker.name.jobTitle(),*/}
-            {/*      image: `/assets/images/covers/cover_${index + 1}.jpg`,*/}
-            {/*      postedAt: faker.date.recent(),*/}
-            {/*    }))}*/}
-            {/*  />*/}
-            {/*</Grid>*/}
-          </Grid>
-        </Container>
+          </Container>
+        </LocalizationProvider>
       </DashboardLayout>
-    </LocalizationProvider>
+    </StoreContext.Provider>
   );
 }
 
 export const getServerSideProps = async ({ req, res }) => {
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
-
-  let user;
-  try {
-    const responseUser = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + 'user/me',
-      {
-        method: 'GET',
-        headers: {
-          'Content-type': 'application/json',
-          authorization: `Bearer ${jwt_token}`,
-        },
-      }
-    );
-    user = (await responseUser.json()).user;
-  } catch (e) {
-    console.log(e);
-    cookies.set('jwt_token');
-  }
-
-  if (!user) {
+  if (!jwt_token) {
     return {
       redirect: {
         permanent: false,
@@ -603,26 +427,47 @@ export const getServerSideProps = async ({ req, res }) => {
     };
   }
 
-  cookies.set('jwt_token', jwt_token, {
-    httpOnly: false,
-    secure: false,
-    sameSite: false,
-    maxAge: 1000 * 60 * 60 * 24 * 400,
-  });
-
-  let allTimeLogs = [];
-  let categories = [];
-
-  const now = DateTime.now().setZone(Timezones[user.timezone]);
-  const to = { month: now.month, year: now.year, day: now.day };
-  const sevenDaysAgo = now.minus({ days: 1 });
-  const from = {
-    month: sevenDaysAgo.month,
-    year: sevenDaysAgo.year,
-    day: sevenDaysAgo.day,
-  };
-
   try {
+    const responseUser = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + 'user/me-extended',
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          authorization: `Bearer ${jwt_token}`,
+        },
+        body: JSON.stringify({
+          extend: [MeExtendedOption.CATEGORIES],
+        }),
+      }
+    );
+    const responseUserJson = await responseUser.json();
+    const {
+      user,
+      categories: userCategories,
+      controlValues,
+    } = responseUserJson;
+
+    if (!user) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+      };
+    }
+
+    cookies.set('jwt_token', jwt_token, {
+      httpOnly: false,
+      secure: false,
+      sameSite: false,
+      maxAge: 1000 * 60 * 60 * 24 * 400,
+    });
+
+    const endOfDay = DateTime.now()
+      .setZone(Timezones[user.timezone])
+      .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
+    const beginningOfADaySevenDaysAgo = endOfDay.minus({ days: 8 });
     const responseTimeLogs = await fetch(
       process.env.NEXT_PUBLIC_API_URL + 'time-log/find-extended',
       {
@@ -631,47 +476,47 @@ export const getServerSideProps = async ({ req, res }) => {
           'Content-type': 'application/json',
           authorization: `Bearer ${jwt_token}`,
         },
-        body: JSON.stringify({ from, to }),
+        body: JSON.stringify({
+          from: beginningOfADaySevenDaysAgo.toMillis(),
+          to: endOfDay.toMillis(),
+          alreadyKnownCategories: Object.keys(
+            userCategories.map((category) => category.id)
+          ),
+        }),
       }
     );
-    const response = await responseTimeLogs.json();
-    allTimeLogs = response?.timeLogs ?? [];
-    categories = response?.categories ?? [];
-  } catch (e) {
-    console.log(e);
-  }
+    const responseTimeLogsJson = await responseTimeLogs.json();
+    const { timeLogs, categories: timeLogsCategories } = responseTimeLogsJson;
 
-  const timeLogsWithDates = [] as TimeLogsWithinDateISO[];
+    const fetchedPeriods = [
+      {
+        from: beginningOfADaySevenDaysAgo.toMillis(),
+        to: endOfDay.toMillis(),
+      },
+    ];
 
-  for (let i = 0; i <= 0; i++) {
-    const nDaysAgo = i > 0 ? now.minus({ days: i }) : now;
-    const date = {
-      month: nDaysAgo.month,
-      year: nDaysAgo.year,
-      day: nDaysAgo.day,
+    return {
+      props: {
+        user: user,
+        timeLogs,
+        categories: [...userCategories, ...timeLogsCategories],
+        controlValues,
+        fetchedPeriods,
+        randomSliderHexColor: getHexFromRGBObject(
+          getColorShadeBasedOnSliderPickerSchema(
+            getRandomRgbObjectForSliderPicker().rgb,
+            'very bright'
+          )
+        ),
+      },
     };
-    timeLogsWithDates.push({
-      date,
-      timeLogsExtended: findTimeLogsWithinCurrentPeriod({
-        allTimeLogs,
-        userTimezone: Timezones[user.timezone],
-        fromDate: date,
-        categories,
-        options: { asIso: true },
-      }) as TimeLogWithinCurrentPeriodISO[],
-    });
+  } catch (e) {
+    cookies.set('jwt_token');
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/',
+      },
+    };
   }
-
-  return {
-    props: {
-      user: user,
-      timeLogsWithDatesISO: deleteUndefinedFromObject(timeLogsWithDates),
-      randomSliderHexColor: getHexFromRGBObject(
-        getColorShadeBasedOnSliderPickerSchema(
-          getRandomRgbObjectForSliderPicker().rgb,
-          'very bright'
-        )
-      ),
-    },
-  };
 };

@@ -1,48 +1,25 @@
 import { Box, Typography } from '@mui/material';
 import Iconify from '../../../components/iconify';
 import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectFromHexString';
-import React from 'react';
+import React, { useContext } from 'react';
 import { DateTime } from 'luxon';
 import { Timezones } from '@test1/shared';
-import { useRouter } from 'next/router';
 import parse from 'html-react-parser';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import EditNote from './EditNote';
 import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export const Note = ({
-  category,
-  categories,
-  setCategories,
-  controlValue,
-  setControlValue,
-  isSaving,
-  setIsSaving,
-  isEditing,
-  setIsEditing,
-  disableHover,
-  note,
-  user,
-}) => {
+export const Note = ({ category, note }) => {
+  const store = useContext(StoreContext);
+  const { isSaving, isEditing, setIsEditing, disableHover, user } =
+    useStore(store);
+
   const tomorrow = DateTime.now()
     .setZone(Timezones[user.timezone])
     .plus({ days: 1 });
-  const endOfDate = DateTime.fromObject(
-    {
-      month: tomorrow.month,
-      year: tomorrow.year,
-      day: tomorrow.day,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    },
-    { zone: Timezones[user.timezone] }
-  );
-  const router = useRouter();
   const updated = note.updatedAt !== note.createdAt;
-  const createdAt = DateTime.fromISO(note.createdAt, {
-    zone: Timezones[user.timezone],
-  });
   const createdAtLocale = DateTime.fromISO(note.createdAt, {
     zone: Timezones[user.timezone],
   }).toLocaleString(
@@ -79,20 +56,7 @@ export const Note = ({
     : getRandomRgbObjectForSliderPicker();
 
   if (isEditing.noteId === note.id) {
-    return (
-      <EditNote
-        note={note}
-        controlValue={controlValue}
-        setControlValue={setControlValue}
-        disableHover={disableHover}
-        isSaving={isSaving}
-        setIsSaving={setIsSaving}
-        setIsEditing={setIsEditing}
-        category={category}
-        categories={categories}
-        setCategories={setCategories}
-      />
-    );
+    return <EditNote category={category} note={note} />;
   }
 
   return (

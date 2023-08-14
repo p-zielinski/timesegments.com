@@ -1,14 +1,16 @@
 import { Box, Typography } from '@mui/material';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getBackgroundColor } from '../../../utils/colors/getBackgroundColor';
 import Iconify from '../../../components/iconify';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
 export default function ShowCompletedInfoSettings({
-  isSaving,
   setOpenedSettingOption,
   currentSettingOption,
-  disableHover,
 }) {
+  const store = useContext(StoreContext);
+  const { isSaving, disableHover } = useStore(store);
   return (
     <Box
       key={`${currentSettingOption.id}_success`}

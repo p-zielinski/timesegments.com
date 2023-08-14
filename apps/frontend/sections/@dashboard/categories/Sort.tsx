@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 // @mui
 import {Button, Menu, MenuItem, Typography} from '@mui/material';
 // component
@@ -6,9 +6,10 @@ import Iconify from '../../../components/iconify';
 import {CategoriesSortOption} from '@test1/shared';
 import capitalize from 'capitalize';
 import {sortCategories} from '../../../utils/sortCategories';
-import {Category, User} from '@prisma/client';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand';
 
 // ----------------------------------------------------------------------
 
@@ -34,23 +35,19 @@ const SORT_BY_OPTIONS = [
   },
 ];
 
-export default function SortCategories({
-  user,
-  categories,
-  setCategories,
-  controlValue,
-  setControlValue,
-  isSaving,
-  setIsSaving,
-}: {
-  user: User;
-  categories: Category[];
-  setCategories: (categories: Category[]) => unknown;
-  controlValue: string;
-  setControlValue: (controlValue?: string) => void;
-  isSaving: boolean;
-  setIsSaving: (isSaving?: boolean) => void;
-}) {
+export default function SortCategories() {
+  const store = useContext(StoreContext);
+  const {
+    isSaving,
+    setIsSaving,
+    user,
+    categories,
+    setCategories,
+    controlValues,
+    handleIncorrectControlValues,
+    setPartialControlValues,
+  } = useStore(store);
+
   const [sortOrder, setSortOrder] = useState(
     (user.sortingCategories as CategoriesSortOption) ??
       CategoriesSortOption.NEWEST
@@ -77,16 +74,21 @@ export default function SortCategories({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/set-sorting-categories',
-      body: { sortingCategories: option, controlValue },
+      body: { sortingCategories: option, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setSortOrder(option);
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

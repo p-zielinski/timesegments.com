@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
@@ -20,21 +20,25 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
-import { useRouter } from 'next/router';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 
-export default function EditNote({
-  note,
-  controlValue,
-  setControlValue,
-  disableHover,
-  isSaving,
-  setIsSaving,
-  setIsEditing,
-  category,
-  categories,
-  setCategories,
-}) {
-  const router = useRouter();
+export default function EditNote({ category, note }) {
+  const store = useContext(StoreContext);
+  const {
+    router,
+    setPartialControlValues,
+    disableHover,
+    isSaving,
+    setIsSaving,
+    setIsEditing,
+    categories,
+    setCategories,
+    handleIncorrectControlValues,
+    controlValues,
+    notes,
+    setNotes,
+  } = useStore(store);
 
   const color = category?.color
     ? {
@@ -87,35 +91,28 @@ export default function EditNote({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'note/update',
-      body: { text, noteId },
+      body: { text, noteId, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response.note) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: (category.notes || []).map((note_) => {
-              if (note_.id !== response.note?.id) {
-                return note_;
-              }
-              return response.note;
-            }),
-          };
-        })
-      );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      setNotes([
+        ...notes.filter((note) => note.id !== response.note.id),
+        response.note,
+      ]);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;
@@ -127,33 +124,26 @@ export default function EditNote({
       pathOrUrl: 'note/delete',
       body: {
         noteId,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
-      setCategories(
-        categories.map((category_) => {
-          if (category_.id !== category.id) {
-            return category_;
-          }
-          return {
-            ...category,
-            notes: (category.notes || []).filter(
-              (note_) => note_.id !== response.note?.id
-            ),
-          };
-        })
-      );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      setNotes(notes.filter((note) => note.id !== response.note.id));
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setIsEditing({});
     } else if (response.statusCode === StatusCodes.UNAUTHORIZED) {
       return router.push('/');
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined); //skip setting isSaving(false)
-      return;
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

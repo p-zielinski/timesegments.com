@@ -1,90 +1,67 @@
-import PropTypes from 'prop-types';
 // @mui
 import {Box, Typography} from '@mui/material'; // utils
 import Iconify from '../../../components/iconify';
 import {getRgbaObjectFromHexString} from '../../../utils/colors/getRgbaObjectFromHexString';
 import EditCategory from './EditCategory';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {handleFetch} from '../../../utils/fetchingData/handleFetch';
 import {StatusCodes} from 'http-status-codes';
-import {getDuration, Timezones} from '@test1/shared';
-import {DateTime} from 'luxon';
+import {getDuration} from '@test1/shared';
 import {TimelineDot} from '@mui/lab';
 import {getHexFromRGBObject} from '../../../utils/colors/getHexFromRGBObject';
 import {getColorShadeBasedOnSliderPickerSchema} from '../../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
 import {getBackgroundColor} from '../../../utils/colors/getBackgroundColor';
+import {StoreContext} from '../../../hooks/useStore';
+import {useStore} from 'zustand';
+import {createGroupedTimeLogPeriod} from '../../../helperFunctions/createGroupedTimeLogPeriod';
 
 // ----------------------------------------------------------------------
 
-Category.propTypes = {
-  category: PropTypes.object,
-};
-
-export default function Category({
-  limits,
-  groupedTimeLogsWithDateSorted,
-  user,
-  timeLogs,
-  setTimeLogs,
-  controlValue,
-  setControlValue,
-  category,
-  categories,
-  setCategories,
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  disableHover,
-}) {
-  const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
-  const currentCategoryNumberOfNotes = (category.notes || []).length;
+export default function Category({ category }) {
+  const store = useContext(StoreContext);
+  const {
+    user,
+    setIsEditing,
+    disableHover,
+    isSaving,
+    setIsSaving,
+    categories,
+    setCategories,
+    limits,
+    isEditing,
+    controlValues,
+    setPartialControlValues,
+    timeLogs,
+    setTimeLogs,
+    handleIncorrectControlValues,
+    notes,
+  } = useStore(store);
 
   const [totalPeriodInMs, setTotalPeriodInMs] = useState(
-    groupedTimeLogsWithDateSorted?.totalPeriodInMsWithoutUnfinishedTimeLog
+    createGroupedTimeLogPeriod(user, timeLogs, category.id)
   );
 
-  const hideDuration = category.active && isEditing.categoryId === category.id;
-
   useEffect(() => {
-    const currentGroupedTimeLog = groupedTimeLogsWithDateSorted.find(
-      (groupedTimeLogWithDateSorted) =>
-        groupedTimeLogWithDateSorted.category?.id === category?.id
-    );
-
-    if (!currentGroupedTimeLog) {
+    const hideDuration =
+      category.active && isEditing.categoryId === category.id;
+    if (hideDuration) {
       return;
     }
-    if (!currentGroupedTimeLog.notFinishedPeriod) {
-      return setTotalPeriodInMs(
-        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog
+    createGroupedTimeLogPeriod(user, timeLogs, category.id);
+    const intervalIdLocal = setInterval(() => {
+      setTotalPeriodInMs(
+        createGroupedTimeLogPeriod(user, timeLogs, category.id)
       );
-    }
-    const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
-      if (hideDuration) {
-        return;
-      }
-      const now = DateTime.now().setZone(Timezones[user.timezone]);
-      const unfinishedPeriodDuration = currentGroupedTimeLog?.notFinishedPeriod
-        ? now.ts - currentGroupedTimeLog.notFinishedPeriod.startedAt.ts
-        : 0;
-      if (isNaN(unfinishedPeriodDuration)) {
-        return console.log(`unfinishedPeriodDuration is NaN`);
-      }
-      const totalPeriodDuration =
-        currentGroupedTimeLog.totalPeriodInMsWithoutUnfinishedTimeLog +
-        unfinishedPeriodDuration;
-      if (totalPeriodDuration > 0) {
-        setTotalPeriodInMs(totalPeriodDuration);
-      }
-    };
-    setTotalPeriodInMsWithUnfinishedTimeLog();
-    const intervalIdLocal = setInterval(
-      () => setTotalPeriodInMsWithUnfinishedTimeLog(),
-      1000
-    );
+    }, 1000);
     return () => clearInterval(intervalIdLocal);
-  }, [groupedTimeLogsWithDateSorted, isEditing]);
+  }, [category, timeLogs, user.timezone, isEditing]);
+
+  const categoriesNotesLimit = limits?.categoriesNotesLimit || 5;
+
+  const categoryNotes = notes.filter(
+    (note) => note?.categoryId === category.id
+  );
+  const currentCategoryNumberOfNotes = (categoryNotes || []).length;
 
   const changeShowRecentNotes = async () => {
     setIsSaving(true);
@@ -93,7 +70,7 @@ export default function Category({
       body: {
         categoryId: category.id,
         showRecentNotes: !category.showRecentNotes,
-        controlValue,
+        controlValues,
       },
       method: 'POST',
     });
@@ -106,11 +83,16 @@ export default function Category({
           return { ...category };
         })
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -121,7 +103,7 @@ export default function Category({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/set-active',
-      body: { categoryId: category.id, controlValue },
+      body: { categoryId: category.id, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
@@ -133,8 +115,8 @@ export default function Category({
           return { ...category };
         })
       );
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       if (response.timeLog) {
         const responseTimeLogId = response.timeLog.id;
@@ -143,8 +125,13 @@ export default function Category({
           response.timeLog,
         ]);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -152,19 +139,7 @@ export default function Category({
   };
 
   if (isEditing.categoryId === category.id) {
-    return (
-      <EditCategory
-        controlValue={controlValue}
-        setControlValue={setControlValue}
-        categories={categories}
-        setCategories={setCategories}
-        category={category}
-        isEditing={isEditing}
-        setIsEditing={setIsEditing}
-        isSaving={isSaving}
-        setIsSaving={setIsSaving}
-      />
-    );
+    return <EditCategory category={category} />;
   }
 
   const duration = getDuration(totalPeriodInMs);
@@ -228,8 +203,12 @@ export default function Category({
           </Typography>
           <Box sx={{ display: 'flex', direction: 'column', mb: 0 }}>
             <Typography
+              key={totalPeriodInMs}
               variant="caption"
-              sx={{ color: 'text.secondary', mb: 0 }}
+              sx={{
+                color: 'text.secondary',
+                mb: 0,
+              }}
             >
               Duration today:
               <br />

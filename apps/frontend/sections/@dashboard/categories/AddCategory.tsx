@@ -10,7 +10,7 @@ import {
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import { HuePicker } from 'react-color';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import { getRandomRgbObjectForSliderPicker } from '../../../utils/colors/getRandomRgbObjectForSliderPicker';
 import * as yup from 'yup';
 import { Formik } from 'formik';
@@ -21,26 +21,23 @@ import { getRgbaObjectFromHexString } from '../../../utils/colors/getRgbaObjectF
 import { styled } from '@mui/material/styles';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function AddCategory({
-  controlValue,
-  setControlValue,
-  disableHover,
-  data = {},
-  isEditing,
-  setIsEditing,
-  category,
-  isSaving,
-  setIsSaving,
-  categories,
-  setCategories,
-}) {
-  const startingColor = category?.color
-    ? {
-        hex: category.color,
-        rgb: getRgbaObjectFromHexString(category.color),
-      }
-    : getRandomRgbObjectForSliderPicker();
+export default function AddCategory() {
+  const store = useContext(StoreContext);
+  const {
+    controlValues,
+    setControlValues,
+    disableHover,
+    isEditing,
+    setIsEditing,
+    isSaving,
+    setIsSaving,
+    categories,
+    setCategories,
+  } = useStore(store);
+  const startingColor = getRandomRgbObjectForSliderPicker();
 
   let StyledTextField, darkHexColor;
   const setStyledTextField = (isSaving, hexColor) => {
@@ -86,17 +83,17 @@ export default function AddCategory({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'category/create',
-      body: { name, color, controlValue },
+      body: { name, color, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.category) {
       setCategories([{ ...response.category }, ...categories]);
       setIsEditing({});
       if (response.controlValue) {
-        setControlValue(response.controlValue);
+        setControlValues(response.controlValue);
       }
     } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+      setControlValues(undefined);
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -178,7 +175,6 @@ export default function AddCategory({
   return (
     <Formik
       initialValues={{
-        ...data,
         categoryName: '',
         color: startingColor,
       }}

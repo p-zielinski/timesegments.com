@@ -7,7 +7,15 @@ import { checkHashedString } from '../../common/checkHashedString';
 import { TokenService } from '../token/token.service';
 import { CategoryService } from '../category/category.service';
 import { TimeLogService } from '../time-log/time-log.service';
-import { Prisma, TimeLog, Timezone, User } from '@prisma/client';
+import {
+  Category,
+  Note,
+  Prisma,
+  TimeLog,
+  Timezone,
+  Token,
+  User,
+} from '@prisma/client';
 import {
   CategoriesSortOption,
   EmailType,
@@ -18,7 +26,6 @@ import {
   Timezones,
 } from '@test1/shared';
 import { LoggerService } from '../../common/logger/loger.service';
-import { nanoid } from 'nanoid';
 import { DateTime } from 'luxon';
 import { EmailService } from '../email/email.service';
 
@@ -57,7 +64,10 @@ export class UserService {
       confirmationEmail.updatedAt
     ).setZone(Timezones[user.timezone]);
     const now = DateTime.now().setZone(Timezones[user.timezone]);
-    if (now.ts - confirmationEmailUpdatedAt.ts < 1000 * 60 * 60) {
+    if (
+      now.toMillis() - confirmationEmailUpdatedAt.toMillis() <
+      1000 * 60 * 60
+    ) {
       return {
         success: false,
         error: 'You have changed your email recently, please try again later',
@@ -98,70 +108,100 @@ export class UserService {
     );
   }
 
-  public getNewControlValue(user: User): string {
-    const newControlValue = nanoid();
-    this.updateControlValue(user.id, newControlValue);
-    return newControlValue;
-  }
-
   public async getMeExtended(
     user: User,
-    extend: MeExtendedOption[]
+    extend: MeExtendedOption[],
+    currentToken: Token
   ): Promise<{
     user: User;
-    limits: Limits;
+    categories?: Category[];
+    notes?: Note[];
+    limits?: Limits;
     timeLogs?: TimeLog[];
+    fetchedFrom?: number;
+    currentToken?: Token;
   }> {
-    let timeLogs;
-    const include: Prisma.UserInclude = {};
-    if (extend.includes(MeExtendedOption.CATEGORIES)) {
-      include.categories = {
-        where: { deleted: false },
-        include: extend.includes(MeExtendedOption.CATEGORIES_NOTES)
-          ? { notes: true }
-          : undefined,
-      };
-    }
-
-    if (extend.includes(MeExtendedOption.NOTES)) {
-      include.notes = true; //to be changed
-    }
+    const timeLogs = [],
+      include: Prisma.UserInclude = {};
+    let fetchedFrom = undefined;
 
     if (extend.includes(MeExtendedOption.TODAYS_TIMELOGS)) {
-      const now = DateTime.now().setZone(Timezones[user.timezone]);
-      const today = { month: now.month, year: now.year, day: now.day };
+      const endOfDay = DateTime.now()
+        .setZone(Timezones[user.timezone])
+        .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
+      const beginningOfToday = endOfDay.minus({ days: 1 });
       const findFromToTimeLogsResult =
-        await this.timeLogService.findFromToTimeLogs(user, today, today);
+        await this.timeLogService.findFromToTimeLogs(
+          user,
+          beginningOfToday.toMillis(),
+          endOfDay.toMillis()
+        );
       if (findFromToTimeLogsResult.success === false) {
         this.loggerService.error(
           `Could not find today's time logs for user: ${user.id}`
         );
       } else {
-        timeLogs = findFromToTimeLogsResult?.timeLogs;
+        findFromToTimeLogsResult?.timeLogs.forEach((timeLog) =>
+          timeLogs.push(timeLog)
+        );
+        fetchedFrom = beginningOfToday.toMillis();
       }
     }
 
-    const limits: { categoriesLimit?: number; categoriesNotesLimit?: number } =
-      {};
-    if (extend.includes(MeExtendedOption.CATEGORIES_LIMIT)) {
-      limits.categoriesLimit = this.configService.get<number>(
-        'MAX_NUMBER_OF_CATEGORIES_PER_USER'
-      );
+    if (extend.includes(MeExtendedOption.CATEGORIES)) {
+      include.categories = {
+        where: { deleted: false },
+        include: extend.includes(MeExtendedOption.CATEGORIES_NOTES)
+          ? { notes: { where: { NOT: { categoryId: null } } } }
+          : undefined,
+      };
     }
-    if (extend.includes(MeExtendedOption.NOTES_PER_CATEGORY_LIMIT)) {
-      limits.categoriesNotesLimit = this.configService.get<number>(
-        'MAX_NUMBER_OF_NOTES_PER_CATEGORY'
-      );
+
+    if (!extend.includes(MeExtendedOption.CATEGORIES)) {
+      if (
+        extend.includes(MeExtendedOption.CATEGORIES_NOTES) &&
+        extend.includes(MeExtendedOption.NOTES)
+      ) {
+        include.notes = true;
+      } else if (extend.includes(MeExtendedOption.NOTES)) {
+        include.notes = { where: { categoryId: null } };
+      } else if (extend.includes(MeExtendedOption.CATEGORIES_NOTES)) {
+        include.notes = { where: { NOT: { categoryId: null } } };
+      }
     }
+
+    const userWithNotesAndCategoriesAndCategoriesNotes = Object.keys(include)
+      .length
+      ? await this.prisma.user.findFirst({
+          where: { id: user.id },
+          include,
+        })
+      : user;
+
+    const { categories, notes } = extractCategoriesAndNotesFromExtendedUser(
+      userWithNotesAndCategoriesAndCategoriesNotes
+    );
+
     return {
-      user: extend.includes(MeExtendedOption.CATEGORIES)
-        ? await this.prisma.user.findFirst({
-            where: { id: user.id },
-            include,
-          })
+      currentToken: extend.includes(MeExtendedOption.CURRENT_TOKEN)
+        ? currentToken
         : undefined,
-      limits: Object.keys(limits).length ? limits : undefined,
-      timeLogs,
+      user,
+      categories: extend.includes(MeExtendedOption.CATEGORIES)
+        ? categories
+        : undefined,
+      notes:
+        extend.includes(MeExtendedOption.NOTES) ||
+        extend.includes(MeExtendedOption.CATEGORIES_NOTES)
+          ? notes
+          : undefined,
+      limits: getLimits(extend, this.configService),
+      timeLogs: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
+        ? timeLogs
+        : undefined,
+      fetchedFrom: extend.includes(MeExtendedOption.TODAYS_TIMELOGS)
+        ? fetchedFrom
+        : undefined,
     };
   }
 
@@ -197,7 +237,6 @@ export class UserService {
       }
       const token = await this.tokenService.generateToken(
         newUser.id,
-        new Date(Date.now() + 3600 * 1000 * 24 * 60),
         data.userAgent
       );
       return {
@@ -205,7 +244,6 @@ export class UserService {
         token: this.jwtService.sign({
           userId: newUser.id,
           tokenId: token.id,
-          expiresAt: token.expiresAt,
         }),
         user: newUser,
       };
@@ -246,7 +284,6 @@ export class UserService {
     }
     const token = await this.tokenService.generateToken(
       requestedUser.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60),
       data.userAgent
     );
     return {
@@ -254,7 +291,6 @@ export class UserService {
       token: this.jwtService.sign({
         userId: requestedUser.id,
         tokenId: token.id,
-        expiresAt: token.expiresAt,
       }),
       user: requestedUser,
     };
@@ -267,11 +303,14 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data: { name, controlValue: nanoid() },
-        select: { name: true, controlValue: true },
+        data: { name },
+        select: { name: true },
       });
       if (updatedUser.name === name) {
-        return { success: true, name, controlValue: updatedUser.controlValue };
+        return {
+          success: true,
+          name,
+        };
       }
     } catch (error) {
       this.loggerService.error(error);
@@ -341,14 +380,13 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
-        data: { timezone, controlValue: nanoid() },
-        select: { timezone: true, controlValue: true },
+        data: { timezone },
+        select: { timezone: true },
       });
       if (updatedUser.timezone === timezone) {
         return {
           success: true,
           timezone,
-          controlValue: updatedUser.controlValue,
         };
       }
     } catch (error) {
@@ -398,7 +436,10 @@ export class UserService {
         select: { sortingNotes: true },
       });
       if (updatedUser.sortingNotes === sortingNotes) {
-        return { success: true, sortingNotes };
+        return {
+          success: true,
+          sortingNotes,
+        };
       }
     } catch (error) {
       this.loggerService.error(error);
@@ -417,11 +458,40 @@ export class UserService {
     });
   }
 
-  private async updateControlValue(userId: string, controlValue: string) {
-    await this.updateUser(userId, { controlValue });
-  }
-
   public async findUserByEmail(email: string) {
     return await this.prisma.user.findFirst({ where: { email } });
   }
 }
+
+const getLimits = (
+  meExtendedOptions: MeExtendedOption[],
+  configService: ConfigService
+) => {
+  if (!meExtendedOptions.includes(MeExtendedOption.LIMITS)) {
+    return undefined;
+  }
+  return {
+    categoriesLimit: configService.get<number>(
+      'MAX_NUMBER_OF_CATEGORIES_PER_USER'
+    ),
+    categoriesNotesLimit: configService.get<number>(
+      'MAX_NUMBER_OF_NOTES_PER_CATEGORY'
+    ),
+    notesLimit: configService.get<number>('MAX_NUMBER_OF_NOTES_PER_USER'),
+  };
+};
+
+const extractCategoriesAndNotesFromExtendedUser = (userExtended) => {
+  const categoriesWithNotes = userExtended.categories;
+  const notes = [
+    ...(userExtended.notes || []),
+    ...(userExtended?.categories?.map?.((category) => category.notes)?.flat() ||
+      []),
+  ];
+  const categories =
+    categoriesWithNotes?.map((category) => {
+      delete category.notes;
+      return category;
+    }) || [];
+  return { categories, notes };
+};

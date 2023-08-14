@@ -63,7 +63,6 @@ export class EmailService {
     await this.sendEmail(email.user, EmailType.EMAIL_CONFIRMATION);
     const token = await this.tokenService.generateToken(
       email.user.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60),
       userAgent
     );
     return {
@@ -71,7 +70,6 @@ export class EmailService {
       token: this.jwtService.sign({
         userId: email.user.id,
         tokenId: token.id,
-        expiresAt: token.expiresAt,
       }),
     };
   }
@@ -94,7 +92,6 @@ export class EmailService {
     await this.removeEmailRecordInDatabase(email.id);
     const token = await this.tokenService.generateToken(
       email.user.id,
-      new Date(Date.now() + 3600 * 1000 * 24 * 60),
       userAgent
     );
     return {
@@ -102,7 +99,6 @@ export class EmailService {
       token: this.jwtService.sign({
         userId: email.user.id,
         tokenId: token.id,
-        expiresAt: token.expiresAt,
       }),
     };
   }
@@ -139,7 +135,7 @@ export class EmailService {
       Timezones[email.user.timezone]
     );
     const now = DateTime.now().setZone(Timezones[email.user.timezone]);
-    if (now.ts - emailSentAt.ts > validFor) {
+    if (now.toMillis() - emailSentAt.toMillis() > validFor) {
       return { success: false, error: 'Email has expired' };
     }
     return { success: true, email };
@@ -182,7 +178,7 @@ export class EmailService {
       Timezones[userTimezone]
     );
     const now = DateTime.now().setZone(Timezones[userTimezone]);
-    return now.ts - emailSentAt.ts >= 1000 * 60 * 60;
+    return now.toMillis() - emailSentAt.toMillis() >= 1000 * 60 * 60;
   }
 
   private async createEmailRecordInDatabase(user: User, emailType: EmailType) {

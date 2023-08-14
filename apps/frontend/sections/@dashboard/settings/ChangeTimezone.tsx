@@ -9,7 +9,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React from 'react';
+import React, { useContext } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -21,19 +21,26 @@ import { StatusCodes } from 'http-status-codes';
 import { timezoneOptionsForSelect } from '../Form/timezoneOptionsForSelect';
 import { SelectWithSearch } from '../../../components/form/SelectWithSearch';
 import { findKeyOfValueInObject, Timezones } from '@test1/shared';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
+import { Timezone } from '.prisma/client';
 
 export default function ChangeTimezone({
-  controlValue,
-  setControlValue,
-  disableHover,
-  user,
-  isSaving,
-  setIsSaving,
-  setUser,
   setOpenedSettingOption,
   currentSettingOption,
   setCompleted,
 }) {
+  const store = useContext(StoreContext);
+  const {
+    controlValues,
+    setPartialControlValues,
+    disableHover,
+    user,
+    isSaving,
+    setIsSaving,
+    setUser,
+    handleIncorrectControlValues,
+  } = useStore(store);
   const { color } = currentSettingOption;
   let StyledTextField, darkHexColor;
   const setStyledTextField = (hexColor) => {
@@ -75,20 +82,25 @@ export default function ChangeTimezone({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'user/change-timezone',
-      body: { timezone, controlValue },
+      body: { timezone, controlValues },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setUser({
         ...user,
-        timezone: findKeyOfValueInObject(Timezones, timezone),
+        timezone: findKeyOfValueInObject(Timezones, timezone) as Timezone,
       });
-      if (response.controlValue) {
-        setControlValue(response.controlValue);
+      if (response.partialControlValues) {
+        setPartialControlValues(response.partialControlValues);
       }
       setCompleted(true);
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
