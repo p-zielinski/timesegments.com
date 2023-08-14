@@ -180,11 +180,11 @@ export default function TimeLogs({
   return (
     <StoreContext.Provider value={store}>
       <DashboardLayout
-        title={'Dashboard'}
+        title={'Time Logs'}
         randomSliderHexColor={randomSliderHexColor}
       >
         <Helmet>
-          <title>Settings</title>
+          <title>Time Logs</title>
         </Helmet>
         <LocalizationProvider dateAdapter={AdapterLuxon}>
           <Container sx={{ mt: -3 }}>
@@ -192,7 +192,7 @@ export default function TimeLogs({
               <Grid item xs={1} sm={1} md={1}>
                 <Formik
                   initialValues={{
-                    onlyOneDay: true,
+                    showOnlyOneDay: true,
                     fromDate: beginningOfADay,
                     toDate: beginningOfADay,
                   }}
@@ -238,7 +238,7 @@ export default function TimeLogs({
                               <Box sx={{ display: 'flex' }}>
                                 <BpCheckbox
                                   onClick={() => {
-                                    if (!values.onlyOneDay) {
+                                    if (!values.showOnlyOneDay) {
                                       const { fromDate } = values;
                                       setFieldValue('toDate', fromDate);
                                       setShowTimeLogsTo(
@@ -250,11 +250,11 @@ export default function TimeLogs({
                                       );
                                     }
                                     setFieldValue(
-                                      'onlyOneDay',
-                                      !values.onlyOneDay
+                                      'showOnlyOneDay',
+                                      !values.showOnlyOneDay
                                     );
                                   }}
-                                  checked={!!values.onlyOneDay}
+                                  checked={!!values.showOnlyOneDay}
                                 />
                                 <Stack
                                   sx={{
@@ -280,13 +280,15 @@ export default function TimeLogs({
                               }
                               onChangeFnc={(value) => {
                                 setShowTimeLogsFrom(value.toMillis());
-                                if (values.onlyOneDay) {
+                                if (values.showOnlyOneDay) {
                                   setFieldValue('toDate', value);
-                                  setShowTimeLogsTo(value.set({ hour: 24 }));
+                                  setShowTimeLogsTo(
+                                    value.set({ hour: 24 }).toMillis()
+                                  );
                                 }
                               }}
                               shouldDisableDate={(date) =>
-                                values.onlyOneDay
+                                values.showOnlyOneDay
                                   ? false
                                   : date.toMillis() > values.toDate.toMillis()
                               }
@@ -295,7 +297,7 @@ export default function TimeLogs({
                               timezone={Timezones[user.timezone]}
                               label={'To Date'}
                               name={'toDate'}
-                              disabled={values.onlyOneDay}
+                              disabled={values.showOnlyOneDay}
                               getTextFieldProps={getTextFieldProps}
                               helperTextColor={
                                 isSaving ? IS_SAVING_HEX : darkHexColor

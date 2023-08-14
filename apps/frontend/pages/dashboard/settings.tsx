@@ -174,7 +174,7 @@ export default function Index({
         randomSliderHexColor={randomSliderHexColor}
       >
         <Helmet>
-          <title>Dashboard</title>
+          <title>Settings</title>
         </Helmet>
         <Container sx={{ minHeight: 'calc(100vh - 200px)', mt: -5 }}>
           <Grid container spacing={2} columns={1}>
