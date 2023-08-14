@@ -14,7 +14,7 @@ export const mapTimeLogToDateTimeLogs = (timeLog, userTimeZone, categories) => {
   const ended = !!timeLog.endedAt;
   let periodInSeconds, periodInMinutes, periodInHours;
   if (ended) {
-    const periodTotalMs = endedAt.toMillis() - startedAt.ts;
+    const periodTotalMs = endedAt.toMillis() - startedAt.toMillis();
     const periodInSecondsTotal = Math.floor(periodTotalMs / 1000);
     const periodInMinutesTotal = Math.floor(periodInSecondsTotal / 60);
     periodInHours = Math.floor(periodInMinutesTotal / 60);
@@ -30,7 +30,9 @@ export const mapTimeLogToDateTimeLogs = (timeLog, userTimeZone, categories) => {
     category: timeLog.categoryId
       ? categories.find((category) => category.id === timeLog.categoryId)
       : undefined,
-    periodTotalMs: ended ? endedAt.ts - startedAt.ts : undefined,
+    periodTotalMs: ended
+      ? endedAt.toMillis() - startedAt.toMillis()
+      : undefined,
     periodInHours,
     periodInMinutes,
     periodInSeconds,
