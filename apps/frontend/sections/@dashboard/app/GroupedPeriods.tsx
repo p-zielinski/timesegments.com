@@ -106,6 +106,7 @@ export default function GroupedPeriods({}) {
         )
         .map((categoryIdNotFinishedStateAndDuration) => (
           <GroupedPeriod
+            key={`${categoryIdNotFinishedStateAndDuration.categoryId}-${categoryIdNotFinishedStateAndDuration.duration}`}
             categoryIdNotFinishedStateAndDuration={
               categoryIdNotFinishedStateAndDuration
             }

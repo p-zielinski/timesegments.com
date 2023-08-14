@@ -39,7 +39,7 @@ export default function BrowseTimeLogs({ showDetails }) {
         {/*    /!*  refreshTimeLogs={refreshTimeLogs}*!/*/}
         {/*    /!*/
         /*/}
-                                                                                                                                  {/*    {`timeLogs`}*/}
+                                                                                                                                          {/*    {`timeLogs`}*/}
         {/*  </>*/}
         {/*) : timeLogsWithinActiveDate?.length ? (*/}
         {/*  getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(*/}
