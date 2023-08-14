@@ -25,14 +25,13 @@ function CustomApp({ Component, pageProps }: AppProps) {
 
   if (loading) {
     return (
-      <div
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        <div className="custom-loader"></div>
+      <div className="gooey">
+        <div className="dot" />
+        <div className="dots">
+          <div className="dot-span"></div>
+          <div className="dot-span"></div>
+          <div className="dot-span"></div>
+        </div>
       </div>
     );
   }

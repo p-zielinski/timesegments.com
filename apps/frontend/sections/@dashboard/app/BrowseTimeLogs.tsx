@@ -1,5 +1,5 @@
 // @mui
-import {Box} from '@mui/material';
+import {Box, CircularProgress} from '@mui/material';
 import React, {useContext, useEffect, useState} from 'react';
 import {DateTime} from 'luxon';
 import {Timezones} from '@test1/shared';
@@ -12,12 +12,27 @@ import TimeLogsWithinDesiredPeriod from './TimeLogsWithinDesiredPeriod';
 
 export default function BrowseTimeLogs({ showDetails }) {
   const store = useContext(StoreContext);
-  const { user, timeLogs, showTimeLogsFrom, showTimeLogsTo } = useStore(store);
+  const { isSaving } = useStore(store);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {showDetails ? <TimeLogsWithinDesiredPeriod /> : <GroupedPeriods />}
+        {isSaving ? (
+          <Box
+            sx={{
+              width: '100%',
+              justifyContent: 'center',
+              display: 'flex',
+              mt: 1,
+            }}
+          >
+            <CircularProgress disableShrink size={100} thickness={1.5} />
+          </Box>
+        ) : showDetails ? (
+          <TimeLogsWithinDesiredPeriod />
+        ) : (
+          <GroupedPeriods />
+        )}
 
         {/*{showDetails ? (*/}
         {/*  <>*/}
@@ -34,7 +49,7 @@ export default function BrowseTimeLogs({ showDetails }) {
         {/*    /!*  refreshTimeLogs={refreshTimeLogs}*!/*/}
         {/*    /!*/
         /*/}
-                                                                                                                                                {/*    {`timeLogs`}*/}
+                                                                                                                                                                            {/*    {`timeLogs`}*/}
         {/*  </>*/}
         {/*) : timeLogsWithinActiveDate?.length ? (*/}
         {/*  getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(*/}
