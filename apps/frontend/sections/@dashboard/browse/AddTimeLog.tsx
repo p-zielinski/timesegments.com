@@ -198,8 +198,8 @@ export default function AddTimeLog({
               return 'Valid start date time is required';
             }
             if (
-              !originalValue?.ts ||
-              DateTime.now().ts - originalValue.ts < 0
+              !originalValue?.toMillis() ||
+              DateTime.now().toMillis() - originalValue.toMillis() < 0
             ) {
               return 'Start date time must be earlier than now';
             }
@@ -212,7 +212,8 @@ export default function AddTimeLog({
               zone: Timezones[user.timezone],
             });
             return !(
-              !startDateTime.ts || DateTime.now().ts - startDateTime.ts < 0
+              !startDateTime.toMillis() ||
+              DateTime.now().toMillis() - startDateTime.toMillis() < 0
             );
           },
         }),
@@ -226,10 +227,13 @@ export default function AddTimeLog({
             if (!value) {
               return 'Start date time is required';
             }
-            if (value === 'Invalid DateTime' || !originalValue?.ts) {
+            if (value === 'Invalid DateTime' || !originalValue?.toMillis()) {
               return 'Valid start date time is required';
             }
-            if (originalValue?.ts || DateTime.now().ts - originalValue.ts < 0) {
+            if (
+              originalValue?.toMillis() ||
+              DateTime.now().toMillis() - originalValue.toMillis() < 0
+            ) {
               return 'End date time must be later than start date time';
             }
           },
@@ -245,7 +249,10 @@ export default function AddTimeLog({
             const endDateTime = DateTime.fromISO(value, {
               zone: Timezones[user.timezone],
             });
-            if (!endDateTime.ts || DateTime.now().ts - endDateTime.ts <= 0) {
+            if (
+              !endDateTime.toMillis() ||
+              DateTime.now().toMillis() - endDateTime.toMillis() <= 0
+            ) {
               return false;
             }
             if (!rawStartDateTime || rawStartDateTime === 'Invalid DateTime') {
@@ -254,10 +261,10 @@ export default function AddTimeLog({
             const startDateTime = DateTime.fromISO(rawStartDateTime, {
               zone: Timezones[user.timezone],
             });
-            if (!startDateTime?.ts) {
+            if (!startDateTime?.toMillis()) {
               return true;
             }
-            return endDateTime.ts - startDateTime.ts > 0;
+            return endDateTime.toMillis() - startDateTime.toMillis() > 0;
           },
         }),
     });
@@ -271,7 +278,11 @@ export default function AddTimeLog({
     setIsSaving(true);
     const response = await handleFetch({
       pathOrUrl: 'time-log/create',
-      body: { categoryId, from: startDateTime.c, to: endDateTime?.c },
+      body: {
+        categoryId,
+        from: startDateTime.toMillis(),
+        to: endDateTime?.toMillis(),
+      },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED && response?.timeLog) {
@@ -295,9 +306,9 @@ export default function AddTimeLog({
         ...data,
         finished: false,
         categoryId: '',
-        startDateTime: '',
-        endDateTime: '',
-        endDateTimeHidden: '',
+        startDateTime: undefined,
+        endDateTime: undefined,
+        endDateTimeHidden: undefined,
       }}
       onSubmit={async (values, { setSubmitting }) => {
         await createTimeLog(

@@ -62,7 +62,7 @@ export default function ManageLoginSessions({
 
   const getLoginSessionOptions = (tokens: Token[]) => {
     return tokens.map((token) => {
-      const createdAtString = DateTime.fromISO(token.createdAt, {
+      const createdAtString = DateTime.fromISO(token.createdAt.toString(), {
         zone: Timezones[user.timezone],
       }).toLocaleString({
         year: 'numeric',
