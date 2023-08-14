@@ -51,7 +51,10 @@ import { redisStore } from 'cache-manager-redis-yet';
           socket: {
             host: getRedisHost(redisUrl) || 'localhost',
             port: getRedisPort(redisUrl) || 6379,
-            tls: undefined,
+            tls:
+              (getRedisHost(redisUrl) || 'localhost') !== 'localhost'
+                ? true
+                : undefined,
           },
         })) as CacheStore;
         return {
