@@ -73,9 +73,9 @@ export class TimeLogService {
     }
     const startedAt = DateTime.fromObject(from, {
       zone: Timezones[user.timezone],
-    }).toISO();
+    });
     const endedAt = to
-      ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
+      ? DateTime.fromObject(to, { zone: Timezones[user.timezone] })
       : null;
     if (endedAt?.toMillis() && endedAt.toMillis() <= startedAt.toMillis()) {
       return {
@@ -92,7 +92,12 @@ export class TimeLogService {
       });
     }
     const createdTimeLog = await this.prisma.timeLog.create({
-      data: { userId: user.id, categoryId, startedAt, endedAt },
+      data: {
+        userId: user.id,
+        categoryId,
+        startedAt: startedAt.toISO(),
+        endedAt: endedAt.toISO(),
+      },
     });
     return {
       success: true,
