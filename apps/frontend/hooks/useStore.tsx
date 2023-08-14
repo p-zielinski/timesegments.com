@@ -161,7 +161,8 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
           const newDesiredFetchedFrom = DateTime.now()
             .setZone(Timezones[user.timezone])
             .set({ hour: 24, minute: 0, second: 0, millisecond: 0 })
-            .minus({ days: 1 }).ts;
+            .minus({ days: 1 })
+            .toMillis();
           if (newDesiredFetchedFrom < storedFetchedFrom) {
             const response = await handleFetch({
               pathOrUrl: 'time-log/find-extended',

@@ -88,7 +88,7 @@ export const findTimeLogsWithinCurrentPeriod = ({
           zone: userTimezone,
         })
       : DateTime.now().setZone(userTimezone);
-    if (fromDateTime.ts > timeLogEndedAt.ts) {
+    if (fromDateTime.toMillis() > timeLogEndedAt.ts) {
       return;
     }
     if (toDateTime.ts < timeLogStartedAt.ts) {

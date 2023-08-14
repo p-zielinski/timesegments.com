@@ -39,7 +39,7 @@ export default function BrowseTimeLogs({ showDetails }) {
         {/*    /!*  refreshTimeLogs={refreshTimeLogs}*!/*/}
         {/*    /!*/
         /*/}
-                                                                                                                                          {/*    {`timeLogs`}*/}
+                                                                                                                                            {/*    {`timeLogs`}*/}
         {/*  </>*/}
         {/*) : timeLogsWithinActiveDate?.length ? (*/}
         {/*  getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(*/}
@@ -68,7 +68,8 @@ function DetailPeriod({ timeLogExtended, user, setIsEditing }) {
     }
     const setTotalPeriodInMsWithUnfinishedTimeLog = () => {
       const now = DateTime.now().setZone(Timezones[user.timezone]);
-      const totalPeriodInMs = now.ts - timeLogExtended.startedAt.ts;
+      const totalPeriodInMs =
+        now.toMillis() - timeLogExtended.startedAt.toMillis();
       if (isNaN(totalPeriodInMs)) {
         return console.log(`totalPeriodInMs is NaN`);
       }

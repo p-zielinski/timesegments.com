@@ -1,28 +1,38 @@
-import {Helmet} from 'react-helmet-async'; // @mui
-import {Box, Container, Grid, Typography} from '@mui/material'; // components
-import DashboardLayout from '../../layouts/dashboard';
-import React, {useEffect, useRef, useState} from 'react';
-import {User} from '@prisma/client';
+import { Helmet } from 'react-helmet-async'; // @mui
+import { Box, Container, Grid, Typography } from '@mui/material'; // components
+import React, { useEffect, useRef, useState } from 'react';
+import { User } from '@prisma/client';
 import Cookies from 'cookies';
-import {getRandomRgbObjectForSliderPicker} from '../../utils/colors/getRandomRgbObjectForSliderPicker';
-import {isMobile} from 'react-device-detect';
+import { getRandomRgbObjectForSliderPicker } from '../../utils/colors/getRandomRgbObjectForSliderPicker';
+import { isMobile } from 'react-device-detect';
 import SetName from '../../sections/@dashboard/settings/SetName';
 import ChangeTimezone from '../../sections/@dashboard/settings/ChangeTimezone';
 import ChangePassword from '../../sections/@dashboard/settings/ChangePassword';
-import {getColorShadeBasedOnSliderPickerSchema} from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
-import {getHexFromRGBObject} from '../../utils/colors/getHexFromRGBObject';
+import { getColorShadeBasedOnSliderPickerSchema } from '../../utils/colors/getColorShadeBasedOnSliderPickerSchema';
+import { getHexFromRGBObject } from '../../utils/colors/getHexFromRGBObject';
 import ChangeEmail from '../../sections/@dashboard/settings/ChangeEmail';
-import {getBackgroundColor} from '../../utils/colors/getBackgroundColor';
-import {TimelineDot} from '@mui/lab';
+import { getBackgroundColor } from '../../utils/colors/getBackgroundColor';
+import { TimelineDot } from '@mui/lab';
 import Iconify from '../../components/iconify';
-import {SettingOption} from '../../enum/settingOption';
-import {ControlValue, findKeyOfValueInObject, MeExtendedOption, Timezones,} from '@test1/shared';
+import { SettingOption } from '../../enum/settingOption';
+import {
+  ControlValue,
+  findKeyOfValueInObject,
+  MeExtendedOption,
+  Timezones,
+} from '@test1/shared';
 import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo';
 import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail';
 import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
-import {createStore, StoreContext} from '../../hooks/useStore';
-import {useRouter} from 'next/router';
-import {useStore} from 'zustand'; // ----------------------------------------------------------------------
+import { createStore, StoreContext } from '../../hooks/useStore';
+import { useRouter } from 'next/router';
+import { useStore } from 'zustand';
+import dynamic from 'next/dynamic';
+
+const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
+  ssr: false,
+});
+// ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------

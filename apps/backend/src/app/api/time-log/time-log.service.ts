@@ -77,7 +77,7 @@ export class TimeLogService {
     const endedAt = to
       ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
       : null;
-    if (endedAt?.ts && endedAt.ts <= startedAt.ts) {
+    if (endedAt?.toMillis() && endedAt.toMillis() <= startedAt.toMillis()) {
       return {
         success: false,
         error: `End date time must be later than start date time`,
@@ -180,7 +180,7 @@ export class TimeLogService {
     if (!fromDateIso || !toDateIso) {
       return { success: false, error: 'Date not valid' };
     }
-    if (fromDateTime.ts > toDateTime.ts) {
+    if (fromDateTime.toMillis() > toDateTime.toMillis()) {
       return { success: false, error: 'Date not valid' };
     }
     const results = await this.prisma.timeLog.findMany({

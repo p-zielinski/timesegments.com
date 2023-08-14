@@ -194,7 +194,7 @@ export default function AddTimeLog({
             if (!value) {
               return 'Start date time is required';
             }
-            if (value === 'Invalid DateTime' || !originalValue?.ts) {
+            if (value === 'Invalid DateTime' || !originalValue?.toMillis()) {
               return 'Valid start date time is required';
             }
             if (

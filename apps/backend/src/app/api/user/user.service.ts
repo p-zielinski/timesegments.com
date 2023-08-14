@@ -64,7 +64,10 @@ export class UserService {
       confirmationEmail.updatedAt
     ).setZone(Timezones[user.timezone]);
     const now = DateTime.now().setZone(Timezones[user.timezone]);
-    if (now.ts - confirmationEmailUpdatedAt.ts < 1000 * 60 * 60) {
+    if (
+      now.toMillis() - confirmationEmailUpdatedAt.toMillis() <
+      1000 * 60 * 60
+    ) {
       return {
         success: false,
         error: 'You have changed your email recently, please try again later',
@@ -130,8 +133,8 @@ export class UserService {
       const findFromToTimeLogsResult =
         await this.timeLogService.findFromToTimeLogs(
           user,
-          beginningOfToday.ts,
-          endOfDay.ts
+          beginningOfToday.toMillis(),
+          endOfDay.toMillis()
         );
       if (findFromToTimeLogsResult.success === false) {
         this.loggerService.error(
@@ -141,7 +144,7 @@ export class UserService {
         findFromToTimeLogsResult?.timeLogs.forEach((timeLog) =>
           timeLogs.push(timeLog)
         );
-        fetchedFrom = beginningOfToday.ts;
+        fetchedFrom = beginningOfToday.toMillis();
       }
     }
 

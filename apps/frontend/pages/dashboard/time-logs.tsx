@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 // components
 // sections
-import DashboardLayout from '../../layouts/dashboard';
 import React, { useRef, useState } from 'react';
 import { Category, TimeLog, User } from '@prisma/client';
 import { DateTime } from 'luxon';
@@ -50,7 +49,12 @@ import { createStore, StoreContext } from '../../hooks/useStore';
 import { useRouter } from 'next/router';
 import { useStore } from 'zustand';
 import { getHexFromRGBAString } from 'apps/frontend/utils/colors/getHexFromRGBString';
+import dynamic from 'next/dynamic';
 import BrowseTimeLogs from '../../sections/@dashboard/app/BrowseTimeLogs';
+
+const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
+  ssr: false,
+});
 
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
@@ -87,6 +91,7 @@ export default function TimeLogs({
     second: 0,
     millisecond: 0,
   });
+  //beginningOfADay.toMillis()
   const store = useRef(
     createStore({
       timeLogs: serverSideFetchedTimeLogs,
@@ -96,8 +101,8 @@ export default function TimeLogs({
       controlValues: serverSideFetchedControlValues,
       categories: serverSideFetchedCategories,
       fetchedPeriods: fetchedPeriodsStartingValue,
-      showTimeLogsFrom: beginningOfADay.ts,
-      showTimeLogsTo: beginningOfADay.ts + 1000 * 60 * 60 * 24,
+      showTimeLogsFrom: beginningOfADay.toMillis(),
+      showTimeLogsTo: beginningOfADay.toMillis() + 1000 * 60 * 60 * 24,
     })
   ).current;
   const { user, isSaving, timeLogs, setShowTimeLogsFrom, setShowTimeLogsTo } =
@@ -234,7 +239,15 @@ export default function TimeLogs({
                                 <BpCheckbox
                                   onClick={() => {
                                     if (!values.onlyOneDay) {
-                                      setFieldValue('toDate', values.fromDate);
+                                      const { fromDate } = values;
+                                      setFieldValue('toDate', fromDate);
+                                      setShowTimeLogsTo(
+                                        fromDate
+                                          .set({
+                                            hour: 24,
+                                          })
+                                          .toMillis()
+                                      );
                                     }
                                     setFieldValue(
                                       'onlyOneDay',
@@ -266,7 +279,7 @@ export default function TimeLogs({
                                 isSaving ? IS_SAVING_HEX : darkHexColor
                               }
                               onChangeFnc={(value) => {
-                                setShowTimeLogsFrom(value.ts);
+                                setShowTimeLogsFrom(value.toMillis());
                                 if (values.onlyOneDay) {
                                   setFieldValue('toDate', value);
                                   setShowTimeLogsTo(value.set({ hour: 24 }));
@@ -275,7 +288,7 @@ export default function TimeLogs({
                               shouldDisableDate={(date) =>
                                 values.onlyOneDay
                                   ? false
-                                  : date.ts > values.toDate.ts
+                                  : date.toMillis() > values.toDate.toMillis()
                               }
                             />
                             <DatePicker
@@ -288,7 +301,7 @@ export default function TimeLogs({
                                 isSaving ? IS_SAVING_HEX : darkHexColor
                               }
                               shouldDisableDate={(date) =>
-                                date.ts < values.fromDate.ts
+                                date.toMillis() < values.fromDate.toMillis()
                               }
                               onChangeFnc={(value) => {
                                 setShowTimeLogsTo(value.set({ hour: 24 }));
@@ -462,8 +475,8 @@ export const getServerSideProps = async ({ req, res }) => {
           authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
-          from: beginningOfADaySevenDaysAgo.ts,
-          to: endOfDay.ts,
+          from: beginningOfADaySevenDaysAgo.toMillis(),
+          to: endOfDay.toMillis(),
           alreadyKnownCategories: Object.keys(
             userCategories.map((category) => category.id)
           ),
@@ -475,8 +488,8 @@ export const getServerSideProps = async ({ req, res }) => {
 
     const fetchedPeriods = [
       {
-        from: beginningOfADaySevenDaysAgo.ts,
-        to: endOfDay.ts,
+        from: beginningOfADaySevenDaysAgo.toMillis(),
+        to: endOfDay.toMillis(),
       },
     ];
 

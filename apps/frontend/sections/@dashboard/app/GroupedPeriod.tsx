@@ -30,7 +30,7 @@ export default function GroupedPeriod({
       category.id === categoryIdNotFinishedStateAndDuration.categoryId
   );
   const color = category.color;
-  const hideActive = showTimeLogsTo < DateTime.now().ts;
+  const hideActive = showTimeLogsTo < DateTime.now().toMillis();
 
   return (
     <Box

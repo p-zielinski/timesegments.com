@@ -13,7 +13,10 @@ export const createGroupedTimeLogPeriod = (
     .setZone(Timezones[user.timezone])
     .set({ hour: 24, minute: 0, second: 0, millisecond: 0 });
   const beginningOfToday = endOfDay.minus({ days: 1 });
-  const desiredPeriod = { from: beginningOfToday.ts, to: endOfDay.ts };
+  const desiredPeriod = {
+    from: beginningOfToday.toMillis(),
+    to: endOfDay.toMillis(),
+  };
   let groupedTimeLogPeriods: number = 0;
   timeLogs
     .filter((timeLog) => timeLog.categoryId === categoryId)
