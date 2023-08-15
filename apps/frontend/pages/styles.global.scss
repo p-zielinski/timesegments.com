@@ -1,58 +1,60 @@
 :root {
-  --dots-color: rgb(40, 40, 30)
+  --primary-color: hsl(222, 78%, 61%);
 }
 
-.gooey {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 142px;
-  height: 40px;
-  margin: -20px 0 0 -71px;
-  background: white;
-  filter: contrast(20);
+.clock-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: var(--primary-color);
 }
 
-.dot {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 12px;
-  left: 15px;
-  filter: blur(4px);
-  background: var(--dots-color);
+.clock-loader {
+  --clock-color: var(--primary-color);
+  --clock-width: 4rem;
+  --clock-radius: calc(var(--clock-width) / 2);
+  --clock-minute-length: calc(var(--clock-width) * 0.4);
+  --clock-hour-length: calc(var(--clock-width) * 0.2);
+  --clock-thickness: 0.2rem;
+
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: var(--clock-width);
+  height: var(--clock-width);
+  border: 3px solid var(--clock-color);
   border-radius: 50%;
-  transform: translateX(0);
-  animation: dot 2.8s infinite;
-}
 
-.dot-span {
-  display: block;
-  float: left;
-  width: 16px;
-  height: 16px;
-  margin-left: 16px;
-  filter: blur(4px);
-  background: var(--dots-color);
-  border-radius: 50%;
-}
+  &::before,
+  &::after {
+    position: absolute;
+    content: "";
+    top: calc(var(--clock-radius) * 0.25);
+    width: var(--clock-thickness);
+    background: var(--clock-color);
+    border-radius: 10px;
+    transform-origin: center calc(100% - calc(var(--clock-thickness) / 2));
+    animation: spin infinite linear;
+  }
 
-.dots {
-  transform: translateX(0);
-  margin-top: 12px;
-  margin-left: 31px;
-  animation: dots 2.8s infinite;
-}
+  &::before {
+    top: calc(var(--clock-radius) * -0.615 + var(--clock-minute-length));
+    height: var(--clock-minute-length);
+    animation-duration: 2s;
+  }
 
-@keyframes dot {
-  50% {
-    transform: translateX(96px);
+  &::after {
+    top: calc(var(--clock-radius) * 0.17 + var(--clock-hour-length));
+    height: var(--clock-hour-length);
+    animation-duration: 15s;
   }
 }
 
-@keyframes dots {
-  50% {
-    transform: translateX(-31px);
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
   }
 }
 

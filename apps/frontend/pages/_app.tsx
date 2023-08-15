@@ -3,7 +3,7 @@ import Head from 'next/head';
 import ThemeProvider from '../theme';
 import ScrollToTop from '../components/scroll-to-top';
 import { HelmetProvider } from 'react-helmet-async';
-import './styles.css';
+import './styles.global.scss';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -25,12 +25,10 @@ function CustomApp({ Component, pageProps }: AppProps) {
 
   if (loading) {
     return (
-      <div className="gooey">
-        <div className="dot" />
-        <div className="dots">
-          <div className="dot-span"></div>
-          <div className="dot-span"></div>
-          <div className="dot-span"></div>
+      <div className="clock-wrapper">
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="clock-loader" />
+          <div style={{ marginTop: 5 }}>loading...</div>
         </div>
       </div>
     );
