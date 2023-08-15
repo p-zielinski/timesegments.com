@@ -2,12 +2,19 @@
   --primary-color: hsl(222, 78%, 61%);
 }
 
+
 .clock-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 50vh;
   color: var(--primary-color);
+}
+
+@media screen and (min-width: 768px) {
+  .clock-wrapper {
+    min-height: 25vh;
+  }
 }
 
 .clock-loader {
