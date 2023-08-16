@@ -144,12 +144,13 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
               response;
             setFetchedPeriods([...fetchedPeriods, ...periodsNeededToBeFetched]);
             if (fetchedTimeLogs?.length) {
-              setTimeLogs(uniqBy([...fetchedTimeLogs, timeLogs], 'id'));
+              setTimeLogs(uniqBy([...fetchedTimeLogs, ...timeLogs], 'id'));
             }
             if (fetchedCategories?.length) {
-              setCategories(uniqBy([...fetchedCategories, categories], 'id'));
+              setCategories(
+                uniqBy([...fetchedCategories, ...categories], 'id')
+              );
             }
-            setIsSaving(false);
           } else if (
             response.statusCode === StatusCodes.CONFLICT &&
             response.typesOfControlValuesWithIncorrectValues?.length > 0
@@ -169,6 +170,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     handleIncorrectControlValues: async (
       typesOfControlValuesWithIncorrectValues: ControlValue[]
     ) => {
+      const pathname = get().router?.pathname;
       const extend: MeExtendedOption[] = [];
       if (
         typesOfControlValuesWithIncorrectValues.includes(
@@ -178,7 +180,10 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
         extend.push(MeExtendedOption.CATEGORIES);
       }
       if (
-        typesOfControlValuesWithIncorrectValues.includes(ControlValue.TIME_LOGS)
+        typesOfControlValuesWithIncorrectValues.includes(
+          ControlValue.TIME_LOGS
+        ) &&
+        pathname === '/dashboard'
       ) {
         extend.push(MeExtendedOption.TODAYS_TIMELOGS);
       }
@@ -273,6 +278,51 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
           ...(controlValues || {}),
           ...overrideControlValues,
         };
+        if (
+          typesOfControlValuesWithIncorrectValues.includes(
+            ControlValue.TIME_LOGS
+          ) &&
+          pathname === '/dashboard/time-logs'
+        ) {
+          const {
+            showTimeLogsFrom,
+            showTimeLogsTo,
+            setFetchedPeriods,
+            setTimeLogs,
+            setCategories,
+            handleIncorrectControlValues,
+          } = get();
+          const currentPeriod = { from: showTimeLogsFrom, to: showTimeLogsTo };
+          const response = await handleFetch({
+            pathOrUrl: 'time-log/find-extended',
+            body: {
+              periods: [currentPeriod],
+              controlValues: setState['controlValues'],
+            },
+            method: 'POST',
+          });
+          if (response.statusCode === StatusCodes.CREATED) {
+            const { timeLogs: fetchedTimeLogs, categories: fetchedCategories } =
+              response;
+            setFetchedPeriods([currentPeriod]);
+            if (fetchedTimeLogs?.length) {
+              setTimeLogs(fetchedTimeLogs);
+            }
+            if (fetchedCategories?.length) {
+              setCategories(
+                uniqBy([...fetchedCategories, ...categories], 'id')
+              );
+            }
+          } else if (
+            response.statusCode === StatusCodes.CONFLICT &&
+            response.typesOfControlValuesWithIncorrectValues?.length > 0
+          ) {
+            handleIncorrectControlValues(
+              response.typesOfControlValuesWithIncorrectValues
+            );
+            return; //skip setting isSaving(false)
+          }
+        }
         return set(() => setState);
       } catch (e) {
         console.log(e);
