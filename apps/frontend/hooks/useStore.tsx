@@ -15,6 +15,7 @@ import { DateTime } from 'luxon';
 import { StatusCodes } from 'http-status-codes';
 import { isObject, uniqBy } from 'lodash';
 import { findPeriodsNeededToBeFetched } from '../utils/useStore/findPeriodsNeededToBeFetched';
+import { getListControlValuesKeysToCheckOnCurrentPage } from '../utils/getListControlValuesKeysToCheckOnCurrentPage';
 
 export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
@@ -337,6 +338,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
         setIsSaving,
         controlValues,
         handleIncorrectControlValues,
+        router,
       } = get();
       const response = await handleFetch({
         pathOrUrl: 'user/me-extended',
@@ -352,9 +354,12 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
       ) {
         return;
       }
+      const { pathname } = router;
       const newControlValues: ControlValue[] = response.controlValues;
       const typesOfControlValuesWithIncorrectValues: ControlValue[] = [];
-      Object.keys(controlValues).forEach((key: ControlValue) => {
+      Object.keys(
+        getListControlValuesKeysToCheckOnCurrentPage(pathname)
+      ).forEach((key: ControlValue) => {
         if (controlValues[key] !== newControlValues[key]) {
           typesOfControlValuesWithIncorrectValues.push(key);
         }

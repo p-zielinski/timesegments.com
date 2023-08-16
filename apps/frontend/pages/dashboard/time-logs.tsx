@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 // components
 // sections
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Category, TimeLog, User } from '@prisma/client';
 import { DateTime } from 'luxon';
 import {
@@ -105,7 +105,23 @@ export default function TimeLogs({
       showTimeLogsTo: beginningOfADay.toMillis() + 1000 * 60 * 60 * 24,
     })
   ).current;
-  const { user, isSaving, timeLogs, setShowTimeLogsFromTo } = useStore(store);
+  const {
+    user,
+    isSaving,
+    timeLogs,
+    setShowTimeLogsFromTo,
+    controlValues,
+    checkControlValues,
+  } = useStore(store);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkControlValues();
+    }, 2 * 60 * 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [controlValues]);
 
   const datePickerColor = {
     hex: '#bf40b9',
