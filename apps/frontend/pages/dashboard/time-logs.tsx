@@ -105,8 +105,7 @@ export default function TimeLogs({
       showTimeLogsTo: beginningOfADay.toMillis() + 1000 * 60 * 60 * 24,
     })
   ).current;
-  const { user, isSaving, timeLogs, setShowTimeLogsFrom, setShowTimeLogsTo } =
-    useStore(store);
+  const { user, isSaving, timeLogs, setShowTimeLogsFromTo } = useStore(store);
 
   const datePickerColor = {
     hex: '#bf40b9',
@@ -241,7 +240,8 @@ export default function TimeLogs({
                                     if (!values.showOnlyOneDay) {
                                       const { fromDate } = values;
                                       setFieldValue('toDate', fromDate);
-                                      setShowTimeLogsTo(
+                                      setShowTimeLogsFromTo(
+                                        fromDate.toMillis(),
                                         fromDate
                                           .set({
                                             hour: 24,
@@ -279,11 +279,16 @@ export default function TimeLogs({
                                 isSaving ? IS_SAVING_HEX : darkHexColor
                               }
                               onChangeFnc={(value) => {
-                                setShowTimeLogsFrom(value.toMillis());
                                 if (values.showOnlyOneDay) {
                                   setFieldValue('toDate', value);
-                                  setShowTimeLogsTo(
+                                  setShowTimeLogsFromTo(
+                                    value.toMillis(),
                                     value.set({ hour: 24 }).toMillis()
+                                  );
+                                } else {
+                                  setShowTimeLogsFromTo(
+                                    value.toMillis(),
+                                    values.toDate.set({ hour: 24 }).toMillis()
                                   );
                                 }
                               }}
@@ -306,7 +311,10 @@ export default function TimeLogs({
                                 date.toMillis() < values.fromDate.toMillis()
                               }
                               onChangeFnc={(value) => {
-                                setShowTimeLogsTo(value.set({ hour: 24 }));
+                                setShowTimeLogsFromTo(
+                                  values.fromDate.toMillis(),
+                                  value.set({ hour: 24 })
+                                );
                               }}
                             />
                           </Box>
@@ -477,11 +485,16 @@ export const getServerSideProps = async ({ req, res }) => {
           authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
-          from: beginningOfADaySevenDaysAgo.toMillis(),
-          to: endOfDay.toMillis(),
+          periods: [
+            {
+              from: beginningOfADaySevenDaysAgo.toMillis(),
+              to: endOfDay.toMillis(),
+            },
+          ],
           alreadyKnownCategories: Object.keys(
             userCategories.map((category) => category.id)
           ),
+          controlValues,
         }),
       }
     );

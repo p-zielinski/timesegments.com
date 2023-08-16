@@ -14,6 +14,7 @@ import { createContext } from 'react';
 import { DateTime } from 'luxon';
 import { StatusCodes } from 'http-status-codes';
 import { isObject, uniqBy } from 'lodash';
+import { findPeriodsNeededToBeFetched } from '../utils/useStore/findPeriodsNeededToBeFetched';
 
 export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
@@ -37,6 +38,7 @@ export interface StoreProps {
 }
 
 export interface State extends StoreProps {
+  setFetchedPeriods: (fetchedPeriods: TimePeriod[]) => void;
   addNote: (note: Note) => void;
   setIsEditing: (isEditing: Record<string, any>) => void;
   setIsSaving: (isSaving: boolean) => void;
@@ -54,8 +56,10 @@ export interface State extends StoreProps {
     typesOfControlValuesWithIncorrectValues: ControlValue[]
   ) => void;
   checkControlValues: () => void;
-  setShowTimeLogsFrom: (showTimeLogsFrom: number) => void;
-  setShowTimeLogsTo: (showTimeLogsTo: number) => void;
+  setShowTimeLogsFromTo: (
+    showTimeLogsFrom: number,
+    showTimeLogsTo: number
+  ) => void;
 }
 
 export const createStore = (initProps?: Partial<StoreProps>) => {
@@ -85,6 +89,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
   return create<State>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    setFetchedPeriods: (fetchedPeriods) => set(() => ({ fetchedPeriods })),
     addNote: (note) => set(() => ({ notes: [...get().notes, note] })),
     setIsEditing: (isEditing) => set(() => ({ isEditing })),
     setIsSaving: (isSaving) => set(() => ({ isSaving })),
@@ -100,9 +105,67 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
       set((state) => ({
         controlValues: { ...state.controlValues, ...controlValues },
       })),
-    setShowTimeLogsFrom: (showTimeLogsFrom) =>
-      set(() => ({ showTimeLogsFrom })),
-    setShowTimeLogsTo: (showTimeLogsTo) => set(() => ({ showTimeLogsTo })),
+    setShowTimeLogsFromTo: async (showTimeLogsFrom, showTimeLogsTo) => {
+      const { fetchedPeriods } = get();
+      if (showTimeLogsTo <= showTimeLogsFrom) {
+        return {};
+      }
+      const periodsNeededToBeFetched = findPeriodsNeededToBeFetched(
+        { from: showTimeLogsFrom, to: showTimeLogsTo },
+        fetchedPeriods
+      );
+      if (periodsNeededToBeFetched.length) {
+        const {
+          setIsSaving,
+          categories,
+          controlValues,
+          setCategories,
+          timeLogs,
+          setTimeLogs,
+          setFetchedPeriods,
+          handleIncorrectControlValues,
+        } = get();
+        setIsSaving(true);
+        try {
+          const alreadyKnownCategories = categories.map(
+            (category) => category.id
+          );
+          const response = await handleFetch({
+            pathOrUrl: 'time-log/find-extended',
+            body: {
+              periods: periodsNeededToBeFetched,
+              controlValues,
+              alreadyKnownCategories,
+            },
+            method: 'POST',
+          });
+          if (response.statusCode === StatusCodes.CREATED) {
+            const { timeLogs: fetchedTimeLogs, categories: fetchedCategories } =
+              response;
+            setFetchedPeriods([...fetchedPeriods, ...periodsNeededToBeFetched]);
+            if (fetchedTimeLogs?.length) {
+              setTimeLogs(uniqBy([...fetchedTimeLogs, timeLogs], 'id'));
+            }
+            if (fetchedCategories?.length) {
+              setCategories(uniqBy([...fetchedCategories, categories], 'id'));
+            }
+            setIsSaving(false);
+          } else if (
+            response.statusCode === StatusCodes.CONFLICT &&
+            response.typesOfControlValuesWithIncorrectValues?.length > 0
+          ) {
+            handleIncorrectControlValues(
+              response.typesOfControlValuesWithIncorrectValues
+            );
+            return; //skip setting isSaving(false)
+          }
+          setIsSaving(false);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      set(() => ({ showTimeLogsFrom, showTimeLogsTo }));
+    },
     handleIncorrectControlValues: async (
       typesOfControlValuesWithIncorrectValues: ControlValue[]
     ) => {

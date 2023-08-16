@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Post,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
@@ -14,6 +15,7 @@ import { CreateTimeLogDto } from './dto/createTimeLog.dto';
 import { EditTimeLogDto } from './dto/editTimeLog.dto';
 import { ControlValue } from '@test1/shared';
 import { ControlValueService } from '../control-value/control-value.service';
+import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
 
 @Controller('time-log')
 export class TimeLogController {
@@ -22,25 +24,20 @@ export class TimeLogController {
     private controlValueService: ControlValueService
   ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post('find-extended')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.TIME_LOGS])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestGetAll(
     @UserDecorator() user: User,
     @Body() fromToDatesDto: FromToDatesDto
   ) {
-    const { from, to, alreadyKnownCategories } = fromToDatesDto;
+    const { periods, alreadyKnownCategories } = fromToDatesDto;
     const findFromToTimeLogsResult =
-      await this.timeLogService.findFromToTimeLogsEnrichedWithCategories(
+      await this.timeLogService.findMultiplePeriodsTimeLogsEnrichedWithCategories(
         user,
-        from,
-        to,
+        periods,
         alreadyKnownCategories
       );
-    if (findFromToTimeLogsResult.success === false) {
-      throw new BadRequestException({
-        error: findFromToTimeLogsResult.error,
-      });
-    }
     return {
       ...findFromToTimeLogsResult,
       partialControlValues:
@@ -50,8 +47,9 @@ export class TimeLogController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('edit')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.TIME_LOGS])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestEditTimeLg(
     @UserDecorator() user: User,
     @Body() editTimeLogDto: EditTimeLogDto
@@ -77,8 +75,9 @@ export class TimeLogController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('create')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.TIME_LOGS])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestCreateTimeLog(
     @UserDecorator() user: User,
     @Body() createTimeLogDto: CreateTimeLogDto

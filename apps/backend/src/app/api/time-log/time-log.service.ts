@@ -11,6 +11,7 @@ import {
 } from '@test1/shared';
 import { uniqBy } from 'lodash';
 import { ControlValueService } from '../control-value/control-value.service';
+import { LoggerService } from '../../common/logger/loger.service';
 
 @Injectable()
 export class TimeLogService {
@@ -18,7 +19,8 @@ export class TimeLogService {
     private prisma: PrismaService,
     @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService,
-    private controlValueService: ControlValueService
+    private controlValueService: ControlValueService,
+    private loggerService: LoggerService
   ) {}
 
   public async editTimeLog(
@@ -108,23 +110,31 @@ export class TimeLogService {
     };
   }
 
-  public async findFromToTimeLogsEnrichedWithCategories(
+  public async findMultiplePeriodsTimeLogsEnrichedWithCategories(
     user: User,
-    from: number,
-    to: number,
+    periods: { from: number; to: number }[],
     alreadyKnownCategories: string[] = []
   ) {
-    //TODO LIMIT IT TO MAX 366 DAYS
-    const findFromToTimeLogsResult = await this.findFromToTimeLogs(
-      user,
-      from,
-      to
+    const timeLogs = uniqBy(
+      (
+        await Promise.all(
+          periods.map(async (period) => {
+            const result = await this.findFromToTimeLogs(
+              user,
+              period.from,
+              period.to
+            );
+            const { success } = result;
+            if (success === false) {
+              this.loggerService.error(result.error);
+              return [];
+            }
+            return result.timeLogs;
+          })
+        )
+      ).flat(),
+      'id'
     );
-    const { success } = findFromToTimeLogsResult;
-    if (!success || !findFromToTimeLogsResult.timeLogs) {
-      return { ...findFromToTimeLogsResult, categories: [] };
-    }
-    const { timeLogs } = findFromToTimeLogsResult;
     const missingCategories = new Set();
     timeLogs.forEach((timeLog) => {
       if (
@@ -139,7 +149,7 @@ export class TimeLogService {
           ...missingCategories,
         ] as string[])
       : [];
-    return { ...findFromToTimeLogsResult, categories };
+    return { timeLogs, categories };
   }
 
   public async endFirstNotFinishedTimeLogsFor(

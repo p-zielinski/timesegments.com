@@ -15,8 +15,7 @@ import {useStore} from 'zustand';
 
 export default function Categories() {
   const store = useContext(StoreContext);
-  const { limits, categories, isSaving, controlValues, checkControlValues } =
-    useStore(store);
+  const { limits, categories, isSaving } = useStore(store);
 
   const categoriesLimit = limits?.categoriesLimit || 5;
 
