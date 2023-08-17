@@ -545,7 +545,7 @@ export default function AddTimeLog({}) {
                       background: backgroundColor,
                     },
                   }}
-                  onClick={() => !isSaving && isFormValid && handleSubmit()}
+                  onClick={() => setFieldValue('finished', !values.finished)}
                 >
                   <Checkbox
                     checked={!!values.finished}
@@ -565,9 +565,6 @@ export default function AddTimeLog({}) {
                         outline: '2px auto rgba(19,124,189,.6)',
                         outlineOffset: 2,
                       },
-                    }}
-                    onClick={() => {
-                      setFieldValue('finished', !values.finished);
                     }}
                   />
                 </Box>

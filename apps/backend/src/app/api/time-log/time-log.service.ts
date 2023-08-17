@@ -80,13 +80,8 @@ export class TimeLogService {
         error: `Category not found, bad request`,
       };
     }
-    const startedAt = DateTime.fromMillis(from, {
-      zone: Timezones[user.timezone],
-    });
-    const endedAt = to
-      ? DateTime.fromMillis(to, { zone: Timezones[user.timezone] })
-      : null;
-    if (!endedAt) {
+
+    if (!to) {
       await this.prisma.category.update({
         data: { active: true },
         where: {
@@ -94,12 +89,14 @@ export class TimeLogService {
         },
       });
     }
+    const startedAt = new Date(from).toISOString();
+    const endedAt = to ? new Date(from).toISOString() : null;
     const createdTimeLog = await this.prisma.timeLog.create({
       data: {
         userId: user.id,
         categoryId,
-        startedAt: startedAt.toISO(),
-        endedAt: endedAt.toISO(),
+        startedAt,
+        endedAt,
       },
     });
     return {
