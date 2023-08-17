@@ -147,6 +147,7 @@ export default function EditCategory({ category }) {
       handleIncorrectControlValues(
         response.typesOfControlValuesWithIncorrectValues
       );
+      return; //skip setting isSaving(false)
     }
     setIsSaving(false);
     return;

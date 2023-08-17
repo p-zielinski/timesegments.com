@@ -36,20 +36,8 @@ export default function BrowseTimeLogs({ showDetails }) {
 
         {/*{showDetails ? (*/}
         {/*  <>*/}
-        {/*    /!*<AddTimeLog*!/*/}
-        {/*    /!*  user={user}*!/*/}
-        {/*    /!*  isEditing={isEditing}*!/*/}
-        {/*    /!*  setIsEditing={setIsEditing}*!/*/}
-        {/*    /!*  categories={categories}*!/*/}
-        {/*    /!*  controlValue={controlValue}*!/*/}
-        {/*    /!*  setControlValue={setControlValue}*!/*/}
-        {/*    /!*  disableHover={disableHover}*!/*/}
-        {/*    /!*  isSaving={isSaving}*!/*/}
-        {/*    /!*  setIsSaving={setIsSaving}*!/*/}
-        {/*    /!*  refreshTimeLogs={refreshTimeLogs}*!/*/}
-        {/*    /!*/
-        /*/}
-                                                                                                                                                                            {/*    {`timeLogs`}*/}
+
+        {/*    {`timeLogs`}*/}
         {/*  </>*/}
         {/*) : timeLogsWithinActiveDate?.length ? (*/}
         {/*  getGroupedTimeLogsWithDateSorted(timeLogsWithinActiveDate).map(*/}

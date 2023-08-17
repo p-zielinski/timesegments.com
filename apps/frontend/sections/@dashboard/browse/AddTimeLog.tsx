@@ -16,7 +16,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -29,20 +29,26 @@ import { Timezones } from '@test1/shared';
 import { DateTime } from 'luxon';
 import { handleFetch } from '../../../utils/fetchingData/handleFetch';
 import { StatusCodes } from 'http-status-codes';
+import { StoreContext } from '../../../hooks/useStore';
+import { useStore } from 'zustand';
 
-export default function AddTimeLog({
-  refreshTimeLogs,
-  user,
-  controlValue,
-  setControlValue,
-  disableHover,
-  data = {},
-  isEditing,
-  setIsEditing,
-  isSaving,
-  setIsSaving,
-  categories,
-}) {
+export default function AddTimeLog({}) {
+  const store = useContext(StoreContext);
+  const {
+    timeLogs,
+    setTimeLogs,
+    user,
+    controlValues,
+    setControlValues,
+    disableHover,
+    isEditing,
+    setIsEditing,
+    isSaving,
+    setIsSaving,
+    categories,
+    handleIncorrectControlValues,
+  } = useStore(store);
+
   const startingColor = {
     hex: '#bf8940',
     rgb: { r: 191, g: 137, b: 64, a: 1 },
@@ -282,18 +288,22 @@ export default function AddTimeLog({
         categoryId,
         from: startDateTime.toMillis(),
         to: endDateTime?.toMillis(),
+        controlValues,
       },
       method: 'POST',
     });
-    if (response.statusCode === StatusCodes.CREATED && response?.timeLog) {
-      // setCategories([{ ...response.category }, ...categories]);
-      refreshTimeLogs();
-      setIsEditing({});
-      if (response.controlValues) {
-        setControlValue(response.controlValue);
-      }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValue(undefined);
+    if (
+      response.statusCode === StatusCodes.CREATED &&
+      response?.timeLog instanceof Object
+    ) {
+      setTimeLogs([...timeLogs, response.timeLog]);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);
@@ -303,7 +313,6 @@ export default function AddTimeLog({
   return (
     <Formik
       initialValues={{
-        ...data,
         finished: false,
         categoryId: '',
         startDateTime: undefined,

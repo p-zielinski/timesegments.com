@@ -36,6 +36,7 @@ export default function AddCategory() {
     setIsSaving,
     categories,
     setCategories,
+    handleIncorrectControlValues,
   } = useStore(store);
   const startingColor = getRandomRgbObjectForSliderPicker();
 
@@ -92,8 +93,13 @@ export default function AddCategory() {
       if (response.controlValue) {
         setControlValues(response.controlValue);
       }
-    } else if (response.statusCode === StatusCodes.CONFLICT) {
-      setControlValues(undefined);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
       return; //skip setting isSaving(false)
     }
     setIsSaving(false);

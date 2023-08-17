@@ -211,15 +211,7 @@ export default function TimeLogs({
                     fromDate: beginningOfADay,
                     toDate: beginningOfADay,
                   }}
-                  onSubmit={async (values, { setSubmitting }) => {
-                    // await createTimeLog(
-                    //   values.categoryId,
-                    //   values.startDateTime,
-                    //   values.endDateTime
-                    // );
-                    setSubmitting(false);
-                  }}
-                  // validationSchema={getValidationSchema}
+                  onSubmit={() => {}}
                 >
                   {({
                     handleSubmit,

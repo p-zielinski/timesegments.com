@@ -3,12 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { DateTime } from 'luxon';
 import { Prisma, TimeLog, User } from '@prisma/client';
-import {
-  asyncMap,
-  ControlValue,
-  FromToDateTime,
-  Timezones,
-} from '@test1/shared';
+import { asyncMap, ControlValue, Timezones } from '@test1/shared';
 import { uniqBy } from 'lodash';
 import { ControlValueService } from '../control-value/control-value.service';
 import { LoggerService } from '../../common/logger/loger.service';
@@ -26,9 +21,15 @@ export class TimeLogService {
   public async editTimeLog(
     user: User,
     timeLogId: string,
-    from: FromToDateTime,
-    to?: FromToDateTime
+    from: number,
+    to?: number
   ) {
+    if (to && to <= from) {
+      return {
+        success: false,
+        error: `End date time must be later than start date time`,
+      };
+    }
     const timeLogWithUser = await this.findOne(timeLogId, { user: true });
     if (!timeLogWithUser || timeLogWithUser.user.id !== user.id) {
       return {
@@ -36,11 +37,11 @@ export class TimeLogService {
         error: 'Could not find time log, bad request',
       };
     }
-    const startedAt = DateTime.fromObject(from, {
+    const startedAt = DateTime.fromMillis(from, {
       zone: Timezones[user.timezone],
     }).toISO();
     const endedAt = to
-      ? DateTime.fromObject(to, { zone: Timezones[user.timezone] }).toISO()
+      ? DateTime.fromMillis(to, { zone: Timezones[user.timezone] }).toISO()
       : null;
     const updatedTimeLog = await this.prisma.timeLog.update({
       where: { id: timeLogId },
@@ -52,9 +53,15 @@ export class TimeLogService {
   public async createTimeLog(
     user: User,
     categoryId: string,
-    from: FromToDateTime,
-    to?: FromToDateTime
+    from: number,
+    to?: number
   ) {
+    if (to && to <= from) {
+      return {
+        success: false,
+        error: `End date time must be later than start date time`,
+      };
+    }
     const categoryWithUser = await this.categoryService.findIfNotDeleted(
       categoryId,
       {
@@ -73,18 +80,12 @@ export class TimeLogService {
         error: `Category not found, bad request`,
       };
     }
-    const startedAt = DateTime.fromObject(from, {
+    const startedAt = DateTime.fromMillis(from, {
       zone: Timezones[user.timezone],
     });
     const endedAt = to
-      ? DateTime.fromObject(to, { zone: Timezones[user.timezone] })
+      ? DateTime.fromMillis(to, { zone: Timezones[user.timezone] })
       : null;
-    if (endedAt?.toMillis() && endedAt.toMillis() <= startedAt.toMillis()) {
-      return {
-        success: false,
-        error: `End date time must be later than start date time`,
-      };
-    }
     if (!endedAt) {
       await this.prisma.category.update({
         data: { active: true },

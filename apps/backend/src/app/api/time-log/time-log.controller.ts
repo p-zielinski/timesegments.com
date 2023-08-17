@@ -12,10 +12,10 @@ import { User } from '@prisma/client';
 import { TimeLogService } from './time-log.service';
 import { FromToDatesDto } from './dto/fromToDates.dto';
 import { CreateTimeLogDto } from './dto/createTimeLog.dto';
-import { EditTimeLogDto } from './dto/editTimeLog.dto';
 import { ControlValue } from '@test1/shared';
 import { ControlValueService } from '../control-value/control-value.service';
 import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
+import { EditTimeLogDto } from './dto/editTimeLog.dto';
 
 @Controller('time-log')
 export class TimeLogController {

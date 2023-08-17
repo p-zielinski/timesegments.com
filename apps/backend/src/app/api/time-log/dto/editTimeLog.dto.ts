@@ -1,42 +1,11 @@
-import {
-  IsDefined,
-  IsNumber,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { FromToDateTime } from '@test1/shared';
-
-class DateTime {
-  @IsNumber()
-  day: number;
-
-  @IsNumber()
-  month: number;
-
-  @IsNumber()
-  year: number;
-
-  @IsNumber()
-  hour: number;
-
-  @IsNumber()
-  minute: number;
-
-  @IsNumber()
-  second: number;
-}
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class EditTimeLogDto {
   @IsString()
   timeLogId: string;
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => DateTime)
-  from: FromToDateTime;
+  @IsNumber()
+  from: number;
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => DateTime)
-  to?: FromToDateTime;
+  @IsNumber()
+  to?: number;
 }
