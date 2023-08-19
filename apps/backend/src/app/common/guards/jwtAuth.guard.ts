@@ -44,8 +44,8 @@ export class JwtAuthGuard implements CanActivate {
         return false;
       }
       const tokenWithoutUserRelation = { ...token, user: undefined };
-      request['user'] = token.user;
-      request['currentToken'] = tokenWithoutUserRelation as Token;
+      request.user = token.user;
+      request.currentToken = tokenWithoutUserRelation as Token;
     } catch (error) {
       console.log(error);
       throw new UnauthorizedException();

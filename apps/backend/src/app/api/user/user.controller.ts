@@ -23,14 +23,17 @@ import { CurrentTokenDecorator } from '../../common/param-decorators/currentToke
 import { SetSortingNotesDto } from './dto/setSortingNotes.dto';
 import { SetSortingCategoriesDto } from './dto/setSortingCategories.dto';
 import { ChangeEmailAddressDto } from './dto/changeEmailAddress.dto';
-import { ControlValueService } from '../control-value/control-value.service';
 import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
 import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
+import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
+import { ResponseService } from '../response/response.service';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private userService: UserService,
+    private responseService: ResponseService,
     private controlValueService: ControlValueService
   ) {}
 
@@ -46,12 +49,9 @@ export class UserController {
       user,
       newEmail
     );
-    if (changeEmailAddressResult.success === false) {
-      throw new BadRequestException({
-        error: changeEmailAddressResult.error,
-      });
-    }
-    return changeEmailAddressResult;
+    return await this.responseService.returnProperResponse(
+      changeEmailAddressResult
+    );
   }
 
   @Post('register')
@@ -69,12 +69,7 @@ export class UserController {
       { email, plainPassword: password, timezone, userAgent },
       { generateToken: true }
     );
-    if (registeringResult.success === false) {
-      throw new BadRequestException({
-        error: registeringResult.error,
-      });
-    }
-    return registeringResult;
+    return await this.responseService.returnProperResponse(registeringResult);
   }
 
   @Post('login')
@@ -88,12 +83,7 @@ export class UserController {
       password,
       userAgent,
     });
-    if (validatingResult.success === false) {
-      throw new BadRequestException({
-        error: validatingResult.error,
-      });
-    }
-    return validatingResult;
+    return await this.responseService.returnProperResponse(validatingResult);
   }
 
   @Get('me')
@@ -123,6 +113,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetName(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() setNameDto: SetNameDto
   ) {
     const { name } = setNameDto;
@@ -132,13 +123,10 @@ export class UserController {
         error: updateNameStatus.error,
       });
     }
-    return {
-      ...updateNameStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.USER]
-      ),
-    };
+    return await this.responseService.returnProperResponse(updateNameStatus, {
+      userId: user.id,
+      importantControlValues,
+    });
   }
 
   @Post('change-password')
@@ -153,12 +141,9 @@ export class UserController {
       currentPassword,
       newPassword
     );
-    if (!changePasswordStatus.success) {
-      throw new BadRequestException({
-        error: changePasswordStatus.error,
-      });
-    }
-    return changePasswordStatus;
+    return await this.responseService.returnProperResponse(
+      changePasswordStatus
+    );
   }
 
   @Post('initialize-email-change')
@@ -169,16 +154,11 @@ export class UserController {
     @Body() initializeEmailChangeDto: InitializeEmailChangeDto
   ) {
     const { currentEmail } = initializeEmailChangeDto;
-    const changePasswordStatus = await this.userService.initializeEmailChange(
-      user,
-      currentEmail
+    const initializeEmailChangeStatus =
+      await this.userService.initializeEmailChange(user, currentEmail);
+    return await this.responseService.returnProperResponse(
+      initializeEmailChangeStatus
     );
-    if (!changePasswordStatus.success) {
-      throw new BadRequestException({
-        error: changePasswordStatus.error,
-      });
-    }
-    return changePasswordStatus;
   }
 
   @Post('change-timezone')
@@ -186,25 +166,21 @@ export class UserController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestChangeTimezone(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() changeTimezoneDto: ChangeTimezoneDto
   ) {
     const { timezone } = changeTimezoneDto;
-    const changePasswordStatus = await this.userService.changeTimezone(
+    const changeTimezoneStatus = await this.userService.changeTimezone(
       user,
       timezone
     );
-    if (!changePasswordStatus.success) {
-      throw new BadRequestException({
-        error: changePasswordStatus.error,
-      });
-    }
-    return {
-      ...changePasswordStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.USER]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      changeTimezoneStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('set-sorting-categories')
@@ -212,23 +188,19 @@ export class UserController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetSortingCategories(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() setSortingCategoriesDto: SetSortingCategoriesDto
   ) {
     const { sortingCategories } = setSortingCategoriesDto;
     const updateSortingCategoriesStatus =
       await this.userService.setSortingCategories(user, sortingCategories);
-    if (!updateSortingCategoriesStatus.success) {
-      throw new BadRequestException({
-        error: updateSortingCategoriesStatus.error,
-      });
-    }
-    return {
-      ...updateSortingCategoriesStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.USER]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      updateSortingCategoriesStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('set-sorting-notes')
@@ -236,22 +208,20 @@ export class UserController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestSetSortingNotes(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() setSortingNotesDto: SetSortingNotesDto
   ) {
     const { sortingNotes } = setSortingNotesDto;
-    const updateSortingCategoriesStatus =
-      await this.userService.setSortingNotes(user, sortingNotes);
-    if (!updateSortingCategoriesStatus.success) {
-      throw new BadRequestException({
-        error: updateSortingCategoriesStatus.error,
-      });
-    }
-    return {
-      ...updateSortingCategoriesStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.USER]
-      ),
-    };
+    const updateSortingNotesStatus = await this.userService.setSortingNotes(
+      user,
+      sortingNotes
+    );
+    return await this.responseService.returnProperResponse(
+      updateSortingNotesStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 }

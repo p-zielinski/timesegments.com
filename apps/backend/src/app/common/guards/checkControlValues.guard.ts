@@ -21,7 +21,6 @@ export class ControlValuesGuard implements CanActivate {
       'typesOfControlValuesToCheck',
       context.getHandler()
     );
-
     if (!typesOfControlValuesToCheck) {
       throw new HttpException(
         { error: `Types of control values to check were not defined` },
@@ -29,6 +28,7 @@ export class ControlValuesGuard implements CanActivate {
       );
     }
     const request = context.switchToHttp().getRequest();
+    request.importantControlValues = typesOfControlValuesToCheck;
     const { user } = request;
     if (!user) {
       throw new HttpException(

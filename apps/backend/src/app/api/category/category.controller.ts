@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Post,
-  SetMetadata,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, SetMetadata, UseGuards } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { CategoryService } from './category.service';
 import { UpdateCategoryDto } from './dto/updateCategoryDto';
@@ -17,14 +10,15 @@ import { SetCategoryDeletedDto } from './dto/setCategoryDeleted.dto';
 import { SetExpandCategoriesDto } from './dto/changeShowRecentNotes.dto';
 import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
 import { ControlValue } from '@test1/shared';
-import { ControlValueService } from '../control-value/control-value.service';
+import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
+import { ResponseService } from '../response/response.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('category')
 export class CategoryController {
   constructor(
     private categoryService: CategoryService,
-    private controlValueService: ControlValueService
+    private responseService: ResponseService
   ) {}
 
   @Post('set-show-recent-notes')
@@ -32,6 +26,7 @@ export class CategoryController {
   @UseGuards(ControlValuesGuard)
   async handleRequestSetExpandSubcategories(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() setExpandCategoriesDto: SetExpandCategoriesDto
   ) {
     const { categoryId, showRecentNotes } = setExpandCategoriesDto;
@@ -41,18 +36,13 @@ export class CategoryController {
         showRecentNotes,
         user
       );
-    if (!updateCategoryStatus.success) {
-      throw new BadRequestException({
-        error: updateCategoryStatus.error,
-      });
-    }
-    return {
-      ...updateCategoryStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      updateCategoryStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('create')
@@ -60,6 +50,7 @@ export class CategoryController {
   @UseGuards(ControlValuesGuard)
   async handleRequestCreateCategory(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() createCategoryDto: CreateCategoryDto
   ) {
     const { name, color } = createCategoryDto;
@@ -68,18 +59,13 @@ export class CategoryController {
       name,
       color
     );
-    if (!createCategoryStatus.success) {
-      throw new BadRequestException({
-        error: createCategoryStatus.error,
-      });
-    }
-    return {
-      ...createCategoryStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      createCategoryStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('set-active')
@@ -90,6 +76,7 @@ export class CategoryController {
   @UseGuards(ControlValuesGuard)
   async handleRequestSetCategoryActive(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() setCategoryActiveDto: SetCategoryActiveDto
   ) {
     const { categoryId } = setCategoryActiveDto;
@@ -97,18 +84,13 @@ export class CategoryController {
       categoryId,
       user
     );
-    if (updateCategoryStatus.success === false) {
-      throw new BadRequestException({
-        error: updateCategoryStatus.error,
-      });
-    }
-    return {
-      ...updateCategoryStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES, ControlValue.TIME_LOGS]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      updateCategoryStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('update')
@@ -116,6 +98,7 @@ export class CategoryController {
   @UseGuards(ControlValuesGuard)
   async handleRequestUpdateCategory(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() updateCategoryDto: UpdateCategoryDto
   ) {
     const { categoryId, name, color } = updateCategoryDto;
@@ -125,18 +108,13 @@ export class CategoryController {
       color,
       user
     );
-    if (!updateCategoryStatus.success) {
-      throw new BadRequestException({
-        error: updateCategoryStatus.error,
-      });
-    }
-    return {
-      ...updateCategoryStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      updateCategoryStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('set-as-deleted')
@@ -144,22 +122,18 @@ export class CategoryController {
   @UseGuards(ControlValuesGuard)
   async handleRequestSetCategoryAsDeleted(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() setCategoryDeletedDto: SetCategoryDeletedDto
   ) {
     const { categoryId } = setCategoryDeletedDto;
     const setCategoryAsDeletedStatus =
       await this.categoryService.setCategoryAsDeleted(categoryId, user);
-    if (!setCategoryAsDeletedStatus.success) {
-      throw new BadRequestException({
-        error: setCategoryAsDeletedStatus.error,
-      });
-    }
-    return {
-      ...setCategoryAsDeletedStatus,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.CATEGORIES]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      setCategoryAsDeletedStatus,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 }

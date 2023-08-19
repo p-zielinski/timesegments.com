@@ -28,6 +28,7 @@ import {
   getUserName,
 } from '../configs/redisConfig';
 import { redisStore } from 'cache-manager-redis-yet';
+import { ResponseService } from './api/response/response.service';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     NoteService,
     EmailService,
     ControlValueService,
+    ResponseService,
   ],
 })
 export class AppModule {}

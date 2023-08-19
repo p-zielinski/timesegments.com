@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Post,
-  SetMetadata,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, SetMetadata, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwtAuth.guard';
 import { UserDecorator } from '../../common/param-decorators/user.decorator';
 import { User } from '@prisma/client';
@@ -13,15 +6,16 @@ import { TimeLogService } from './time-log.service';
 import { FromToDatesDto } from './dto/fromToDates.dto';
 import { CreateTimeLogDto } from './dto/createTimeLog.dto';
 import { ControlValue } from '@test1/shared';
-import { ControlValueService } from '../control-value/control-value.service';
 import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard';
 import { EditTimeLogDto } from './dto/editTimeLog.dto';
+import { ResponseService } from '../response/response.service';
+import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
 
 @Controller('time-log')
 export class TimeLogController {
   constructor(
     private timeLogService: TimeLogService,
-    private controlValueService: ControlValueService
+    private responseService: ResponseService
   ) {}
 
   @Post('find-extended')
@@ -29,6 +23,7 @@ export class TimeLogController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestGetAll(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() fromToDatesDto: FromToDatesDto
   ) {
     const { periods, alreadyKnownCategories } = fromToDatesDto;
@@ -38,13 +33,13 @@ export class TimeLogController {
         periods,
         alreadyKnownCategories
       );
-    return {
-      ...findFromToTimeLogsResult,
-      partialControlValues:
-        await this.controlValueService.getPartialControlValues(user.id, [
-          ControlValue.TIME_LOGS,
-        ]),
-    };
+    return await this.responseService.returnProperResponse(
+      findFromToTimeLogsResult,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 
   @Post('edit')
@@ -52,6 +47,7 @@ export class TimeLogController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestEditTimeLg(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() editTimeLogDto: EditTimeLogDto
   ) {
     const { timeLogId, from, to } = editTimeLogDto;
@@ -61,18 +57,10 @@ export class TimeLogController {
       from,
       to
     );
-    if (editTimeLogResult.success === false) {
-      throw new BadRequestException({
-        error: editTimeLogResult.error,
-      });
-    }
-    return {
-      ...editTimeLogResult,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.TIME_LOGS]
-      ),
-    };
+    return await this.responseService.returnProperResponse(editTimeLogResult, {
+      userId: user.id,
+      importantControlValues,
+    });
   }
 
   @Post('create')
@@ -80,6 +68,7 @@ export class TimeLogController {
   @UseGuards(JwtAuthGuard, ControlValuesGuard)
   async handleRequestCreateTimeLog(
     @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
     @Body() createTimeLogDto: CreateTimeLogDto
   ) {
     const { categoryId, from, to } = createTimeLogDto;
@@ -89,17 +78,12 @@ export class TimeLogController {
       from,
       to
     );
-    if (createTimeLogResult.success === false) {
-      throw new BadRequestException({
-        error: createTimeLogResult.error,
-      });
-    }
-    return {
-      ...createTimeLogResult,
-      partialControlValues: await this.controlValueService.getNewControlValues(
-        user.id,
-        [ControlValue.TIME_LOGS]
-      ),
-    };
+    return await this.responseService.returnProperResponse(
+      createTimeLogResult,
+      {
+        userId: user.id,
+        importantControlValues,
+      }
+    );
   }
 }
