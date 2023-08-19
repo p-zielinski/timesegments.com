@@ -90,7 +90,7 @@ export class TimeLogService {
       });
     }
     const startedAt = new Date(from).toISOString();
-    const endedAt = to ? new Date(from).toISOString() : null;
+    const endedAt = to ? new Date(to).toISOString() : null;
     const createdTimeLog = await this.prisma.timeLog.create({
       data: {
         userId: user.id,
