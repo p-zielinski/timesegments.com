@@ -240,30 +240,29 @@ export default function TimeLogs({
                                 mb: 0,
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                cursor: 'pointer',
+                              }}
+                              onClick={() => {
+                                if (!values.showOnlyOneDay) {
+                                  const { fromDate } = values;
+                                  setFieldValue('toDate', fromDate);
+                                  setShowTimeLogsFromTo(
+                                    fromDate.toMillis(),
+                                    fromDate
+                                      .set({
+                                        hour: 24,
+                                      })
+                                      .toMillis()
+                                  );
+                                }
+                                setFieldValue(
+                                  'showOnlyOneDay',
+                                  !values.showOnlyOneDay
+                                );
                               }}
                             >
                               <Box sx={{ display: 'flex' }}>
-                                <BpCheckbox
-                                  onClick={() => {
-                                    if (!values.showOnlyOneDay) {
-                                      const { fromDate } = values;
-                                      setFieldValue('toDate', fromDate);
-                                      setShowTimeLogsFromTo(
-                                        fromDate.toMillis(),
-                                        fromDate
-                                          .set({
-                                            hour: 24,
-                                          })
-                                          .toMillis()
-                                      );
-                                    }
-                                    setFieldValue(
-                                      'showOnlyOneDay',
-                                      !values.showOnlyOneDay
-                                    );
-                                  }}
-                                  checked={!!values.showOnlyOneDay}
-                                />
+                                <BpCheckbox checked={!!values.showOnlyOneDay} />
                                 <Stack
                                   sx={{
                                     position: 'relative',
