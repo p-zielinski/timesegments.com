@@ -357,13 +357,13 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
       const { pathname } = router;
       const newControlValues: ControlValue[] = response.controlValues;
       const typesOfControlValuesWithIncorrectValues: ControlValue[] = [];
-      Object.keys(
-        getListControlValuesKeysToCheckOnCurrentPage(pathname)
-      ).forEach((key: ControlValue) => {
-        if (controlValues[key] !== newControlValues[key]) {
-          typesOfControlValuesWithIncorrectValues.push(key);
+      getListControlValuesKeysToCheckOnCurrentPage(pathname).forEach(
+        (key: ControlValue) => {
+          if (controlValues[key] !== newControlValues[key]) {
+            typesOfControlValuesWithIncorrectValues.push(key);
+          }
         }
-      });
+      );
       if (typesOfControlValuesWithIncorrectValues.length > 0) {
         setIsSaving(true);
         handleIncorrectControlValues(typesOfControlValuesWithIncorrectValues);

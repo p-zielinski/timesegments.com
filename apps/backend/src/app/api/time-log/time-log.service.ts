@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma.service';
 import { CategoryService } from '../category/category.service';
 import { DateTime } from 'luxon';
 import { Prisma, TimeLog, User } from '@prisma/client';
-import { asyncMap, ControlValue, Timezones } from '@test1/shared';
+import { asyncMap, Timezones } from '@test1/shared';
 import { uniqBy } from 'lodash';
 import { ControlValueService } from '../control-value/control-value.service';
 import { LoggerService } from '../../common/logger/loger.service';
@@ -102,9 +102,6 @@ export class TimeLogService {
     return {
       success: true,
       timeLog: createdTimeLog,
-      controlValues: this.controlValueService.getNewControlValues(user.id, [
-        ControlValue.TIME_LOGS,
-      ]),
     };
   }
 
