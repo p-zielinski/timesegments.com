@@ -14,6 +14,7 @@ import Iconify from '../../../components/iconify';
 import {TimeLog} from '@prisma/client';
 import {calculateTimeLogDurationDuringDesiredTimePeriod} from '../../../helperFunctions/calculateTimeLogDurationDuringDesiredTimePeriod';
 import {cloneDeep} from 'lodash';
+import EditTimeLog from '../browse/EditTimeLog';
 // utils
 // ----------------------------------------------------------------------
 
@@ -21,13 +22,9 @@ export default function DetailPeriod({ timeLog }: { timeLog: TimeLog }) {
   const store = useContext(StoreContext);
   const { isEditing, showTimeLogsFrom, showTimeLogsTo } = useStore(store);
 
-  // if (!isEditing.timeLogId) {
-  //   return (
-  //     <>
-  //       <input type="text" id="fname" name="fname" />
-  //     </>
-  //   );
-  // }
+  if (isEditing.timeLogId === timeLog.id) {
+    return <EditTimeLog timeLog={timeLog} />;
+  }
 
   const calculateTimeLogDurationDuringDesiredTimePeriodWrapper = () =>
     calculateTimeLogDurationDuringDesiredTimePeriod(
