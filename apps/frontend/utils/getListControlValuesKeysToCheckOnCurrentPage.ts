@@ -5,7 +5,7 @@ export const getListControlValuesKeysToCheckOnCurrentPage = (
 ) => {
   switch (pathname) {
     case '/dashboard/time-logs':
-      return [ControlValue.TIME_LOGS];
+      return [ControlValue.CATEGORIES, ControlValue.TIME_LOGS];
     case '/dashboard/settings':
       return [ControlValue.USER];
     case '/dashboard':

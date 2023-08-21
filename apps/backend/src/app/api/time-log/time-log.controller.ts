@@ -10,12 +10,14 @@ import { ControlValuesGuard } from '../../common/guards/checkControlValues.guard
 import { EditTimeLogDto } from './dto/editTimeLog.dto';
 import { ResponseService } from '../response/response.service';
 import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
+import { ControlValueService } from '../control-value/control-value.service';
 
 @Controller('time-log')
 export class TimeLogController {
   constructor(
     private timeLogService: TimeLogService,
-    private responseService: ResponseService
+    private responseService: ResponseService,
+    private controlValueService: ControlValueService
   ) {}
 
   @Post('find-extended')
@@ -33,13 +35,14 @@ export class TimeLogController {
         periods,
         alreadyKnownCategories
       );
-    return await this.responseService.returnProperResponse(
-      findFromToTimeLogsResult,
-      {
-        userId: user.id,
-        importantControlValues,
-      }
-    );
+    return {
+      ...findFromToTimeLogsResult,
+      partialControlValues:
+        await this.controlValueService.getPartialControlValues(
+          user.id,
+          importantControlValues
+        ),
+    };
   }
 
   @Post('edit')

@@ -61,13 +61,6 @@ dayjs.extend(timezonePlugin);
 
 // ----------------------------------------------------------------------
 
-//user: user,
-//         timeLogs,
-//         categories: [...userCategories, ...timeLogsCategories],
-//         controlValues,
-//         fetchedPeriods,
-//         randomSliderHexColor:
-
 type Props = {
   user: User;
   categories: Category[];
@@ -85,13 +78,14 @@ export default function TimeLogs({
   fetchedPeriods: fetchedPeriodsStartingValue,
   randomSliderHexColor,
 }: Props) {
-  const beginningOfADay = DateTime.now().set({
-    hour: 0,
-    minute: 0,
-    second: 0,
-    millisecond: 0,
-  });
-  //beginningOfADay.toMillis()
+  const beginningOfADay = DateTime.now()
+    .setZone(Timezones[serverSideFetchedUser.timezone])
+    .set({
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
   const store = useRef(
     createStore({
       timeLogs: serverSideFetchedTimeLogs,
@@ -117,7 +111,7 @@ export default function TimeLogs({
   useEffect(() => {
     const intervalId = setInterval(() => {
       checkControlValues();
-    }, 2 * 60 * 1000);
+    }, 200 * 60 * 1000); //fix it
     return () => {
       clearInterval(intervalId);
     };
