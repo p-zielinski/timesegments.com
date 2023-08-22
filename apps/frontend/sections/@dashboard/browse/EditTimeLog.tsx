@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import {
+  DARK_GREEN,
   GREEN,
   IS_SAVING_HEX,
   LIGHT_GREEN,
@@ -43,6 +44,7 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
     isSaving,
     setIsSaving,
     categories,
+    setCategories,
     handleIncorrectControlValues,
     setPartialControlValues,
   } = useStore(store);
@@ -236,6 +238,50 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
     return;
   };
 
+  const deleteTimeLog = async () => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'time-log/delete',
+      body: {
+        timeLogId: timeLog.id,
+        controlValues,
+      },
+      method: 'POST',
+    });
+    if (
+      response.statusCode === StatusCodes.CREATED &&
+      response.partialControlValues
+    ) {
+      setPartialControlValues(response.partialControlValues);
+    }
+    if (
+      response.statusCode === StatusCodes.CREATED &&
+      response?.deletedTimeLog instanceof Object &&
+      response?.category instanceof Object
+    ) {
+      setTimeLogs(
+        timeLogs.filter((timeLog) => timeLog.id !== response.deletedTimeLog.id)
+      );
+      setCategories([
+        ...categories.filter(
+          (category) => category.id !== response.category.id
+        ),
+        response.category,
+      ]);
+    } else if (
+      response.statusCode === StatusCodes.CONFLICT &&
+      response.typesOfControlValuesWithIncorrectValues?.length > 0
+    ) {
+      handleIncorrectControlValues(
+        response.typesOfControlValuesWithIncorrectValues
+      );
+      return; //skip setting isSaving(false)
+    }
+    setIsSaving(false);
+    setIsEditing({});
+    return;
+  };
+
   return (
     <Formik
       initialValues={{
@@ -352,6 +398,75 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
                         timezone={Timezones[user.timezone]}
                       />
                     </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Box
+                        onClick={() =>
+                          setFieldValue('finished', !values.finished)
+                        }
+                        sx={{
+                          display: 'flex',
+                          cursor: 'pointer',
+                          pl: 1,
+                          pr: 1,
+                          mt: -1,
+                          mb: -1,
+                        }}
+                      >
+                        <Checkbox
+                          checked={!!values.finished}
+                          sx={{
+                            p: 0,
+                            '&:hover': { background: 'transparent' },
+                            color: GREEN,
+                            '&.Mui-checked': {
+                              color: GREEN,
+                            },
+                            '& .MuiSvgIcon-root': { fontSize: 40 },
+                            '.Mui-focusVisible &': {
+                              outline: '2px auto rgba(19,124,189,.6)',
+                              outlineOffset: 2,
+                            },
+                          }}
+                        />
+                        <Stack
+                          sx={{
+                            position: 'relative',
+                            pt: 1.2,
+                            pl: 0.5,
+                            color: DARK_GREEN,
+                          }}
+                        >
+                          <Typography variant="subtitle2" noWrap>
+                            Finished
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        background: isSaving
+                          ? SUPER_LIGHT_SILVER
+                          : backgroundColor,
+                        pl: '5px',
+                        pr: '5px',
+                        border: `solid 1px ${
+                          isSaving ? SUPER_LIGHT_SILVER : backgroundColor
+                        }`,
+                        color: isSaving ? IS_SAVING_HEX : 'black',
+                        cursor: isSaving ? 'default' : 'pointer',
+                        '&:hover': !isSaving && {
+                          background: backgroundColor,
+                        },
+                      }}
+                    ></Box>
                   </Stack>
                 </Box>
               </Box>
@@ -425,7 +540,7 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
                       }}
                     >
                       <Typography variant="subtitle2" noWrap>
-                        SAVEc TIME LOG
+                        SAVE TIME LOG
                       </Typography>
                     </Stack>
                   </Box>
@@ -434,38 +549,29 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
                   sx={{
                     display: 'flex',
                     flexDirection: 'row',
-                    background: isSaving ? SUPER_LIGHT_SILVER : backgroundColor,
+                    background: isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED,
                     pl: '5px',
                     pr: '5px',
                     border: `solid 1px ${
-                      isSaving ? SUPER_LIGHT_SILVER : backgroundColor
+                      isSaving ? SUPER_LIGHT_SILVER : LIGHT_RED
                     }`,
                     color: isSaving ? IS_SAVING_HEX : 'black',
                     cursor: isSaving ? 'default' : 'pointer',
                     '&:hover': !isSaving && {
-                      background: backgroundColor,
+                      background: LIGHT_RED,
+                      border: `solid 1px ${RED}`,
                     },
                   }}
-                  onClick={() => setFieldValue('finished', !values.finished)}
+                  onClick={() => !isSaving && deleteTimeLog()}
                 >
-                  <Checkbox
-                    checked={!!values.finished}
+                  <Iconify
+                    icon={'material-symbols:delete-forever-outline-rounded'}
+                    width={40}
                     sx={{
                       position: 'relative',
                       top: '50%',
                       left: '40%',
                       transform: 'translate(-40%, -50%)',
-                      p: 0,
-                      '&:hover': { background: 'transparent' },
-                      color: GREEN,
-                      '&.Mui-checked': {
-                        color: GREEN,
-                      },
-                      '& .MuiSvgIcon-root': { fontSize: 40 },
-                      '.Mui-focusVisible &': {
-                        outline: '2px auto rgba(19,124,189,.6)',
-                        outlineOffset: 2,
-                      },
                     }}
                   />
                 </Box>

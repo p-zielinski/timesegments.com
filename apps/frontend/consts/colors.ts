@@ -2,6 +2,8 @@ export const ULTRA_LIGHT_GREEN = `rgb(239, 255, 240)`;
 export const LIGHT_GREEN = `rgb(177, 231, 184)`;
 export const GREEN = `rgb(81, 171, 92)`;
 
+export const DARK_GREEN = `rgb(35, 75, 40)`;
+
 export const LIGHT_RED = `rgb(254, 198, 198)`;
 export const ULTRA_LIGHT_RED = `rgb(255, 234, 234)`;
 export const RED = `rgb(255, 118, 118)`;

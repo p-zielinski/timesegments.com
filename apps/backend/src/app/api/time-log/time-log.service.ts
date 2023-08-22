@@ -50,6 +50,34 @@ export class TimeLogService {
     return { success: true, timeLog: updatedTimeLog };
   }
 
+  public async deleteTimeLog(user: User, timeLogId: string) {
+    const timeLogWithUserAndCategory = await this.findOne(timeLogId, {
+      user: true,
+      category: true,
+    });
+    if (
+      !timeLogWithUserAndCategory ||
+      timeLogWithUserAndCategory.user.id !== user.id
+    ) {
+      return {
+        success: false,
+        error: 'Could not find time log, bad request',
+      };
+    }
+    let category = timeLogWithUserAndCategory.category;
+    const deletedUnfinished = timeLogWithUserAndCategory.category.active;
+    if (deletedUnfinished) {
+      category = await this.prisma.category.update({
+        data: { active: false },
+        where: { id: timeLogWithUserAndCategory.category.id },
+      });
+    }
+    const deletedTimeLog = await this.prisma.timeLog.delete({
+      where: { id: timeLogId },
+    });
+    return { success: true, deletedTimeLog, deletedUnfinished, category };
+  }
+
   public async createTimeLog(
     user: User,
     categoryId: string,
@@ -262,7 +290,7 @@ export class TimeLogService {
 
   public async findOne(
     timeLogId: string,
-    include: Prisma.CategoryInclude = null
+    include: Prisma.TimeLogInclude = null
   ) {
     return await this.prisma.timeLog.findFirst({
       where: { id: timeLogId },

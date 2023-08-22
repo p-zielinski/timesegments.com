@@ -11,6 +11,7 @@ import { EditTimeLogDto } from './dto/editTimeLog.dto';
 import { ResponseService } from '../response/response.service';
 import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
 import { ControlValueService } from '../control-value/control-value.service';
+import { DeleteTimeLogDto } from './dto/deleteTimeLog.dto';
 
 @Controller('time-log')
 export class TimeLogController {
@@ -88,5 +89,29 @@ export class TimeLogController {
         importantControlValues,
       }
     );
+  }
+
+  @Post('delete')
+  @SetMetadata('typesOfControlValuesToCheck', [ControlValue.TIME_LOGS])
+  @UseGuards(JwtAuthGuard, ControlValuesGuard)
+  async handleRequestDeleteTimeLg(
+    @UserDecorator() user: User,
+    @ImportantControlValuesDecorator() importantControlValues: ControlValue[],
+    @Body() deleteTimeLogDto: DeleteTimeLogDto
+  ) {
+    const { timeLogId } = deleteTimeLogDto;
+    const editTimeLogResult = await this.timeLogService.deleteTimeLog(
+      user,
+      timeLogId
+    );
+    return await this.responseService.returnProperResponse(editTimeLogResult, {
+      userId: user.id,
+      importantControlValues: [
+        ...importantControlValues,
+        ...(editTimeLogResult.deletedUnfinished
+          ? []
+          : [ControlValue.CATEGORIES]),
+      ],
+    });
   }
 }
