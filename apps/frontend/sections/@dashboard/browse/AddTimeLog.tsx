@@ -227,7 +227,7 @@ export default function AddTimeLog({}) {
         .string()
         .nullable()
         .test({
-          name: 'Start date time',
+          name: 'End date time',
           exclusive: false,
           message: ({ value, originalValue }) => {
             if (!value) {

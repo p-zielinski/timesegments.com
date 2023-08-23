@@ -149,7 +149,7 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
         .string()
         .nullable()
         .test({
-          name: 'Start date time',
+          name: 'End date time',
           exclusive: false,
           message: ({ value, originalValue }) => {
             if (!value) {
@@ -223,7 +223,10 @@ export default function EditTimeLog({ timeLog }: { timeLog: TimeLog }) {
       response.statusCode === StatusCodes.CREATED &&
       response?.timeLog instanceof Object
     ) {
-      setTimeLogs([...timeLogs, response.timeLog]);
+      setTimeLogs([
+        ...timeLogs.filter((timeLog) => timeLog.id !== response.timeLog),
+        response.timeLog,
+      ]);
     } else if (
       response.statusCode === StatusCodes.CONFLICT &&
       response.typesOfControlValuesWithIncorrectValues?.length > 0

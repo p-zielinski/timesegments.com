@@ -58,7 +58,7 @@ export default function DetailPeriod({ timeLog }: { timeLog: TimeLog }) {
     <DisplayTimeLog
       timeLog={timeLog}
       duration={duration}
-      key={`DisplayTimeLog-${timeLog.id}-${duration}`}
+      key={`DisplayTimeLog-${timeLog.id}-${timeLog.startedAt}-${timeLog.endedAt}-${duration}`}
     />
   );
 }

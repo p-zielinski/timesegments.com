@@ -47,12 +47,12 @@ import { ResponseService } from './api/response/response.service';
       useFactory: async (config: ConfigService) => {
         const redisUrl = config.get('REDIS_URL');
         const store = (await redisStore({
-          username: getUserName(redisUrl) || undefined,
-          password: getRedisPassword(redisUrl) || undefined,
+          username: getUserName(redisUrl),
+          password: getRedisPassword(redisUrl),
           socket: {
-            host: getRedisHost(redisUrl) || 'localhost',
-            port: getRedisPort(redisUrl) || 6379,
-            tls: undefined,
+            host: getRedisHost(redisUrl),
+            port: getRedisPort(redisUrl),
+            tls: true,
           },
         })) as CacheStore;
         return {
