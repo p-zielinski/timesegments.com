@@ -100,7 +100,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
     );
   }
 
-  const initialTimezone = DateTime.local().zoneName || '';
+  const initialTimezone = DateTime.local?.()?.zoneName || '';
 
   return (
     <Formik
