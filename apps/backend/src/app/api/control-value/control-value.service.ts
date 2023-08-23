@@ -12,13 +12,13 @@ export class ControlValueService {
     private readonly configService: ConfigService
   ) {}
 
-  environment = this.configService.get<string>('ENVIRONMENT');
+  environmentPrefix = this.configService.get<string>('ENVIRONMENT') + '-';
 
   public async getAllUserControlValues(
     userId: string
   ): Promise<Record<ControlValue, string>> {
     const controlValues = await this.cacheManager.get(
-      this.environment + userId
+      this.environmentPrefix + userId
     );
     if (controlValues instanceof Object) {
       return controlValues as Record<ControlValue, string>;
@@ -26,7 +26,10 @@ export class ControlValueService {
     const newControlValue = Object.fromEntries(
       Object.values(ControlValue).map((value) => [value, nanoid()])
     );
-    await this.cacheManager.set(this.environment + userId, newControlValue);
+    await this.cacheManager.set(
+      this.environmentPrefix + userId,
+      newControlValue
+    );
     return newControlValue as Record<ControlValue, string>;
   }
 
@@ -38,7 +41,7 @@ export class ControlValueService {
     const newControlValue = Object.fromEntries(
       types.map((controlValueType) => [controlValueType, nanoid()])
     );
-    await this.cacheManager.set(this.environment + userId, {
+    await this.cacheManager.set(this.environmentPrefix + userId, {
       ...controlValues,
       ...newControlValue,
     });
