@@ -18,6 +18,7 @@ type SelectWithSearchProps = {
   inputBackground?: string;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
+  focused?: boolean;
 };
 
 export type AutocompleteCloseReason =
@@ -40,6 +41,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   inputBackground = 'white',
   startAdornment,
   endAdornment,
+  focused,
 }) => {
   return (
     <FastField autoComplete="nope" name={name}>
@@ -78,6 +80,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                       helperText
                     )}
                     focused={
+                      focused ||
                       !!(
                         meta.initialValue !== meta.value &&
                         meta.value &&

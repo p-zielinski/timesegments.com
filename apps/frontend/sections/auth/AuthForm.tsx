@@ -15,6 +15,7 @@ import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {SelectWithSearch} from '../../components/form/SelectWithSearch';
 import {StatusCodes} from 'http-status-codes';
 import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSelect';
+import {DateTime} from 'luxon';
 // ----------------------------------------------------------------------
 
 export default function AuthForm({ authPageState, setAuthPageState }) {
@@ -99,9 +100,15 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
     );
   }
 
+  const initialTimezone = DateTime.local().zoneName || '';
+
   return (
     <Formik
-      initialValues={{ email: '', password: '', timezone: '' }}
+      initialValues={{
+        email: '',
+        password: '',
+        timezone: initialTimezone,
+      }}
       onSubmit={async (values, { setSubmitting, setFieldError }) => {
         const valuesAndEmailToLowerCase = {
           ...values,
@@ -141,6 +148,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
         errors,
         isValid,
         setFieldValue,
+        setFieldTouched,
         touched,
         setErrors,
       }) => {
@@ -194,6 +202,7 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                   groupBy={(option) => option.groupBy}
                   label="Timezone"
                   options={timezoneOptionsForSelect}
+                  focused={!!initialTimezone}
                 />
               )}
             </Stack>

@@ -42,6 +42,8 @@ function CustomApp({ Component, pageProps }: AppProps) {
         <ScrollToTop />
         <Head>
           <title>Timesegs.com</title>
+          <link rel="icon" href="/favicon/favicon.ico" />
+          <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml" />
         </Head>
         <Component {...pageProps} />
       </ThemeProvider>
