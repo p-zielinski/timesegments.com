@@ -21,12 +21,6 @@ import { NoteService } from './api/note/note.service';
 import { EmailService } from './api/email/email.service';
 import { EmailController } from './api/email/email.controller';
 import { ControlValueService } from './api/control-value/control-value.service';
-import {
-  getRedisHost,
-  getRedisPassword,
-  getRedisPort,
-  getUserName,
-} from '../configs/redisConfig';
 import { redisStore } from 'cache-manager-redis-yet';
 import { ResponseService } from './api/response/response.service';
 
@@ -47,13 +41,7 @@ import { ResponseService } from './api/response/response.service';
       useFactory: async (config: ConfigService) => {
         const redisUrl = config.get('REDIS_URL');
         const store = (await redisStore({
-          username: getUserName(redisUrl),
-          password: getRedisPassword(redisUrl),
-          socket: {
-            host: getRedisHost(redisUrl),
-            port: getRedisPort(redisUrl),
-            tls: true,
-          },
+          url: redisUrl,
         })) as CacheStore;
         return {
           store: store,
