@@ -6,28 +6,13 @@ import { HelmetProvider } from 'react-helmet-async';
 import './styles.global.scss';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { Button } from '@mui/material';
 
 function CustomApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showRefreshButton, setShowRefreshButton] = useState(false);
   useEffect(() => {
-    const handleStart = async (url) => {
-      if (url !== router.asPath) {
-        setLoading(true);
-        await new Promise((r) => setTimeout(r, 1550));
-        if (loading) {
-          setShowRefreshButton(true);
-        }
-      }
-    };
-    const handleComplete = (url) => {
-      if (url === router.asPath) {
-        setLoading(false);
-        setShowRefreshButton(false);
-      }
-    };
+    const handleStart = (url) => url !== router.asPath && setLoading(true);
+    const handleComplete = (url) => url === router.asPath && setLoading(false);
     router.events.on('routeChangeStart', handleStart);
     router.events.on('routeChangeComplete', handleComplete);
     router.events.on('routeChangeError', handleComplete);
@@ -42,28 +27,10 @@ function CustomApp({ Component, pageProps }: AppProps) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div className="clock-wrapper">
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="clock-loader" />
-            <div style={{ marginTop: 5 }}>loading...</div>
-          </div>
-        </div>
-        <div
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 20,
-            display: showRefreshButton ? 'flex' : 'none',
-          }}
-        >
-          <Button
-            onClick={() => location.reload()}
-            size="large"
-            variant="contained"
-          >
-            Refresh
-          </Button>
+      <div className="clock-wrapper">
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="clock-loader" />
+          <div style={{ marginTop: 5 }}>loading...</div>
         </div>
       </div>
     );
