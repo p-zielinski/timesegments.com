@@ -9,10 +9,10 @@ datasource db {
 
 model User {
   id                        String                @id @default(cuid())
-  email                     String                @unique
+  email                     String?               @unique
   emailConfirmed            Boolean               @default(false)
   emails                    Email[]
-  password                  String
+  password                  String?
   name                      String?
   tokens                    Token[]
   notes                     Note[]

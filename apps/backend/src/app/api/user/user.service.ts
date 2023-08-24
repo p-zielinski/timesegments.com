@@ -207,8 +207,8 @@ export class UserService {
 
   public async createNewUser(
     data: {
-      email: string;
-      plainPassword: string;
+      email?: string;
+      plainPassword?: string;
       timezone: Timezones;
       userAgent: string;
     },
@@ -221,17 +221,24 @@ export class UserService {
       const newUser = await this.prisma.user.create({
         data: {
           email: data.email,
-          password: await hashString(
-            data.plainPassword,
-            this.configService.get<number>('SALT_ROUNDS')
-          ),
+          password:
+            data.plainPassword &&
+            (await hashString(
+              data.plainPassword,
+              this.configService.get<number>('SALT_ROUNDS')
+            )),
           timezone: findKeyOfValueInObject(
             Timezones,
             data.timezone
           ) as Timezone,
         },
       });
-      await this.emailService.sendEmail(newUser, EmailType.EMAIL_CONFIRMATION);
+      if (data.email) {
+        await this.emailService.sendEmail(
+          newUser,
+          EmailType.EMAIL_CONFIRMATION
+        );
+      }
       if (!options?.generateToken) {
         return { success: true, user: newUser };
       }

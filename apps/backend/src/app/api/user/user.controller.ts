@@ -28,6 +28,7 @@ import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
 import { ResponseService } from '../response/response.service';
 import { ControlValueService } from '../control-value/control-value.service';
+import { CreateSandboxDto } from './dto/createSandbox.dto';
 
 @Controller('user')
 export class UserController {
@@ -67,6 +68,19 @@ export class UserController {
     const { email, password, timezone } = registerDto;
     const registeringResult = await this.userService.createNewUser(
       { email, plainPassword: password, timezone, userAgent },
+      { generateToken: true }
+    );
+    return await this.responseService.returnProperResponse(registeringResult);
+  }
+
+  @Post('create-sandbox')
+  async handleRequestCreateSandbox(
+    @Body() createSandboxDto: CreateSandboxDto,
+    @Headers('User-Agent') userAgent: string
+  ) {
+    const { timezone } = createSandboxDto;
+    const registeringResult = await this.userService.createNewUser(
+      { timezone, userAgent },
       { generateToken: true }
     );
     return await this.responseService.returnProperResponse(registeringResult);
