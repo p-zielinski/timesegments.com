@@ -17,6 +17,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
         while (url !== window.location.pathname) {
           await new Promise((r) => setTimeout(r, 50));
         }
+        await new Promise((r) => setTimeout(r, 300));
         setLoading(false);
       }
     };
