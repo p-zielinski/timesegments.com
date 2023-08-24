@@ -11,8 +11,17 @@ function CustomApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    const handleStart = (url) => url !== router.asPath && setLoading(true);
-    const handleComplete = (url) => url === router.asPath && setLoading(false);
+    const handleStart = async (url) => {
+      if (url !== window.location.pathname) {
+        setLoading(true);
+        while (url !== window.location.pathname) {
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        setLoading(false);
+      }
+    };
+    const handleComplete = (url) =>
+      url === window.location.pathname && setLoading(false);
     router.events.on('routeChangeStart', handleStart);
     router.events.on('routeChangeComplete', handleComplete);
     router.events.on('routeChangeError', handleComplete);
