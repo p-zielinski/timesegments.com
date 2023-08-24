@@ -15,6 +15,11 @@ module.exports = {
       version: '1.0.0',
       script: 'npm run build:backend && npm run start:backend',
       env: {
+        REDIS_HOST: '',
+        REDIS_USERNAME: '',
+        REDIS_PASSWORD: '',
+        REDIS_PORT: 123,
+        REDIS_TLS: false,
         PORT: 30122,
         DATABASE_URL:
           'postgres://postgres:ABkNPAC6fs@mws02.mikr.us:50002/timesegs_prod',
