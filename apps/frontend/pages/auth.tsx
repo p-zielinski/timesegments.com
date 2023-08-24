@@ -1,8 +1,10 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
-import {Button, Container, Typography} from '@mui/material'; // hooks
+import {Container, Typography} from '@mui/material'; // hooks
+import {AuthForm} from '../sections/auth';
 import React, {useState} from 'react';
 import {AuthPageState, UserWithCategoriesAndNotes} from '@test1/shared';
+import {RenderAuthLink} from '../components/renderAuthLink';
 import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -39,22 +41,33 @@ export default function Auth({ randomSliderColor }: Props) {
   return (
     <>
       <Helmet>
-        <title>TimeSegments.com</title>
+        <title>
+          {currentPageState === AuthPageState.LOGIN
+            ? `Log in | TimeSegments.com`
+            : currentPageState === AuthPageState.REGISTER
+            ? `Sign up | TimeSegments.com`
+            : `Recover account | TimeSegments.com`}
+        </title>
       </Helmet>
 
       <StyledRoot>
         <Container maxWidth="sm">
-          <StyledContent
-            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
-          >
+          <StyledContent>
             <Typography variant="h4" gutterBottom>
+              {currentPageState === AuthPageState.LOGIN
+                ? `Sign in to `
+                : currentPageState === AuthPageState.REGISTER
+                ? `Sign up to `
+                : `Recover account`}
               {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
                 currentPageState
               ) && (
                 <span
                   style={{
                     color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
+                    cursor: 'pointer',
                   }}
+                  onClick={() => router.push('/')}
                 >
                   TimeSeg
                   <span
@@ -68,20 +81,18 @@ export default function Auth({ randomSliderColor }: Props) {
                 </span>
               )}
             </Typography>
-            <Button
-              onClick={() => router.push('/auth')}
-              size="large"
-              variant="contained"
-            >
-              Sign in / up
-            </Button>
-            <Button
-              onClick={() => router.push('/auth')}
-              size="large"
-              variant="contained"
-            >
-              Try demo
-            </Button>
+
+            <Typography variant="body2" sx={{ mb: 3 }}>
+              <RenderAuthLink
+                currentPageState={currentPageState}
+                setCurrentPageState={setCurrentPageState}
+              />
+            </Typography>
+
+            <AuthForm
+              authPageState={currentPageState}
+              setAuthPageState={setCurrentPageState}
+            />
           </StyledContent>
         </Container>
       </StyledRoot>

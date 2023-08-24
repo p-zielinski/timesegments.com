@@ -12,6 +12,7 @@ import {isMobile} from 'react-device-detect';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
 import dynamic from 'next/dynamic';
 import {useStore} from 'zustand';
+import {Helmet} from 'react-helmet-async';
 // --------------------------------------------------------------------
 
 const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
@@ -70,6 +71,9 @@ export default function Index({
         title={'Active Categories'}
         randomSliderHexColor={randomSliderHexColor}
       >
+        <Helmet>
+          <title>Active Categories | TimeSegments.com</title>
+        </Helmet>
         <Container sx={{ mt: -5 }}>
           <Categories />
         </Container>

@@ -1,10 +1,11 @@
 // @mui
-import {Box, CircularProgress} from '@mui/material';
-import React, {useContext} from 'react';
-import {useStore} from 'zustand';
-import {StoreContext} from '../../../hooks/useStore';
+import { Box, CircularProgress } from '@mui/material';
+import React, { useContext } from 'react';
+import { useStore } from 'zustand';
+import { StoreContext } from '../../../hooks/useStore';
 import GroupedPeriods from './GroupedPeriods';
 import TimeLogsWithinDesiredPeriod from './TimeLogsWithinDesiredPeriod';
+import AddTimeLog from '../browse/AddTimeLog';
 // utils
 // ----------------------------------------------------------------------
 
@@ -26,10 +27,11 @@ export default function BrowseTimeLogs({ showDetails }) {
           >
             <CircularProgress disableShrink size={100} thickness={1.5} />
           </Box>
-        ) : showDetails ? (
-          <TimeLogsWithinDesiredPeriod />
         ) : (
-          <GroupedPeriods />
+          <>
+            <AddTimeLog />
+            {showDetails ? <TimeLogsWithinDesiredPeriod /> : <GroupedPeriods />}
+          </>
         )}
       </Box>
     </Box>

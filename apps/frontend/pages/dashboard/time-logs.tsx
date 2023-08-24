@@ -193,7 +193,7 @@ export default function TimeLogs({
         randomSliderHexColor={randomSliderHexColor}
       >
         <Helmet>
-          <title>Time Logs</title>
+          <title>Time Logs | TimeSegments.com</title>
         </Helmet>
         <LocalizationProvider dateAdapter={AdapterLuxon}>
           <Container sx={{ mt: -3 }}>

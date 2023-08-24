@@ -66,7 +66,7 @@ export default function Email({ randomSliderColor }: Props) {
   return (
     <>
       <Helmet>
-        <title> Login | Minimal UI </title>
+        <title>Email | TimeSegments.com</title>
       </Helmet>
 
       <StyledRoot>
