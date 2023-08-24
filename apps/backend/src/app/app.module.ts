@@ -1,4 +1,4 @@
-import { CacheStore, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AppService } from './app.service';
 import { UserService } from './api/user/user.service';
@@ -21,7 +21,7 @@ import { NoteService } from './api/note/note.service';
 import { EmailService } from './api/email/email.service';
 import { EmailController } from './api/email/email.controller';
 import { ControlValueService } from './api/control-value/control-value.service';
-import { redisStore } from 'cache-manager-redis-yet';
+import * as redisStore from 'cache-manager-redis-store';
 import { ResponseService } from './api/response/response.service';
 
 @Module({
@@ -38,17 +38,17 @@ import { ResponseService } from './api/response/response.service';
     }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => {
-        const redisUrl = config.get('REDIS_URL');
-        const store = (await redisStore({
-          url: redisUrl,
-        })) as CacheStore;
-        return {
-          store: store,
-          ttl: 1000 * 60 * 60 * 24 * 7, //milliseconds
-        };
-      },
       inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get<string>('REDIS_HOST'),
+        username: configService.get<string>('REDIS_USERNAME'),
+        password: configService.get<string>('REDIS_PASSWORD'),
+        port: configService.get<number>('REDIS_PORT'),
+        ttl: 1000 * 60 * 60 * 24 * 7, //milliseconds
+        tls: configService.get<boolean>('REDIS_TLS'),
+      }),
+      isGlobal: true,
     }),
   ],
   controllers: [

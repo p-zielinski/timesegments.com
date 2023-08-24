@@ -8,6 +8,10 @@ export const ValidationSchema = Joi.object({
   MAX_NUMBER_OF_NOTES_PER_USER: Joi.number().min(5).max(20).default(10),
   FRONTEND_URL: Joi.string().required(),
   SEND_MAIL_TOKEN: Joi.string().required(),
-  REDIS_URL: Joi.string().required(),
+  REDIS_HOST: Joi.string().required(),
+  REDIS_USERNAME: Joi.string().required(),
+  REDIS_PASSWORD: Joi.string().required(),
+  REDIS_PORT: Joi.number().required(),
+  REDIS_TLS: Joi.boolean().required(),
   ENVIRONMENT: Joi.string().required(),
 });
