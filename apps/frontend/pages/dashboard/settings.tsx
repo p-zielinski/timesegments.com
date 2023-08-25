@@ -28,6 +28,7 @@ import { createStore, StoreContext } from '../../hooks/useStore';
 import { useRouter } from 'next/router';
 import { useStore } from 'zustand';
 import dynamic from 'next/dynamic';
+import ClaimThisAccount from '../../sections/@dashboard/settings/ClaimThisAccount';
 
 const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
   ssr: false,
@@ -82,12 +83,25 @@ export default function Index({
   }, [controlValues]);
 
   const getAllSettingOptions = (user) => {
+    const findKeyOfSettingOptionEnum = (settingOption: SettingOption) => {
+      return findKeyOfValueInObject(SettingOption, settingOption);
+    };
+
     return Object.keys(SettingOption)
       .filter((key) =>
-        !user.emailConfirmed
-          ? true
-          : key !==
-            findKeyOfValueInObject(SettingOption, SettingOption.CONFIRM_EMAIL)
+        user.email
+          ? !user.emailConfirmed
+            ? ![
+                findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+              ].includes(key)
+            : ![
+                findKeyOfSettingOptionEnum(SettingOption.CONFIRM_EMAIL),
+                findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+              ].includes(key)
+          : [
+              findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+              findKeyOfSettingOptionEnum(SettingOption.CHANGE_TIMEZONE),
+            ].includes(key)
       )
       .map((key) => {
         let icon,
@@ -96,10 +110,8 @@ export default function Index({
           iconColor,
           color = { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' };
         switch (key) {
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CONFIRM_EMAIL
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT):
+          case findKeyOfSettingOptionEnum(SettingOption.CONFIRM_EMAIL):
             icon = 'ph:warning-fill';
             successText =
               'We sent you an email with link to confirm your email address!';
@@ -107,38 +119,26 @@ export default function Index({
             iconColor = 'rgb(191,64,64)';
             color = { rgb: { r: 191, g: 64, b: 64, a: 1 }, hex: '#bf4040' };
             break;
-          case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
+          case findKeyOfSettingOptionEnum(SettingOption.SET_NAME):
             icon = 'icon-park-outline:edit-name';
             subtitle = user.name;
             successText = 'Name was successfully changed';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CHANGE_TIMEZONE
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CHANGE_TIMEZONE):
             icon = 'mdi:timezone-outline';
             subtitle = Timezones[user.timezone];
             successText = 'Timezone was successfully changed';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CHANGE_PASSWORD
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CHANGE_PASSWORD):
             icon = 'material-symbols:password';
             successText = 'Password was successfully changed';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CHANGE_EMAIL
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CHANGE_EMAIL):
             icon = 'ic:outline-email';
             subtitle = user.email;
             successText = 'We sent you an email with further instructions';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.MANAGE_LOGIN_SESSIONS
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.MANAGE_LOGIN_SESSIONS):
             icon = 'tabler:lock-access';
             successText = 'Action successfully executed';
             break;
@@ -196,6 +196,20 @@ export default function Index({
                         key={`completed${currentSettingOption.id}`}
                         setOpenedSettingOption={setOpenedSettingOption}
                         currentSettingOption={currentSettingOption}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.CLAIM_THIS_ACCOUNT
+                  ) {
+                    return (
+                      <ClaimThisAccount
+                        key={`${currentSettingOption}-active`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                        setCompleted={setCompleted}
                       />
                     );
                   }

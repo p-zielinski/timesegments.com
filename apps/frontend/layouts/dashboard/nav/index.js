@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import {useContext, useEffect} from 'react';
+import React, {useContext, useEffect} from 'react';
 // @mui
 import {alpha, styled} from '@mui/material/styles';
 import {Box, Drawer, Link, Typography} from '@mui/material';
@@ -87,9 +87,23 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
           <StyledAccount>
             <Box sx={{ ml: 0 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {user.name || user.email
-                  ? capitalizeFirstLetter(user.email.split('@')[0] ?? '')
-                  : 'Demo'}
+                {user.email ? (
+                  user.name ||
+                  capitalizeFirstLetter(user.email.split('@')[0] ?? '')
+                ) : (
+                  <Link
+                    variant="subtitle2"
+                    underline="hover"
+                    sx={{ cursor: 'pointer', color: 'rgb(191,64,64)' }}
+                    onClick={() =>
+                      router.push(
+                        '/dashboard/settings?option=claim_this_account'
+                      )
+                    }
+                  >
+                    Claim this account!
+                  </Link>
+                )}
               </Typography>
             </Box>
           </StyledAccount>

@@ -156,6 +156,12 @@ export class EmailService {
   }
 
   public async sendEmail(user, emailType) {
+    if (!user.email) {
+      return {
+        success: false,
+        error: 'You have not provided an email address ever before!',
+      };
+    }
     const createEmailRecordInDatabaseResult =
       await this.createEmailRecordInDatabase(user, emailType);
     if (!createEmailRecordInDatabaseResult.success) {

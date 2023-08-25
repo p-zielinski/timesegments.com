@@ -11,18 +11,24 @@ function CustomApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
+    const getPathname = (pathnameWithSearch) =>
+      pathnameWithSearch.split('?')[0];
+
     const handleStart = async (url) => {
-      if (url !== window.location.pathname) {
+      const pathname = getPathname(url);
+      if (pathname !== window.location.pathname) {
         setLoading(true);
-        while (url !== window.location.pathname) {
+        while (pathname !== window.location.pathname) {
           await new Promise((r) => setTimeout(r, 50));
         }
         await new Promise((r) => setTimeout(r, 300));
         setLoading(false);
       }
     };
-    const handleComplete = (url) =>
-      url === window.location.pathname && setLoading(false);
+    const handleComplete = (url) => {
+      const pathname = getPathname(url);
+      pathname === window.location.pathname && setLoading(false);
+    };
     router.events.on('routeChangeStart', handleStart);
     router.events.on('routeChangeComplete', handleComplete);
     router.events.on('routeChangeError', handleComplete);
