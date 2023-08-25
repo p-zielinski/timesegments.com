@@ -87,8 +87,9 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
           <StyledAccount>
             <Box sx={{ ml: 0 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {user.name ||
-                  capitalizeFirstLetter(user.email.split('@')[0] ?? '')}
+                {user.name || user.email
+                  ? capitalizeFirstLetter(user.email.split('@')[0] ?? '')
+                  : 'Demo'}
               </Typography>
             </Box>
           </StyledAccount>

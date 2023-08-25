@@ -205,6 +205,22 @@ export class UserService {
     };
   }
 
+  public async createSandbox(timezone: Timezones, userAgent: string) {
+    const creatingUserResult = await this.createNewUser(
+      { timezone, userAgent },
+      { generateToken: true }
+    );
+    if (!creatingUserResult.success) {
+      return creatingUserResult;
+    }
+    const { user } = creatingUserResult;
+    await this.categoryService.createCategory(user, 'Job', '#4d40bf');
+    await this.categoryService.createCategory(user, 'Reading books', '#4dbf40');
+    await this.categoryService.createCategory(user, 'Studying', '#bf40bb');
+    await this.categoryService.createCategory(user, 'Working out', '#bf4840');
+    return creatingUserResult;
+  }
+
   public async createNewUser(
     data: {
       email?: string;

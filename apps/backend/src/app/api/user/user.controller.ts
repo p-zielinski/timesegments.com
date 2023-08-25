@@ -66,11 +66,11 @@ export class UserController {
       });
     }
     const { email, password, timezone } = registerDto;
-    const registeringResult = await this.userService.createNewUser(
+    const creatingUserResult = await this.userService.createNewUser(
       { email, plainPassword: password, timezone, userAgent },
       { generateToken: true }
     );
-    return await this.responseService.returnProperResponse(registeringResult);
+    return await this.responseService.returnProperResponse(creatingUserResult);
   }
 
   @Post('create-sandbox')
@@ -79,11 +79,11 @@ export class UserController {
     @Headers('User-Agent') userAgent: string
   ) {
     const { timezone } = createSandboxDto;
-    const registeringResult = await this.userService.createNewUser(
-      { timezone, userAgent },
-      { generateToken: true }
+    const creatingUserResult = await this.userService.createSandbox(
+      timezone,
+      userAgent
     );
-    return await this.responseService.returnProperResponse(registeringResult);
+    return await this.responseService.returnProperResponse(creatingUserResult);
   }
 
   @Post('login')

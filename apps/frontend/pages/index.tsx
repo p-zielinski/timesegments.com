@@ -1,8 +1,8 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
-import {Button, Container, Typography} from '@mui/material'; // hooks
+import {Button, CircularProgress, Container, Typography} from '@mui/material'; // hooks
 import React, {useState} from 'react';
-import {AuthPageState, UserWithCategoriesAndNotes} from '@test1/shared';
+import {Timezones, UserWithCategoriesAndNotes} from '@test1/shared';
 import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -10,6 +10,9 @@ import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorSh
 import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
 import {useRouter} from 'next/router';
+import {handleFetch} from '../utils/fetchingData/handleFetch';
+import {StatusCodes} from 'http-status-codes';
+import {DateTime} from 'luxon';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -22,7 +25,7 @@ type Props = {
   randomSliderColor: string;
 };
 
-export default function Auth({ randomSliderColor }: Props) {
+export default function Index({ randomSliderColor }: Props) {
   const router = useRouter();
   const StyledContent = styled('div')(({ theme }) => ({
     maxWidth: 480,
@@ -34,8 +37,38 @@ export default function Auth({ randomSliderColor }: Props) {
     padding: theme.spacing(isMobile ? 6 : 12, 0),
   }));
 
-  const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
+  const [isSaving, setIsSaving] = useState(false);
 
+  const createSandbox = async (): Promise<void> => {
+    setIsSaving(true);
+    const response = await handleFetch({
+      pathOrUrl: 'user/create-sandbox',
+      body: {
+        timezone: DateTime.local?.()?.zoneName || Timezones.EUROPE__LONDON,
+      },
+      method: 'POST',
+    });
+    if (response.statusCode === StatusCodes.CREATED) {
+      if (typeof process.env.NEXT_PUBLIC_FRONTEND_URL !== 'string') {
+        console.log({
+          NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
+        });
+        throw new Error('misconfiguration of NEXT_PUBLIC_API_URL');
+      }
+      await handleFetch({
+        pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
+        body: { name: 'jwt_token', value: response.token },
+        method: 'POST',
+      });
+      await router.push('/dashboard');
+      return;
+    }
+    if (response.statusCode === StatusCodes.BAD_REQUEST) {
+      console.log(response);
+    }
+    setIsSaving(false);
+    return;
+  };
   return (
     <>
       <Helmet>
@@ -48,25 +81,21 @@ export default function Auth({ randomSliderColor }: Props) {
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
             <Typography variant="h4" gutterBottom>
-              {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
-                currentPageState
-              ) && (
+              <span
+                style={{
+                  color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
+                }}
+              >
+                TimeSeg
                 <span
                   style={{
-                    color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
+                    color: randomSliderColor,
                   }}
                 >
-                  TimeSeg
-                  <span
-                    style={{
-                      color: randomSliderColor,
-                    }}
-                  >
-                    ment
-                  </span>
-                  s.com
+                  ment
                 </span>
-              )}
+                s.com
+              </span>
             </Typography>
             <Button
               onClick={() => router.push('/auth')}
@@ -76,11 +105,15 @@ export default function Auth({ randomSliderColor }: Props) {
               Sign in / up
             </Button>
             <Button
-              onClick={() => router.push('/auth')}
+              onClick={() => createSandbox()}
               size="large"
               variant="contained"
             >
-              Try demo
+              {!isSaving ? (
+                'Try demo'
+              ) : (
+                <CircularProgress size={'15px'} sx={{ color: 'silver' }} />
+              )}
             </Button>
           </StyledContent>
         </Container>
