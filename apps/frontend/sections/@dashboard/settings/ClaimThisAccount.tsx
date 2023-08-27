@@ -1,4 +1,12 @@
-import { Box, Card, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import {
   GREEN,
   IS_SAVING_HEX,
@@ -9,7 +17,7 @@ import {
 } from '../../../consts/colors';
 import { getHexFromRGBAObject } from '../../../utils/colors/getHexFromRGBAObject';
 import Iconify from '../../../components/iconify';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import { getHexFromRGBObject } from '../../../utils/colors/getHexFromRGBObject';
@@ -23,6 +31,7 @@ import YupPassword from 'yup-password';
 import { equalTo } from '../../../utils/yupCustomMethods';
 import { useStore } from 'zustand';
 import { StoreContext } from '../../../hooks/useStore';
+import loginSchema from '../../../yupSchemas/login';
 
 YupPassword(yup); // extend yup
 yup.addMethod(yup.string, 'equalTo', (ref, msg) =>
@@ -34,6 +43,8 @@ export default function ClaimThisAccount({
   currentSettingOption,
   setCompleted,
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const store = useContext(StoreContext);
   const { disableHover, isSaving, setIsSaving } = useStore(store);
   const { color } = currentSettingOption;
@@ -73,76 +84,44 @@ export default function ClaimThisAccount({
   };
   setStyledTextField(isSaving ? IS_SAVING_HEX : color.hex);
 
-  const changePassword = async (
-    currentPassword: string,
-    newPassword: string,
+  const claimThisAccount = async (
+    email: string,
+    password: string,
     setFieldError: (field: string, message: string) => void
   ) => {
     setIsSaving(true);
     const response = await handleFetch({
-      pathOrUrl: 'user/change-password',
-      body: { currentPassword, newPassword },
+      pathOrUrl: 'user/claim-this-account',
+      body: { email, password },
       method: 'POST',
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
     }
-    if (response.error && typeof response.error === 'string') {
-      setFieldError('currentPassword', response.error);
+    if (response.statusCode === StatusCodes.BAD_REQUEST) {
+      const error = response.error || '';
+      if (error.match(/password/i)) {
+        setFieldError('password', error);
+      }
+      if (error.match(/email/i)) {
+        setFieldError('email', error);
+      }
     }
     setIsSaving(false);
     return;
   };
 
-  const validationSchema = yup.object().shape({
-    currentPassword: yup
-      .string()
-      .password()
-      .minLowercase(1)
-      .minUppercase(1)
-      .minNumbers(1)
-      .minSymbols(1)
-      .min(5)
-      .required()
-      .label('Current password'),
-    newPassword: yup
-      .string()
-      .password()
-      .minLowercase(1)
-      .minUppercase(1)
-      .minNumbers(1)
-      .minSymbols(1)
-      .min(5)
-      .required()
-      .notOneOf(
-        [yup.ref('currentPassword')],
-        'New password cannot be the same as the current one'
-      )
-      .label('New password'),
-    newPasswordCheck: (yup as any)
-      .string()
-      .equalTo(yup.ref('newPassword'))
-      .notOneOf(
-        [yup.ref('currentPassword')],
-        'New password check cannot be the same as the current one'
-      )
-      .label('New password check'),
-  });
+  const validationSchema = loginSchema;
 
   return (
     <Card>
       <Formik
         initialValues={{
-          currentPassword: '',
-          newPassword: '',
-          newPasswordCheck: '',
+          email: '',
+          password: '',
         }}
         onSubmit={async (values, { setSubmitting, setFieldError }) => {
-          await changePassword(
-            values.currentPassword,
-            values.newPassword,
-            setFieldError
-          );
+          await claimThisAccount(values.email, values.password, setFieldError);
           setSubmitting(false);
         }}
         validationSchema={validationSchema}
@@ -211,34 +190,42 @@ export default function ClaimThisAccount({
                         )}
                       </Box>
                       <InputText
-                        type="password"
-                        name={'currentPassword'}
-                        label={`Current password`}
+                        type="text"
+                        name="email"
+                        label="Email address"
                         TextField={StyledTextField}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
                         disabled={isSaving}
                       />
+
                       <InputText
-                        type="password"
-                        name={'newPassword'}
-                        label={`New password`}
+                        endAdornment={
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => {
+                                setShowPassword(!showPassword);
+                              }}
+                              edge="end"
+                            >
+                              <Iconify
+                                icon={
+                                  showPassword
+                                    ? ('eva:eye-fill' as any)
+                                    : ('eva:eye-off-fill' as any)
+                                }
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        label="Password"
                         TextField={StyledTextField}
                         helperTextColor={
                           isSaving ? IS_SAVING_HEX : darkHexColor
                         }
-                        disabled={isSaving}
-                      />
-                      <InputText
-                        type="password"
-                        name={'newPasswordCheck'}
-                        label={`New password check`}
-                        TextField={StyledTextField}
-                        helperTextColor={
-                          isSaving ? IS_SAVING_HEX : darkHexColor
-                        }
-                        disabled={isSaving}
                       />
                     </Stack>
                   </Box>

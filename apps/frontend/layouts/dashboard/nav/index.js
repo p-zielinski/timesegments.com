@@ -16,6 +16,7 @@ import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {useStore} from 'zustand';
 import {StoreContext} from '../../../hooks/useStore';
+import {SettingOption} from '../../../enum/settingOption';
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
   const store = useContext(StoreContext);
-  const { user, setUser } = useStore(store);
+  const { user, setUser, setOpenedSettingOption } = useStore(store);
 
   const router = useRouter();
 
@@ -95,11 +96,12 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
                     variant="subtitle2"
                     underline="hover"
                     sx={{ cursor: 'pointer', color: 'rgb(191,64,64)' }}
-                    onClick={() =>
+                    onClick={() => {
+                      setOpenedSettingOption(SettingOption.CLAIM_THIS_ACCOUNT);
                       router.push(
-                        '/dashboard/settings?option=claim_this_account'
-                      )
-                    }
+                        '/dashboard/settings?option=CLAIM_THIS_ACCOUNT'
+                      );
+                    }}
                   >
                     Claim this account!
                   </Link>

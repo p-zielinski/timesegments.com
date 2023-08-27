@@ -29,6 +29,8 @@ import { ImportantControlValuesDecorator } from '../../common/param-decorators/i
 import { ResponseService } from '../response/response.service';
 import { ControlValueService } from '../control-value/control-value.service';
 import { CreateSandboxDto } from './dto/createSandbox.dto';
+import { ClaimThisAccountDto } from './dto/claimThisAccount.dto';
+import { OnlyUnclaimedAccounts } from '../../common/guards/onlyUnclaimedAccounts.guard';
 
 @Controller('user')
 export class UserController {
@@ -120,6 +122,28 @@ export class UserController {
         user.id
       ),
     };
+  }
+
+  @Post('claim-this-account')
+  @UseGuards(JwtAuthGuard, OnlyUnclaimedAccounts)
+  async handleRequestClaimThisAccount(
+    @UserDecorator() user: User,
+    @Body() claimThisAccountDto: ClaimThisAccountDto
+  ) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new BadRequestException({
+        error: 'Registration is disabled',
+      });
+    }
+    const { email, password } = claimThisAccountDto;
+    const claimThisAccountResult = await this.userService.claimThisAccount(
+      user.id,
+      email,
+      password
+    );
+    return await this.responseService.returnProperResponse(
+      claimThisAccountResult
+    );
   }
 
   @Post('set-name')

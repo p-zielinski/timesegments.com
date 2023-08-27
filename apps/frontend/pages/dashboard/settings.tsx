@@ -15,12 +15,7 @@ import { getBackgroundColor } from '../../utils/colors/getBackgroundColor';
 import { TimelineDot } from '@mui/lab';
 import Iconify from '../../components/iconify';
 import { SettingOption } from '../../enum/settingOption';
-import {
-  ControlValue,
-  findKeyOfValueInObject,
-  MeExtendedOption,
-  Timezones,
-} from '@test1/shared';
+import { ControlValue, MeExtendedOption, Timezones } from '@test1/shared';
 import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo';
 import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail';
 import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
@@ -29,6 +24,7 @@ import { useRouter } from 'next/router';
 import { useStore } from 'zustand';
 import dynamic from 'next/dynamic';
 import ClaimThisAccount from '../../sections/@dashboard/settings/ClaimThisAccount';
+import { findKeyOfSettingOptionEnum } from '../../utils/findKeyOfSettingOptionEnum';
 
 const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
   ssr: false,
@@ -47,6 +43,7 @@ type OptionsColors = {
 };
 
 type Props = {
+  openOption: SettingOption | null;
   user: User;
   currentTokenId: string;
   randomSliderHexColor: string;
@@ -54,6 +51,7 @@ type Props = {
 };
 
 export default function Index({
+  openOption,
   user: serverSideFetchedUser,
   controlValues: serverSideFetchedControlValues,
   currentTokenId,
@@ -61,6 +59,7 @@ export default function Index({
 }: Props) {
   const store = useRef(
     createStore({
+      openedSettingOption: openOption ? SettingOption[openOption] : undefined,
       currentTokenId,
       disableHover: isMobile,
       router: useRouter(),
@@ -68,10 +67,15 @@ export default function Index({
       controlValues: serverSideFetchedControlValues,
     })
   ).current;
-  const { user, controlValues, disableHover, isSaving, checkControlValues } =
-    useStore(store);
-  const [openedSettingOption, setOpenedSettingOption] =
-    useState<SettingOption>(undefined);
+  const {
+    user,
+    controlValues,
+    disableHover,
+    isSaving,
+    checkControlValues,
+    openedSettingOption,
+    setOpenedSettingOption,
+  } = useStore(store);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -83,10 +87,6 @@ export default function Index({
   }, [controlValues]);
 
   const getAllSettingOptions = (user) => {
-    const findKeyOfSettingOptionEnum = (settingOption: SettingOption) => {
-      return findKeyOfValueInObject(SettingOption, settingOption);
-    };
-
     return Object.keys(SettingOption)
       .filter((key) =>
         user.email
@@ -401,6 +401,7 @@ export default function Index({
 }
 
 export const getServerSideProps = async ({ req, res }) => {
+  const { query } = req;
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
   if (!jwt_token) {
@@ -449,6 +450,8 @@ export const getServerSideProps = async ({ req, res }) => {
 
     return {
       props: {
+        openOption:
+          query?.option && query.option in SettingOption ? query.option : null,
         user: user,
         currentTokenId,
         controlValues,

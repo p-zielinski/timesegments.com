@@ -1,9 +1,10 @@
-import * as yup from "yup";
-import recoverSchema from "./recover";
-import YupPassword from "yup-password";
+import * as yup from 'yup';
+import recoverSchema from './recover';
+import YupPassword from 'yup-password';
+
 YupPassword(yup); // extend yup
 
-const loginRegisterSchema = recoverSchema.concat(
+const loginSchema = recoverSchema.concat(
   yup.object().shape({
     password: yup
       .string()
@@ -17,4 +18,4 @@ const loginRegisterSchema = recoverSchema.concat(
   })
 );
 
-export default loginRegisterSchema;
+export default loginSchema;

@@ -221,6 +221,44 @@ export class UserService {
     return creatingUserResult;
   }
 
+  public async claimThisAccount(
+    userId: string,
+    email: string,
+    plainPassword: string
+  ) {
+    try {
+      const updatedUser = await this.prisma.user.update({
+        data: {
+          email: email,
+          password: await hashString(
+            plainPassword,
+            this.configService.get<number>('SALT_ROUNDS')
+          ),
+        },
+        where: { id: userId },
+      });
+      await this.emailService.sendEmail(
+        updatedUser,
+        EmailType.EMAIL_CONFIRMATION
+      );
+      return {
+        success: true,
+        user: updatedUser,
+      };
+    } catch (error) {
+      if (error?.meta?.target?.includes('email')) {
+        return { success: false, error: 'This email is already taken' };
+      }
+      return {
+        success: false,
+        error:
+          typeof error?.message === 'string'
+            ? error?.message?.trim()
+            : error?.message ?? 'Unknown error',
+      };
+    }
+  }
+
   public async createNewUser(
     data: {
       email?: string;
