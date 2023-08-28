@@ -280,12 +280,12 @@ export default function ClaimThisAccount({
                       }}
                     >
                       <Iconify
-                        icon={'material-symbols:save-outline'}
+                        icon={'mdi:register-outline'}
                         width={40}
                         sx={{
                           position: 'relative',
                           top: '50%',
-                          left: '40%',
+                          left: '50%',
                           transform: 'translate(-40%, -50%)',
                         }}
                       />
@@ -299,11 +299,12 @@ export default function ClaimThisAccount({
                         sx={{
                           position: 'absolute',
                           top: '50%',
+                          left: 5,
                           transform: 'translate(0, -50%)',
                         }}
                       >
                         <Typography variant="subtitle2" noWrap>
-                          SAVE NEW PASSWORD
+                          CLAIM THIS ACCOUNT
                         </Typography>
                       </Stack>
                     </Box>

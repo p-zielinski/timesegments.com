@@ -42,6 +42,17 @@ export class UserService {
     private emailService: EmailService
   ) {}
 
+  public async deleteUnclaimedAccount(user: User) {
+    try {
+      const deletedUser = await this.prisma.user.delete({
+        where: { id: user.id },
+      });
+      return { success: true, deletedUser };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
   public async changeEmailAddress(user: User, newEmail: string) {
     if (user.emailConfirmed) {
       return {
@@ -226,37 +237,28 @@ export class UserService {
     email: string,
     plainPassword: string
   ) {
-    try {
-      const updatedUser = await this.prisma.user.update({
-        data: {
-          email: email,
-          password: await hashString(
-            plainPassword,
-            this.configService.get<number>('SALT_ROUNDS')
-          ),
-        },
-        where: { id: userId },
-      });
-      await this.emailService.sendEmail(
-        updatedUser,
-        EmailType.EMAIL_CONFIRMATION
-      );
-      return {
-        success: true,
-        user: updatedUser,
-      };
-    } catch (error) {
-      if (error?.meta?.target?.includes('email')) {
-        return { success: false, error: 'This email is already taken' };
-      }
-      return {
-        success: false,
-        error:
-          typeof error?.message === 'string'
-            ? error?.message?.trim()
-            : error?.message ?? 'Unknown error',
-      };
+    const userWithProvidedEmail = await this.findUserByEmail(email);
+    if (userWithProvidedEmail) {
+      return { success: false, error: 'This email is already taken' };
     }
+    const updatedUser = await this.prisma.user.update({
+      data: {
+        email: email,
+        password: await hashString(
+          plainPassword,
+          this.configService.get<number>('SALT_ROUNDS')
+        ),
+      },
+      where: { id: userId },
+    });
+    await this.emailService.sendEmail(
+      updatedUser,
+      EmailType.EMAIL_CONFIRMATION
+    );
+    return {
+      success: true,
+      user: updatedUser,
+    };
   }
 
   public async createNewUser(

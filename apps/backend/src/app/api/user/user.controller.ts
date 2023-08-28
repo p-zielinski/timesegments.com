@@ -40,6 +40,16 @@ export class UserController {
     private controlValueService: ControlValueService
   ) {}
 
+  @UseGuards(JwtAuthGuard, OnlyUnclaimedAccounts)
+  @Post('delete-unclaimed-account')
+  async deleteUnclaimedAccount(@UserDecorator() user: User) {
+    const deleteUnclaimedAccountResult =
+      await this.userService.deleteUnclaimedAccount(user);
+    return await this.responseService.returnProperResponse(
+      deleteUnclaimedAccountResult
+    );
+  }
+
   @Post('change-email-address')
   @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
   @UseGuards(JwtAuthGuard, ControlValuesGuard)

@@ -7,6 +7,9 @@ import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {getIsPageState} from '../../utils/getIsPageState';
+import {useContext} from 'react';
+import {StoreContext} from '../../hooks/useStore';
+import {useStore} from 'zustand';
 
 // ----------------------------------------------------------------------
 
@@ -33,6 +36,9 @@ NavItem.propTypes = {
 };
 
 function NavItem({ item }) {
+  const store = useContext(StoreContext);
+  const { user } = useStore(store);
+
   const router = useRouter();
   const { title, path, icon, query } = item;
 
@@ -48,12 +54,23 @@ function NavItem({ item }) {
     });
   };
 
+  const deleteUnclaimedAccount = async () => {
+    await handleFetch({
+      pathOrUrl: 'user/delete-unclaimed-account',
+      method: 'POST',
+    });
+  };
+
   return (
     <StyledNavItem
       onClick={async () => {
         switch (path) {
           case '*logout':
-            revokeCurrentToken();
+            if (user.email) {
+              revokeCurrentToken();
+            } else {
+              deleteUnclaimedAccount();
+            }
             Cookies.remove('jwt_token');
             router.push('/');
             return;
