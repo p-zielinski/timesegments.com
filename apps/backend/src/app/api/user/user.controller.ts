@@ -31,6 +31,7 @@ import { ControlValueService } from '../control-value/control-value.service';
 import { CreateSandboxDto } from './dto/createSandbox.dto';
 import { ClaimThisAccountDto } from './dto/claimThisAccount.dto';
 import { OnlyUnclaimedAccounts } from '../../common/guards/onlyUnclaimedAccounts.guard';
+import { DeleteUnclaimedAccountsDto } from './dto/deleteUnclaimedAccounts.dto';
 
 @Controller('user')
 export class UserController {
@@ -39,6 +40,18 @@ export class UserController {
     private responseService: ResponseService,
     private controlValueService: ControlValueService
   ) {}
+
+  @Post('delete-unclaimed-accounts')
+  async deleteUnclaimedAccounts(
+    @Body() deleteUnclaimedAccountsDto: DeleteUnclaimedAccountsDto
+  ) {
+    console.log(deleteUnclaimedAccountsDto);
+    // const deleteUnclaimedAccountResult =
+    //   await this.userService.deleteUnclaimedAccounts();
+    // return await this.responseService.returnProperResponse(
+    //   deleteUnclaimedAccountResult
+    // );
+  }
 
   @UseGuards(JwtAuthGuard, OnlyUnclaimedAccounts)
   @Post('delete-unclaimed-account')
