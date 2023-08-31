@@ -65,12 +65,12 @@ function NavItem({ item }) {
     <StyledNavItem
       onClick={async () => {
         switch (path) {
+          case '*delete-unclaimed-account':
+            deleteUnclaimedAccount();
           case '*logout':
-            if (user.email) {
-              revokeCurrentToken();
-            } else {
-              deleteUnclaimedAccount();
-            }
+            revokeCurrentToken();
+          case '*delete-unclaimed-account':
+          case '*logout':
             Cookies.remove('jwt_token');
             router.push('/');
             return;

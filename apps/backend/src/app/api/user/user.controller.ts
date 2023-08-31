@@ -45,12 +45,11 @@ export class UserController {
   async deleteUnclaimedAccounts(
     @Body() deleteUnclaimedAccountsDto: DeleteUnclaimedAccountsDto
   ) {
-    console.log(deleteUnclaimedAccountsDto);
-    // const deleteUnclaimedAccountResult =
-    //   await this.userService.deleteUnclaimedAccounts();
-    // return await this.responseService.returnProperResponse(
-    //   deleteUnclaimedAccountResult
-    // );
+    const deleteUnclaimedAccountsResult =
+      await this.userService.deleteUnclaimedAccounts();
+    return await this.responseService.returnProperResponse(
+      deleteUnclaimedAccountsResult
+    );
   }
 
   @UseGuards(JwtAuthGuard, OnlyUnclaimedAccounts)

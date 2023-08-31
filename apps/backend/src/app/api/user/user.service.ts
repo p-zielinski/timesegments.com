@@ -42,6 +42,25 @@ export class UserService {
     private emailService: EmailService
   ) {}
 
+  public async deleteUnclaimedAccounts() {
+    const threeDaysInMilliseconds = 1000 * 60 * 60 * 24 * 3;
+    try {
+      return {
+        success: true,
+        result: await this.prisma.user.deleteMany({
+          where: {
+            email: null,
+            createdAt: {
+              lt: new Date(new Date().getTime() - threeDaysInMilliseconds),
+            },
+          },
+        }),
+      };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
   public async deleteUnclaimedAccount(user: User) {
     try {
       const deletedUser = await this.prisma.user.delete({
