@@ -1,7 +1,7 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
 import {Button, CircularProgress, Container, Typography} from '@mui/material'; // hooks
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Timezones, UserWithCategoriesAndNotes} from '@test1/shared';
 import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
@@ -23,9 +23,10 @@ const StyledRoot = styled('div')(({ theme }) => ({
 
 type Props = {
   randomSliderColor: string;
+  isPageChanging: boolean;
 };
 
-export default function Index({ randomSliderColor }: Props) {
+export default function Index({ isPageChanging, randomSliderColor }: Props) {
   const router = useRouter();
   const StyledContent = styled('div')(({ theme }) => ({
     maxWidth: 480,
@@ -38,6 +39,10 @@ export default function Index({ randomSliderColor }: Props) {
   }));
 
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   const createSandbox = async (): Promise<void> => {
     setIsSaving(true);

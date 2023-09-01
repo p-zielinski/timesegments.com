@@ -22,9 +22,10 @@ const StyledRoot = styled('div')(({ theme }) => ({
 
 type Props = {
   randomSliderColor: string;
+  isPageChanging: boolean;
 };
 
-export default function Email({ randomSliderColor }: Props) {
+export default function Email({ isPageChanging, randomSliderColor }: Props) {
   const router = useRouter();
   const { query } = router;
   const [email, setEmail] = useState<EmailWithUser>(undefined);
@@ -52,6 +53,10 @@ export default function Email({ randomSliderColor }: Props) {
   useEffect(() => {
     handleEmailRequestValidation(query);
   }, []);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   const StyledContent = styled('div')(({ theme }) => ({
     maxWidth: 480,
