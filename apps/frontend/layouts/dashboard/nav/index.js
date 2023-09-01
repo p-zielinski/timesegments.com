@@ -17,6 +17,7 @@ import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {useStore} from 'zustand';
 import {StoreContext} from '../../../hooks/useStore';
 import {SettingOption} from '../../../enum/settingOption';
+import {UserAffiliation} from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -50,6 +51,15 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
       onCloseNav();
     }
   }, [router.pathname]);
+
+  const getNavConfig = () => {
+    const userAffiliation = user?.email
+      ? UserAffiliation.CLAIMED
+      : UserAffiliation.UNCLAIMED;
+    return navConfig.filter((config) =>
+      config.forWhom?.includes?.(userAffiliation)
+    );
+  };
 
   const renderContent = (
     <Scrollbar
@@ -112,7 +122,7 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
         </Link>
       </Box>
 
-      <NavSection data={navConfig} setUser={setUser} />
+      <NavSection data={getNavConfig()} setUser={setUser} />
 
       <Box sx={{ flexGrow: 1 }} />
     </Scrollbar>

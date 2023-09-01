@@ -98,7 +98,11 @@ function NavItem({ item }) {
         }
       }}
       sx={{
-        color: isSelected ? 'rgb(59,122,179)' : 'rgb(64,182,132)',
+        color: isSelected
+          ? 'rgb(59,122,179)'
+          : item.color
+          ? item.color
+          : 'rgb(64,182,132)',
         fontWeight: 800,
         bgcolor: isSelected ? 'rgb(234,237,239)' : undefined,
         '&:active': isSelected && {

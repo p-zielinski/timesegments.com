@@ -7,7 +7,7 @@ export const DARK_GREEN = `rgb(35, 75, 40)`;
 export const LIGHT_RED = `rgb(254, 198, 198)`;
 export const ULTRA_LIGHT_RED = `rgb(255, 234, 234)`;
 export const RED = `rgb(255, 118, 118)`;
-
+export const DARK_RED = `rgb(191, 64, 64)`;
 export const ULTRA_LIGHT_BLUE = `rgb(245, 249, 255)`;
 export const LIGHT_BLUE = `rgb(198, 218, 254)`;
 export const BLUE = `rgb(118, 166, 255)`;
