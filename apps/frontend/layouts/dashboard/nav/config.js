@@ -1,6 +1,6 @@
 import { DashboardPageState } from '../../../enum/DashboardPageState';
 import { UserAffiliation } from '@test1/shared';
-import { DARK_RED } from '../../../consts/colors';
+import { ORANGE } from '../../../consts/colors';
 
 export const navConfig = [
   {
@@ -41,7 +41,7 @@ export const navConfig = [
     path: '*delete-unclaimed-account',
     icon: `material-symbols:delete-outline`,
     forWhom: [UserAffiliation.UNCLAIMED],
-    color: DARK_RED,
+    color: ORANGE,
   },
 ];
 

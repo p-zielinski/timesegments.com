@@ -22,6 +22,7 @@ const StyledRoot = styled('div')(({ theme }) => ({
 
 type Props = {
   randomSliderColor: string;
+  isPageChanging: boolean;
 };
 
 export default function Auth({ isPageChanging, randomSliderColor }: Props) {
