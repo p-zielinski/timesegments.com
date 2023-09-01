@@ -20,6 +20,7 @@ const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
 });
 
 type Props = {
+  isPageChanging: boolean;
   user: User;
   categories: Category[];
   notes: Note[];
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export default function Index({
+  isPageChanging,
   user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
   categories: serverSideFetchedCategories,
   notes: serverSideFetchedNotes,
@@ -54,7 +56,11 @@ export default function Index({
     })
   ).current;
 
-  const { controlValues, checkControlValues } = useStore(store);
+  const { controlValues, checkControlValues, setIsSaving } = useStore(store);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {

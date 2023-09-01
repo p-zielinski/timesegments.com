@@ -43,6 +43,7 @@ type OptionsColors = {
 };
 
 type Props = {
+  isPageChanging: boolean;
   openOption: SettingOption | null;
   user: User;
   currentTokenId: string;
@@ -51,6 +52,7 @@ type Props = {
 };
 
 export default function Index({
+  isPageChanging,
   openOption,
   user: serverSideFetchedUser,
   controlValues: serverSideFetchedControlValues,
@@ -75,7 +77,12 @@ export default function Index({
     checkControlValues,
     openedSettingOption,
     setOpenedSettingOption,
+    setIsSaving,
   } = useStore(store);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {

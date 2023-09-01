@@ -2,7 +2,7 @@ import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
 import {Container, Typography} from '@mui/material'; // hooks
 import {AuthForm} from '../sections/auth';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {AuthPageState, UserWithCategoriesAndNotes} from '@test1/shared';
 import {RenderAuthLink} from '../components/renderAuthLink';
 import {isMobile} from 'react-device-detect';
@@ -24,7 +24,7 @@ type Props = {
   randomSliderColor: string;
 };
 
-export default function Auth({ randomSliderColor }: Props) {
+export default function Auth({ isPageChanging, randomSliderColor }: Props) {
   const router = useRouter();
   const StyledContent = styled('div')(({ theme }) => ({
     maxWidth: 480,
@@ -37,6 +37,11 @@ export default function Auth({ randomSliderColor }: Props) {
   }));
 
   const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   return (
     <>
@@ -92,6 +97,8 @@ export default function Auth({ randomSliderColor }: Props) {
             <AuthForm
               authPageState={currentPageState}
               setAuthPageState={setCurrentPageState}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
             />
           </StyledContent>
         </Container>

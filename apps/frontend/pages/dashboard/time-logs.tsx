@@ -68,9 +68,11 @@ type Props = {
   controlValues: Record<ControlValue, string>;
   fetchedPeriods: TimePeriod[];
   randomSliderHexColor: string;
+  isPageChanging: boolean;
 };
 
 export default function TimeLogs({
+  isPageChanging,
   user: serverSideFetchedUser,
   controlValues: serverSideFetchedControlValues,
   timeLogs: serverSideFetchedTimeLogs,
@@ -106,7 +108,12 @@ export default function TimeLogs({
     setShowTimeLogsFromTo,
     controlValues,
     checkControlValues,
+    setIsSaving,
   } = useStore(store);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {

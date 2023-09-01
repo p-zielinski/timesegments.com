@@ -37,7 +37,7 @@ NavItem.propTypes = {
 
 function NavItem({ item }) {
   const store = useContext(StoreContext);
-  const { user } = useStore(store);
+  const { isSaving } = useStore(store);
 
   const router = useRouter();
   const { title, path, icon, query } = item;
@@ -64,6 +64,9 @@ function NavItem({ item }) {
   return (
     <StyledNavItem
       onClick={async () => {
+        if (isSaving) {
+          return;
+        }
         switch (path) {
           case '*delete-unclaimed-account':
             deleteUnclaimedAccount();
@@ -110,10 +113,14 @@ function NavItem({ item }) {
           bgcolor: 'action.selected',
           fontWeight: 'fontWeightBold',
         },
-        '&:hover': isSelected && {
-          cursor: 'default',
-          background: 'rgb(234,237,239)',
-        },
+        '&:hover':
+          (isSelected && {
+            cursor: 'default',
+            background: 'rgb(234,237,239)',
+          }) ||
+          (isSaving && {
+            cursor: 'default',
+          }),
       }}
     >
       {typeof icon === 'string' && (
