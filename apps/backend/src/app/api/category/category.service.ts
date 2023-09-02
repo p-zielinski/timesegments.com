@@ -57,7 +57,8 @@ export class CategoryService {
   public async createCategory(
     user: User,
     name: string,
-    color: string
+    color: string,
+    skipCountingUserCategories = false
   ): Promise<{
     success: boolean;
     error?: string;
@@ -65,8 +66,9 @@ export class CategoryService {
     controlValues?: Record<ControlValue, string>;
   }> {
     if (
+      !skipCountingUserCategories &&
       (await this.countUserCategories(user.id)) >
-      this.configService.get<number>('MAX_NUMBER_OF_CATEGORIES_PER_USER')
+        this.configService.get<number>('MAX_NUMBER_OF_CATEGORIES_PER_USER')
     ) {
       return {
         success: false,

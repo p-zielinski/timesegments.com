@@ -23,6 +23,7 @@ import { EmailController } from './api/email/email.controller';
 import { ControlValueService } from './api/control-value/control-value.service';
 import * as redisStore from 'cache-manager-redis-store';
 import { ResponseService } from './api/response/response.service';
+import { IsScheduleToken } from './common/validator-constraint/scheduleToken.rule';
 
 @Module({
   imports: [
@@ -60,11 +61,14 @@ import { ResponseService } from './api/response/response.service';
     EmailController,
   ],
   providers: [
+    //modules
+    PrismaClient,
+    //services
+    ConfigService,
     LoggerService,
     AppService,
     PrismaService,
     UserService,
-    PrismaClient,
     TokenService,
     CategoryService,
     TimeLogService,
@@ -72,6 +76,8 @@ import { ResponseService } from './api/response/response.service';
     EmailService,
     ControlValueService,
     ResponseService,
+    //validators
+    IsScheduleToken,
   ],
 })
 export class AppModule {}

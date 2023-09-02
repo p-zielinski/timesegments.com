@@ -16,6 +16,7 @@ import { StatusCodes } from 'http-status-codes';
 import { isObject, uniqBy } from 'lodash';
 import { findPeriodsNeededToBeFetched } from '../utils/useStore/findPeriodsNeededToBeFetched';
 import { getListControlValuesKeysToCheckOnCurrentPage } from '../utils/getListControlValuesKeysToCheckOnCurrentPage';
+import { SettingOption } from '../enum/settingOption';
 
 export const StoreContext = createContext<Store | null>(null);
 type Store = ReturnType<typeof createStore>;
@@ -36,6 +37,7 @@ export interface StoreProps {
   controlValues: Record<ControlValue, string>;
   showTimeLogsFrom: number;
   showTimeLogsTo: number;
+  openedSettingOption: SettingOption;
 }
 
 export interface State extends StoreProps {
@@ -49,6 +51,7 @@ export interface State extends StoreProps {
   setTimeLogs: (timeLogs: TimeLog[]) => void;
   setFetchedFrom: (fetchedFrom: number) => void;
   setLimits: (limits: Limits) => void;
+  setOpenedSettingOption: (openedSettingOption: SettingOption) => void;
   setPartialControlValues: (
     partialControlValues: Record<ControlValue, string>
   ) => void;
@@ -80,6 +83,7 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
     controlValues: undefined,
     showTimeLogsFrom: undefined,
     showTimeLogsTo: undefined,
+    openedSettingOption: undefined,
   };
   if (!initProps.router) {
     throw 'Router was not initialized';
@@ -101,6 +105,8 @@ export const createStore = (initProps?: Partial<StoreProps>) => {
       set(() => ({ timeLogs: uniqBy(timeLogs, 'id') })),
     setFetchedFrom: (fetchedFrom) => set(() => ({ fetchedFrom })),
     setLimits: (limits) => set(() => ({ limits })),
+    setOpenedSettingOption: (openedSettingOption) =>
+      set(() => ({ openedSettingOption })),
     setControlValues: (controlValues) => set(() => ({ controlValues })),
     setPartialControlValues: (controlValues) =>
       set((state) => ({

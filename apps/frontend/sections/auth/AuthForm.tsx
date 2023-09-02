@@ -18,12 +18,16 @@ import {timezoneOptionsForSelect} from '../@dashboard/Form/timezoneOptionsForSel
 import {DateTime} from 'luxon';
 // ----------------------------------------------------------------------
 
-export default function AuthForm({ authPageState, setAuthPageState }) {
+export default function AuthForm({
+  authPageState,
+  setAuthPageState,
+  isSaving,
+  setIsSaving,
+}) {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
   const [resetPasswordEmailSent, setResetPasswordEmailSent] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
 
   const onResetPassword = async (
     email: string,
@@ -244,6 +248,14 @@ export default function AuthForm({ authPageState, setAuthPageState }) {
                 <CircularProgress size={'15px'} sx={{ color: 'silver' }} />
               )}
             </LoadingButton>
+            <Typography
+              variant="subtitle2"
+              sx={{ mt: 1, textAlign: 'right', cursor: 'pointer' }}
+            >
+              <Link variant="subtitle2" onClick={() => router.push('/')}>
+                Open the landing page
+              </Link>
+            </Typography>
           </>
         );
       }}

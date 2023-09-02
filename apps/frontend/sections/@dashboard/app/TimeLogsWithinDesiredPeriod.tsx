@@ -7,7 +7,6 @@ import {cloneDeep} from 'lodash';
 import ShowNoData from '../browse/ShowNoData';
 import DetailPeriod from './DetailPeriod';
 import {nanoid} from 'nanoid';
-import AddTimeLog from '../browse/AddTimeLog';
 // utils
 // ----------------------------------------------------------------------
 
@@ -35,7 +34,6 @@ export default function TimeLogsWithinDesiredPeriod({}) {
 
   return (
     <>
-      <AddTimeLog />
       {timeLogsWithinDesiredTimePeriodSortedByStartedAt.map((timeLog) => (
         <DetailPeriod timeLog={timeLog} key={nanoid()} />
       ))}

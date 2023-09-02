@@ -1,8 +1,9 @@
-import { Helmet } from 'react-helmet-async';
-import { useRouter } from 'next/router';
+import {Helmet} from 'react-helmet-async';
+import {useRouter} from 'next/router';
 // @mui
-import { styled } from '@mui/material/styles';
-import { Button, Typography, Container, Box } from '@mui/material';
+import {styled} from '@mui/material/styles';
+import {Button, Container, Typography} from '@mui/material';
+import Iconify from '../components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -33,14 +34,18 @@ export default function Page404() {
           </Typography>
 
           <Typography sx={{ color: 'text.secondary' }}>
-            Sorry, we couldn’t find the page you’re looking for. Perhaps you’ve
+            Sorry, we could not find the page you’re looking for. Perhaps you’ve
             mistyped the URL? Be sure to check your spelling.
           </Typography>
-
-          <Box
-            component="img"
-            src="/assets/illustrations/illustration_404.svg"
-            sx={{ height: 260, mx: 'auto', my: { xs: 5, sm: 10 } }}
+          <Iconify
+            icon="solar:sad-square-line-duotone"
+            sx={{
+              width: 260,
+              height: 260,
+              mx: 'auto',
+              my: { xs: 3, sm: 6 },
+              color: '#3b78e7',
+            }}
           />
           <Button
             onClick={() => router.push('/')}

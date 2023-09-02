@@ -14,4 +14,5 @@ export const ValidationSchema = Joi.object({
   REDIS_PORT: Joi.number().required(),
   REDIS_TLS: Joi.boolean().required(),
   ENVIRONMENT: Joi.string().required(),
+  SCHEDULE_TOKEN: Joi.string().min(70).required(),
 });

@@ -15,12 +15,7 @@ import { getBackgroundColor } from '../../utils/colors/getBackgroundColor';
 import { TimelineDot } from '@mui/lab';
 import Iconify from '../../components/iconify';
 import { SettingOption } from '../../enum/settingOption';
-import {
-  ControlValue,
-  findKeyOfValueInObject,
-  MeExtendedOption,
-  Timezones,
-} from '@test1/shared';
+import { ControlValue, MeExtendedOption, Timezones } from '@test1/shared';
 import ShowCompletedInfoSettings from '../../sections/@dashboard/settings/ShowCompletedInfo';
 import ConfirmEmail from '../../sections/@dashboard/settings/ConfirmEmail';
 import ManageLoginSessions from '../../sections/@dashboard/settings/ManageLoginSessions';
@@ -28,6 +23,8 @@ import { createStore, StoreContext } from '../../hooks/useStore';
 import { useRouter } from 'next/router';
 import { useStore } from 'zustand';
 import dynamic from 'next/dynamic';
+import ClaimThisAccount from '../../sections/@dashboard/settings/ClaimThisAccount';
+import { findKeyOfSettingOptionEnum } from '../../utils/findKeyOfSettingOptionEnum';
 
 const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
   ssr: false,
@@ -46,6 +43,8 @@ type OptionsColors = {
 };
 
 type Props = {
+  isPageChanging: boolean;
+  openOption: SettingOption | null;
   user: User;
   currentTokenId: string;
   randomSliderHexColor: string;
@@ -53,6 +52,8 @@ type Props = {
 };
 
 export default function Index({
+  isPageChanging,
+  openOption,
   user: serverSideFetchedUser,
   controlValues: serverSideFetchedControlValues,
   currentTokenId,
@@ -60,6 +61,7 @@ export default function Index({
 }: Props) {
   const store = useRef(
     createStore({
+      openedSettingOption: openOption ? SettingOption[openOption] : undefined,
       currentTokenId,
       disableHover: isMobile,
       router: useRouter(),
@@ -67,10 +69,20 @@ export default function Index({
       controlValues: serverSideFetchedControlValues,
     })
   ).current;
-  const { user, controlValues, disableHover, isSaving, checkControlValues } =
-    useStore(store);
-  const [openedSettingOption, setOpenedSettingOption] =
-    useState<SettingOption>(undefined);
+  const {
+    user,
+    controlValues,
+    disableHover,
+    isSaving,
+    checkControlValues,
+    openedSettingOption,
+    setOpenedSettingOption,
+    setIsSaving,
+  } = useStore(store);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -84,10 +96,19 @@ export default function Index({
   const getAllSettingOptions = (user) => {
     return Object.keys(SettingOption)
       .filter((key) =>
-        !user.emailConfirmed
-          ? true
-          : key !==
-            findKeyOfValueInObject(SettingOption, SettingOption.CONFIRM_EMAIL)
+        user.email
+          ? !user.emailConfirmed
+            ? ![
+                findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+              ].includes(key)
+            : ![
+                findKeyOfSettingOptionEnum(SettingOption.CONFIRM_EMAIL),
+                findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+              ].includes(key)
+          : [
+              findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+              findKeyOfSettingOptionEnum(SettingOption.CHANGE_TIMEZONE),
+            ].includes(key)
       )
       .map((key) => {
         let icon,
@@ -96,10 +117,8 @@ export default function Index({
           iconColor,
           color = { rgb: { r: 72, g: 191, b: 64, a: 1 }, hex: '#48bf40' };
         switch (key) {
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CONFIRM_EMAIL
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT):
+          case findKeyOfSettingOptionEnum(SettingOption.CONFIRM_EMAIL):
             icon = 'ph:warning-fill';
             successText =
               'We sent you an email with link to confirm your email address!';
@@ -107,38 +126,26 @@ export default function Index({
             iconColor = 'rgb(191,64,64)';
             color = { rgb: { r: 191, g: 64, b: 64, a: 1 }, hex: '#bf4040' };
             break;
-          case findKeyOfValueInObject(SettingOption, SettingOption.SET_NAME):
+          case findKeyOfSettingOptionEnum(SettingOption.SET_NAME):
             icon = 'icon-park-outline:edit-name';
             subtitle = user.name;
             successText = 'Name was successfully changed';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CHANGE_TIMEZONE
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CHANGE_TIMEZONE):
             icon = 'mdi:timezone-outline';
             subtitle = Timezones[user.timezone];
             successText = 'Timezone was successfully changed';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CHANGE_PASSWORD
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CHANGE_PASSWORD):
             icon = 'material-symbols:password';
             successText = 'Password was successfully changed';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.CHANGE_EMAIL
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.CHANGE_EMAIL):
             icon = 'ic:outline-email';
             subtitle = user.email;
             successText = 'We sent you an email with further instructions';
             break;
-          case findKeyOfValueInObject(
-            SettingOption,
-            SettingOption.MANAGE_LOGIN_SESSIONS
-          ):
+          case findKeyOfSettingOptionEnum(SettingOption.MANAGE_LOGIN_SESSIONS):
             icon = 'tabler:lock-access';
             successText = 'Action successfully executed';
             break;
@@ -174,7 +181,7 @@ export default function Index({
         randomSliderHexColor={randomSliderHexColor}
       >
         <Helmet>
-          <title>Settings</title>
+          <title>Settings | TimeSegments.com</title>
         </Helmet>
         <Container sx={{ minHeight: 'calc(100vh - 200px)', mt: -5 }}>
           <Grid container spacing={2} columns={1}>
@@ -196,6 +203,20 @@ export default function Index({
                         key={`completed${currentSettingOption.id}`}
                         setOpenedSettingOption={setOpenedSettingOption}
                         currentSettingOption={currentSettingOption}
+                      />
+                    );
+                  }
+
+                  if (
+                    isActive &&
+                    openedSettingOption === SettingOption.CLAIM_THIS_ACCOUNT
+                  ) {
+                    return (
+                      <ClaimThisAccount
+                        key={`${currentSettingOption}-active`}
+                        setOpenedSettingOption={setOpenedSettingOption}
+                        currentSettingOption={currentSettingOption}
+                        setCompleted={setCompleted}
                       />
                     );
                   }
@@ -387,6 +408,7 @@ export default function Index({
 }
 
 export const getServerSideProps = async ({ req, res }) => {
+  const { query } = req;
   const cookies = new Cookies(req, res);
   const jwt_token = cookies.get('jwt_token');
   if (!jwt_token) {
@@ -435,6 +457,8 @@ export const getServerSideProps = async ({ req, res }) => {
 
     return {
       props: {
+        openOption:
+          query?.option && query.option in SettingOption ? query.option : null,
         user: user,
         currentTokenId,
         controlValues,

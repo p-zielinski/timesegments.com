@@ -7,6 +7,9 @@ import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
 import {handleFetch} from '../../utils/fetchingData/handleFetch';
 import {getIsPageState} from '../../utils/getIsPageState';
+import {useContext} from 'react';
+import {StoreContext} from '../../hooks/useStore';
+import {useStore} from 'zustand';
 
 // ----------------------------------------------------------------------
 
@@ -33,6 +36,9 @@ NavItem.propTypes = {
 };
 
 function NavItem({ item }) {
+  const store = useContext(StoreContext);
+  const { isSaving } = useStore(store);
+
   const router = useRouter();
   const { title, path, icon, query } = item;
 
@@ -48,12 +54,26 @@ function NavItem({ item }) {
     });
   };
 
+  const deleteUnclaimedAccount = async () => {
+    await handleFetch({
+      pathOrUrl: 'user/delete-unclaimed-account',
+      method: 'POST',
+    });
+  };
+
   return (
     <StyledNavItem
       onClick={async () => {
+        if (isSaving) {
+          return;
+        }
         switch (path) {
+          case '*delete-unclaimed-account':
+            deleteUnclaimedAccount();
           case '*logout':
             revokeCurrentToken();
+          case '*delete-unclaimed-account':
+          case '*logout':
             Cookies.remove('jwt_token');
             router.push('/');
             return;
@@ -81,7 +101,11 @@ function NavItem({ item }) {
         }
       }}
       sx={{
-        color: isSelected ? 'rgb(59,122,179)' : 'rgb(64,182,132)',
+        color: isSelected
+          ? 'rgb(59,122,179)'
+          : item.color
+          ? item.color
+          : 'rgb(64,182,132)',
         fontWeight: 800,
         bgcolor: isSelected ? 'rgb(234,237,239)' : undefined,
         '&:active': isSelected && {
@@ -89,10 +113,14 @@ function NavItem({ item }) {
           bgcolor: 'action.selected',
           fontWeight: 'fontWeightBold',
         },
-        '&:hover': isSelected && {
-          cursor: 'default',
-          background: 'rgb(234,237,239)',
-        },
+        '&:hover':
+          (isSelected && {
+            cursor: 'default',
+            background: 'rgb(234,237,239)',
+          }) ||
+          (isSaving && {
+            cursor: 'default',
+          }),
       }}
     >
       {typeof icon === 'string' && (

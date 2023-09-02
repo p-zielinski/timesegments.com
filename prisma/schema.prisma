@@ -9,10 +9,10 @@ datasource db {
 
 model User {
   id                        String                @id @default(cuid())
-  email                     String                @unique
+  email                     String?               @unique
   emailConfirmed            Boolean               @default(false)
   emails                    Email[]
-  password                  String
+  password                  String?
   name                      String?
   tokens                    Token[]
   notes                     Note[]
@@ -27,7 +27,7 @@ model User {
 
 model Email {
   id                String                @id @default(cuid())
-  user              User                  @relation(fields: [userId], references: [id])
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String
   type              EmailType
   status            EmailStatus           @default(CREATED)
@@ -38,7 +38,7 @@ model Email {
 
 model Token {
   id            String      @id @default(cuid())
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   userAgent     String?
   valid         Boolean     @default(true)
@@ -48,11 +48,11 @@ model Token {
 
 model Note {
   id            String      @id @default(cuid())
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   title         String?
   text          String?
-  category      Category?   @relation(fields: [categoryId], references: [id])
+  category      Category?   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId    String?
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
@@ -61,7 +61,7 @@ model Note {
 model Category {
   id                  String      @id @default(cuid())
   name                String
-  user                User        @relation(fields: [userId], references: [id])
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
   color               String
   active              Boolean     @default(false)
@@ -75,10 +75,10 @@ model Category {
 
 model TimeLog {
   id            String        @id @default(cuid())
-  user          User          @relation(fields: [userId], references: [id])
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   comment       Comment?
-  category      Category      @relation(fields: [categoryId], references: [id])
+  category      Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId    String
   createdAt     DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
@@ -89,7 +89,7 @@ model TimeLog {
 model Comment {
   id            String      @id @default(cuid())
   comment       String
-  timeLog       TimeLog     @relation(fields: [timeLogId], references: [id])
+  timeLog       TimeLog     @relation(fields: [timeLogId], references: [id], onDelete: Cascade)
   timeLogId     String      @unique
   createdAt     DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime    @updatedAt @db.Timestamptz(3)

@@ -42,6 +42,36 @@ export class UserService {
     private emailService: EmailService
   ) {}
 
+  public async deleteUnclaimedAccounts() {
+    const threeDaysInMilliseconds = 1000 * 60 * 60 * 24 * 3;
+    try {
+      return {
+        success: true,
+        result: await this.prisma.user.deleteMany({
+          where: {
+            email: null,
+            createdAt: {
+              lt: new Date(new Date().getTime() - threeDaysInMilliseconds),
+            },
+          },
+        }),
+      };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  public async deleteUnclaimedAccount(user: User) {
+    try {
+      const deletedUser = await this.prisma.user.delete({
+        where: { id: user.id },
+      });
+      return { success: true, deletedUser };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
   public async changeEmailAddress(user: User, newEmail: string) {
     if (user.emailConfirmed) {
       return {
@@ -205,10 +235,55 @@ export class UserService {
     };
   }
 
+  public async createSandbox(timezone: Timezones, userAgent: string) {
+    const creatingUserResult = await this.createNewUser(
+      { timezone, userAgent },
+      { generateToken: true }
+    );
+    if (!creatingUserResult.success) {
+      return creatingUserResult;
+    }
+    const { user } = creatingUserResult;
+    await this.categoryService.createCategory(user, 'Job', '#4d40bf');
+    await this.categoryService.createCategory(user, 'Reading books', '#4dbf40');
+    await this.categoryService.createCategory(user, 'Studying', '#bf40bb');
+    await this.categoryService.createCategory(user, 'Working out', '#bf4840');
+    return creatingUserResult;
+  }
+
+  public async claimThisAccount(
+    userId: string,
+    email: string,
+    plainPassword: string
+  ) {
+    const userWithProvidedEmail = await this.findUserByEmail(email);
+    if (userWithProvidedEmail) {
+      return { success: false, error: 'This email is already taken' };
+    }
+    const updatedUser = await this.prisma.user.update({
+      data: {
+        email: email,
+        password: await hashString(
+          plainPassword,
+          this.configService.get<number>('SALT_ROUNDS')
+        ),
+      },
+      where: { id: userId },
+    });
+    await this.emailService.sendEmail(
+      updatedUser,
+      EmailType.EMAIL_CONFIRMATION
+    );
+    return {
+      success: true,
+      user: updatedUser,
+    };
+  }
+
   public async createNewUser(
     data: {
-      email: string;
-      plainPassword: string;
+      email?: string;
+      plainPassword?: string;
       timezone: Timezones;
       userAgent: string;
     },
@@ -221,17 +296,24 @@ export class UserService {
       const newUser = await this.prisma.user.create({
         data: {
           email: data.email,
-          password: await hashString(
-            data.plainPassword,
-            this.configService.get<number>('SALT_ROUNDS')
-          ),
+          password:
+            data.plainPassword &&
+            (await hashString(
+              data.plainPassword,
+              this.configService.get<number>('SALT_ROUNDS')
+            )),
           timezone: findKeyOfValueInObject(
             Timezones,
             data.timezone
           ) as Timezone,
         },
       });
-      await this.emailService.sendEmail(newUser, EmailType.EMAIL_CONFIRMATION);
+      if (data.email) {
+        await this.emailService.sendEmail(
+          newUser,
+          EmailType.EMAIL_CONFIRMATION
+        );
+      }
       if (!options?.generateToken) {
         return { success: true, user: newUser };
       }

@@ -6,7 +6,6 @@ export class RegisterDto {
   @IsEmail()
   @Transform(({ value }) => value.toLowerCase())
   email: string;
-
   @IsNotEmpty()
   password: string;
   @IsEnum(Timezones)

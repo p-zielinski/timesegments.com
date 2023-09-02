@@ -1,8 +1,10 @@
 import {Helmet} from 'react-helmet-async'; // @mui
 import {styled} from '@mui/material/styles';
-import {Button, CircularProgress, Container, Typography} from '@mui/material'; // hooks
+import {Container, Typography} from '@mui/material'; // hooks
+import {AuthForm} from '../sections/auth';
 import React, {useEffect, useState} from 'react';
-import {Timezones, UserWithCategoriesAndNotes} from '@test1/shared';
+import {AuthPageState, UserWithCategoriesAndNotes} from '@test1/shared';
+import {RenderAuthLink} from '../components/renderAuthLink';
 import {isMobile} from 'react-device-detect';
 import Cookies from 'cookies';
 import {getRandomRgbObjectForSliderPicker} from '../utils/colors/getRandomRgbObjectForSliderPicker';
@@ -10,9 +12,6 @@ import {getColorShadeBasedOnSliderPickerSchema} from '../utils/colors/getColorSh
 import {getHexFromRGBObject} from '../utils/colors/getHexFromRGBObject';
 import {getHexFromRGBAObject} from '../utils/colors/getHexFromRGBAObject';
 import {useRouter} from 'next/router';
-import {handleFetch} from '../utils/fetchingData/handleFetch';
-import {StatusCodes} from 'http-status-codes';
-import {DateTime} from 'luxon';
 // ---------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -26,7 +25,7 @@ type Props = {
   isPageChanging: boolean;
 };
 
-export default function Index({ isPageChanging, randomSliderColor }: Props) {
+export default function Auth({ isPageChanging, randomSliderColor }: Props) {
   const router = useRouter();
   const StyledContent = styled('div')(({ theme }) => ({
     maxWidth: 480,
@@ -38,88 +37,70 @@ export default function Index({ isPageChanging, randomSliderColor }: Props) {
     padding: theme.spacing(isMobile ? 6 : 12, 0),
   }));
 
+  const [currentPageState, setCurrentPageState] = useState(AuthPageState.LOGIN);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setIsSaving(isPageChanging);
   }, [isPageChanging]);
 
-  const createSandbox = async (): Promise<void> => {
-    setIsSaving(true);
-    const response = await handleFetch({
-      pathOrUrl: 'user/create-sandbox',
-      body: {
-        timezone: DateTime.local?.()?.zoneName || Timezones.EUROPE__LONDON,
-      },
-      method: 'POST',
-    });
-    if (response.statusCode === StatusCodes.CREATED) {
-      if (typeof process.env.NEXT_PUBLIC_FRONTEND_URL !== 'string') {
-        console.log({
-          NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
-        });
-        throw new Error('misconfiguration of NEXT_PUBLIC_API_URL');
-      }
-      await handleFetch({
-        pathOrUrl: process.env.NEXT_PUBLIC_FRONTEND_URL + 'api/set-cookie',
-        body: { name: 'jwt_token', value: response.token },
-        method: 'POST',
-      });
-      await router.push('/dashboard');
-      return;
-    }
-    if (response.statusCode === StatusCodes.BAD_REQUEST) {
-      console.log(response);
-    }
-    setIsSaving(false);
-    return;
-  };
   return (
     <>
       <Helmet>
-        <title>TimeSegments.com</title>
+        <title>
+          {currentPageState === AuthPageState.LOGIN
+            ? `Log in | TimeSegments.com`
+            : currentPageState === AuthPageState.REGISTER
+            ? `Sign up | TimeSegments.com`
+            : `Recover account | TimeSegments.com`}
+        </title>
       </Helmet>
 
       <StyledRoot>
         <Container maxWidth="sm">
-          <StyledContent
-            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
-          >
+          <StyledContent>
             <Typography variant="h4" gutterBottom>
-              <span
-                style={{
-                  color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
-                }}
-              >
-                TimeSeg
+              {currentPageState === AuthPageState.LOGIN
+                ? `Sign in to `
+                : currentPageState === AuthPageState.REGISTER
+                ? `Sign up to `
+                : `Recover account`}
+              {[AuthPageState.LOGIN, AuthPageState.REGISTER].includes(
+                currentPageState
+              ) && (
                 <span
                   style={{
-                    color: randomSliderColor,
+                    color: getHexFromRGBAObject({ r: 0, g: 0, b: 0, a: 0.7 }),
+                    cursor: 'pointer',
                   }}
+                  onClick={() => router.push('/')}
                 >
-                  ment
+                  TimeSeg
+                  <span
+                    style={{
+                      color: randomSliderColor,
+                    }}
+                  >
+                    ment
+                  </span>
+                  s.com
                 </span>
-                s.com
-              </span>
-            </Typography>
-            <Button
-              onClick={() => router.push('/auth')}
-              size="large"
-              variant="contained"
-            >
-              Sign in / up
-            </Button>
-            <Button
-              onClick={() => createSandbox()}
-              size="large"
-              variant="contained"
-            >
-              {!isSaving ? (
-                'Try demo'
-              ) : (
-                <CircularProgress size={'15px'} sx={{ color: 'silver' }} />
               )}
-            </Button>
+            </Typography>
+
+            <Typography variant="body2" sx={{ mb: 3 }}>
+              <RenderAuthLink
+                currentPageState={currentPageState}
+                setCurrentPageState={setCurrentPageState}
+              />
+            </Typography>
+
+            <AuthForm
+              authPageState={currentPageState}
+              setAuthPageState={setCurrentPageState}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+            />
           </StyledContent>
         </Container>
       </StyledRoot>

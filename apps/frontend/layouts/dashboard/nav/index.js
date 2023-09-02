@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import {useContext, useEffect} from 'react';
+import React, {useContext, useEffect} from 'react';
 // @mui
 import {alpha, styled} from '@mui/material/styles';
 import {Box, Drawer, Link, Typography} from '@mui/material';
@@ -16,6 +16,8 @@ import {capitalizeFirstLetter} from '../../../utils/capitalizeFirstLetter';
 import {getHexFromRGBAObject} from '../../../utils/colors/getHexFromRGBAObject';
 import {useStore} from 'zustand';
 import {StoreContext} from '../../../hooks/useStore';
+import {SettingOption} from '../../../enum/settingOption';
+import {UserAffiliation} from '@test1/shared';
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +40,7 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
   const store = useContext(StoreContext);
-  const { user, setUser } = useStore(store);
+  const { user, setUser, setOpenedSettingOption } = useStore(store);
 
   const router = useRouter();
 
@@ -49,6 +51,15 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
       onCloseNav();
     }
   }, [router.pathname]);
+
+  const getNavConfig = () => {
+    const userAffiliation = user?.email
+      ? UserAffiliation.CLAIMED
+      : UserAffiliation.UNCLAIMED;
+    return navConfig.filter((config) =>
+      config.forWhom?.includes?.(userAffiliation)
+    );
+  };
 
   const renderContent = (
     <Scrollbar
@@ -87,15 +98,31 @@ export default function Nav({ openNav, onCloseNav, randomSliderHexColor }) {
           <StyledAccount>
             <Box sx={{ ml: 0 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {user.name ||
-                  capitalizeFirstLetter(user.email.split('@')[0] ?? '')}
+                {user.email ? (
+                  user.name ||
+                  capitalizeFirstLetter(user.email.split('@')[0] ?? '')
+                ) : (
+                  <Link
+                    variant="subtitle2"
+                    underline="hover"
+                    sx={{ cursor: 'pointer', color: 'rgb(191,64,64)' }}
+                    onClick={() => {
+                      setOpenedSettingOption(SettingOption.CLAIM_THIS_ACCOUNT);
+                      router.push(
+                        '/dashboard/settings?option=CLAIM_THIS_ACCOUNT'
+                      );
+                    }}
+                  >
+                    Claim this account!
+                  </Link>
+                )}
               </Typography>
             </Box>
           </StyledAccount>
         </Link>
       </Box>
 
-      <NavSection data={navConfig} setUser={setUser} />
+      <NavSection data={getNavConfig()} setUser={setUser} />
 
       <Box sx={{ flexGrow: 1 }} />
     </Scrollbar>

@@ -28,6 +28,10 @@ import { InitializeEmailChangeDto } from './dto/initializeEmailChange.dto';
 import { ImportantControlValuesDecorator } from '../../common/param-decorators/importantControlValues';
 import { ResponseService } from '../response/response.service';
 import { ControlValueService } from '../control-value/control-value.service';
+import { CreateSandboxDto } from './dto/createSandbox.dto';
+import { ClaimThisAccountDto } from './dto/claimThisAccount.dto';
+import { OnlyUnclaimedAccounts } from '../../common/guards/onlyUnclaimedAccounts.guard';
+import { DeleteUnclaimedAccountsDto } from './dto/deleteUnclaimedAccounts.dto';
 
 @Controller('user')
 export class UserController {
@@ -36,6 +40,27 @@ export class UserController {
     private responseService: ResponseService,
     private controlValueService: ControlValueService
   ) {}
+
+  @Post('delete-unclaimed-accounts')
+  async deleteUnclaimedAccounts(
+    @Body() deleteUnclaimedAccountsDto: DeleteUnclaimedAccountsDto
+  ) {
+    const deleteUnclaimedAccountsResult =
+      await this.userService.deleteUnclaimedAccounts();
+    return await this.responseService.returnProperResponse(
+      deleteUnclaimedAccountsResult
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, OnlyUnclaimedAccounts)
+  @Post('delete-unclaimed-account')
+  async deleteUnclaimedAccount(@UserDecorator() user: User) {
+    const deleteUnclaimedAccountResult =
+      await this.userService.deleteUnclaimedAccount(user);
+    return await this.responseService.returnProperResponse(
+      deleteUnclaimedAccountResult
+    );
+  }
 
   @Post('change-email-address')
   @SetMetadata('typesOfControlValuesToCheck', [ControlValue.USER])
@@ -59,17 +84,25 @@ export class UserController {
     @Body() registerDto: RegisterDto,
     @Headers('User-Agent') userAgent: string
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new BadRequestException({
-        error: 'Registration is disabled',
-      });
-    }
     const { email, password, timezone } = registerDto;
-    const registeringResult = await this.userService.createNewUser(
+    const creatingUserResult = await this.userService.createNewUser(
       { email, plainPassword: password, timezone, userAgent },
       { generateToken: true }
     );
-    return await this.responseService.returnProperResponse(registeringResult);
+    return await this.responseService.returnProperResponse(creatingUserResult);
+  }
+
+  @Post('create-sandbox')
+  async handleRequestCreateSandbox(
+    @Body() createSandboxDto: CreateSandboxDto,
+    @Headers('User-Agent') userAgent: string
+  ) {
+    const { timezone } = createSandboxDto;
+    const creatingUserResult = await this.userService.createSandbox(
+      timezone,
+      userAgent
+    );
+    return await this.responseService.returnProperResponse(creatingUserResult);
   }
 
   @Post('login')
@@ -106,6 +139,28 @@ export class UserController {
         user.id
       ),
     };
+  }
+
+  @Post('claim-this-account')
+  @UseGuards(JwtAuthGuard, OnlyUnclaimedAccounts)
+  async handleRequestClaimThisAccount(
+    @UserDecorator() user: User,
+    @Body() claimThisAccountDto: ClaimThisAccountDto
+  ) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new BadRequestException({
+        error: 'Registration is disabled',
+      });
+    }
+    const { email, password } = claimThisAccountDto;
+    const claimThisAccountResult = await this.userService.claimThisAccount(
+      user.id,
+      email,
+      password
+    );
+    return await this.responseService.returnProperResponse(
+      claimThisAccountResult
+    );
   }
 
   @Post('set-name')

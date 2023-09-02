@@ -12,6 +12,7 @@ import {isMobile} from 'react-device-detect';
 import Categories from 'apps/frontend/sections/@dashboard/categories';
 import dynamic from 'next/dynamic';
 import {useStore} from 'zustand';
+import {Helmet} from 'react-helmet-async';
 // --------------------------------------------------------------------
 
 const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
@@ -19,6 +20,7 @@ const DashboardLayout = dynamic(() => import('../../layouts/dashboard'), {
 });
 
 type Props = {
+  isPageChanging: boolean;
   user: User;
   categories: Category[];
   notes: Note[];
@@ -30,6 +32,7 @@ type Props = {
 };
 
 export default function Index({
+  isPageChanging,
   user: serverSideFetchedUserWithCategoriesAndCategoriesNotes,
   categories: serverSideFetchedCategories,
   notes: serverSideFetchedNotes,
@@ -53,7 +56,11 @@ export default function Index({
     })
   ).current;
 
-  const { controlValues, checkControlValues } = useStore(store);
+  const { controlValues, checkControlValues, setIsSaving } = useStore(store);
+
+  useEffect(() => {
+    setIsSaving(isPageChanging);
+  }, [isPageChanging]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -70,6 +77,9 @@ export default function Index({
         title={'Active Categories'}
         randomSliderHexColor={randomSliderHexColor}
       >
+        <Helmet>
+          <title>Active Categories | TimeSegments.com</title>
+        </Helmet>
         <Container sx={{ mt: -5 }}>
           <Categories />
         </Container>
