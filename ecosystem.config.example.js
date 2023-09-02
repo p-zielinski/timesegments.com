@@ -24,6 +24,7 @@ module.exports = {
         DATABASE_URL:
           'postgres://postgres:ABkNPAC6fs@mws02.mikr.us:50002/timesegs_prod',
         JWT_SECRET: '',
+        SCHEDULE_TOKEN: '',
       },
     },
   ],
