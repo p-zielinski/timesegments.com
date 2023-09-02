@@ -248,6 +248,14 @@ export default function AuthForm({
                 <CircularProgress size={'15px'} sx={{ color: 'silver' }} />
               )}
             </LoadingButton>
+            <Typography
+              variant="subtitle2"
+              sx={{ mt: 1, textAlign: 'right', cursor: 'pointer' }}
+            >
+              <Link variant="subtitle2" onClick={() => router.push('/')}>
+                Open the landing page
+              </Link>
+            </Typography>
           </>
         );
       }}
