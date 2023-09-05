@@ -147,11 +147,6 @@ export class UserController {
     @UserDecorator() user: User,
     @Body() claimThisAccountDto: ClaimThisAccountDto
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new BadRequestException({
-        error: 'Registration is disabled',
-      });
-    }
     const { email, password } = claimThisAccountDto;
     const claimThisAccountResult = await this.userService.claimThisAccount(
       user.id,
