@@ -28,6 +28,7 @@ import {
 import { LoggerService } from '../../common/logger/loger.service';
 import { DateTime } from 'luxon';
 import { EmailService } from '../email/email.service';
+import { getNumberOfMsInDesiredNumberOfDays } from '../../common/utils/getNumberOfMsInDesiredNumberOfDays';
 
 @Injectable()
 export class UserService {
@@ -43,7 +44,6 @@ export class UserService {
   ) {}
 
   public async deleteUnclaimedAccounts() {
-    const threeDaysInMilliseconds = 1000 * 60 * 60 * 24 * 3;
     try {
       return {
         success: true,
@@ -51,7 +51,14 @@ export class UserService {
           where: {
             email: null,
             createdAt: {
-              lt: new Date(new Date().getTime() - threeDaysInMilliseconds),
+              lt: new Date(
+                new Date().getTime() -
+                  getNumberOfMsInDesiredNumberOfDays(
+                    this.configService.get<number>(
+                      'NUMBER_OF_DAYS_TO_ACTIVATE_ACCOUNT'
+                    )
+                  )
+              ),
             },
           },
         }),

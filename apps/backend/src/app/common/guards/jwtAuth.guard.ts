@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from '../../api/token/token.service';
 import { Token } from '@prisma/client';
+import { getNumberOfMsInDesiredNumberOfDays } from '../utils/getNumberOfMsInDesiredNumberOfDays';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -45,6 +46,20 @@ export class JwtAuthGuard implements CanActivate {
       }
       const tokenWithoutUserRelation = { ...token, user: undefined };
       request.user = token.user;
+      if (!request.user.email) {
+        if (
+          new Date(
+            new Date().getTime() +
+              getNumberOfMsInDesiredNumberOfDays(
+                this.configService.get<number>(
+                  'NUMBER_OF_DAYS_TO_ACTIVATE_ACCOUNT'
+                )
+              )
+          ).getTime() > new Date(request.user.createdAt).getTime()
+        ) {
+          throw new UnauthorizedException();
+        }
+      }
       request.currentToken = tokenWithoutUserRelation as Token;
     } catch (error) {
       console.log(error);
