@@ -20,6 +20,7 @@ import {
   CategoriesSortOption,
   EmailType,
   findKeyOfValueInObject,
+  getNumberOfMsInDesiredNumberOfDays,
   Limits,
   MeExtendedOption,
   NotesSortOption,
@@ -28,7 +29,6 @@ import {
 import { LoggerService } from '../../common/logger/loger.service';
 import { DateTime } from 'luxon';
 import { EmailService } from '../email/email.service';
-import { getNumberOfMsInDesiredNumberOfDays } from '../../common/utils/getNumberOfMsInDesiredNumberOfDays';
 
 @Injectable()
 export class UserService {

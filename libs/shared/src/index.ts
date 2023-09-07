@@ -16,3 +16,4 @@ export * from './lib/types/email';
 export * from './lib/utils/findKeyOfValueInObject';
 export * from './lib/utils/asyncMap';
 export * from './lib/utils/getDuration';
+export * from './lib/utils/getNumberOfMsInDesiredNumberOfDays';
