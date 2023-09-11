@@ -93,23 +93,37 @@ export default function Index({
     };
   }, [controlValues]);
 
+  const [completed, setCompleted] = useState(false);
+  useEffect(() => {
+    setCompleted(false);
+  }, [openedSettingOption]);
+
   const getAllSettingOptions = (user) => {
     return Object.keys(SettingOption)
-      .filter((key) =>
-        user.email
-          ? !user.emailConfirmed
+      .filter((key) => {
+        if (
+          completed &&
+          openedSettingOption === SettingOption.CLAIM_THIS_ACCOUNT
+        ) {
+          return ![
+            findKeyOfSettingOptionEnum(SettingOption.CONFIRM_EMAIL),
+          ].includes(key);
+        }
+        if (user.email) {
+          return !user.emailConfirmed
             ? ![
                 findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
               ].includes(key)
             : ![
                 findKeyOfSettingOptionEnum(SettingOption.CONFIRM_EMAIL),
                 findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
-              ].includes(key)
-          : [
-              findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
-              findKeyOfSettingOptionEnum(SettingOption.CHANGE_TIMEZONE),
-            ].includes(key)
-      )
+              ].includes(key);
+        }
+        return [
+          findKeyOfSettingOptionEnum(SettingOption.CLAIM_THIS_ACCOUNT),
+          findKeyOfSettingOptionEnum(SettingOption.CHANGE_TIMEZONE),
+        ].includes(key);
+      })
       .map((key) => {
         let icon,
           subtitle,
@@ -167,12 +181,7 @@ export default function Index({
   );
   useEffect(() => {
     setAllSettingOptions(getAllSettingOptions(user));
-  }, [user]);
-
-  const [completed, setCompleted] = useState(false);
-  useEffect(() => {
-    setCompleted(false);
-  }, [openedSettingOption]);
+  }, [user, completed]);
 
   return (
     <StoreContext.Provider value={store}>

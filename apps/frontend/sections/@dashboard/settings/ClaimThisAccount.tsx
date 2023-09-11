@@ -46,7 +46,7 @@ export default function ClaimThisAccount({
   const [showPassword, setShowPassword] = useState(false);
 
   const store = useContext(StoreContext);
-  const { disableHover, isSaving, setIsSaving } = useStore(store);
+  const { disableHover, isSaving, setIsSaving, setUser } = useStore(store);
   const { color } = currentSettingOption;
 
   let StyledTextField, darkHexColor;
@@ -97,6 +97,9 @@ export default function ClaimThisAccount({
     });
     if (response.statusCode === StatusCodes.CREATED) {
       setCompleted(true);
+      if (response.user) {
+        setUser(response.user);
+      }
     }
     if (response.statusCode === StatusCodes.BAD_REQUEST) {
       const error = response.error || '';
